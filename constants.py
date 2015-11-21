@@ -14,7 +14,7 @@ class xs1_:
     # constants.xs1_.IP    
     IP = xs1_IP
     USER = "admin"
-    PASS = "Ivenhoe"
+    PASS = "admin"
     
 class sql_:
     # constants.sql_.IP
@@ -33,3 +33,6 @@ class scanner_:
     IP = "192.168.192.10"
     # constants.scanner_.PORT
     PORT = 5010
+    
+class hue_:
+    hue_devices = ['Stehlampe','Stablampe 1', 'Stablampe 2', 'LightStrips 2']

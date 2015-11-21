@@ -30,7 +30,6 @@ import constants
 #from heizung import temp_derivator
 
 selfsupervision = True
-lgd = logdebug(True, True)
 
 aes = alarm_event()
 mes = messaging()
@@ -62,7 +61,6 @@ def on_receive(data):
 #Heartbeat & Server Steuerung
 #####################
     if (("heartbeat" == name) and (value == 0)):
-        #lgd.debug(" Inputs: Heartbeat canceled")
         heartbeat.cancel()
         heartbeat = Timer(constants.heartbt, heartbeat_sup)
         heartbeat.start()        
@@ -156,7 +154,6 @@ def on_receive(data):
 #Abwesend fall back
 ##################
     if (("Anwesend_Block" == name) and (value == 0)):
-        #lgd.debug(str(setting_r("Status")))
         if (setting_r("Status") == "Am Gehen 1") or (setting_r("Status") == "Am Gehen 2") or (setting_r("Status") == "Am Gehen 3"):
             mySocket.sendto('Alles_aus_nochmal',(constants.udp_.IP,constants.udp_.PORT))       
 ##################
@@ -375,7 +372,6 @@ def on_receive(data):
             setting_s("Kuechentuer", str(value))
     
 def heartbeat_sup():
-  # lgd.debug("Heartbeat supervision")
   if selfsupervision:
     zeit =  time.time()
     now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))  
@@ -391,7 +387,6 @@ def heartbeat_sup():
     if ping(constants.router_IP):
         os.system(exectext)
     else:
-        lgd.debug("Restart WLAN")
         reset_wlan()
         os.system(exectext)   
 
@@ -413,7 +408,6 @@ def main():
     setting_s("Laststart", str(now))
     if selfsupervision:
         while not ping(constants.router_IP):
-            lgd.debug("Start without LAN...")
             #reset_wlan()
             time.sleep(60)        
             

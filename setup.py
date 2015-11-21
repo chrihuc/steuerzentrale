@@ -6,7 +6,7 @@ import MySQLdb as mdb
 
 
 def main():
-    con = mdb.connect('localhost', 'root', 'Ivenhoe', '')
+    con = mdb.connect('localhost', 'root', 'password', '')
     with con:
         cur = con.cursor()
         sql = "grant all on *.* to '" + constants.sql_.USER + "'@'%' identified by '" + constants.sql_.PASS + "'"
