@@ -1,0 +1,35 @@
+#!  /usr/bin/python 
+
+eigene_IP = "192.168.192.33"
+xs1_IP = "192.168.192.4"
+router_IP = "192.168.192.1"
+UDP_PORT = 5000
+installation_folder = "/home/pi/steuerzentrale"
+
+#timeout for connection in seconds
+heartbt = 125
+
+class xs1_:
+    STREAM_URL = xs1_IP+"/control?callback=cname&cmd=subscribe&format=txt" 
+    # constants.xs1_.IP    
+    IP = xs1_IP
+    USER = "admin"
+    PASS = "Ivenhoe"
+    
+class sql_:
+    # constants.sql_.IP
+    IP = eigene_IP
+    USER = "customer"
+    PASS = "user"
+    DB = "XS1DB"
+    
+class udp_:
+    IP = eigene_IP
+    # constants.udp_.PORT
+    PORT = UDP_PORT
+    
+class scanner_:
+    # constants.scanner_.IP
+    IP = "192.168.192.10"
+    # constants.scanner_.PORT
+    PORT = 5010
