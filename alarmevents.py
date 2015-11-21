@@ -2,17 +2,17 @@
 
 import constants
 
-#import MySQLdb as mdb
-#from mysql_con import mdb_sonos_r, mdb_sonos_s, mdb_szene_r, mdb_hue_r, setting_s, setting_r, mdb_marantz_r, mdb_hue_s, mdb_fern_schluessel_r
-#from messaging import messaging
+import MySQLdb as mdb
+from mysql_con import mdb_hue_r, setting_r, mdb_hue_s
+from messaging import messaging
 #from socket import socket, AF_INET, SOCK_DGRAM
-#from threading import Timer
-#import threading
-#from phue import Bridge
+from threading import Timer
+import threading
+from phue import Bridge
 #import subprocess
-#from email.mime.text import MIMEText
-#from subprocess import Popen, PIPE
-#import time
+from email.mime.text import MIMEText
+from subprocess import Popen, PIPE
+import time
 #from szenen import set_szene
 
 # 4 prios at the moment
@@ -35,8 +35,7 @@ import constants
 # * 4.1 lights red 30 secs
 # * 4.2 lights red in anticipation (Schlafzimmer only when not awake)
 # * 4.3 lights blinking red in higher alarm, same as above
-hue_devices =['Stehlampe','Stablampe 1', 'Stablampe 2', 'LightStrips 2']
-hbridge = Bridge('192.168.192.190')
+hbridge = Bridge(constants.hue_.IP)
 
 def hue_set_szene(device, szene):
     if szene == 'Save': 
@@ -81,9 +80,9 @@ def main():
 class alarm_event:
     def __init__(self):
         self.mes = messaging()
-        self.mySocket = socket( AF_INET, SOCK_DGRAM )
-        self.OUTPUTS_IP   = '192.168.192.10'
-        self.OUTPUTS_PORT = 5000
+        #self.mySocket = socket( AF_INET, SOCK_DGRAM )
+        #self.OUTPUTS_IP   = '192.168.192.10'
+        #self.OUTPUTS_PORT = 5000
         #self.szs = set_szene()
 
     def new_event(self, description, prio=0, durchsage="", karenz=-1):
@@ -105,7 +104,7 @@ class alarm_event:
                 neuer = False
         if neuer:                
             dicti = {}
-            XS1DB = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+            XS1DB = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
             with XS1DB:
                 cur = XS1DB.cursor()
                 if prio < 1:
@@ -142,8 +141,8 @@ class alarm_event:
             elif prio >= 3:
                 self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description)
                 msg = MIMEText(description)
-                msg["From"] = "chrihuc@gmail.com"
-                msg["To"] = "chrihuc@gmail.com"
+                msg["From"] = constants.mail_.receiver
+                msg["To"] = constants.mail_.receiver
                 msg["Subject"] = "Alarm"
                 p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
                 p.communicate(msg.as_string())                
@@ -151,9 +150,9 @@ class alarm_event:
                 t =  Timer(0.1,self.hue_blink_set, args=[prio *10 % 10])
                 if (str(setting_r("Notification_Visuell")) == "An"):
                     t.start() 
-            if durchsage <> "":
-                setting_s("Durchsage",durchsage)
-                self.mySocket.sendto('az_Durchsage',(self.OUTPUTS_IP,self.OUTPUTS_PORT))
+            #if durchsage <> "":
+                #setting_s("Durchsage",durchsage)
+                #self.mySocket.sendto('az_Durchsage',(self.OUTPUTS_IP,self.OUTPUTS_PORT))
 
                 
     def alarm_resolved(self, description, resolv_desc):
@@ -167,31 +166,31 @@ class alarm_event:
     
     def hue_blink_set(self, farbe, Anzahl = 15, Pause = 1):
         i = 0
-        for device in hue_devices:
+        for device in constants.hue_.notify_devices:
             hue_set_szene(device, "Save")
         while i < Anzahl:
-            for device in hue_devices:
+            for device in constants.hue_.notify_devices:
                 hue_set_szene(device, farbe)
             time.sleep(Pause)
-            for device in hue_devices:
+            for device in constants.hue_.notify_devices:
                 hue_set_szene(device, "Aus")
             time.sleep(Pause)
             i = i + 1
         self.hue_reset()
     
     def hue_set(self, farbe):
-        for device in hue_devices:
+        for device in constants.hue_.notify_devices:
             hue_set_szene(device, "Save")
             hue_set_szene(device, farbe)
         t =  Timer(30,self.hue_reset)
         t.start()             
     
     def hue_reset(self):
-        for device in hue_devices:
+        for device in constants.hue_.notify_devices:
             hue_set_szene(device, device)        
             
     def acknowledge_alarm(self, alarm_id):
-        con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             sql = 'UPDATE alarm_events SET acknowledged = CURRENT_TIMESTAMP WHERE id = '+ str(alarm_id) 
@@ -199,7 +198,7 @@ class alarm_event:
         con.close() 
 
     def acknowledge_alarm_name(self, alarm_name):
-        con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             sql = 'UPDATE alarm_events SET acknowledged = CURRENT_TIMESTAMP WHERE description = '+ str(alarm_name) 
@@ -207,16 +206,16 @@ class alarm_event:
         con.close()         
         
     def acknowledge_all(self):
-        con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             sql = 'UPDATE alarm_events SET acknowledged = CURRENT_TIMESTAMP WHERE acknowledged is NULL'
             cur.execute(sql)        
         con.close()
-        self.mySocket.sendto('az_Hinweis_gesehen',(self.OUTPUTS_IP,self.OUTPUTS_PORT))
+        #self.mySocket.sendto('az_Hinweis_gesehen',(self.OUTPUTS_IP,self.OUTPUTS_PORT))
 
     def alarm_events_read(self, unacknowledged=False, prio=0, time=24*60):
-        con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         dicti = {}
         liste = []
         with con:

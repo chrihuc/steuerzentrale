@@ -35,4 +35,13 @@ class scanner_:
     PORT = 5010
     
 class hue_:
-    hue_devices = ['Stehlampe','Stablampe 1', 'Stablampe 2', 'LightStrips 2']
+    # hue lights for notification
+    # constants.hue_.devices
+    notify_devices = ['Stehlampe','Stablampe 1', 'Stablampe 2', 'LightStrips 2']
+    # constants.hue_.IP
+    IP = "192.168.192.190"    
+    
+class mail_:
+    # constants.mail_.receiver
+    receiver = "chrihuc@gmail.com"
+    
