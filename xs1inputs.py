@@ -2,45 +2,42 @@
 
 import constants
 
-#import pycurl,httplib,xml,urllib2,subprocess,os
+import pycurl,httplib,xml,urllib2,subprocess,os
 #from urllib2 import URLError
-#from classes import myezcontrol,meas_value, logdebug, ping
-#from mysql_con import setting_s, setting_r, mdb_fern_r
-#from threading import Timer
-#import threading
-#import time
+from classes import  ping #myezcontrol,
+from mysql_con import setting_s, setting_r, mdb_fern_r
+from threading import Timer
+import threading
+import time
 #import sys
-#from time import localtime,strftime
+from time import localtime,strftime
 #from datetime import date
 #import datetime
-#from Sonos2Py import sonos
-#import MySQLdb as mdb
+from Sonos2Py import sonos
+import MySQLdb as mdb
 #import sys
 #import re
-#from socket import socket, AF_INET, SOCK_DGRAM
+from socket import socket, AF_INET, SOCK_DGRAM
 #from szenen import set_szene
-#from alarmevents import alarm_event
+from alarmevents import alarm_event
 #from sensor_health import check_sensor_health
 #from periodic_sup import periodic_supervision
 #from messaging import messaging
 #from tinkerforge_class import TiFo_moist
 #from balkon import balkon
-#from tablecontrol import tablecontrol
+from tablecontrol import tablecontrol
 #from tuer_check import tuer_check
-#from heizung import temp_derivator
+from heizung import temp_derivator
 
 selfsupervision = True
 
 aes = alarm_event()
-mes = messaging()
-bk = balkon()
 tc = tablecontrol()
-tuer = tuer_check()
 sn = sonos()
 wohnT = temp_derivator("Wohnzimmer_T")
 balkT = temp_derivator("Balkon_T")
 XS1DB = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
+#ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
 mySocket = socket( AF_INET, SOCK_DGRAM )
 
             
@@ -317,6 +314,10 @@ def on_receive(data):
             insertstatement = 'INSERT INTO Schlafzimmer_H(Value, Date) VALUES(' + str(value) + ', "' + str(now) + '")'
             cur.execute(insertstatement)
     elif ('Temperatur_Wohnzi' == name):
+        with XS1DB:
+            cur = XS1DB.cursor()
+            insertstatement = 'INSERT INTO Wohnzimmer_T(Value, Date) VALUES(' + str(value) + ', "' + str(now) + '")'
+            cur.execute(insertstatement)          
         setting_s("Temperatur_Wohnzi", str(value))
         RolAvg =  wohnT.get_avg("Value",13)
         wohnT.write_data("RolAvg",RolAvg)
@@ -362,12 +363,7 @@ def on_receive(data):
 #####################
     if setting_r("Fenster_override") == "Aus":
         if ('Balkontuer' == name):
-            value = bk.update(value)
-            name = "balkon_dt" 
-            with XS1DB:
-                cur = XS1DB.cursor()
-                insertstatement = 'INSERT INTO Actuators(Name, Value, Date) VALUES("' + str(name) + '", ' + str(value) + ', "' + str(now) + '")'
-                cur.execute(insertstatement)  
+            setting_s("Balkontuer", str(value))
         if ('Kuechentuer' == name): 
             setting_s("Kuechentuer", str(value))
     
@@ -403,6 +399,7 @@ def to_mysql(moisture):
         cur.execute(insertstatement)  
 
 def main():  
+    global heartbeat
     zeit =  time.time()
     now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))  
     setting_s("Laststart", str(now))
@@ -414,17 +411,8 @@ def main():
     heartbeat = Timer(constants.heartbt, heartbeat_sup)
     heartbeat.start()
 
-    t = threading.Thread(target=periodic_supervision)
-    t.start()  
-
-    t = threading.Thread(target=TiFo_moist, args=[30, to_mysql])
-    t.start()
-
-
-    bk.update(ezcontrol.GetSensor_neu("Balkontuer"))
-
     conn = pycurl.Curl()  
-    conn.setopt(pycurl.URL, constants.xs1.STREAM_URL)  
+    conn.setopt(pycurl.URL, constants.xs1_.STREAM_URL)  
     conn.setopt(pycurl.WRITEFUNCTION, on_receive)
     aes.new_event(description="XS1inputs neugestartet", prio=0)
     conn.perform()

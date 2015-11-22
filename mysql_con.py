@@ -10,8 +10,19 @@ sn=sonos()
 
 def main():
     #set_automode(device="Stehlampe", mode="auto")
-    print mdb_szene_r("Auto_Mode")
-
+    #print mdb_szene_r("Device_Typ")
+    typ_dict = mdb_szene_r("Device_Typ")
+    ezcontrol_devices = []
+    TF_LEDs = []
+    hue_devices = []
+    for device in typ_dict:
+        if typ_dict.get(device) == "EZControl":
+            ezcontrol_devices.append(device)
+        if typ_dict.get(device) == "TF_LEDs":
+            TF_LEDs.append(device)
+        if typ_dict.get(device) == "Hue":
+            hue_devices.append(device)            
+    print hue_devices
     
 def gcm_users_read():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -87,6 +98,7 @@ def setting_s(setting, wert):
     
 def setting_r(setting):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    value = None
     with con:
         cur = con.cursor()
         sql = 'SELECT * FROM Settings WHERE Name = "' + str(setting) +'"'

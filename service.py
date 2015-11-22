@@ -5,6 +5,10 @@ from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import time, os
 import urllib2
 
+
+#xs1inputs
+#periodic_sup
+
 def internet_on():
     try:
         response=urllib2.urlopen('http://192.168.192.1',timeout=1)
