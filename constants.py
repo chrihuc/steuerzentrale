@@ -5,6 +5,7 @@ xs1_IP = "192.168.192.4"
 router_IP = "192.168.192.1"
 UDP_PORT = 5000
 installation_folder = "/home/pi/steuerzentrale"
+gcm_ID = 'AIzaSyCF_dmQYm9qjfry3sG_RDGYxYQMMgFMbts'
 
 #timeout for connection in seconds
 heartbt = 125

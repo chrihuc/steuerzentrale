@@ -14,7 +14,7 @@ def main():
 
     
 def gcm_users_read():
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     liste = []
     with con:
@@ -35,7 +35,7 @@ def gcm_users_read():
     
 def mdb_sonos_r(player):
     dicti = {}
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'SELECT * FROM Sonos WHERE Name = "' + str(player) +'"'
@@ -60,17 +60,11 @@ def mdb_sonos_r(player):
     con.close()  
 
 def mdb_sonos_s(player, Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume):
-    if player == sn.WohnZi:
-        playern = "WohnZi"
-    elif player == sn.Kueche:
-        playern = "Kueche"
-    elif player == sn.Bad:
-        playern = "Bad"
-    elif player == sn.SchlafZi:
-        playern = "SchlafZi"
+    if player in sn.Names:
+        playern = sn.Names.get(player)
     else:
         playern = player
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     if Volume == 'None':
         with con:
             cur = con.cursor()
@@ -84,7 +78,7 @@ def mdb_sonos_s(player, Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume)
     con.close()
     
 def setting_s(setting, wert):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'UPDATE Settings SET Value = "' + str(wert) + '" WHERE Name = "'+ str(setting) + '"'
@@ -92,7 +86,7 @@ def setting_s(setting, wert):
     con.close() 
     
 def setting_r(setting):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'SELECT * FROM Settings WHERE Name = "' + str(setting) +'"'
@@ -105,7 +99,7 @@ def setting_r(setting):
     return value
         
 def app_r(name):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'SELECT * FROM App WHERE Kommando = "' + str(name) +'"'
@@ -118,7 +112,7 @@ def app_r(name):
     return value
 
 def set_automode(device, mode):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'UPDATE Szenen SET '+device+' = "' + str(mode) + '" WHERE Name = "Auto_Mode"'
@@ -129,7 +123,7 @@ def set_automode(device, mode):
 def mdb_hue_s(device, setting):
     #setting must be a dict
     #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = "UPDATE Hue SET hue = '" + str(setting.get("hue")) + "', bri = '" + str(setting.get("bri")) + "', sat = '" + str(setting.get("sat")) + "', an = '" + str(setting.get("an")) + "' WHERE Name = '" + device +"'"
@@ -138,7 +132,7 @@ def mdb_hue_s(device, setting):
     
 def mdb_fern_r(Table, Knopf):
     setting_ = setting_r("Status")
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     szenen = []
     dicti = {}
     with con:
@@ -168,7 +162,7 @@ def mdb_fern_r(Table, Knopf):
 
 def mdb_fern_r_neu(Setting, Table, Knopf):
     setting_ = setting_r(Setting)
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     szenen = []
     dicti = {}
     with con:
@@ -220,7 +214,7 @@ def set_status(Setting, neuer_Status):
         
 def mdb_fern_schluessel_r(schlue_c, schlue_s, schlue_c_n, schlue_s_n):
     setting_ = setting_r("Status")
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     szenen = []
     dicti = {}
     with con:
@@ -240,7 +234,7 @@ def mdb_fern_schluessel_r(schlue_c, schlue_s, schlue_c_n, schlue_s_n):
 def mdb_marantz_s(name, setting):
     #setting must be a dict
     #{'Treble': '7', 'Bass': '2', 'Power': 'True', 'Mute': 'False', 'Attenuate': 'False', 'Volume': '-25', 'Source': '11'}
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = "UPDATE Marantz SET Power = '" + str(setting.get("Power")) + "', Volume = '0" + str(setting.get("Volume")) + "', Source = '" + str(setting.get("Source")) + "', Mute = '" + str(setting.get("Mute")) + "' WHERE Name = '" + name +"'"
@@ -251,7 +245,7 @@ def mdb_marantz_s(name, setting):
 def mdb_sideb_s(name, setting):
     #setting must be a dict
     #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = "UPDATE Sideboard SET rot = '" + str(setting.get("rot")) + "', gruen = '" + str(setting.get("gruen")) + "', blau = '" + str(setting.get("blau")) + "' WHERE Name = '" + name +"'"
@@ -260,7 +254,7 @@ def mdb_sideb_s(name, setting):
 
 ## alle mit dicti:
 def mdb_get_dicti(db, name):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     with con:
         cur = con.cursor()
@@ -296,7 +290,7 @@ def mdb_tspled_r(name):
     return mdb_get_dicti('TuerSPiLED', name) 
     
 def settings_r():
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     with con:
         cur = con.cursor()
