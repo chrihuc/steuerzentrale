@@ -18,7 +18,7 @@ import MySQLdb as mdb
 #import sys
 #import re
 from socket import socket, AF_INET, SOCK_DGRAM
-#from szenen import set_szene
+from szenen import set_szene
 from alarmevents import alarm_event
 #from sensor_health import check_sensor_health
 #from periodic_sup import periodic_supervision

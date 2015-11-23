@@ -40,7 +40,8 @@ sudo pip install phue
 sudo pip install gcm
 sudo apt-get install python-pycurl
 sudo apt-get install python-pysolar
-
+sudo pip install pyephem
+sudo pip install paramiko
 
 python
 

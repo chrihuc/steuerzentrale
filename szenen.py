@@ -26,7 +26,7 @@ from cron import cron
 #from webcammov import clear_webc_folder, mail_webc_pics, set_recording, send_wc_pix
 import os
 from anwesenheit import anwesenheit
-#from ssh import ssh_connection 
+from ssh import ssh_connection 
 #from plexapi.server import PlexServer
 
 sn=sonos()
@@ -34,6 +34,7 @@ aes = alarm_event()
 anw_status = anwesenheit()
 mes = messaging()
 crn = cron()
+redundant = redundancy.redundancy()
 
 PS3_IP = '192.168.192.27'
 BettPi_PIP = '192.168.192.24'
@@ -51,8 +52,8 @@ tv_remote_lan = remotecontrol(constants.eigene_IP,'192.168.192.29','00:30:1b:a0:
 no_event = ['Alarm','Achtung','Hinweis','Hue_Meldung','set_hinweis']
 
 ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
-IRSocket = socket( AF_INET, SOCK_DGRAM )
 hbridge = Bridge(constants.hue_.IP)
+
 router = ssh_connection(ip = constants.router_IP, username = "admin", passwort = "Ivenhoe")
 
 
@@ -71,7 +72,7 @@ RaspBMC = socket( AF_INET, SOCK_DGRAM )
 TuerSPi_IP   = '192.168.192.32'
 TuerSPi_sock = socket( AF_INET, SOCK_DGRAM )
 
-plex = PlexServer()
+#plex = PlexServer()
 
 typ_dict = mdb_szene_r("Device_Typ")
 ezcontrol_devices = []
@@ -544,7 +545,6 @@ def set_szene(name):
         erfuellt = True
     settings = settings_r()
     for bedingung in bedingungen:
-        print bedingung
         try:
             groesser = bedingungen.get(bedingung).find('>')
             kleiner = bedingungen.get(bedingung).find('<')
@@ -578,7 +578,8 @@ def set_szene(name):
             aes.new_event(description="Szenen: " + name, prio=eval(szene.get("Priority")), karenz = 0.03)
         else:
             aes.new_event(description= str(szene.get("Beschreibung")), prio=eval(szene.get("Priority")), karenz = 0.03)
-    if erfuellt and redundancy().master():
+    master_slave = redundant.master()
+    if erfuellt:
         interlocks = {}
         if str(szene.get("Auto_Mode")) == "True":
             interlocks = mdb_szene_r("Auto_Mode")
@@ -608,64 +609,65 @@ def set_szene(name):
                         kommandos = [szene.get(key)]
                 else:
                     kommandos = [szene.get(key)]
-                if key in ezcontrol_devices:
-                    for kommando in kommandos:
-                        t = threading.Thread(target=xs1_set_szene, args=[key, kommando])
-                        t.start()
-                elif key == "set_Task":
-                    for kommando in kommandos:
-                        mes.send_direkt(to=mes.alle, titel="Setting", text=str(kommando))  
-                elif key == "set_Task_zuhause":
-                    for kommando in kommandos:
-                        mes.send_zuhause(to=mes.alle, titel="Setting", text=str(kommando))                          
-                        #mes.send_direkt(mes.tf201,"Setting",str(kommando))                    
-                elif key in sonos_devices:
-                    #for kommando in kommandos:
-                    t = threading.Thread(target=sonos_set_szene, args=[sonos_devices.get(key), kommandos])
-                    t.start()                
-                elif key in hue_devices:
-                    for kommando in kommandos:
-                        if hue_count > 2:
-                            hue_delay += 0.55
-                            hue_count = 0
-                        hue_del = Timer(hue_delay, hue_set_szene, [key, kommando])
-                        hue_del.start()
-                        hue_count += 1
-                elif key == "LightstripSchlafzi":
-                    for kommando in kommandos:
-                        t = threading.Thread(target=set_ls_schlafzi, args=[kommando])
-                        t.start()                          
-                elif key == "TV":
-                    for idx, kommando in enumerate(kommandos):
-                        folgen = Timer((float(idx)/5), tv_set_szene, [kommando])
-                        folgen.start()                        
-                elif key == "Amp":
-                    for kommando in kommandos:
-                        marantz_set_szene(kommando) 
-                elif key in TF_LEDs:                
-                    for kommando in kommandos:
-                        #t = threading.Thread(target=set_TF_LEDs, args=[key, kommando])
-                        #t.start()                    
-                        set_TF_LEDs(key, kommando)                         
-                elif key in setting:
-                    for kommando in kommandos:
-                        aes.new_event(description=key + ": " + str(kommando), prio=0)
-                        setting_s(key, str(kommando))
-                elif key == "Zusatz_Status":
-                    time.sleep(1)
-                    for kommando in kommandos:
-                        #aes.new_event(description=key + ": " + str(kommando) + ": " + str(kommandos.get(kommando)), prio=0)
-                        setting_s(str(kommando), str(kommandos.get(kommando)))
-                elif key == "TuerSPi":
-                    for kommando in kommandos:
-                        t = threading.Thread(target=TuerSPi, args=[kommando])
-                        t.start()
-                elif key == "Interner_Befehl":
-                    time.sleep(1)
-                    for kommando in kommandos:
-                        t = threading.Thread(target=interner_befehl, args=[kommando])
-                        t.start() 
-    if erfuellt:                        
+                if master_slave:
+                    if key in ezcontrol_devices:
+                        for kommando in kommandos:
+                            t = threading.Thread(target=xs1_set_szene, args=[key, kommando])
+                            t.start()
+                    elif key == "set_Task":
+                        for kommando in kommandos:
+                            mes.send_direkt(to=mes.alle, titel="Setting", text=str(kommando))  
+                    elif key == "set_Task_zuhause":
+                        for kommando in kommandos:
+                            mes.send_zuhause(to=mes.alle, titel="Setting", text=str(kommando))                          
+                            #mes.send_direkt(mes.tf201,"Setting",str(kommando))                    
+                    elif key in sonos_devices:
+                        #for kommando in kommandos:
+                        t = threading.Thread(target=sonos_set_szene, args=[sonos_devices.get(key), kommandos])
+                        t.start()                
+                    elif key in hue_devices:
+                        for kommando in kommandos:
+                            if hue_count > 2:
+                                hue_delay += 0.55
+                                hue_count = 0
+                            hue_del = Timer(hue_delay, hue_set_szene, [key, kommando])
+                            hue_del.start()
+                            hue_count += 1
+                    elif key == "LightstripSchlafzi":
+                        for kommando in kommandos:
+                            t = threading.Thread(target=set_ls_schlafzi, args=[kommando])
+                            t.start()                          
+                    elif key == "TV":
+                        for idx, kommando in enumerate(kommandos):
+                            folgen = Timer((float(idx)/5), tv_set_szene, [kommando])
+                            folgen.start()                        
+                    elif key == "Amp":
+                        for kommando in kommandos:
+                            marantz_set_szene(kommando) 
+                    elif key in TF_LEDs:                
+                        for kommando in kommandos:
+                            #t = threading.Thread(target=set_TF_LEDs, args=[key, kommando])
+                            #t.start()                    
+                            set_TF_LEDs(key, kommando)                         
+                    elif key == "TuerSPi":
+                        for kommando in kommandos:
+                            t = threading.Thread(target=TuerSPi, args=[kommando])
+                            t.start()
+                    elif key == "Interner_Befehl":
+                        time.sleep(1)
+                        for kommando in kommandos:
+                            t = threading.Thread(target=interner_befehl, args=[kommando])
+                            t.start() 
+                else:
+                    if key in setting:
+                        for kommando in kommandos:
+                            aes.new_event(description=key + ": " + str(kommando), prio=0)
+                            setting_s(key, str(kommando))
+                    elif key == "Zusatz_Status":
+                        time.sleep(1)
+                        for kommando in kommandos:
+                            #aes.new_event(description=key + ": " + str(kommando) + ": " + str(kommandos.get(kommando)), prio=0)
+                            setting_s(str(kommando), str(kommandos.get(kommando)))                             
         if ((szene.get("Szene_folgt") <> "") and (str(szene.get("Szene_folgt")) <> "None")):
             try:
                 if type(eval(szene.get("Szene_folgt"))) == list:
