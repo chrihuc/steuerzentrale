@@ -29,7 +29,7 @@ class messaging:
         gcm_users = gcm_users_read()
         for user in gcm_users:
             if user.get('vorname') <> None:
-                if (user.get('vorname') in to) and (str(setting_r(str('Notify_'+ user.get('vorname')))) == "Ein"):
+                if (user.get('vorname') in to) and (str(setting_r(str('Notify_'+ user.get('vorname')))) == "Ein") and constants.redundancy_.master:
                     response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
                     if response <> {}:
                         success = False
@@ -42,7 +42,7 @@ class messaging:
         gcm_users = gcm_users_read()
         for user in gcm_users:
             if user.get('vorname') <> None:
-                if (user.get('vorname') in to) and (str(setting_r(str('Notify_'+ user.get('vorname')))) == "Ein"):
+                if (user.get('vorname') in to) and (str(setting_r(str('Notify_'+ user.get('vorname')))) == "Ein") and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(setting_r(user.get('vorname')) == "1"):
                         response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)            
@@ -56,7 +56,7 @@ class messaging:
         gcm_users = gcm_users_read()
         for user in gcm_users:
             if user.get('vorname') <> None:
-                if (user.get('vorname') in to) and (str(setting_r(str('Notify_'+ user.get('vorname')))) == "Ein"):
+                if (user.get('vorname') in to) and (str(setting_r(str('Notify_'+ user.get('vorname')))) == "Ein") and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(setting_r(user.get('vorname')) == "0"):
                         response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)                     

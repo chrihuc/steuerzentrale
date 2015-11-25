@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import constants
-import redundancy
 
 from Sonos2Py import sonos
 from classes import myezcontrol, ping
@@ -23,7 +22,7 @@ import datetime
 from messaging import messaging
 from cron import cron
 #from cloudftp import get_serialnumbers
-#from webcammov import clear_webc_folder, mail_webc_pics, set_recording, send_wc_pix
+from webcammov import send_wc_pix
 import os
 from anwesenheit import anwesenheit
 from ssh import ssh_connection 
@@ -34,7 +33,6 @@ aes = alarm_event()
 anw_status = anwesenheit()
 mes = messaging()
 crn = cron()
-redundant = redundancy.redundancy()
 
 PS3_IP = '192.168.192.27'
 BettPi_PIP = '192.168.192.24'
@@ -367,9 +365,6 @@ def xs1_set_szene(device, szene):
     if szene in ["man", "auto"]:
         mysql_con.set_automode(device=device, mode=szene)
         return
-    if (device == "Webcams") and str(szene) == "0":
-        set_recording(camera = 1, recording = False)
-        set_recording(camera = 2, recording = False)
     if (device == "Video_Audio") and str(szene) == "0":
         if ping(ezcont_interlock.get(device)):
             aes.new_event(description="PS3 noch eingeschaltet", prio=1)
@@ -466,7 +461,6 @@ def hue_set_szene(device, szene):
 def Tuer_auf():
     Anwesend_init = setting_r("Anwesenheit")
     if str(setting_r("Status")) in ["Schlafen", "Abwesend", "Urlaub"]:
-        set_recording(camera = 1, recording = True)
         einbruch = True
         setting_s("Einbruch","True")
         set_szene("Einbruch_1")
@@ -474,7 +468,6 @@ def Tuer_auf():
         #setting_s("Status","Einbruch")
     else:
         einbruch = False
-        set_recording(camera = 1, recording = False)
     #alle weggewesen     
     i = 0
     while i < 7:
@@ -483,15 +476,12 @@ def Tuer_auf():
         if akt_status.get("Einbruch") == False:
             einbruch = False
             setting_s("Einbruch","False") 
-            set_recording(camera = 1, recording = False) 
             if str(setting_r("Status")) in ["Abwesend", "Urlaub"]: 
                 set_szene("Heimgekommen")
             if str(setting_r("Status")) in ["Schlafen"]: 
                 set_szene("einer_heimgekommen")                
-            clear_webc_folder()
             i = 60
         if str(setting_r("Status")) in ["Wach", "Besuch"]:
-            set_recording(camera = 1, recording = False)
             einbruch = False
             setting_s("Einbruch","False") 
             i = 60  
@@ -500,10 +490,6 @@ def Tuer_auf():
             Anwesend_init = akt_status.get("Anwesenheit")
             #!!!!!!!!!!!!!achtung noch die passenden Szenen setzen
             #einer gegangen einer schlaeft check if this gets even executed then            
-        if i == 30:
-            if einbruch:
-                #aes.new_event(description="Einbruch Warnung", prio=2.1)
-                mail_webc_pics()
         time.sleep(10)
     #if einbruch:
     #    setting_s("Einbruch","True")
@@ -511,7 +497,6 @@ def Tuer_auf():
     #    setting_s("Einbruch","False")
     if str(setting_r("Einbruch")) == "True":
         aes.new_event(description="Einbruch", prio=3.1)
-        mail_webc_pics()
         Tuer_auf()
 
 def TuerSPi(szene):
@@ -578,7 +563,6 @@ def set_szene(name):
             aes.new_event(description="Szenen: " + name, prio=eval(szene.get("Priority")), karenz = 0.03)
         else:
             aes.new_event(description= str(szene.get("Beschreibung")), prio=eval(szene.get("Priority")), karenz = 0.03)
-    master_slave = redundant.master()
     if erfuellt:
         interlocks = {}
         if str(szene.get("Auto_Mode")) == "True":
@@ -609,7 +593,7 @@ def set_szene(name):
                         kommandos = [szene.get(key)]
                 else:
                     kommandos = [szene.get(key)]
-                if master_slave:
+                if constants.redundancy_.master:
                     if key in ezcontrol_devices:
                         for kommando in kommandos:
                             t = threading.Thread(target=xs1_set_szene, args=[key, kommando])
@@ -721,6 +705,9 @@ def interner_befehl(befehl):
         #plex.
     if befehl == "send_wc_pix":        
         send_wc_pix()
+    if befehl == "poweroff":       
+        exectext = "sudo poweroff"
+        os.system(exectext)          
                     
 def marantz_set_szene(szene):
     j = 0

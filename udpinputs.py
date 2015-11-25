@@ -2,34 +2,34 @@
 
 import constants
 
-#from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
+from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 #from socket import error as socket_error
 #from socket import socket, AF_INET, SOCK_DGRAM
 #import sys
-#from Sonos2Py import sonos
+from Sonos2Py import sonos
 #from samspy import remotecontrol
-#from classes import myezcontrol, logdebug, ping, restart_services, constants, restart_wecker
+from classes import myezcontrol, ping
 #import os
-#import time
-#from time import localtime,strftime
+import time
+from time import localtime,strftime
 #from datetime import date
-#import threading
-#from threading import Timer
+import threading
+from threading import Timer
 #import re
 #import csv
-#import MySQLdb as mdb
-#from phue import Bridge
+import MySQLdb as mdb
+from phue import Bridge
 #from get_next_alarm import get_wecker
 ##mail
 #from email.mime.text import MIMEText
 #from subprocess import Popen, PIPE
-#from mysql_con import mdb_sonos_r, mdb_sonos_s, setting_s, setting_r, mdb_szene_r, mdb_marantz_r, mdb_marantz_s, mdb_fern_r_neu, mdb_sideb_r, app_r, mdb_hue_s, mdb_sideb_s
-#from szenen import set_szene, sonos_set_szene, marantz_set_szene, tv_set_szene, set_TF_LEDs, hue_set_szene, set_TF_LEDs
-#from messaging import messaging
-#from alarmevents import alarm_event
+from mysql_con import mdb_sonos_r, mdb_sonos_s, setting_s, setting_r, mdb_szene_r, mdb_marantz_r, mdb_marantz_s, mdb_fern_r_neu, mdb_sideb_r, app_r, mdb_hue_s, mdb_sideb_s
+from szenen import set_szene, sonos_set_szene, marantz_set_szene, tv_set_szene, set_TF_LEDs, hue_set_szene, set_TF_LEDs
+from messaging import messaging
+from alarmevents import alarm_event
 #from text_to_sonos import downloadAudioFile
-#from tablecontrol import tablecontrol
-#from ssh import reboot_pis, restart_pi
+from tablecontrol import tablecontrol
+from ssh import reboot_pis, restart_pi
 
 ########################
 #Variablen declarification
@@ -41,34 +41,19 @@ if not (ping('192.168.192.190')):
 if not (ping('192.168.192.4')):
     aes.new_event(description="XS1 nicht erreichbar", prio=2)        
 
-ezcontrol = myezcontrol('192.168.192.4','admin','')
-tv_remote = remotecontrol('192.168.192.10','192.168.192.26','00:30:1b:a0:2f:05')#('192.168.192.25','192.168.192.26','a0:0b:ba:ca:54:74')
-IR_SERVER_IP   = '192.168.192.25'
-IR_PORT = 5000
+ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
+
 PORT_NUMBER = 5000
 SIZE = 1024
-RaspBMC_IP = '192.168.192.24'
-MARANTZ_IP   = '192.168.192.25'
-MARANTZ_PORT = 5010
-MarantzSocket = socket( AF_INET, SOCK_DGRAM )
-PS3_IP = '192.168.192.27'
+
 no_event_list = ["Toggle_Kueche","TV_Channel_up","TV_Channel_down","Marantz_leiser","Marantz_lauter"]
-marantz_szenen = ["Aus", "TV"]
+
 tc = tablecontrol()
 
-#to change when migrating
-#hostName = gethostbyname( '192.168.192.10' )
-#Remote_IR = True
-#homefolder = "/home/chris/homecontrol/"
-
-const = constants()
-lgd = logdebug(True, True)
-# move saug makro
-# move restart script
-##
+hostName = gethostbyname( constants.eigene_IP )
 
 mySocket = socket( AF_INET, SOCK_DGRAM )
-mySocket.bind( (const.hostName, PORT_NUMBER) )
+mySocket.bind( (hostName, constants.UDP_PORT) )
 IRSocket = socket( AF_INET, SOCK_DGRAM )
 sn=sonos()
 RaspBMC = socket( AF_INET, SOCK_DGRAM )
@@ -79,17 +64,13 @@ dimm_esz = False
 alarm_steh = False
 TV_eingeschaltet = False
 Amp_eingeschaltet = False
-#AV_mode = 0 #0 = aus; 1 = TV; 2 = RaspBMC; 3 = Sonos; 4 = PS3
+
 heartbt = 130
-saugen_flag = False
-saugbeginn = 8
-saugende = 20
-saugtage = [1,2,3,4,5,6,7]
-hbridge = Bridge('192.168.192.190')
-light_names = hbridge.get_light_objects('name')
+
+hbridge = Bridge(constants.hue_.IP)
+
 message = messaging()
 aes = alarm_event()
-gw = get_wecker()
 
 ###################
 #Marantz
@@ -99,7 +80,6 @@ def set_auto_szene():
     time.sleep(2)
     if (setting_r("AV_cmd")<>"1"):
         szene = mdb_marantz_r("Aktuell")
-        lgd.debug(" autoszene: " + str(szene))
         if str(szene.get("Power")) == "False":
             pass
             #set_szene("auto_szene_Aus")
@@ -121,7 +101,6 @@ def set_auto_szene():
                 setting_s("Kommando", "Sonos")
     #time.sleep(2)       
     #setting_s("AV_cmd", "0")
-    #lgd.log(" AV_cmd: 0")
 
         
 ###################
@@ -132,71 +111,13 @@ def Alles_ein():
     t = threading.Thread(target=set_szene, args=["Alles_ein"])
     t.start()
     aes.check_liste() 
-
-###################
-# Saugen
-###################
-
-def saugen():
-    if (ezcontrol.GetSwitch("gesaugt") == "0.0") and (ezcontrol.GetSwitch("Saugstauber") == "100.0"):
-        lgd.debug("saugen")
-        t = threading.Thread(target=timed_saugen)
-        t.start()
-
-def timed_saugen():
-    lt = localtime()
-    stunde = int(strftime("%H", lt))
-    tag = int(strftime("%w", lt))
-    lgd.debug("timed saugen, Tag " + str(tag))
-    if tag in saugtage:
-        time.sleep(60)
-        while ((stunde < saugbeginn) or (stunde > saugende)):
-            time.sleep(60)
-            lt = localtime()
-            stunde = int(strftime("%H", lt))        
-        execstring = 'python '+  const.homefolder + 'saug_makro.py'
-        os.system(execstring)
-        aes.new_event("Staubsauger gestartet")
-    
-###################
-# Licht dimmen
-###################
-
-def Stehlampe():
-    if hbridge.get_light('Stehlampe', 'on'):
-        if hbridge.get_light('Stehlampe', 'bri') == 176:
-            command =  {'bri' : 254, 'hue' : 34534, 'sat' : 240,'on' : True}
-            hbridge.set_light('Stehlampe', command)
-        else:
-            hbridge.set_light('Stehlampe', 'on', False) 
-    else:
-        command =  {'bri' : 176, 'hue' : 12554, 'sat' : 225,'on' : True}
-        hbridge.set_light('Stehlampe', command)            
-
-###################
-# Sideboard
-###################            
-
-def sideboard_loop():
-    aktuell = str(setting_r("Sideboard"))
-    if aktuell == "None":
-        zaehler = 0
-    else:
-        zaehler = int(aktuell[-1:])
-    zaehler = zaehler + 1
-    if str(mdb_sideb_r("Loop" + str(zaehler))) =='{}':
-        MarantzSocket.sendto(str(mdb_sideb_r("Loop0")),(MARANTZ_IP,MARANTZ_PORT))
-        setting_s("Sideboard","Loop0")
-    else:
-        MarantzSocket.sendto(str(mdb_sideb_r("Loop"+str(zaehler))),(MARANTZ_IP,MARANTZ_PORT))
-        setting_s("Sideboard","Loop"+str(zaehler))
-
+           
 ###################
 # Lese Bewohner und Besucher
 ################### 
         
 def read_mysql(table):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     liste = []
     with con:
@@ -216,7 +137,7 @@ def read_mysql(table):
     return liste        
 
 def write_mysql(table, name, setting, wert, prod):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'UPDATE '+ table +' SET ' + str(setting) + ' = "' + str(wert) + '", prod = "' + str(prod) + '" WHERE Name = "'+ str(name) + '"'
@@ -224,7 +145,7 @@ def write_mysql(table, name, setting, wert, prod):
     con.close()
 
 def read_bebe_action(BeBe, Status, Event):
-    con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     liste = []
     with con:
@@ -259,311 +180,306 @@ def restart_services_h():
     setting_s("NumRestart", str(count + 1))    
     restart_services()
     
-asz = Timer(2, set_auto_szene)
-heartbeat = Timer(heartbt, restart_services_h)
-heartbeat.start()
-ezcontrol.SetSwitchFunction("heartbeat", str(1))
-ezcontrol.SetSwitchFunction("NotbetrNot", str(1))
-marantz_set_szene("Reset")
-if (setting_r("Restart_PIs") == "Ein"):
-    reboot_pis()
-else:
-    restart_pi("192.168.192.24")
-    restart_pi("192.168.192.25")
-#Initialize scenes
-if ((setting_r("Status") == "Am Gehen 1") or (setting_r("Status") == "Am Gehen 2")):
-    t = threading.Thread(target=set_szene, args=["Alles_aus_4"])
-    t.start()
-if ((setting_r("Status") == "Am Gehen 3") or (setting_r("Status") == "Gegangen") or (setting_r("Status") == "Urlaub")):
-    t = threading.Thread(target=set_szene, args=["Alles_aus_4"])
-    t.start()
-if ((setting_r("Status") == "Abwesend") or (setting_r("Status") == "Urlaub")):
-    t = threading.Thread(target=set_szene, args=["Alles_aus_5"])
-    t.start()    
-if ((setting_r("Status") == "Schlafen")):
-    t = threading.Thread(target=set_szene, args=["sz_Schlafen_stealth"])
-    t.start()    
+def main():
+    asz = Timer(2, set_auto_szene)
+    heartbeat = Timer(heartbt, restart_services_h)
+    heartbeat.start()
+    ezcontrol.SetSwitchFunction("heartbeat", str(1))
+    ezcontrol.SetSwitchFunction("NotbetrNot", str(1))
+    marantz_set_szene("Reset")
+    if (setting_r("Restart_PIs") == "Ein"):
+        reboot_pis()
+    else:
+        restart_pi("192.168.192.24")
+        restart_pi("192.168.192.25")
+    #Initialize scenes
+    if ((setting_r("Status") == "Am Gehen 1") or (setting_r("Status") == "Am Gehen 2")):
+        t = threading.Thread(target=set_szene, args=["Alles_aus_4"])
+        t.start()
+    if ((setting_r("Status") == "Am Gehen 3") or (setting_r("Status") == "Gegangen") or (setting_r("Status") == "Urlaub")):
+        t = threading.Thread(target=set_szene, args=["Alles_aus_4"])
+        t.start()
+    if ((setting_r("Status") == "Abwesend") or (setting_r("Status") == "Urlaub")):
+        t = threading.Thread(target=set_szene, args=["Alles_aus_5"])
+        t.start()    
+    if ((setting_r("Status") == "Schlafen")):
+        t = threading.Thread(target=set_szene, args=["sz_Schlafen_stealth"])
+        t.start()    
 
-aes.new_event(description="Outputs neugestartet", prio=0)
-lgd.log(" Outputs neugestartet")
-while True:
-        (data,addr) = mySocket.recvfrom(SIZE)
-        heartbeat.cancel()
-        heartbeat = Timer(heartbt, restart_services_h)
-        heartbeat.start() 
-        isdict = False
-        try:
-            data_ev = eval(data)
-            if type(data_ev) is dict:
-                lgd.debug(" " + data)
-                if "Source" in data_ev:
-                    #threading hinzufuegen ansonsten timed es aus
-                    asz.cancel()
-                    mdb_marantz_s("Aktuell", data_ev)
-                    asz = Timer(2, set_auto_szene)
-                    #asz.start()
-                elif "Key" in data_ev: 
-                    gefunden = False
-                    aes.new_event(description="Schluessel: "+str(data_ev.get("Key")), prio=0)
-                    for typ in ["Bewohner", "Besucher"]:
-                        namen = read_mysql(typ)
-                        for name in namen:
-                            if (str(data_ev.get("Key")) == name.get("USB_ID")) and (name.get("USB_State")>-15):
-                                aes.new_event(description=str(name.get("Name"))+" Schluessel: "+str(data_ev.get("value")), prio=0)
-                                gefunden = True
-                                try:
-                                    actions = read_bebe_action(BeBe=typ, Status=setting_r("Status"), Event=data_ev.get("value"))
-                                    t = threading.Thread(target=set_szene, args=[actions[0].get("Szene")])
-                                    t.start()
-                                except:
-                                    pass
-                                write_mysql(table=typ, name=str(name.get("Name")), setting="USB_State",wert=data_ev.get("value"), prod=data_ev.get("prod"))   
-                    if not gefunden:
-                        t = threading.Thread(target=set_szene, args=["FalscherSchluessel"])
-                        t.start()                        
-                elif "Licht" in data_ev:
-                    if str(data_ev.get("Licht")) in ["Stablampe 1","Stehlampe","Monaco Lampe","Balkonlampe","LightStrips 2","BettSabina","BettChris","SchlafziFenster"]:
-                        #setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
-                        mdb_hue_s("App", data_ev)
-                        hue_set_szene(str(data_ev.get("Licht")),"App")
-                    else:
-                        mdb_sideb_s("App", data_ev)
-                        set_TF_LEDs(data_ev.get("Licht"), "App")
-                elif ("name" in data_ev) and ("value" in data_ev):
-                    XS1DB = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
-                    zeit =  time.time()
-                    now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))                     
-                    with XS1DB:
-                       cur = XS1DB.cursor()
-                       insertstatement = 'INSERT INTO Actuators(Name, Value, Date) VALUES("' + str(data_ev.get("name")) + '", ' + str(data_ev.get("value")) + ', "' + str(now) + '")'
-                       cur.execute(insertstatement)   
-                    XS1DB.close() 
-                    szenen = tc.get_szene(sensor = data_ev.get("name"), value = data_ev.get("value"))
-                    for szene in szenen:
-                        t = threading.Thread(target=set_szene, args=[szene])
-                        t.start()
-                    if data_ev.get("name") == "Helligkeit":
-                        setting_s("Helligkeit", str(data_ev.get("value"))) 
-                    if data_ev.get("name") == "Haustuer":
-                        setting_s("Haustuer", str(data_ev.get("value"))) 
-                    if data_ev.get("name") == "SchlafZiFenster":
-                        setting_s("SchlafZiFenster", str(data_ev.get("value")))                          
-                isdict = True
-        except Exception as serr:
-            lgd.debug(" NameError " + str(serr))
+    aes.new_event(description="Outputs neugestartet", prio=0)
+    while True:
+            (data,addr) = mySocket.recvfrom(SIZE)
+            heartbeat.cancel()
+            heartbeat = Timer(heartbt, restart_services_h)
+            heartbeat.start() 
             isdict = False
-        if (data == "heartbeat"):
-            #lgd.debug(" Outputs: Heartbeat canceled")          
-            ezcontrol.SetSwitchFunction("heartbeat", str(1))
-            ezcontrol.SetSwitchFunction("NotbetrNot", str(1))
-        else:
-            if (not (data in no_event_list)) and (not (isdict)):
-                aes.new_event(data, karenz = 1)
-        if "sz_" in data:
-            t = threading.Thread(target=set_szene, args=[data])
-            t.start()
-        if "appz_" in data:
-            t = threading.Thread(target=set_szene, args=[data[5:]])
-            t.start()            
-        if "az_" in data:
-            t = threading.Thread(target=set_szene, args=[data])
-            t.start()        
-#Hauptszenen
-    #Alles ein
-        if (data == "Alles_ein"):
-            t = threading.Thread(target=set_szene, args=["Alles_ein"])
-            t.start()
-            if (setting_r("Status") == "Wach"):
-                t = threading.Thread(target=set_szene, args=["sz_gemuetlich"])
-                t.start()            
-        elif (data == "Alles_ein_Flur"):
-            ezcontrol.SetSwitch("Diele", str(100))
-            t = threading.Thread(target=set_szene, args=["Alles_ein"])
-            t.start()
-            if (setting_r("Status") == "Wach"):
-                t = threading.Thread(target=set_szene, args=["sz_gemuetlich"])
-                t.start()   
-    #app szenen
-        elif "app_" in data:
-            t = threading.Thread(target=set_szene, args=[str(app_r(data))])
-            t.start()  
-    #set_wecker
-        elif "wecker_gestellt" in data:
-            restart_wecker()
-            gw.next_wecker_heute_morgen()
-    #Wach
-        elif (data == "Wach"):
-            ezcontrol.SetSwitch("Kueche", str(100))
-            t = threading.Thread(target=set_szene, args=["Wach"])
-            t.start()
-        elif (data == "Alles_aus_nochmal"):
-            setting_s("Status", "Abwesend")
-            ezcontrol.SetSwitch("Webcams", str(100))
-            ezcontrol.SetSwitch("Anwesend_Block", str(0))
-    #Schlafen
-        elif (data == "Schlafen"):
-            t = threading.Thread(target=set_szene, args=["Schlafen1"])
-            t.start()
-    #Alles aus
-        elif (data == "Alles_aus"):
-            Alles_aus()
-    #Movie_Play
-        elif (data == "Movie_Play"):
-            Movie_Play()        
-    #Movie_Pause
-        elif (data == "Movie_Pause"):
-            Movie_Pause()    
-    #Movie_Stop
-        elif (data == "Movie_Stop"):
-            Movie_Stop()    
-#Licht       
-        elif (data == "Szene_Tv"):
-            ezcontrol.SetSwitch("Kueche", str(0))
-            ezcontrol.SetSwitch("Diele", str(0))
-            ezcontrol.SetSwitch("Wohnzimmer_Decke", str(0))
-        elif (data == "Toggle_Flur"):
-            if (ezcontrol.GetSwitch("Diele") == "100.0"):
-                ezcontrol.SetSwitch("Diele", str(0))
+            #if True:
+            try:
+                data_ev = eval(data)
+                if type(data_ev) is dict:
+                    if "Source" in data_ev:
+                        #threading hinzufuegen ansonsten timed es aus
+                        asz.cancel()
+                        mdb_marantz_s("Aktuell", data_ev)
+                        asz = Timer(2, set_auto_szene)
+                        #asz.start()
+                    elif "Key" in data_ev: 
+                        gefunden = False
+                        aes.new_event(description="Schluessel: "+str(data_ev.get("Key")), prio=0)
+                        for typ in ["Bewohner", "Besucher"]:
+                            namen = read_mysql(typ)
+                            for name in namen:
+                                if (str(data_ev.get("Key")) == name.get("USB_ID")) and (name.get("USB_State")>-15):
+                                    aes.new_event(description=str(name.get("Name"))+" Schluessel: "+str(data_ev.get("value")), prio=0)
+                                    gefunden = True
+                                    try:
+                                        actions = read_bebe_action(BeBe=typ, Status=setting_r("Status"), Event=data_ev.get("value"))
+                                        t = threading.Thread(target=set_szene, args=[actions[0].get("Szene")])
+                                        t.start()
+                                    except:
+                                        pass
+                                    write_mysql(table=typ, name=str(name.get("Name")), setting="USB_State",wert=data_ev.get("value"), prod=data_ev.get("prod"))   
+                        if not gefunden:
+                            t = threading.Thread(target=set_szene, args=["FalscherSchluessel"])
+                            t.start()                        
+                    elif "Licht" in data_ev:
+                        if str(data_ev.get("Licht")) in ["Stablampe 1","Stehlampe","Monaco Lampe","Balkonlampe","LightStrips 2","BettSabina","BettChris","SchlafziFenster"]:
+                            #setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
+                            mdb_hue_s("App", data_ev)
+                            hue_set_szene(str(data_ev.get("Licht")),"App")
+                        else:
+                            mdb_sideb_s("App", data_ev)
+                            set_TF_LEDs(data_ev.get("Licht"), "App")
+                    elif ("name" in data_ev) and ("value" in data_ev):
+                        XS1DB = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+                        zeit =  time.time()
+                        now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))                     
+                        with XS1DB:
+                            cur = XS1DB.cursor()
+                            insertstatement = 'INSERT INTO Actuators(Name, Value, Date) VALUES("' + str(data_ev.get("name")) + '", ' + str(data_ev.get("value")) + ', "' + str(now) + '")'
+                            cur.execute(insertstatement)   
+                        XS1DB.close() 
+                        szenen = tc.get_szene(sensor = data_ev.get("name"), value = data_ev.get("value"))
+                        for szene in szenen:
+                            t = threading.Thread(target=set_szene, args=[szene])
+                            t.start()
+                        if data_ev.get("name") == "Helligkeit":
+                            setting_s("Helligkeit", str(data_ev.get("value"))) 
+                        if data_ev.get("name") == "Haustuer":
+                            setting_s("Haustuer", str(data_ev.get("value"))) 
+                        if data_ev.get("name") == "SchlafZiFenster":
+                            setting_s("SchlafZiFenster", str(data_ev.get("value")))                          
+                    isdict = True
+            except Exception as serr:
+                isdict = False
+            if (data == "heartbeat"):         
+                ezcontrol.SetSwitchFunction("heartbeat", str(1))
+                ezcontrol.SetSwitchFunction("NotbetrNot", str(1))
             else:
-                ezcontrol.SetSwitch("Diele", str(100))
-        elif (data == "Toggle_Kueche"):
-            if (ezcontrol.GetSwitch("Kueche") == "100.0"):
-                set_kueche(True)
-            else:
-                set_kueche(False)
-        elif (data == "Stehlampe"):
-            Stehlampe()  
-        elif (data == "Stehlampen_an"):
-            command =  {'bri' : 176, 'hue' : 12554, 'sat' : 225,'on' : True}
-            hbridge.set_light('Stehlampe', command) 
-            ezcontrol.SetSwitch("Monaco_Lampe", str(100))   
-        elif (data == "Stehlampen_aus"):
-            hbridge.set_light('Stehlampe', 'on', False)
-            ezcontrol.SetSwitch("Monaco_Lampe", str(0)) 
-        elif (data == "szene_lights_off"):
-            set_szene("Alle_Lichter_Aus")
-        elif (data == "Sideboard"):
-            sideboard_loop()            
-#Mediaquellen
-    #Mediarack ein
-        elif (data == "Mediarack_ein"):
-            TV_ein() 
-            Marantz_ein() 
-    #Mediarack aus             
-    #Fernsehen$
-        elif (data == "Media_TV"):
-            t = threading.Thread(target=set_szene, args=["TV"])
-            t.start()
-    #Sonos        
-        elif (data == "Media_Sonos"):
-            t = threading.Thread(target=set_szene, args=["MediaSonos"])
-            t.start()  
-    #PS3
-        elif (data == "Media_PS3"):
-            Media_PS3()                    
-#Wecker
-        elif (data == "Schlafzi_alles"):
-            Schlafzi_alles() 
-        elif (data == "SchlafzimmerAus"):
-            SchlafzimmerAus()              
-#Musiksteuerung 
-        elif (data == "Schlafzimmer_lauter"):
-            SetVolume(sn.SchlafZi,'increase')
-        elif (data == "Schlafzimmer_leiser"):
-            SetVolume(sn.SchlafZi,'decrease')  
-        elif (data == "Bad_lauter"):
-            SetVolume(sn.Bad,'increase')
-        elif (data == "Bad_leiser"):
-            SetVolume(sn.Bad,'decrease')             
-        elif (data == "PlayPause_SchlafZi"):
-            PlayPause_SchlafZi()
-        elif (data == "PlayPause_Bad"):
-            PlayPause_Bad()            
-    #Incoming Call
-        elif (data == "Incoming_call"):
-            set_szene("SonosSave")
-            laenge = downloadAudioFile("Dies ist eine Testnachricht")
-            set_szene("TextToSonos")
-            time.sleep(laenge)
-            set_szene("SonosReturn")
-    #Incoming message
-        elif (data == "Incoming_mess"):        
-            phone_incoming("mess")
-        elif (data == "saugen"):
-            saugen()
-#Serversteuerung funzt nicht
-        elif (data == "Neustart_services"):
-            restart_services()
-            #execstring = "sudo "+ const.homefolder + "restart_services.sh"
-            #os.system(execstring)       
-        elif (data == "Neustart_raspberry"):
-            os.system("sudo reboot")
-        elif (data == "SonosWrite"):
-            SonosWriteConfig()
-#temp_alar,       
-        elif (data == "alle_alarme_gesehen"):
-            aes.acknowledge_all()
-#test
-        elif (data == "Test1"):
-            set_szene("AlleLichterEin")
-            #sonos_alles_ein()
-        elif (data == "Test0"):
-            pass          
-        elif (data == "Alarm"):
-            if alarm_steh:
-                alarm_steh = False
-            else:
-                alarm_steh = True
-                t = threading.Thread(target=Alarm_blinken)
-                #t.daemon = True
+                if (not (data in no_event_list)) and (not (isdict)):
+                    aes.new_event(data, karenz = 1)
+            if "sz_" in data:
+                t = threading.Thread(target=set_szene, args=[data])
                 t.start()
-#IR-Send                
-        elif (data == "irsend_Media_TV"):
-            irsend_Media_TV()
-        elif (data == "irsend_Input_Sonos"):
-            irsend_Input_Sonos()
-        elif (data == "irsend_Input_RaspBMC"):
-            irsend_Input_RaspBMC()
-        elif (data == "irsend_Input_PS3"):
-            irsend_Input_PS3()
-        elif (data == "irsend_phone_call"):
-            irsend_phone_call()  
-        elif (data == "Marantz_ein"):
-            Marantz_ein()
-        elif (data == "Marantz_aus"):
-            Marantz_aus()
-        elif (data == "Marantz_lauter"):
-            Marantz_lauter()
-        elif (data == "Marantz_leiser"):
-            Marantz_leiser()
-        elif (data == "Marantz_mute"):
-            Marantz_mute()            
-        elif (data == "TV_ein"):
-            TV_ein()
-        elif (data == "TV_aus"):
-            TV_aus()
-#FernBett
-        elif (data == "Bett_0_kurz"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_0_kurz"))
-        elif (data == "Bett_0_lang"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_0_lang"))
-        elif (data == "Bett_0_lang_lang"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_0_lang_lang"))           
-        elif (data == "Bett_3_kurz"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_3_kurz"))
-        elif (data == "Bett_3_lang"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_3_lang"))         
-        elif (data == "Bett_4_kurz"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_4_kurz"))
-        elif (data == "Bett_4_lang"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_4_lang"))
-        elif (data == "Bett_7_kurz"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_7_kurz"))
-        elif (data == "Bett_7_lang"):
-            set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_7_lang"))  
-        if "Distance_" in data:
-            volume = (int(data.split("_")[1]) - 124) / 15 + 5
-            sn.SetVolume(sn.SchlafZi, volume)
-sys.ext()
+            if "appz_" in data:
+                t = threading.Thread(target=set_szene, args=[data[5:]])
+                t.start()            
+            if "az_" in data:
+                t = threading.Thread(target=set_szene, args=[data])
+                t.start()        
+    #Hauptszenen
+        #Alles ein
+            if (data == "Alles_ein"):
+                t = threading.Thread(target=set_szene, args=["Alles_ein"])
+                t.start()
+                if (setting_r("Status") == "Wach"):
+                    t = threading.Thread(target=set_szene, args=["sz_gemuetlich"])
+                    t.start()            
+            elif (data == "Alles_ein_Flur"):
+                ezcontrol.SetSwitch("Diele", str(100))
+                t = threading.Thread(target=set_szene, args=["Alles_ein"])
+                t.start()
+                if (setting_r("Status") == "Wach"):
+                    t = threading.Thread(target=set_szene, args=["sz_gemuetlich"])
+                    t.start()   
+        #app szenen
+            elif "app_" in data:
+                t = threading.Thread(target=set_szene, args=[str(app_r(data))])
+                t.start()  
+        #Wach
+            elif (data == "Wach"):
+                ezcontrol.SetSwitch("Kueche", str(100))
+                t = threading.Thread(target=set_szene, args=["Wach"])
+                t.start()
+            elif (data == "Alles_aus_nochmal"):
+                setting_s("Status", "Abwesend")
+                ezcontrol.SetSwitch("Webcams", str(100))
+                ezcontrol.SetSwitch("Anwesend_Block", str(0))
+        #Schlafen
+            elif (data == "Schlafen"):
+                t = threading.Thread(target=set_szene, args=["Schlafen1"])
+                t.start()
+        #Alles aus
+            elif (data == "Alles_aus"):
+                Alles_aus()
+        #Movie_Play
+            elif (data == "Movie_Play"):
+                Movie_Play()        
+        #Movie_Pause
+            elif (data == "Movie_Pause"):
+                Movie_Pause()    
+        #Movie_Stop
+            elif (data == "Movie_Stop"):
+                Movie_Stop()    
+    #Licht       
+            elif (data == "Szene_Tv"):
+                ezcontrol.SetSwitch("Kueche", str(0))
+                ezcontrol.SetSwitch("Diele", str(0))
+                ezcontrol.SetSwitch("Wohnzimmer_Decke", str(0))
+            elif (data == "Toggle_Flur"):
+                if (ezcontrol.GetSwitch("Diele") == "100.0"):
+                    ezcontrol.SetSwitch("Diele", str(0))
+                else:
+                    ezcontrol.SetSwitch("Diele", str(100))
+            elif (data == "Toggle_Kueche"):
+                if (ezcontrol.GetSwitch("Kueche") == "100.0"):
+                    set_kueche(True)
+                else:
+                    set_kueche(False)
+            elif (data == "Stehlampe"):
+                Stehlampe()  
+            elif (data == "Stehlampen_an"):
+                command =  {'bri' : 176, 'hue' : 12554, 'sat' : 225,'on' : True}
+                hbridge.set_light('Stehlampe', command) 
+                ezcontrol.SetSwitch("Monaco_Lampe", str(100))   
+            elif (data == "Stehlampen_aus"):
+                hbridge.set_light('Stehlampe', 'on', False)
+                ezcontrol.SetSwitch("Monaco_Lampe", str(0)) 
+            elif (data == "szene_lights_off"):
+                set_szene("Alle_Lichter_Aus")
+            
+    #Mediaquellen
+        #Mediarack ein
+            elif (data == "Mediarack_ein"):
+                TV_ein() 
+                Marantz_ein() 
+        #Mediarack aus             
+        #Fernsehen$
+            elif (data == "Media_TV"):
+                t = threading.Thread(target=set_szene, args=["TV"])
+                t.start()
+        #Sonos        
+            elif (data == "Media_Sonos"):
+                t = threading.Thread(target=set_szene, args=["MediaSonos"])
+                t.start()  
+        #PS3
+            elif (data == "Media_PS3"):
+                Media_PS3()                    
+    #Wecker
+            elif (data == "Schlafzi_alles"):
+                Schlafzi_alles() 
+            elif (data == "SchlafzimmerAus"):
+                SchlafzimmerAus()              
+    #Musiksteuerung 
+            elif (data == "Schlafzimmer_lauter"):
+                SetVolume(sn.SchlafZi,'increase')
+            elif (data == "Schlafzimmer_leiser"):
+                SetVolume(sn.SchlafZi,'decrease')  
+            elif (data == "Bad_lauter"):
+                SetVolume(sn.Bad,'increase')
+            elif (data == "Bad_leiser"):
+                SetVolume(sn.Bad,'decrease')             
+            elif (data == "PlayPause_SchlafZi"):
+                PlayPause_SchlafZi()
+            elif (data == "PlayPause_Bad"):
+                PlayPause_Bad()            
+        #Incoming Call
+            elif (data == "Incoming_call"):
+                set_szene("SonosSave")
+                laenge = downloadAudioFile("Dies ist eine Testnachricht")
+                set_szene("TextToSonos")
+                time.sleep(laenge)
+                set_szene("SonosReturn")
+        #Incoming message
+            elif (data == "Incoming_mess"):        
+                phone_incoming("mess")
+            elif (data == "saugen"):
+                saugen()
+    #Serversteuerung funzt nicht
+            elif (data == "Neustart_services"):
+                restart_services()
+                #execstring = "sudo "+ const.homefolder + "restart_services.sh"
+                #os.system(execstring)       
+            elif (data == "Neustart_raspberry"):
+                os.system("sudo reboot")
+            elif (data == "SonosWrite"):
+                SonosWriteConfig()
+    #temp_alar,       
+            elif (data == "alle_alarme_gesehen"):
+                aes.acknowledge_all()
+    #test
+            elif (data == "Test1"):
+                set_szene("AlleLichterEin")
+                #sonos_alles_ein()
+            elif (data == "Test0"):
+                pass          
+            elif (data == "Alarm"):
+                if alarm_steh:
+                    alarm_steh = False
+                else:
+                    alarm_steh = True
+                    t = threading.Thread(target=Alarm_blinken)
+                    #t.daemon = True
+                    t.start()
+    #IR-Send                
+            elif (data == "irsend_Media_TV"):
+                irsend_Media_TV()
+            elif (data == "irsend_Input_Sonos"):
+                irsend_Input_Sonos()
+            elif (data == "irsend_Input_RaspBMC"):
+                irsend_Input_RaspBMC()
+            elif (data == "irsend_Input_PS3"):
+                irsend_Input_PS3()
+            elif (data == "irsend_phone_call"):
+                irsend_phone_call()  
+            elif (data == "Marantz_ein"):
+                Marantz_ein()
+            elif (data == "Marantz_aus"):
+                Marantz_aus()
+            elif (data == "Marantz_lauter"):
+                Marantz_lauter()
+            elif (data == "Marantz_leiser"):
+                Marantz_leiser()
+            elif (data == "Marantz_mute"):
+                Marantz_mute()            
+            elif (data == "TV_ein"):
+                TV_ein()
+            elif (data == "TV_aus"):
+                TV_aus()
+    #FernBett
+            elif (data == "Bett_0_kurz"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_0_kurz"))
+            elif (data == "Bett_0_lang"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_0_lang"))
+            elif (data == "Bett_0_lang_lang"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_0_lang_lang"))           
+            elif (data == "Bett_3_kurz"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_3_kurz"))
+            elif (data == "Bett_3_lang"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_3_lang"))         
+            elif (data == "Bett_4_kurz"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_4_kurz"))
+            elif (data == "Bett_4_lang"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_4_lang"))
+            elif (data == "Bett_7_kurz"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_7_kurz"))
+            elif (data == "Bett_7_lang"):
+                set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_7_lang"))  
+            if "Distance_" in data:
+                volume = (int(data.split("_")[1]) - 124) / 15 + 5
+                sn.SetVolume(sn.SchlafZi, volume)
+    sys.ext()
 
+if __name__ == '__main__':
+    main() 
 

@@ -65,12 +65,6 @@ def ping(IP, number = 1):
     #p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
     #p.communicate(msg.as_string())
 
-class constants:
-    def __init__(self):
-        self.hostName = gethostbyname( constants.eigene_IP )
-        self.Remote_IR = True
-        self.homefolder = "/home/chris/homecontrol/"
-
 class myezcontrol:
     def __init__(self,ip,user,passwd):
         self.data = []

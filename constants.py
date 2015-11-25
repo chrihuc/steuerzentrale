@@ -1,6 +1,9 @@
 #!  /usr/bin/python 
 
 eigene_IP = "192.168.192.33"
+name = "BueroPi"
+partner_IP = "192.168.192.10"
+redundancy_PORT = 5050
 xs1_IP = "192.168.192.4"
 router_IP = "192.168.192.1"
 UDP_PORT = 5000
@@ -46,3 +49,8 @@ class mail_:
     # constants.mail_.receiver
     receiver = "chrihuc@gmail.com"
     
+class redundancy_:
+    # constants.redundancy_.master
+    master = False   
+    timeout_receive = 30
+    timeout_send = 10
