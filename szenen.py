@@ -90,11 +90,12 @@ for device in typ_dict:
 def main():
     #mysql_con.set_automode(device="Stehlampe", mode="man")
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
-    #set_szene("SchlafziFCheck")
+    set_szene("Heimgekommen")
+    #set_szene("Einbruch_3")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
     #test("Stehlampe")
     #deactivate_usb_keys()
-    sonos_write_szene(sn.Bad)
+    #sonos_write_szene(sn.Bad)
     
 
 def autolicht(helligkeit, offset = 60, minimum = 0, maximum=160):    
@@ -253,12 +254,13 @@ def sonos_set_szene(player, szenen):
                     sonos_write_szene(player)
                     lt = localtime()
                     stunde = int(strftime("%H", lt))
-                    minute = int(strftime("%M", lt))    
-                    text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
-                    laenge = downloadAudioFile(text)
-                    sonos_read_szene(player, mdb_sonos_r("TextToSonos"))
-                    time.sleep(laenge + 1)            
-                    sonos_read_szene(player, mdb_sonos_r(sonos_szenen.get(str(player))))
+                    minute = int(strftime("%M", lt)) 
+                    if (minute <> 0) and (minute <> 30):
+                        text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
+                        laenge = downloadAudioFile(text)
+                        sonos_read_szene(player, mdb_sonos_r("TextToSonos"))
+                        time.sleep(laenge + 1)            
+                        sonos_read_szene(player, mdb_sonos_r(sonos_szenen.get(str(player))))
                 elif str(szene) == "Durchsage":
                     sonos_write_szene(player)   
                     text = setting_r("Durchsage")        
@@ -611,8 +613,8 @@ def set_szene(name):
                         t.start()                
                     elif key in hue_devices:
                         for kommando in kommandos:
-                            if hue_count > 2:
-                                hue_delay += 0.55
+                            if hue_count > 1:
+                                hue_delay += 0.4
                                 hue_count = 0
                             hue_del = Timer(hue_delay, hue_set_szene, [key, kommando])
                             hue_del.start()
@@ -642,16 +644,15 @@ def set_szene(name):
                         for kommando in kommandos:
                             t = threading.Thread(target=interner_befehl, args=[kommando])
                             t.start() 
-                else:
-                    if key in setting:
-                        for kommando in kommandos:
-                            aes.new_event(description=key + ": " + str(kommando), prio=0)
-                            setting_s(key, str(kommando))
-                    elif key == "Zusatz_Status":
-                        time.sleep(1)
-                        for kommando in kommandos:
-                            #aes.new_event(description=key + ": " + str(kommando) + ": " + str(kommandos.get(kommando)), prio=0)
-                            setting_s(str(kommando), str(kommandos.get(kommando)))                             
+                if key in setting:
+                    for kommando in kommandos:
+                        aes.new_event(description=key + ": " + str(kommando), prio=0)
+                        setting_s(key, str(kommando))
+                elif key == "Zusatz_Status":
+                    time.sleep(1)
+                    for kommando in kommandos:
+                        #aes.new_event(description=key + ": " + str(kommando) + ": " + str(kommandos.get(kommando)), prio=0)
+                        setting_s(str(kommando), str(kommandos.get(kommando)))                             
         if ((szene.get("Szene_folgt") <> "") and (str(szene.get("Szene_folgt")) <> "None")):
             try:
                 if type(eval(szene.get("Szene_folgt"))) == list:

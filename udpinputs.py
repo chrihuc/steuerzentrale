@@ -9,7 +9,7 @@ import sys
 from Sonos2Py import sonos
 #from samspy import remotecontrol
 from classes import myezcontrol, ping
-#import os
+import os
 import time
 from time import localtime,strftime
 #from datetime import date
@@ -178,7 +178,8 @@ def restart_services_h():
         aes.new_event(description="XS1 nicht erreichbar", prio=2)
         setting_s("XS1_off", "Active")
     setting_s("NumRestart", str(count + 1))    
-    restart_services()
+    exectext = "sudo killall python"
+    os.system(exectext)
     
 def main():
     asz = Timer(2, set_auto_szene)
@@ -407,9 +408,8 @@ def main():
                 saugen()
     #Serversteuerung funzt nicht
             elif (data == "Neustart_services"):
-                restart_services()
-                #execstring = "sudo "+ const.homefolder + "restart_services.sh"
-                #os.system(execstring)       
+                exectext = "sudo killall python"
+                os.system(exectext)     
             elif (data == "Neustart_raspberry"):
                 os.system("sudo reboot")
             elif (data == "SonosWrite"):

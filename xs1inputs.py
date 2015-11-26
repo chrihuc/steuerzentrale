@@ -381,7 +381,7 @@ def heartbeat_sup():
         aes.new_event(description="XS1 nicht erreichbar", prio=2)
         setting_s("XS1_off", "Active")
     setting_s("NumRestart", str(count + 1))
-    exectext = "sudo " + constants.installation_folder + "restart_services.sh"
+    exectext = "sudo killall python"
     if ping(constants.router_IP):
         os.system(exectext)
     else:

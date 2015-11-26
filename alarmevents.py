@@ -138,7 +138,7 @@ class alarm_event:
                 t =  Timer(0.1,self.hue_blink_set, args=[prio *10 % 10, 3, 2])
                 if anwesend and (str(setting_r("Notification_Visuell")) == "An"):
                     t.start()                    
-            elif prio >= 3:
+            elif prio >= 4 and prio < 5:
                 self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description)
                 msg = MIMEText(description)
                 msg["From"] = constants.mail_.receiver
@@ -146,10 +146,12 @@ class alarm_event:
                 msg["Subject"] = "Alarm"
                 p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
                 p.communicate(msg.as_string())                
-            elif prio > 4:
+            elif prio > 4 and prio < 5:
                 t =  Timer(0.1,self.hue_blink_set, args=[prio *10 % 10])
                 if (str(setting_r("Notification_Visuell")) == "An"):
                     t.start() 
+            elif prio >= 5 and prio < 6:
+                self.mes.send_direkt(to=self.mes.chris, titel="Alarm", text=description)                    
             #if durchsage <> "":
                 #setting_s("Durchsage",durchsage)
                 #self.mySocket.sendto('az_Durchsage',(self.OUTPUTS_IP,self.OUTPUTS_PORT))

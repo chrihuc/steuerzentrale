@@ -13,27 +13,35 @@ SIZE = 1024
 aes = alarm_event()
 
 mySocket = socket( AF_INET, SOCK_DGRAM )
-mySocket.bind( (hostName, constants.redundancy_PORT) )
+mySocket.bind( (hostName, constants.redundancy_.PORT) )
 
 def set_master():
     constants.redundancy_.master = True
     time.sleep(1)
-    aes.new_event(description="Master-Slave changeover, " + constants.name + " ist Master", prio=3, durchsage="", karenz=0)
+    aes.new_event(description="Master-Slave changeover, " + constants.name + " ist Master", prio=5, durchsage="", karenz=0)
     while constants.run:
-        mySocket.sendto("master",(constants.partner_IP,constants.redundancy_PORT))
+        mySocket.sendto("master",(constants.redundancy_.partner_IP,constants.redundancy_.PORT))
         time.sleep(constants.redundancy_.timeout_send)
         
 
 def main():
-    redundancy = Timer(constants.redundancy_.timeout_receive, set_master)
-    redundancy.start() 
-    aes.new_event(description="Master-Slave redundancy started", prio=0, durchsage="", karenz=0)
-    while constants.run:
-            (data,addr) = mySocket.recvfrom(SIZE)            
-            if (data == "master"):         
-                redundancy.cancel()
-                redundancy = Timer(constants.redundancy_.timeout_receive, set_master)
-                redundancy.start()       
+    if constants.redundancy_.typ == 'Master':
+        set_master()
+    elif constants.redundancy_.typ == 'Slave':
+        aes.new_event(description="Running as slave", prio=0, durchsage="", karenz=0)
+        constants.redundancy_.master = False
+        while constants.run:
+            time.sleep(1)        
+    elif constants.redundancy_.typ == 'auto':
+        redundancy = Timer(constants.redundancy_.timeout_receive, set_master)
+        redundancy.start() 
+        aes.new_event(description="Master-Slave redundancy started", prio=0, durchsage="", karenz=0)
+        while constants.run:
+                (data,addr) = mySocket.recvfrom(SIZE)            
+                if (data == "master"):         
+                    redundancy.cancel()
+                    redundancy = Timer(constants.redundancy_.timeout_receive, set_master)
+                    redundancy.start()       
     
     
 if __name__ == '__main__':

@@ -29,19 +29,23 @@ sudo chmod 755 /etc/service/daemon/log/run
 
 
 #####################################3
-sudo apt-get install python-dev 
+sudo apt-get install python-dev         #??
 
-sudo apt-get install python-mysqldb
+sudo apt-get install python-mysqldb     #??
+
 sudo nano /etc/mysql/my.cnf
 #bind-address 127.0.0.1
+
 sudo service mysql restart
-sudo apt-get install python-pip
-sudo pip install phue
-sudo pip install gcm
-sudo apt-get install python-pycurl
-sudo apt-get install python-pysolar
-sudo pip install pyephem
-sudo pip install paramiko
+
+sudo apt-get install python-pip         #??
+sudo pip install phue                   #??
+sudo pip install gcm                    #??
+sudo apt-get install python-pycurl      #??
+sudo apt-get install python-pysolar     #??
+sudo pip install pyephem                #??
+sudo pip install paramiko               #??
+sudo apt-get install python-dateutil    #python3
 
 python
 
