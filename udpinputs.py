@@ -5,7 +5,7 @@ import constants
 from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 #from socket import error as socket_error
 #from socket import socket, AF_INET, SOCK_DGRAM
-#import sys
+import sys
 from Sonos2Py import sonos
 #from samspy import remotecontrol
 from classes import myezcontrol, ping
@@ -207,7 +207,7 @@ def main():
         t.start()    
 
     aes.new_event(description="Outputs neugestartet", prio=0)
-    while True:
+    while constants.run:
             (data,addr) = mySocket.recvfrom(SIZE)
             heartbeat.cancel()
             heartbeat = Timer(heartbt, restart_services_h)
@@ -478,7 +478,7 @@ def main():
             if "Distance_" in data:
                 volume = (int(data.split("_")[1]) - 124) / 15 + 5
                 sn.SetVolume(sn.SchlafZi, volume)
-    sys.ext()
+    sys.exit()
 
 if __name__ == '__main__':
     main() 

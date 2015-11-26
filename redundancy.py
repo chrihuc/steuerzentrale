@@ -19,7 +19,7 @@ def set_master():
     constants.redundancy_.master = True
     time.sleep(1)
     aes.new_event(description="Master-Slave changeover, " + constants.name + " ist Master", prio=3, durchsage="", karenz=0)
-    while True:
+    while constants.run:
         mySocket.sendto("master",(constants.partner_IP,constants.redundancy_PORT))
         time.sleep(constants.redundancy_.timeout_send)
         
@@ -28,7 +28,7 @@ def main():
     redundancy = Timer(constants.redundancy_.timeout_receive, set_master)
     redundancy.start() 
     aes.new_event(description="Master-Slave redundancy started", prio=0, durchsage="", karenz=0)
-    while True:
+    while constants.run:
             (data,addr) = mySocket.recvfrom(SIZE)            
             if (data == "master"):         
                 redundancy.cancel()

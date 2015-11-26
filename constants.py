@@ -1,5 +1,7 @@
 #!  /usr/bin/python 
 
+run = True
+
 eigene_IP = "192.168.192.33"
 name = "BueroPi"
 partner_IP = "192.168.192.10"
@@ -9,6 +11,8 @@ router_IP = "192.168.192.1"
 UDP_PORT = 5000
 installation_folder = "/home/pi/steuerzentrale"
 gcm_ID = 'AIzaSyCF_dmQYm9qjfry3sG_RDGYxYQMMgFMbts'
+
+automatic_backup = False
 
 #timeout for connection in seconds
 heartbt = 125

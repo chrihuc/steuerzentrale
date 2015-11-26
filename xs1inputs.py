@@ -9,13 +9,12 @@ from mysql_con import setting_s, setting_r, mdb_fern_r
 from threading import Timer
 import threading
 import time
-#import sys
+import sys
 from time import localtime,strftime
 #from datetime import date
 #import datetime
 from Sonos2Py import sonos
 import MySQLdb as mdb
-#import sys
 #import re
 from socket import socket, AF_INET, SOCK_DGRAM
 from szenen import set_szene
@@ -39,9 +38,12 @@ balkT = temp_derivator("Balkon_T")
 XS1DB = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
 #ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
 mySocket = socket( AF_INET, SOCK_DGRAM )
+conn = pycurl.Curl()
 
             
 def on_receive(data):
+    if not constants.run:
+        sys.exit("Error message")
     global heartbeat
     count = int(setting_r("NumRestart"))
     if count > 0:
@@ -416,6 +418,7 @@ def main():
     conn.setopt(pycurl.WRITEFUNCTION, on_receive)
     aes.new_event(description="XS1inputs neugestartet", prio=0)
     conn.perform()
+
     
 if __name__ == '__main__':
     main()    

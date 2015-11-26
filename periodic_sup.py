@@ -1,45 +1,39 @@
-import urllib2
-from urllib2 import URLError
+#!/usr/bin/env python
+
+import constants
+
 import sensor_health
-from classes import ping, logdebug
-import MySQLdb as mdb
+from classes import ping
 from alarmevents import alarm_event
 import time
 from threading import Timer
 import threading
-from checkraid import checkraid
-import time
+#from checkraid import checkraid
 from time import localtime,strftime
-from szenen import set_szene
 from mysql_con import mdb_fern_r, setting_r, setting_s, settings_r
 from cron import cron
 from datetime import date
 import os
-from socket import socket, AF_INET, SOCK_DGRAM
 from dateutil.relativedelta import relativedelta
 import shutil, glob
 from messaging import messaging
 from webcammov import mail_webc_pics
-from anwesen_neu import anwesenheit
-from plexapi.server import PlexServer
+from anwesenheit import anwesenheit
+#from plexapi.server import PlexServer
 from szenen import set_szene
 import ssh
 
 
 aes = alarm_event()
 crn = cron()
-mySocket = socket( AF_INET, SOCK_DGRAM )
-OUTPUTS_IP   = '192.168.192.10'
-OUTPUTS_PORT = 5000
 mes = messaging()
 status = anwesenheit()
-plex = PlexServer()
+#plex = PlexServer()
 tv_con_check_old = 0
-lgd = logdebug(False, False)
 
 def main():
-    #periodic_supervision()
-    print crn.get_now(4, "18:22", "cron")
+    periodic_supervision()
+    #print crn.get_now(4, "18:22", "cron")
     #every_min(4, "18:22", "cron")
     #every_30_min()
     #crn.calculate()
@@ -89,19 +83,19 @@ def every_min(tag, zeit, db):
                 task.start()
         if str(szene.get('Permanent')) <> "1":
             crn.delete(szene.get('Id'))  
-    if str(setting_r("Kino_Beleuchtung_Auto")) == "Ein":
-        if plex.sessions() == []:
-                if str(setting_r("Kino_Beleuchtung")) == "Ein":
-                    set_szene("AutoBelEin")
-        else:
-            if str(setting_r("Kino_Beleuchtung")) == "Aus":
-                set_szene("Kino_BeleuchtungSet")
+    #if str(setting_r("Kino_Beleuchtung_Auto")) == "Ein":
+        #if plex.sessions() == []:
+                #if str(setting_r("Kino_Beleuchtung")) == "Ein":
+                    #set_szene("AutoBelEin")
+        #else:
+            #if str(setting_r("Kino_Beleuchtung")) == "Aus":
+                #set_szene("Kino_BeleuchtungSet")
 
 def every_2_min():
     akt_status = status.check_all()
     if (akt_status.get("Anwesenheit") == 0) and  not (str(setting_r("Status")) in ["Besuch", "Abwesend", "Gegangen"]):
         aes.new_event(description="Neue Anwesenheit regel: Abwesend", prio=0)
-        mySocket.sendto("az_Alles_aus_4",(OUTPUTS_IP,OUTPUTS_PORT))
+        set_szene("Alles_aus_4")
     if (akt_status.get("Anwesenheit") < 0) and  not (str(setting_r("Status")) in ["Besuch", "Urlaub"]):
         aes.new_event(description="Neue Anwesenheit regel: Urlaub", prio=0)
 
@@ -121,14 +115,7 @@ def every_10_min():
         
 def every_30_min():
     if (str(setting_r("Status")) in ["Schlafen", "Abwesend", "Urlaub"]): mail_webc_pics()
-    sensor_health.check_sensor_health()
-                
-    body = "http://192.168.192.30/decoder_control.cgi?user=admin&pwd=&command=31"
-    try:
-        pass
-        #f = urllib2.urlopen(body)        
-    except URLError as e:
-        pass 
+    sensor_health.check_sensor_health() 
 
 def every_60_min():
     if not (ping("192.168.192.32", number = 3)):
@@ -146,39 +133,40 @@ def every_60_min():
     
 def every_24_hrs():
         crn.calculate()
-        source = '/home/chris/homecontrol'
-        datum = date.today()
-        delete = date.today() - relativedelta(days=7)
-        destin = '/mnt/array1/MIsc/MySQL/'
-        fname = destin + str(datum)
-        if not os.path.exists(fname):
-                os.makedirs(fname)    
-        datei = fname  + '/xs1db.sql'
-        cmd = '/usr/bin/mysqldump -u root -pIvenhoe1202 XS1DB > ' + datei
-        os.system(cmd)
-        datei = fname  + '/Gesundheit.sql'
-        cmd = '/usr/bin/mysqldump -u root -pIvenhoe1202 Gesundheit > ' + datei
-        os.system(cmd)    
-        for filename in glob.glob(os.path.join(source, '*.py')):
-                shutil.copy(filename, fname)
-        shutil.rmtree(destin + str(delete))
-        aes.new_event("Raidcheck: " + checkraid(), prio=0) 
+        if constants.automatic_backup:
+            source = '/home/chris/homecontrol'
+            datum = date.today()
+            delete = date.today() - relativedelta(days=7)
+            destin = '/mnt/array1/MIsc/MySQL/'
+            fname = destin + str(datum)
+            if not os.path.exists(fname):
+                    os.makedirs(fname)    
+            datei = fname  + '/xs1db.sql'
+            cmd = '/usr/bin/mysqldump -u root -pIvenhoe1202 XS1DB > ' + datei
+            os.system(cmd)
+            datei = fname  + '/Gesundheit.sql'
+            cmd = '/usr/bin/mysqldump -u root -pIvenhoe1202 Gesundheit > ' + datei
+            os.system(cmd)    
+            for filename in glob.glob(os.path.join(source, '*.py')):
+                    shutil.copy(filename, fname)
+            shutil.rmtree(destin + str(delete))
+            aes.new_event("Raidcheck: " + checkraid(), prio=0) 
 
-        source = '/mnt/array1/photos/SP3_pictures/'
-        destin = '/mnt/array1/photos/Database/'
-        datum = date.today()
-        delete = date.today() - relativedelta(days=31)  
-        photo_db = source + 'digikam4.db'
-        photo_db_newname = destin + 'digikam4_' + str(datum) + '.db'
-        shutil.copy(photo_db, photo_db_newname) 
-        photo_db_delete = destin + 'digikam4_' + str(delete) + '.db'
-        try:
-                os.remove(photo_db_delete)
-        except:
-                pass
+            source = '/mnt/array1/photos/SP3_pictures/'
+            destin = '/mnt/array1/photos/Database/'
+            datum = date.today()
+            delete = date.today() - relativedelta(days=31)  
+            photo_db = source + 'digikam4.db'
+            photo_db_newname = destin + 'digikam4_' + str(datum) + '.db'
+            shutil.copy(photo_db, photo_db_newname) 
+            photo_db_delete = destin + 'digikam4_' + str(delete) + '.db'
+            try:
+                    os.remove(photo_db_delete)
+            except:
+                    pass
     
 def periodic_supervision():
-    while True:
+    while constants.run:
         #executed every day
         lt = localtime()
         stunde = int(strftime("%H", lt))
