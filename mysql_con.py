@@ -9,20 +9,21 @@ from threading import Timer
 sn=sonos()
 
 def main():
+    print mdb_get_table("sattelites")
     #set_automode(device="Stehlampe", mode="auto")
     #print mdb_szene_r("Device_Typ")
-    typ_dict = mdb_szene_r("Device_Typ")
-    ezcontrol_devices = []
-    TF_LEDs = []
-    hue_devices = []
-    for device in typ_dict:
-        if typ_dict.get(device) == "EZControl":
-            ezcontrol_devices.append(device)
-        if typ_dict.get(device) == "TF_LEDs":
-            TF_LEDs.append(device)
-        if typ_dict.get(device) == "Hue":
-            hue_devices.append(device)            
-    print hue_devices
+    #typ_dict = mdb_szene_r("Device_Typ")
+    #ezcontrol_devices = []
+    #TF_LEDs = []
+    #hue_devices = []
+    #for device in typ_dict:
+        #if typ_dict.get(device) == "EZControl":
+            #ezcontrol_devices.append(device)
+        #if typ_dict.get(device) == "TF_LEDs":
+            #TF_LEDs.append(device)
+        #if typ_dict.get(device) == "Hue":
+            #hue_devices.append(device)            
+    #print hue_devices
     
 def gcm_users_read():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -300,6 +301,9 @@ def mdb_hue_r(name):
 
 def mdb_tspled_r(name):
     return mdb_get_dicti('TuerSPiLED', name) 
+
+def mdb_read_table_entry(table,name):
+    return mdb_get_dicti(table, name) 
     
 def settings_r():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -314,6 +318,24 @@ def settings_r():
             dicti[row[1]] = row[2]            
     con.close()    
     return dicti        
+
+#kompletter table:
+def mdb_get_table(db):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    rlist = []
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT * FROM ' + db
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            dicti = {}
+            for i in range (0,len(row)):
+               dicti[field_names[i]] = row[i]  
+            rlist.append(dicti)
+    con.close()    
+    return rlist  
         
 if __name__ == '__main__':
     main()    

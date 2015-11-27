@@ -12,6 +12,7 @@ installation_folder = "/home/pi/steuerzentrale"
 gcm_ID = 'AIzaSyCF_dmQYm9qjfry3sG_RDGYxYQMMgFMbts'
 
 automatic_backup = False
+webcam_supervision = False
 
 #timeout for connection in seconds
 heartbt = 125

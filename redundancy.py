@@ -23,6 +23,8 @@ def set_master():
         mySocket.sendto("master",(constants.redundancy_.partner_IP,constants.redundancy_.PORT))
         time.sleep(constants.redundancy_.timeout_send)
         
+def set_master_fake():
+    aes.new_event(description="Fake Master-Slave changeover, " + constants.name + " ist Master", prio=5, durchsage="", karenz=0)     
 
 def main():
     if constants.redundancy_.typ == 'Master':
@@ -30,8 +32,14 @@ def main():
     elif constants.redundancy_.typ == 'Slave':
         aes.new_event(description="Running as slave", prio=0, durchsage="", karenz=0)
         constants.redundancy_.master = False
+        redundancy = Timer(constants.redundancy_.timeout_receive, set_master_fake)
+        redundancy.start() 
         while constants.run:
-            time.sleep(1)        
+                (data,addr) = mySocket.recvfrom(SIZE)            
+                if (data == "master"):         
+                    redundancy.cancel()
+                    redundancy = Timer(constants.redundancy_.timeout_receive, set_master_fake)
+                    redundancy.start()       
     elif constants.redundancy_.typ == 'auto':
         redundancy = Timer(constants.redundancy_.timeout_receive, set_master)
         redundancy.start() 

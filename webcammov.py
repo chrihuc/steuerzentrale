@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+import constants
+
 import os
 import zipfile
 import urllib2
@@ -52,14 +55,15 @@ def zip_webc_folder():
     zipf.close()
    
 def mail_webc_pics():
-    folder1 = '/var/smb/ftp2/cameras/camera1'
-    folder2 = '/var/smb/ftp2/cameras/camera2'
-    filenp = "/var/smb/ftp2/cameras/temp/movement.zip"
-    if not os.listdir(folder1) and not os.listdir(folder2) : return
-    zip_webc_folder()
-    exectext = "uuencode '"+filenp+"' 'movement.zip' | mailx -s 'Movement Detected' 'chrihuc@gmail.com'"
-    os.system(exectext)
-    clear_webc_folder()
+    if constants.webcam_supervision:
+        folder1 = '/var/smb/ftp2/cameras/camera1'
+        folder2 = '/var/smb/ftp2/cameras/camera2'
+        filenp = "/var/smb/ftp2/cameras/temp/movement.zip"
+        if not os.listdir(folder1) and not os.listdir(folder2) : return
+        zip_webc_folder()
+        exectext = "uuencode '"+filenp+"' 'movement.zip' | mailx -s 'Movement Detected' 'chrihuc@gmail.com'"
+        os.system(exectext)
+        clear_webc_folder()
     
 def zip_wc_folder(ordner, datei):
     zipf = zipfile.ZipFile(datei, 'w')
