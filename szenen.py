@@ -514,6 +514,7 @@ def Schluessel_weg():
     
 def set_szene(name):
     global schlummern
+    global bad_ir
     if str(name) == "None" or str(name) == "":
         return
     if "Tuer_auf" in str(name):
@@ -584,6 +585,8 @@ def set_szene(name):
             #mar_fb.start() 
         if name in ["WeckerMute", "WeckerPhase1"] or "Schlummern" in name:
             schlummern.cancel
+        if name in ["Bad_ir"]:
+            bad_ir.cancel            
         for idk, key in enumerate(szene):        
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                 if (type(szene.get(key)) == str) and (not(str(key) in no_list)):
@@ -672,7 +675,10 @@ def set_szene(name):
             for index, kommando in enumerate(kommandos):
                 if "Schlummern" in name:
                     schlummern = Timer(float(delays[index]), set_szene, [str(kommando)])
-                    schlummern.start()                   
+                    schlummern.start()   
+                elif "Bad_ir" in name:
+                    bad_ir = Timer(float(delays[index]), set_szene, [str(kommando)])
+                    bad_ir.start()                      
                 else:
                     folgen = Timer(float(delays[index]), set_szene, [str(kommando)])
                     folgen.start()
@@ -866,6 +872,7 @@ def test(bri):
         print autolicht(helligkeit = 10, offset = auto_l_settings.get("offset"), gradient = auto_l_settings.get("gradient"), mindest=0)                         
             
 schlummern = Timer(1, set_szene, ["NONE"])
+bad_ir = Timer(1, set_szene, ["NONE"])
             
 if __name__ == '__main__':
     main()
