@@ -584,9 +584,9 @@ def set_szene(name):
             mar_fb = Timer(delay, marantz_fb)
             #mar_fb.start() 
         if name in ["WeckerMute", "WeckerPhase1"] or "Schlummern" in name:
-            schlummern.cancel
+            schlummern.cancel()
         if name in ["Bad_ir"]:
-            bad_ir.cancel            
+            bad_ir.cancel()            
         for idk, key in enumerate(szene):        
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                 if (type(szene.get(key)) == str) and (not(str(key) in no_list)):
