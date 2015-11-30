@@ -3,28 +3,28 @@ sudo apt-get install daemontools-run
 
 sudo mkdir /etc/service
 
-sudo mkdir /etc/service/daemon
+sudo mkdir /etc/service/steuerzentrale
 
-sudo nano /etc/service/daemon/run
+sudo nano /etc/service/steuerzentrale/run
 
 #!/bin/sh
 exec 2>&1
 exec setuidgid root sh -c '
-  exec /usr/bin/python /home/chris/homecontrol/xs1inputs.py
+  exec /usr/bin/python /home/pi/steuerzentrale/main.py
 '
 
-sudo chmod 755 /etc/service/daemon/run
+sudo chmod 755 /etc/service/steuerzentrale/run
 
 
 
-mkdir /etc/service/daemon/log
+sudo mkdir /etc/service/steuerzentrale/log
 
-sudo nano /etc/service/daemon/log/run
+sudo nano /etc/service/steuerzentrale/log/run
 
 #!/bin/sh
-     exec setuidgid root multilog t /home/chris/homecontrol/logxs1inp
+     exec setuidgid root multilog t /home/pi/steuerzentrale/log
 
-sudo chmod 755 /etc/service/daemon/log/run
+sudo chmod 755 /etc/service/steuerzentrale/log/run
 
 
 

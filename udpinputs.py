@@ -404,8 +404,6 @@ def main():
         #Incoming message
             elif (data == "Incoming_mess"):        
                 phone_incoming("mess")
-            elif (data == "saugen"):
-                saugen()
     #Serversteuerung funzt nicht
             elif (data == "Neustart_services"):
                 exectext = "sudo killall python"

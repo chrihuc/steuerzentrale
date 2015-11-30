@@ -56,8 +56,8 @@ class mail_:
 class redundancy_:
     # constants.redundancy_.master
     master = False   
-    timeout_receive = 60
-    timeout_send = 10
+    timeout_receive = 10
+    timeout_send = 1
     partner_IP = "192.168.192.10"
     PORT = 5050    
     #'Master' 'Slave' 'auto'

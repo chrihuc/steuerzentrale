@@ -71,17 +71,18 @@ def zip_wc_folder(ordner, datei):
     zipf.close()
    
 def send_wc_pix():
-    ordner = '/mnt/array1/MIsc/recordings/'
-    ordner_temp = "/mnt/array1/MIsc/rec_temp/"
-    datei = "/mnt/array1/MIsc/rec_temp/recordings.zip"
-    if not os.listdir(ordner) : return
-    zip_wc_folder(ordner, datei)
-    exectext = "uuencode '"+datei+"' 'recordings.zip' | mailx -s 'Aufnahmen von Eingangstuer' 'chrihuc@gmail.com'"
-    os.system(exectext)
-    exectext = "(uuencode '"+ordner+"web-cam-shot00.jpg' 'web-cam-shot00.jpg'; uuencode '"+ordner+"web-cam-shot01.jpg' 'web-cam-shot01.jpg'; uuencode '"+ordner+"web-cam-shot02.jpg' 'web-cam-shot02.jpg') | mailx -s 'Aufnahmen von Eingangstuer' 'chrihuc@gmail.com'"
-    os.system(exectext)    
-    clear_wc_folder(ordner)  
-    clear_wc_folder(ordner_temp) 
+    if constants.webcam_supervision:    
+        ordner = '/mnt/array1/MIsc/recordings/'
+        ordner_temp = "/mnt/array1/MIsc/rec_temp/"
+        datei = "/mnt/array1/MIsc/rec_temp/recordings.zip"
+        if not os.listdir(ordner) : return
+        zip_wc_folder(ordner, datei)
+        exectext = "uuencode '"+datei+"' 'recordings.zip' | mailx -s 'Aufnahmen von Eingangstuer' 'chrihuc@gmail.com'"
+        os.system(exectext)
+        exectext = "(uuencode '"+ordner+"web-cam-shot00.jpg' 'web-cam-shot00.jpg'; uuencode '"+ordner+"web-cam-shot01.jpg' 'web-cam-shot01.jpg'; uuencode '"+ordner+"web-cam-shot02.jpg' 'web-cam-shot02.jpg') | mailx -s 'Aufnahmen von Eingangstuer' 'chrihuc@gmail.com'"
+        os.system(exectext)    
+        clear_wc_folder(ordner)  
+        clear_wc_folder(ordner_temp) 
     
 def set_recording(camera = 1, recording = True):
     if camera == 1:

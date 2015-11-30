@@ -413,7 +413,7 @@ def hue_set_szene(device, szene):
     if szene in ["man", "auto"]:
         mysql_con.set_automode(device=device, mode=szene)
         return
-    if szene == 'Save': 
+    elif szene == 'Save': 
         hue = hbridge.get_light(device, 'hue')
         bri = hbridge.get_light(device, 'bri')
         sat = hbridge.get_light(device, 'sat')
@@ -422,14 +422,14 @@ def hue_set_szene(device, szene):
         setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
         mdb_hue_s(device, setting)
         return
-    if szene == 'toggle':
+    elif szene == 'toggle':
         an = hbridge.get_light(device, 'on') 
         if an:
             hbridge.set_light(device, {'on':False})
         else:
             hbridge.set_light(device, {'on':True}) 
         return
-    if szene == 'sz_toggle':
+    elif szene == 'sz_toggle':
         an = hbridge.get_light(device, 'on') 
         if an:
             szene="SZ_Aus"
@@ -449,6 +449,7 @@ def hue_set_szene(device, szene):
                 szene['bri'] =  0
     if str(szene.get('an')) == "1" or str(szene.get('an')) == "True":
         hbridge.set_light(device, {'on':True}) 
+        time.sleep(0.5)
     command = {}
     for key in keys:
         if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
@@ -614,7 +615,7 @@ def set_szene(name):
                     elif key in hue_devices:
                         for kommando in kommandos:
                             if hue_count > 1:
-                                hue_delay += 0.4
+                                hue_delay += 0.75
                                 hue_count = 0
                             hue_del = Timer(hue_delay, hue_set_szene, [key, kommando])
                             hue_del.start()

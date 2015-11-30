@@ -11,22 +11,22 @@ aes = alarm_event()
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-def  get_sattelites():
-    list = mdb_get_table("sattelites")
+def  get_satellites():
+    list = mdb_get_table("satellites")
     simplelist = []
-    for sattelite in list:
-        x = raspi(sattelite.get("Name"),sattelite.get("IP"),sattelite.get("PORT"),sattelite.get("Type"),sattelite.get("USER"),sattelite.get("PASS"))
-        x.attr = sattelite
+    for satellite in list:
+        x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"))
+        x.attr = satellite
         simplelist.append(x)
     return simplelist
 
 def main():
-    pies = get_sattelites()
+    pies = get_satellites()
     for pi in pies:
         if pi.Type == "sat":
             print pi.reboot()
 
-class raspi:
+class sputnik:
     def __init__ (self, name, IP, PORT, Type, USER, PASS):
         self.name = name
         self.IP = IP
