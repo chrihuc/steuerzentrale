@@ -5,3 +5,4 @@
 #!/foo/bar 
 *.pyc
 /log/*
+constants.py
