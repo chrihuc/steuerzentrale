@@ -15,7 +15,7 @@ import threading
 from threading import Timer
 from alarmevents import alarm_event
 from samspy import remotecontrol
-#from text_to_sonos import downloadAudioFile
+from text_to_sonos import downloadAudioFile
 from time import localtime,strftime
 from datetime import datetime
 import datetime
@@ -90,7 +90,7 @@ for device in typ_dict:
 def main():
     #mysql_con.set_automode(device="Stehlampe", mode="man")
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
-    set_szene("Heimgekommen")
+    set_szene("Schlafen1")
     #set_szene("Einbruch_3")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
     #test("Stehlampe")
