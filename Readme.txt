@@ -54,4 +54,5 @@ b = Bridge('192.168.192.190')
 
 todo:
     switch ssh to satellite
+    zeitdurchsage
     
