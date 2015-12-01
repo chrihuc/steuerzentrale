@@ -46,13 +46,21 @@ sudo apt-get install python-pysolar     #??
 sudo pip install pyephem                #??
 sudo pip install paramiko               #??
 sudo apt-get install python-dateutil    #python3
+sudo apt-get install python-pymad       #??
+
 
 python
 
 from phue import Bridge
 b = Bridge('192.168.192.190')
 
+
+
+###########
 todo:
     switch ssh to satellite
+        periodic_sup
+        szenen
+        udp_inputs
     zeitdurchsage
     

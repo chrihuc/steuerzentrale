@@ -43,8 +43,8 @@ class sputnik:
             count += 1
             try:
                 ssh.connect(self.IP, username=self.USER, password=self.PASS)
-                #if constants.master:
-                ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
+                if constants.master:
+                    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
                 success = True
             except socket_error as serr:
                 success = False
@@ -58,7 +58,17 @@ class sputnik:
 
     def reboot(self):
         return self.send_ssh_cmd("sudo reboot","neugestarted")
+    
+    def kill_python(self):
+        return self.send_ssh_cmd("sudo killall python","python killed")  
+    
+    def open_fw(self, dev_ip):
+        return self.send_ssh_cmd("iptables -D FORWARD -s 0/0 -d " + dev_ip + " -j DROP", "Firewall opened 1 " +dev_ip)
+        return self.send_ssh_cmd("iptables -D FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall opened 2 " +dev_ip)   
 
+    def close_fw(self, dev_ip):
+        return self.send_ssh_cmd("iptables -I FORWARD -s 0/0 -d " + dev_ip + " -j DROP", "Firewall closed 1 " +dev_ip)
+        return self.send_ssh_cmd("iptables -I FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall closed 2 " +dev_ip) 
 
 if __name__ == '__main__':
     main()  

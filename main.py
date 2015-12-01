@@ -7,6 +7,19 @@ import threading
 import time, os, sys
 #import urllib2
 import xs1inputs, udpinputs, redundancy, periodic_sup
+from alarmevents import alarm_event
+import sqlsync
+
+aes = alarm_event()
+ssync = sqlsync.sync()
+
+for table in ["Settings","Besucher","Bewohner","cron","gcm_users","Szenen","Wecker"]:
+    try:
+        ssync.export(table, "XS1DB")
+        ssync.trunc_import(table, "XS1DB") 
+        aes.new_event(description="Success sync "+table, prio=0)
+    except:
+        aes.new_event(description="Error sync "+table, prio=0)
 
 threadliste = []
 

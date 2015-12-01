@@ -7,8 +7,10 @@ import os
 
 def main():
     ssync = sync()
-    ssync.export("Settings", "XS1DB")
-    ssync.trunc_import("Settings", "XS1DB")
+    for table in ["Settings","Besucher","Bewohner","cron","gcm_users","Szenen","Wecker"]:
+        ssync.export(table, "XS1DB")
+        ssync.trunc_import(table, "XS1DB") 
+
 
 class sync:
     def __init__(self):

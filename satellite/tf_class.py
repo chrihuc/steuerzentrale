@@ -20,37 +20,11 @@ from socket import socket, AF_INET, SOCK_DGRAM
 
 mySocket = socket( AF_INET, SOCK_DGRAM )
 
-class TiFo_SideB:
+class TiFo:
     HOST = "localhost"
     PORT = 4223
-
-    NUM_LEDS = 15
-
-    r = [0]*16
-    g = [0]*16
-    b = [0]*16
-    r_index = 0 
-    r_start = 0
-    zufall = False
-    
-    def __cb_frame_rendered__(self, led_strip, length):
-        global r_index
-        b[r_index] = 0
-        if r_index == NUM_LEDS-1:
-            r_index = 0
-        else:
-            r_index += 1
-
-        b[r_index] = 255
-
-        # Set new data for next render cycle
-        led_strip.set_rgb_values(0, NUM_LEDS, r, g, b)
         
     def __init__(self):
-        self.led = None
-        self.io = None
-        self.al = None
-        self.moist = None
         self.vc = None
 
         # Create IP Connection
@@ -63,28 +37,20 @@ class TiFo_SideB:
                                      self.cb_connected)
 
         # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(TiFo_SideB.HOST, TiFo_SideB.PORT) 
-        self.ipcon.enumerate()                 
+        self.ipcon.connect(TiFo.HOST, TiFo.PORT) 
+        #self.ipcon.enumerate()                 
        
     
-    def cb_reached(self):        
+    def cb_reached_vc(self):        
         voltage = self.vc.get_voltage()
         dicti = {}
-        dicti['value'] = str(illuminance)
+        dicti['value'] = str(voltage)
         dicti['name'] = 'Voltage'
         mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
         mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT)) 
-        thread_cb_reached = Timer(60, self.cb_reached, [])
+        thread_cb_reached = Timer(60, self.cb_reached_vc, [])
         thread_cb_reached.start()        
-
-    def cb_interrupt(self, port, interrupt_mask, value_mask):
-        #print('Interrupt on port: ' + port + str(bin(interrupt_mask)))
-        #print('Value: ' + str(bin(value_mask)))
-        dicti = {}
-        dicti['value'] = str((interrupt_mask & value_mask))
-        dicti['name'] = port + str((interrupt_mask))      
-        mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
-        mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT))        
+       
     
     # Callback handles device connections and configures possibly lost 
     # configuration of lcd and temperature callbacks, backlight etc.
@@ -97,7 +63,7 @@ class TiFo_SideB:
             # Enumeration for V/C
             if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
                 self.vc = BrickletVoltageCurrent(uid, self.ipcon)
-                self.cb_reached()
+                self.cb_reached_vc()
 
         
     def cb_connected(self, connected_reason):
@@ -108,7 +74,7 @@ class TiFo_SideB:
         
     
 if __name__ == "__main__":
-    sb = TiFo_SideB()
+    sb = TiFo()
     
     raw_input('Press key to exit\n') # Use input() in Python 3   
     #sb.set_one_color(rot = 255)
