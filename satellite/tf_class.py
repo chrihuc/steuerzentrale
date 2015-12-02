@@ -48,6 +48,12 @@ class TiFo:
         dicti['name'] = 'Voltage'
         mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
         mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT)) 
+        current = self.vc.get_current()
+        dicti = {}
+        dicti['value'] = str(current)
+        dicti['name'] = 'Current'
+        mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
+        mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT))         
         thread_cb_reached = Timer(60, self.cb_reached_vc, [])
         thread_cb_reached.start()        
        

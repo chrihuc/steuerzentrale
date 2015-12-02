@@ -3,6 +3,7 @@
 import constants
 
 from mysql_con import mdb_get_table
+from socket import socket, AF_INET, SOCK_DGRAM
 from socket import error as socket_error
 from alarmevents import alarm_event
 import paramiko
@@ -20,6 +21,15 @@ def  get_satellites():
         simplelist.append(x)
     return simplelist
 
+def  get_satellite(name):
+    list = mdb_get_table("satellites")
+    simplelist = []
+    for satellite in list:
+        if satellite.get("Name") == name:
+            x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"))
+            x.attr = satellite
+    return x
+
 def main():
     pies = get_satellites()
     for pi in pies:
@@ -27,6 +37,8 @@ def main():
             print pi.reboot()
 
 class sputnik:
+    mysocket = socket( AF_INET, SOCK_DGRAM )
+    
     def __init__ (self, name, IP, PORT, Type, USER, PASS):
         self.name = name
         self.IP = IP
@@ -69,6 +81,9 @@ class sputnik:
     def close_fw(self, dev_ip):
         return self.send_ssh_cmd("iptables -I FORWARD -s 0/0 -d " + dev_ip + " -j DROP", "Firewall closed 1 " +dev_ip)
         return self.send_ssh_cmd("iptables -I FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall closed 2 " +dev_ip) 
+
+    def send_udp_cmd(self, command):
+        sputnik.mysocket.sendto(str(command),(self.IP,self.PORT))
 
 if __name__ == '__main__':
     main()  

@@ -13,7 +13,15 @@ import sqlsync
 aes = alarm_event()
 ssync = sqlsync.sync()
 
-for table in ["Settings","Besucher","Bewohner","cron","gcm_users","Szenen","Wecker"]:
+syncliste = []
+syncliste += ["Settings"]
+syncliste += ["Besucher"]
+syncliste += ["Bewohner"]
+syncliste += ["cron"]
+syncliste += ["gcm_users"]
+#syncliste += ["Szenen"]
+syncliste += ["Wecker"]
+for table in syncliste:
     try:
         ssync.export(table, "XS1DB")
         ssync.trunc_import(table, "XS1DB") 
@@ -48,7 +56,7 @@ try:
             if not t in threading.enumerate():
                 constants.run = False
                 sys.exit() 
-        time.sleep(1)
+        time.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
     sys.exit() 

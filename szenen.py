@@ -5,7 +5,7 @@ import constants
 from Sonos2Py import sonos
 from classes import myezcontrol, ping
 import MySQLdb as mdb
-from mysql_con import mdb_fern_r, mdb_sonos_r, mdb_sonos_s, mdb_szene_r, mdb_hue_r, setting_s, setting_r, settings_r, mdb_marantz_r, mdb_hue_s, mdb_fern_schluessel_r, mdb_sideb_r, mdb_ls_sz_r, hue_autolicht, mdb_tspled_r
+from mysql_con import mdb_fern_r, mdb_sonos_r, mdb_sonos_s, mdb_szene_r, mdb_hue_r, setting_s, setting_r, settings_r, mdb_marantz_r, mdb_hue_s, mdb_fern_schluessel_r, mdb_sideb_r, mdb_ls_sz_r, hue_autolicht, mdb_tspled_r, mdb_get_dicti
 import mysql_con
 import time
 from socket import socket, AF_INET, SOCK_DGRAM
@@ -25,7 +25,7 @@ from cron import cron
 from webcammov import send_wc_pix
 import os
 from anwesenheit import anwesenheit
-from ssh import ssh_connection 
+import satellites
 #from plexapi.server import PlexServer
 
 sn=sonos()
@@ -52,8 +52,8 @@ no_event = ['Alarm','Achtung','Hinweis','Hue_Meldung','set_hinweis']
 ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
 hbridge = Bridge(constants.hue_.IP)
 
-router = ssh_connection(ip = constants.router_IP, username = "admin", passwort = "Ivenhoe")
-
+router = satellites.get_satellite("Router")
+pies = satellites.get_satellites()
 
 MARANTZ_IP   = '192.168.192.25'
 MARANTZ_PORT = 5010
@@ -77,6 +77,7 @@ ezcontrol_devices = []
 TF_LEDs = []
 hue_devices = []
 setting = []
+sat_names = []
 for device in typ_dict:
     if typ_dict.get(device) == "EZControl":
         ezcontrol_devices.append(device)
@@ -86,12 +87,15 @@ for device in typ_dict:
         hue_devices.append(device)   
     if typ_dict.get(device) == "setting":
         setting.append(device)   
+    if typ_dict.get(device) == "satellite":
+        sat_names.append(device)        
 
 def main():
     #mysql_con.set_automode(device="Stehlampe", mode="man")
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
-    set_szene("Schlafen1")
-    #set_szene("Einbruch_3")
+    constants.redundancy_.master = True
+    set_szene("SchlafZi_alles_aus")
+    #set_szene("Test")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
     #test("Stehlampe")
     #deactivate_usb_keys()
@@ -405,9 +409,16 @@ def xs1_set_szene(device, szene):
     #aes.new_event(description="Versandt: " + str(now), prio=0)
                 
 def set_ls_schlafzi(szene):
+    #deprecated
     if mdb_ls_sz_r(szene) <> {}:
         szene = mdb_ls_sz_r(szene)
     BettSocket.sendto(str(szene),(BETT_IP,BETT_PORT))
+
+def send_cmd_satellite(device, szene):
+    command = mdb_get_dicti(str(device),szene)
+    for item in pies:
+        if item.name == str(device):
+            item.send_udp_cmd(command)
                 
 def hue_set_szene(device, szene):
     if szene in ["man", "auto"]:
@@ -623,9 +634,9 @@ def set_szene(name):
                             hue_del = Timer(hue_delay, hue_set_szene, [key, kommando])
                             hue_del.start()
                             hue_count += 1
-                    elif key == "LightstripSchlafzi":
+                    elif key in sat_names:
                         for kommando in kommandos:
-                            t = threading.Thread(target=set_ls_schlafzi, args=[kommando])
+                            t = threading.Thread(target=send_cmd_satellite, args=[key,kommando])
                             t.start()                          
                     elif key == "TV":
                         for idx, kommando in enumerate(kommandos):
@@ -682,7 +693,7 @@ def set_szene(name):
                 else:
                     folgen = Timer(float(delays[index]), set_szene, [str(kommando)])
                     folgen.start()
-        con = mdb.connect('192.168.192.10', 'python_user', 'python', 'XS1DB')
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             sql = 'UPDATE Szenen SET LastUsed = CURRENT_TIMESTAMP WHERE Name = "'+ name + '"' 
@@ -703,11 +714,11 @@ def interner_befehl(befehl):
     if befehl == "keys_in_hub":
         anw_status.keys_in_hub()
     if befehl == "firew_TV_close":
-        router.close_firewall("192.168.192.26")
-        router.close_firewall("192.168.192.29")
+        router.close_fw("192.168.192.26")
+        router.close_fw("192.168.192.29")
     if befehl == "firew_TV_open":
-        router.open_firewall("192.168.192.26")
-        router.open_firewall("192.168.192.29") 
+        router.open_fw("192.168.192.26")
+        router.open_fw("192.168.192.29") 
     if befehl == "update_filme":
         pass
         #plex.

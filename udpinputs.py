@@ -272,7 +272,7 @@ def main():
                 ezcontrol.SetSwitchFunction("NotbetrNot", str(1))
             else:
                 if (not (data in no_event_list)) and (not (isdict)):
-                    aes.new_event(data, karenz = 1)
+                    aes.new_event("UDP receive: "+data, karenz = 1)
             if "sz_" in data:
                 t = threading.Thread(target=set_szene, args=[data])
                 t.start()
@@ -316,16 +316,7 @@ def main():
                 t.start()
         #Alles aus
             elif (data == "Alles_aus"):
-                Alles_aus()
-        #Movie_Play
-            elif (data == "Movie_Play"):
-                Movie_Play()        
-        #Movie_Pause
-            elif (data == "Movie_Pause"):
-                Movie_Pause()    
-        #Movie_Stop
-            elif (data == "Movie_Stop"):
-                Movie_Stop()    
+                Alles_aus()  
     #Mediaquellen            
         #Fernsehen$
             elif (data == "Media_TV"):
@@ -334,33 +325,7 @@ def main():
         #Sonos        
             elif (data == "Media_Sonos"):
                 t = threading.Thread(target=set_szene, args=["MediaSonos"])
-                t.start()  
-        #PS3
-            elif (data == "Media_PS3"):
-                Media_PS3()                                
-    #Musiksteuerung 
-            elif (data == "Schlafzimmer_lauter"):
-                SetVolume(sn.SchlafZi,'increase')
-            elif (data == "Schlafzimmer_leiser"):
-                SetVolume(sn.SchlafZi,'decrease')  
-            elif (data == "Bad_lauter"):
-                SetVolume(sn.Bad,'increase')
-            elif (data == "Bad_leiser"):
-                SetVolume(sn.Bad,'decrease')             
-            elif (data == "PlayPause_SchlafZi"):
-                PlayPause_SchlafZi()
-            elif (data == "PlayPause_Bad"):
-                PlayPause_Bad()            
-        #Incoming Call
-            elif (data == "Incoming_call"):
-                set_szene("SonosSave")
-                laenge = downloadAudioFile("Dies ist eine Testnachricht")
-                set_szene("TextToSonos")
-                time.sleep(laenge)
-                set_szene("SonosReturn")
-        #Incoming message
-            elif (data == "Incoming_mess"):        
-                phone_incoming("mess")
+                t.start()                                         
     #Serversteuerung funzt nicht
             elif (data == "Neustart_services"):
                 exectext = "sudo killall python"
