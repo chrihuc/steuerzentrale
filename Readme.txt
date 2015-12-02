@@ -61,6 +61,4 @@ todo:
     switch ssh to satellite
         periodic_sup
         szenen
-        udp_inputs
-    zeitdurchsage
     

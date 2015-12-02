@@ -29,7 +29,6 @@ from messaging import messaging
 from alarmevents import alarm_event
 #from text_to_sonos import downloadAudioFile
 from tablecontrol import tablecontrol
-from ssh import reboot_pis, restart_pi
 
 ########################
 #Variablen declarification
@@ -188,11 +187,6 @@ def main():
     ezcontrol.SetSwitchFunction("heartbeat", str(1))
     ezcontrol.SetSwitchFunction("NotbetrNot", str(1))
     marantz_set_szene("Reset")
-    if (setting_r("Restart_PIs") == "Ein"):
-        reboot_pis()
-    else:
-        restart_pi("192.168.192.24")
-        restart_pi("192.168.192.25")
     #Initialize scenes
     if ((setting_r("Status") == "Am Gehen 1") or (setting_r("Status") == "Am Gehen 2")):
         t = threading.Thread(target=set_szene, args=["Alles_aus_4"])
@@ -332,39 +326,7 @@ def main():
         #Movie_Stop
             elif (data == "Movie_Stop"):
                 Movie_Stop()    
-    #Licht       
-            elif (data == "Szene_Tv"):
-                ezcontrol.SetSwitch("Kueche", str(0))
-                ezcontrol.SetSwitch("Diele", str(0))
-                ezcontrol.SetSwitch("Wohnzimmer_Decke", str(0))
-            elif (data == "Toggle_Flur"):
-                if (ezcontrol.GetSwitch("Diele") == "100.0"):
-                    ezcontrol.SetSwitch("Diele", str(0))
-                else:
-                    ezcontrol.SetSwitch("Diele", str(100))
-            elif (data == "Toggle_Kueche"):
-                if (ezcontrol.GetSwitch("Kueche") == "100.0"):
-                    set_kueche(True)
-                else:
-                    set_kueche(False)
-            elif (data == "Stehlampe"):
-                Stehlampe()  
-            elif (data == "Stehlampen_an"):
-                command =  {'bri' : 176, 'hue' : 12554, 'sat' : 225,'on' : True}
-                hbridge.set_light('Stehlampe', command) 
-                ezcontrol.SetSwitch("Monaco_Lampe", str(100))   
-            elif (data == "Stehlampen_aus"):
-                hbridge.set_light('Stehlampe', 'on', False)
-                ezcontrol.SetSwitch("Monaco_Lampe", str(0)) 
-            elif (data == "szene_lights_off"):
-                set_szene("Alle_Lichter_Aus")
-            
-    #Mediaquellen
-        #Mediarack ein
-            elif (data == "Mediarack_ein"):
-                TV_ein() 
-                Marantz_ein() 
-        #Mediarack aus             
+    #Mediaquellen            
         #Fernsehen$
             elif (data == "Media_TV"):
                 t = threading.Thread(target=set_szene, args=["TV"])
@@ -375,12 +337,7 @@ def main():
                 t.start()  
         #PS3
             elif (data == "Media_PS3"):
-                Media_PS3()                    
-    #Wecker
-            elif (data == "Schlafzi_alles"):
-                Schlafzi_alles() 
-            elif (data == "SchlafzimmerAus"):
-                SchlafzimmerAus()              
+                Media_PS3()                                
     #Musiksteuerung 
             elif (data == "Schlafzimmer_lauter"):
                 SetVolume(sn.SchlafZi,'increase')
@@ -414,46 +371,7 @@ def main():
                 SonosWriteConfig()
     #temp_alar,       
             elif (data == "alle_alarme_gesehen"):
-                aes.acknowledge_all()
-    #test
-            elif (data == "Test1"):
-                set_szene("AlleLichterEin")
-                #sonos_alles_ein()
-            elif (data == "Test0"):
-                pass          
-            elif (data == "Alarm"):
-                if alarm_steh:
-                    alarm_steh = False
-                else:
-                    alarm_steh = True
-                    t = threading.Thread(target=Alarm_blinken)
-                    #t.daemon = True
-                    t.start()
-    #IR-Send                
-            elif (data == "irsend_Media_TV"):
-                irsend_Media_TV()
-            elif (data == "irsend_Input_Sonos"):
-                irsend_Input_Sonos()
-            elif (data == "irsend_Input_RaspBMC"):
-                irsend_Input_RaspBMC()
-            elif (data == "irsend_Input_PS3"):
-                irsend_Input_PS3()
-            elif (data == "irsend_phone_call"):
-                irsend_phone_call()  
-            elif (data == "Marantz_ein"):
-                Marantz_ein()
-            elif (data == "Marantz_aus"):
-                Marantz_aus()
-            elif (data == "Marantz_lauter"):
-                Marantz_lauter()
-            elif (data == "Marantz_leiser"):
-                Marantz_leiser()
-            elif (data == "Marantz_mute"):
-                Marantz_mute()            
-            elif (data == "TV_ein"):
-                TV_ein()
-            elif (data == "TV_aus"):
-                TV_aus()
+                aes.acknowledge_all()       
     #FernBett
             elif (data == "Bett_0_kurz"):
                 set_szene(mdb_fern_r_neu("Fern_Bett", "Fern_Bett", "Fern_Bett_0_kurz"))
