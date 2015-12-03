@@ -34,19 +34,19 @@ for table in syncliste:
 
 threadliste = []
 
-t = threading.Thread(target=xs1inputs.main, args = [])
+t = threading.Thread(name="xs1", target=xs1inputs.main, args = [])
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(target=udpinputs.main, args = [])
+t = threading.Thread(name="udp",target=udpinputs.main, args = [])
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(target=redundancy.main, args = [])
+t = threading.Thread(name="redun",target=redundancy.main, args = [])
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(target=periodic_sup.main, args = [])
+t = threading.Thread(name="peri",target=periodic_sup.periodic_supervision, args = [])
 threadliste.append(t)
 t.start()
 
@@ -57,7 +57,7 @@ try:
     while constants.run:
         for t in threadliste:
             if not t in threading.enumerate():
-                print t
+                print t.name
                 constants.run = False
                 sys.exit() 
         time.sleep(10)

@@ -33,17 +33,7 @@ tv_con_check_old = 0
 sats = satellites.get_satellites()
 
 def main():
-    for sat in sats:
-        if sat.Type == "sat":
-            no_hbts = sensor_health.check_sat_health(sat.name,30)
-            if no_hbts <= sat.no_of_lb and no_hbts == 0:
-                sat.reboot()             
-            elif no_hbts <= sat.no_of_lb:
-                sat.kill_python()
-            else:
-                aes.new_event(description=sat.name + " healthy " + str(sat.no_of_lb), prio=0)
-            sat.no_of_lb = no_hbts
-    #periodic_supervision()
+    periodic_supervision()
     #print crn.get_now(4, "18:22", "cron")
     #every_min(4, "18:22", "cron")
     #every_30_min()
