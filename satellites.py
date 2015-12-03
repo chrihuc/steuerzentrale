@@ -47,15 +47,17 @@ class sputnik:
         self.Type = Type
         self.USER = USER
         self.PASS = PASS
+        self.no_of_hb = 0
+        self.no_of_lb = 0
 
-    def send_ssh_cmd(self, cmd_to_execute, text="N/A", tries=5):
+    def send_ssh_cmd(self, cmd_to_execute, text="N/A", tries=10):
         success = False
         count = 0
         while (not success) and (count <= tries):
             count += 1
             try:
                 ssh.connect(self.IP, username=self.USER, password=self.PASS)
-                if constants.master:
+                if constants.redundancy_.master:
                     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
                 success = True
             except socket_error as serr:
@@ -83,7 +85,8 @@ class sputnik:
         return self.send_ssh_cmd("iptables -I FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall closed 2 " +dev_ip) 
 
     def send_udp_cmd(self, command):
-        sputnik.mysocket.sendto(str(command),(self.IP,self.PORT))
+        if constants.redundancy_.master:
+            sputnik.mysocket.sendto(str(command),(self.IP,self.PORT))
 
 if __name__ == '__main__':
     main()  

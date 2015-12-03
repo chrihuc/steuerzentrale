@@ -21,7 +21,7 @@ from webcammov import mail_webc_pics
 from anwesenheit import anwesenheit
 #from plexapi.server import PlexServer
 from szenen import set_szene
-import ssh
+import satellites
 
 
 aes = alarm_event()
@@ -30,9 +30,20 @@ mes = messaging()
 status = anwesenheit()
 #plex = PlexServer()
 tv_con_check_old = 0
+sats = satellites.get_satellites()
 
 def main():
-    periodic_supervision()
+    for sat in sats:
+        if sat.Type == "sat":
+            no_hbts = sensor_health.check_sat_health(sat.name,30)
+            if no_hbts <= sat.no_of_lb and no_hbts == 0:
+                sat.reboot()             
+            elif no_hbts <= sat.no_of_lb:
+                sat.kill_python()
+            else:
+                aes.new_event(description=sat.name + " healthy " + str(sat.no_of_lb), prio=0)
+            sat.no_of_lb = no_hbts
+    #periodic_supervision()
     #print crn.get_now(4, "18:22", "cron")
     #every_min(4, "18:22", "cron")
     #every_30_min()
@@ -100,17 +111,16 @@ def every_2_min():
         aes.new_event(description="Neue Anwesenheit regel: Urlaub", prio=0)
 
 def every_10_min():
-    global tv_con_check_old
-    tv_con_check_old = sensor_health.check_TVControl_health(30)
-    tv_con_check = sensor_health.check_TVControl_health(20)
-    if tv_con_check_old >= tv_con_check:
-        if tv_con_check < 30:
-            aes.new_event(description="Problem mit TVControl " + str(tv_con_check) , prio=1.3, karenz=3*60)
-            ssh.restart_pi("192.168.192.25")
-    tv_con_check_old = tv_con_check
-    tuer_con = sensor_health.check_TuerSpy_health(30)
-    if tuer_con < 7:
-        aes.new_event(description="Problem mit TuerSPi " + str(tuer_con) , prio=1.3, karenz=3*60)
+    for sat in sats:
+        if sat.Type == "sat":
+            no_hbts = sensor_health.check_sat_health(sat.name,30)
+            if no_hbts <= sat.no_of_lb and no_hbts == 0:
+                sat.reboot()             
+            elif no_hbts <= sat.no_of_lb:
+                sat.kill_python()
+            else:
+                aes.new_event(description=sat.name + " healthy " + str(sat.no_of_lb), prio=0)
+            sat.no_of_lb = no_hbts
         
         
 def every_30_min():

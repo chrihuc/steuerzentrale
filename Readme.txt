@@ -56,11 +56,12 @@ Satellite with IP and Port in table Satellites
 
 ###########
 todo:
-    switch ssh to satellite
-        periodic_sup / also add the supervision of the satellites
+    switch ssh to satellite remove ssh
     change all pi devices to satellites
         mysql
         szenen
+    adventslichter from cron not xs1
+    wecker from cron not wecker.py
         
 Changes in Mysql
     change LightstrSchlafzi in LightstripSchlafzi

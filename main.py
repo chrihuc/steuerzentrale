@@ -10,6 +10,9 @@ import xs1inputs, udpinputs, redundancy, periodic_sup
 from alarmevents import alarm_event
 import sqlsync
 
+#delay for changeover
+time.sleep(10)
+
 aes = alarm_event()
 ssync = sqlsync.sync()
 
@@ -54,6 +57,7 @@ try:
     while constants.run:
         for t in threadliste:
             if not t in threading.enumerate():
+                print t
                 constants.run = False
                 sys.exit() 
         time.sleep(10)

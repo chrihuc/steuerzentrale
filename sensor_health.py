@@ -46,12 +46,25 @@ def check_sensor_health():
             aes.new_event(description="Problem mit Temperatur Balkon", prio=1.3, karenz=24*60)        
     con.close     
 
+#dreprecated
 def check_TVControl_health(time):        
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     ergebnis = 0
     with con:
         cur = con.cursor()
         sql = 'SELECT * FROM XS1DB.Actuators where Name like "Hellig%" and Date > DATE_ADD(NOW(), INTERVAL -'+ str(time) +' MINUTE)'
+        cur.execute(sql)
+        results = cur.fetchall()
+        ergebnis = len(results)
+    con.close
+    return ergebnis
+
+def check_sat_health(sat,time):        
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    ergebnis = 0
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT * FROM XS1DB.Actuators where Name like "Hrtbt_'+sat+'" and Date > DATE_ADD(NOW(), INTERVAL -'+ str(time) +' MINUTE)'
         cur.execute(sql)
         results = cur.fetchall()
         ergebnis = len(results)

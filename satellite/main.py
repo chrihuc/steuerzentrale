@@ -20,10 +20,13 @@ def send_heartbeat():
     while True:
         dicti = {}
         dicti['value'] = str(1)
-        dicti['name'] = 'BueroPi'
+        dicti['name'] = 'Hrtbt_BueroPi'
         mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
         mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT))  
         time.sleep(60)
+
+hb = threading.Thread(target=send_heartbeat, args = [])
+hb.start()
 
 vc = tf_class.TiFo()
 
@@ -31,8 +34,7 @@ vc = tf_class.TiFo()
 #t = threading.Thread(target=tuer.monitor, args = [])
 #t.start()
 
-hb = threading.Thread(target=send_heartbeat, args = [])
-hb.start()
+
 
 while True:
     (data,addr) = mySocket.recvfrom(SIZE)
