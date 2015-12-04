@@ -104,9 +104,9 @@ def every_10_min():
     for sat in sats:
         if sat.Type == "sat":
             no_hbts = sensor_health.check_sat_health(sat.name,30)
-            if no_hbts <= sat.no_of_lb and no_hbts == 0:
+            if no_hbts <= sat.no_of_lb and no_hbts < 4:
                 sat.reboot()             
-            elif no_hbts <= sat.no_of_lb:
+            elif no_hbts <= sat.no_of_lb and no_hbts < 25:
                 sat.kill_python()
             else:
                 aes.new_event(description=sat.name + " healthy " + str(sat.no_of_lb), prio=0)
@@ -118,18 +118,7 @@ def every_30_min():
     sensor_health.check_sensor_health() 
 
 def every_60_min():
-    if not (ping("192.168.192.32", number = 3)):
-        aes.new_event(description="Schluesselboard offline", prio=3.3)
-    else:
-        aes.alarm_resolved(description="Schluesselboard offline", resolv_desc="Schluesselboard wieder erreichbar")
-    if not (ping("192.168.192.25", number = 3)):
-        aes.new_event(description="TV control offline", prio=3.3, karenz=24*60) 
-    else:
-        aes.alarm_resolved(description="TV control offline", resolv_desc="TV control wieder erreichbar")        
-    if not (ping("192.168.192.24", number = 3)):
-        aes.new_event(description="Bett offline", prio=3.3, karenz=24*60)  
-    else:
-        aes.alarm_resolved(description="Bett offline", resolv_desc="Bett wieder erreichbar")
+    pass
     
 def every_24_hrs():
         crn.calculate()
