@@ -16,7 +16,7 @@ def  get_satellites():
     list = mdb_get_table("satellites")
     simplelist = []
     for satellite in list:
-        x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"))
+        x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"),satellite.get("command_set"))
         x.attr = satellite
         simplelist.append(x)
     return simplelist
@@ -26,7 +26,7 @@ def  get_satellite(name):
     simplelist = []
     for satellite in list:
         if satellite.get("Name") == name:
-            x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"))
+            x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"),satellite.get("command_set"))
             x.attr = satellite
     return x
 
@@ -39,7 +39,7 @@ def main():
 class sputnik:
     mysocket = socket( AF_INET, SOCK_DGRAM )
     
-    def __init__ (self, name, IP, PORT, Type, USER, PASS):
+    def __init__ (self, name, IP, PORT, Type, USER, PASS, command_set):
         self.name = name
         self.IP = IP
         self.PORT = PORT
@@ -47,6 +47,7 @@ class sputnik:
         self.Type = Type
         self.USER = USER
         self.PASS = PASS
+        self.command_set = command_set
         self.no_of_hb = 0
         self.no_of_lb = 0
 

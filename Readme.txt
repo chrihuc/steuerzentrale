@@ -56,7 +56,6 @@ Satellite with IP and Port in table Satellites
 
 ###########
 todo:
-    switch ssh to satellite remove ssh
     change all pi devices to satellites
         mysql
         szenen
@@ -64,5 +63,7 @@ todo:
     wecker from cron not wecker.py
         
 Changes in Mysql
-    change LightstrSchlafzi in LightstripSchlafzi
-    
+    rename LightstrSchlafzi in LightstripSchlafzi
+    rename Amp in Marantz
+    rename table TuerSPiled in TuerSPi
+    add commandset to Pi

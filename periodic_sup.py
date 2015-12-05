@@ -108,8 +108,6 @@ def every_10_min():
                 sat.reboot()             
             elif no_hbts <= sat.no_of_lb and no_hbts < 25:
                 sat.kill_python()
-            else:
-                aes.new_event(description=sat.name + " healthy " + str(sat.no_of_lb), prio=0)
             sat.no_of_lb = no_hbts
         
         

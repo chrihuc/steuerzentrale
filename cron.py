@@ -13,7 +13,7 @@ def main():
     crn = cron()
     #crn.new_event('Test','20:15')
     #print crn.get_now(2, '5:40' ,'Wecker')
-    print crn.next_wecker_heute_morgen()
+    crn.calculate()
     #next_i = crn.get_next(2, '5:40' ,'Wecker')
     #if next_i: print next_i[0].get("delta")
     #print next_i

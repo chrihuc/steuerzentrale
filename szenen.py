@@ -94,7 +94,7 @@ def main():
     #mysql_con.set_automode(device="Stehlampe", mode="man")
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
     constants.redundancy_.master = True
-    set_szene("SchlafZi_alles_aus")
+    set_szene("SchlafZi_alles_an")
     #set_szene("Test")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
     #test("Stehlampe")
@@ -415,9 +415,9 @@ def set_ls_schlafzi(szene):
     BettSocket.sendto(str(szene),(BETT_IP,BETT_PORT))
 
 def send_cmd_satellite(device, szene):
-    command = mdb_get_dicti(str(device),szene)
     for item in pies:
         if item.name == str(device):
+            command = mdb_get_dicti(str(item.command_set),szene)
             item.send_udp_cmd(command)
                 
 def hue_set_szene(device, szene):

@@ -39,12 +39,22 @@ XS1DB = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS,
 #ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
 mySocket = socket( AF_INET, SOCK_DGRAM )
 conn = pycurl.Curl()
+last_data = ""
 
+def last_data_reset():
+    last_data = ""
             
 def on_receive(data):
     if not constants.run:
         sys.exit("Error message")
     global heartbeat
+    global last_data
+    global ldt
+    ldt.cancel()
+    ldt = Timer(1, last_data_reset)
+    ldt.start() 
+    if last_data == data:
+        return
     count = int(setting_r("NumRestart"))
     if count > 0:
         setting_s("NumRestart", str(0))
@@ -368,6 +378,7 @@ def on_receive(data):
             setting_s("Balkontuer", str(value))
         if ('Kuechentuer' == name): 
             setting_s("Kuechentuer", str(value))
+    last_data = data
     
 def heartbeat_sup():
   if selfsupervision:
@@ -402,6 +413,7 @@ def to_mysql(moisture):
 
 def main():  
     global heartbeat
+    global ldt
     zeit =  time.time()
     now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))  
     setting_s("Laststart", str(now))
@@ -412,6 +424,7 @@ def main():
             
     heartbeat = Timer(constants.heartbt, heartbeat_sup)
     heartbeat.start()
+    ldt = Timer(2, last_data_reset)
 
     conn = pycurl.Curl()  
     conn.setopt(pycurl.URL, constants.xs1_.STREAM_URL)  
