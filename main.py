@@ -24,6 +24,7 @@ syncliste += ["Bewohner"]
 syncliste += ["gcm_users"]
 #syncliste += ["Szenen"]
 syncliste += ["Wecker"]
+#syncliste += ["Sideboard"]
 for table in syncliste:
     try:
         ssync.export(table, "XS1DB")

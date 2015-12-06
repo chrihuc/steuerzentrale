@@ -420,6 +420,7 @@ def send_cmd_satellite(device, szene):
     for item in pies:
         if item.name == str(device):
             command = mdb_get_dicti(str(item.command_set),szene)
+            command["device"] = device
             item.send_udp_cmd(command)
                 
 def hue_set_szene(device, szene):

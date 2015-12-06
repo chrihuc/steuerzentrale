@@ -57,11 +57,8 @@ Satellite with IP and Port in table Satellites
 
 ###########
 todo:
-    change all pi devices to satellites
-        szenen
     wecker from cron not wecker.py
     szenen_timer is recursive not working
-    debug commands to sideboard
     rewrite communication to acknowledge
         
 Changes in Mysql

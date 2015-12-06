@@ -129,11 +129,11 @@ def every_24_hrs():
             if not os.path.exists(fname):
                     os.makedirs(fname)    
             datei = fname  + '/xs1db.sql'
-            cmd = '/usr/bin/mysqldump -u root -pIvenhoe1202 XS1DB > ' + datei
-            os.system(cmd)
-            datei = fname  + '/Gesundheit.sql'
-            cmd = '/usr/bin/mysqldump -u root -pIvenhoe1202 Gesundheit > ' + datei
-            os.system(cmd)    
+            #cmd = '/usr/bin/mysqldump -u root -p XS1DB > ' + datei
+            #os.system(cmd)
+            #datei = fname  + '/Gesundheit.sql'
+            #cmd = '/usr/bin/mysqldump -u root -p Gesundheit > ' + datei
+            #os.system(cmd)    
             for filename in glob.glob(os.path.join(source, '*.py')):
                     shutil.copy(filename, fname)
             shutil.rmtree(destin + str(delete))
