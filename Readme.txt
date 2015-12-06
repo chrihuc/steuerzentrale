@@ -1,12 +1,13 @@
 ###################################
 needed packages
 ###################################
-sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad
+sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip
 
 sudo pip install phue                   #??
 sudo pip install gcm                    #??
 sudo pip install pyephem                #??
 sudo pip install paramiko               #??
+sudo pip install tinkerforge
 
 ##################################
 setup of daemon tools

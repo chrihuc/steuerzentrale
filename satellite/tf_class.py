@@ -13,6 +13,7 @@ from tinkerforge.ip_connection import IPConnection
 #from tinkerforge.bricklet_ambient_light import AmbientLight
 #from tinkerforge.bricklet_moisture import Moisture
 from tinkerforge.bricklet_voltage_current import BrickletVoltageCurrent
+from tinkerforge.bricklet_distance_us import BrickletDistanceUS
 from threading import Timer
 import time
 
@@ -20,10 +21,10 @@ from socket import socket, AF_INET, SOCK_DGRAM
 
 mySocket = socket( AF_INET, SOCK_DGRAM )
 
-class TiFo:
-    HOST = "localhost"
-    PORT = 4223
-        
+HOST = "localhost"
+PORT = 4223
+
+class volt_cur:
     def __init__(self):
         self.vc = None
 
@@ -37,7 +38,7 @@ class TiFo:
                                      self.cb_connected)
 
         # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(TiFo.HOST, TiFo.PORT) 
+        self.ipcon.connect(HOST, PORT) 
         #self.ipcon.enumerate()                 
        
     
@@ -76,11 +77,58 @@ class TiFo:
         # Enumerate devices again. If we reconnected, the Bricks/Bricklets
         # may have been offline and the configuration may be lost.
         # In this case we don't care for the reason of the connection
-        self.ipcon.enumerate()      
+        self.ipcon.enumerate()    
+        
+class dist_us:
+    def __init__(self):
+        self.dus = None
+
+        # Create IP Connection
+        self.ipcon = IPConnection() 
+
+        # Register IP Connection callbacks
+        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE, 
+                                     self.cb_enumerate)
+        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED, 
+                                     self.cb_connected)
+
+        # Connect to brickd, will trigger cb_connected
+        self.ipcon.connect(HOST, PORT) 
+        #self.ipcon.enumerate()                 
+       
+    
+    def cb_distance(self, distance):        
+        dicti = {}
+        dicti['value'] = str(distance)
+        dicti['name'] = str(self.dus.get_identity()[0]) + "_" + str(self.dus.get_identity()[5])
+        mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
+        mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT)) 
+       
+    
+    # Callback handles device connections and configures possibly lost 
+    # configuration of lcd and temperature callbacks, backlight etc.
+    def cb_enumerate(self, uid, connected_uid, position, hardware_version, 
+                     firmware_version, device_identifier, enumeration_type):
+
+        if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
+           enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
+            
+            # Enumeration for Distance US
+            if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
+                self.dus = BrickletDistanceUS(uid, self.ipcon)
+                self.dus.register_callback(self.dus.CALLBACK_DISTANCE, self.cb_distance)
+                self.dus.set_distance_callback_period(10000)
+
+        
+    def cb_connected(self, connected_reason):
+        # Enumerate devices again. If we reconnected, the Bricks/Bricklets
+        # may have been offline and the configuration may be lost.
+        # In this case we don't care for the reason of the connection
+        self.ipcon.enumerate()          
         
     
 if __name__ == "__main__":
-    sb = TiFo()
+    sb = dist_us()
     
     raw_input('Press key to exit\n') # Use input() in Python 3   
     #sb.set_one_color(rot = 255)
