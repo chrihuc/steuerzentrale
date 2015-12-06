@@ -17,7 +17,7 @@ from alarmevents import alarm_event
 from samspy import remotecontrol
 from text_to_sonos import downloadAudioFile
 from time import localtime,strftime
-from datetime import datetime
+#from datetime import datetime
 import datetime
 from messaging import messaging
 from cron import cron
@@ -91,10 +91,13 @@ for device in typ_dict:
         sat_names.append(device)        
 
 def main():
+    global start_t
     #mysql_con.set_automode(device="Stehlampe", mode="man")
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
     constants.redundancy_.master = True
-    set_szene("SchlafZi_alles_an")
+    start_t = datetime.datetime.now()
+    set_szene("SchlafZi_alles_aus")
+    print datetime.datetime.now() - start_t
     #set_szene("Test")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
     #test("Stehlampe")
@@ -597,7 +600,7 @@ def set_szene(name):
         if name in ["WeckerMute", "WeckerPhase1"] or "Schlummern" in name:
             schlummern.cancel()
         if name in ["Bad_ir"]:
-            bad_ir.cancel()            
+            bad_ir.cancel()   
         for idk, key in enumerate(szene):        
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                 if (type(szene.get(key)) == str) and (not(str(key) in no_list)):
@@ -655,10 +658,21 @@ def set_szene(name):
                             t = threading.Thread(target=TuerSPi, args=[kommando])
                             t.start()
                     elif key == "Interner_Befehl":
-                        time.sleep(1)
                         for kommando in kommandos:
                             t = threading.Thread(target=interner_befehl, args=[kommando])
-                            t.start() 
+                            t.start()                            
+        for idk, key in enumerate(szene):
+            if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
+                if (type(szene.get(key)) == str) and (not(str(key) in no_list)):
+                    try:
+                        if type(eval(szene.get(key))) == list or type(eval(szene.get(key))) == dict:
+                            kommandos = eval(szene.get(key))
+                        else:
+                            kommandos = [szene.get(key)]
+                    except NameError as serr:
+                        kommandos = [szene.get(key)]
+                else:
+                    kommandos = [szene.get(key)]  
                 if key in setting:
                     for kommando in kommandos:
                         aes.new_event(description=key + ": " + str(kommando), prio=0)
@@ -667,7 +681,7 @@ def set_szene(name):
                     time.sleep(1)
                     for kommando in kommandos:
                         #aes.new_event(description=key + ": " + str(kommando) + ": " + str(kommandos.get(kommando)), prio=0)
-                        setting_s(str(kommando), str(kommandos.get(kommando)))                             
+                        setting_s(str(kommando), str(kommandos.get(kommando)))                      
         if ((szene.get("Szene_folgt") <> "") and (str(szene.get("Szene_folgt")) <> "None")):
             try:
                 if type(eval(szene.get("Szene_folgt"))) == list:
@@ -701,6 +715,7 @@ def set_szene(name):
         con.close() 
 
 def interner_befehl(befehl):
+    time.sleep(1)
     if befehl == "deactivate_usb_keys":
         anw_status.deactivate_keys()
     if befehl == "activate_usb_keys":
