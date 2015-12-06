@@ -26,13 +26,14 @@ from webcammov import send_wc_pix
 import os
 from anwesenheit import anwesenheit
 import satellites
-#from plexapi.server import PlexServer
+#from delay_list import szenen_timer
 
 sn=sonos()
 aes = alarm_event()
 anw_status = anwesenheit()
 mes = messaging()
 crn = cron()
+#sz_timer = szenen_timer(def_to_run = set_szene)
 
 PS3_IP = '192.168.192.27'
 BettPi_PIP = '192.168.192.24'
@@ -96,7 +97,7 @@ def main():
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
     constants.redundancy_.master = True
     start_t = datetime.datetime.now()
-    set_szene("SchlafZi_alles_aus")
+    set_szene("Sideb_OL_Aus")
     print datetime.datetime.now() - start_t
     #set_szene("Test")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
@@ -411,13 +412,11 @@ def xs1_set_szene(device, szene):
     #now = datetime.datetime.now().strftime("%H:%M:%S.%f") 
     #aes.new_event(description="Versandt: " + str(now), prio=0)
                 
-def set_ls_schlafzi(szene):
-    #deprecated
-    if mdb_ls_sz_r(szene) <> {}:
-        szene = mdb_ls_sz_r(szene)
-    BettSocket.sendto(str(szene),(BETT_IP,BETT_PORT))
 
 def send_cmd_satellite(device, szene):
+    if szene in ["man", "auto"]:
+        mysql_con.set_automode(device=device, mode=szene)
+        return
     for item in pies:
         if item.name == str(device):
             command = mdb_get_dicti(str(item.command_set),szene)
@@ -644,19 +643,7 @@ def set_szene(name):
                     elif key == "TV":
                         for idx, kommando in enumerate(kommandos):
                             folgen = Timer((float(idx)/5), tv_set_szene, [kommando])
-                            folgen.start()                        
-                    elif key == "Amp":
-                        for kommando in kommandos:
-                            marantz_set_szene(kommando) 
-                    elif key in TF_LEDs:                
-                        for kommando in kommandos:
-                            #t = threading.Thread(target=set_TF_LEDs, args=[key, kommando])
-                            #t.start()                    
-                            set_TF_LEDs(key, kommando)                         
-                    elif key == "TuerSPi":
-                        for kommando in kommandos:
-                            t = threading.Thread(target=TuerSPi, args=[kommando])
-                            t.start()
+                            folgen.start()                                                 
                     elif key == "Interner_Befehl":
                         for kommando in kommandos:
                             t = threading.Thread(target=interner_befehl, args=[kommando])
@@ -678,10 +665,9 @@ def set_szene(name):
                         aes.new_event(description=key + ": " + str(kommando), prio=0)
                         setting_s(key, str(kommando))
                 elif key == "Zusatz_Status":
-                    time.sleep(1)
                     for kommando in kommandos:
-                        #aes.new_event(description=key + ": " + str(kommando) + ": " + str(kommandos.get(kommando)), prio=0)
-                        setting_s(str(kommando), str(kommandos.get(kommando)))                      
+                        set_del = Timer(1, setting_s, [str(kommando), str(kommandos.get(kommando))])
+                        set_del.start()                                           
         if ((szene.get("Szene_folgt") <> "") and (str(szene.get("Szene_folgt")) <> "None")):
             try:
                 if type(eval(szene.get("Szene_folgt"))) == list:
@@ -743,75 +729,6 @@ def interner_befehl(befehl):
         exectext = "sudo poweroff"
         os.system(exectext)          
                     
-def marantz_set_szene(szene):
-    j = 0
-    MarantzSocket.sendto("Update",(MARANTZ_IP,MARANTZ_PORT))
-    if str(szene) == "Reset":
-        MarantzSocket.sendto("STOP",(MARANTZ_IP,MARANTZ_PORT))
-        return
-    elif str(szene) == "Save":
-        MarantzSocket.sendto("Save",(MARANTZ_IP,MARANTZ_PORT))
-        return
-    elif str(szene) == "lauter":
-        #MarantzSocket.sendto("Save",(MARANTZ_IP,MARANTZ_PORT))
-        #szene = "Aktuell"
-        #time.sleep(0)
-        #m_szene = mdb_marantz_r(str(szene))
-        #vol = str(m_szene.get("Volume"))
-        #vol = float(vol[1:len(vol)])
-        dicti = {}
-        dicti["Command"] = "VOL"
-        #vol = "0" + str(vol+5)[0:(len(str(vol+5))-2)]
-        dicti["Value"] = '3'#vol
-        MarantzSocket.sendto(str(dicti),(MARANTZ_IP,MARANTZ_PORT))
-        return
-    elif str(szene) == "leiser":
-        #MarantzSocket.sendto("Save",(MARANTZ_IP,MARANTZ_PORT))
-        #szene = "Aktuell"  
-        #time.sleep(0)
-        #m_szene = mdb_marantz_r(str(szene))
-        #vol = str(m_szene.get("Volume"))
-        #vol = float(vol[1:len(vol)])
-        dicti = {}
-        dicti["Command"] = "VOL"
-        #vol = "0" + str(vol-5)[0:(len(str(vol-5))-2)]
-        dicti["Value"] = '4'#vol
-        MarantzSocket.sendto(str(dicti),(MARANTZ_IP,MARANTZ_PORT))
-        return
-    elif str(szene) == "Update":
-        MarantzSocket.sendto("Update",(MARANTZ_IP,MARANTZ_PORT))
-        return    
-    while mdb_marantz_r('Aktuell').get('Power') == "False" and str(szene) <> "Aus" and j<6:
-        ezcontrol.SetSwitch("Video_Audio", "100.0")
-        MarantzSocket.sendto("Update",(MARANTZ_IP,MARANTZ_PORT))
-        time.sleep(5)
-        MarantzSocket.sendto("AMPein",(MARANTZ_IP,MARANTZ_PORT))
-        time.sleep(10)
-        MarantzSocket.sendto("STOP",(MARANTZ_IP,MARANTZ_PORT))
-        time.sleep(15)
-        j = j + 1
-    if j > 5:
-        aes.new_event(description="Probleme mit Marantzcontrol", prio=1)
-    if str(szene) == "AMPein":
-        MarantzSocket.sendto("AMPein",(MARANTZ_IP,MARANTZ_PORT))         
-        return
-    m_szene = mdb_marantz_r(str(szene))
-    commands = ["Power", "Volume", "Source", "Mute", "Display"]
-    shorts = {"Volume":"VOL", "Power":"PWR", "Source":"SRC", "Mute":"AMT", "Display":"DIP"}
-    for command in m_szene:
-        if ((command in commands) and (str(m_szene.get(command)) <> "None")):
-            dicti = {}
-            dicti["Command"] = str(shorts.get(command))
-            dicti["Value"] = str(m_szene.get(command))
-            if str(command) == "Power" and str(m_szene.get(command)) == "True":
-                dicti["Value"] = "2"
-            if str(command) == "Power" and str(m_szene.get(command)) == "False":
-                dicti["Value"] = "1" 
-            MarantzSocket.sendto(str(dicti),(MARANTZ_IP,MARANTZ_PORT))
-            time.sleep(1)
-    if str(m_szene.get("Power")) == "True":
-        time.sleep(2)
-        MarantzSocket.sendto("STOP",(MARANTZ_IP,MARANTZ_PORT))
 
 def set_TF_LEDs(device, kommando):
     if kommando in ["man", "auto"]:

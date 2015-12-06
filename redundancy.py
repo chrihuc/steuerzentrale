@@ -6,6 +6,7 @@ from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 from threading import Timer
 import time
 from alarmevents import alarm_event
+from mysql_con import setting_s
 
 hostName = gethostbyname( constants.eigene_IP )
 SIZE = 1024
@@ -19,6 +20,7 @@ def set_master():
     constants.redundancy_.master = True
     time.sleep(1)
     aes.new_event(description="Master-Slave changeover, " + constants.name + " ist Master", prio=5, durchsage="", karenz=0)
+    setting_s("Master_Slave","Master")
     while constants.run:
         mySocket.sendto("master",(constants.redundancy_.partner_IP,constants.redundancy_.PORT))
         time.sleep(constants.redundancy_.timeout_send)
@@ -27,6 +29,7 @@ def set_master_fake():
     aes.new_event(description="Fake Master-Slave changeover, " + constants.name + " ist Master", prio=5, durchsage="", karenz=0)     
 
 def main():
+    setting_s("Master_Slave","Slave")
     if constants.redundancy_.typ == 'Master':
         set_master()
     elif constants.redundancy_.typ == 'Slave':

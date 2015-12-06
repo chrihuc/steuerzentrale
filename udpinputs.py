@@ -24,7 +24,7 @@ from phue import Bridge
 #from email.mime.text import MIMEText
 #from subprocess import Popen, PIPE
 from mysql_con import mdb_sonos_r, mdb_sonos_s, setting_s, setting_r, mdb_szene_r, mdb_marantz_r, mdb_marantz_s, mdb_fern_r_neu, mdb_sideb_r, app_r, mdb_hue_s, mdb_sideb_s
-from szenen import set_szene, sonos_set_szene, marantz_set_szene, tv_set_szene, set_TF_LEDs, hue_set_szene, set_TF_LEDs
+from szenen import set_szene, sonos_set_szene, tv_set_szene, set_TF_LEDs, hue_set_szene, set_TF_LEDs
 from messaging import messaging
 from alarmevents import alarm_event
 #from text_to_sonos import downloadAudioFile
@@ -186,7 +186,6 @@ def main():
     heartbeat.start()
     ezcontrol.SetSwitchFunction("heartbeat", str(1))
     ezcontrol.SetSwitchFunction("NotbetrNot", str(1))
-    marantz_set_szene("Reset")
     #Initialize scenes
     if ((setting_r("Status") == "Am Gehen 1") or (setting_r("Status") == "Am Gehen 2")):
         t = threading.Thread(target=set_szene, args=["Alles_aus_4"])
