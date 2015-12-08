@@ -66,25 +66,3 @@ V1: rewrite communication to acknowledge
     Alle inputs in einen Table
     Tables ordern historische vs Einstellungen d sensible Daten
     setup creates all tables in sql root password not stored
-    
-new SQL Schema:
-    HIS_inputs
-    HIS_alarmevents
-    cmd_inputs
-    set_settings
-   Besucher
-   Bewohner
-    cmd_cron
-   gcm_users
-    set_Szenen
-    cmd_wecker
-    out_hue
-   hue_autolicht
-    cmd_KeyActions
-    out_LightstripSchlafzi
-    out_Marantz
-    set_satellites
-    out_Sideboard
-    out_Sonos
-    out_TuerSPi
-    
