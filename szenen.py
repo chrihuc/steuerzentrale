@@ -97,7 +97,7 @@ def main():
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
     constants.redundancy_.master = True
     start_t = datetime.datetime.now()
-    set_szene("Sideb_OL_Aus")
+    set_szene("AbendBelEin")
     print datetime.datetime.now() - start_t
     #set_szene("Test")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))

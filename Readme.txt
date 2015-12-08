@@ -58,13 +58,33 @@ Satellite with IP and Port in table Satellites
 ###########
 todo:
     wecker from cron not wecker.py
+    remove temperatur prediction
+
+V1: rewrite communication to acknowledge
     szenen_timer is recursive not working
-    rewrite communication to acknowledge
-        
-Changes in Mysql
-    rename LightstrSchlafzi in LightstripSchlafzi
-    rename Amp in Marantz
-    rename table TuerSPiled in TuerSPi
-    add commandset to Pi
-    Sideboard
+    Einer wach wird Nachtruhe
+    Alle inputs in einen Table
+    Tables ordern historische vs Einstellungen d sensible Daten
+    setup creates all tables in sql root password not stored
+    
+new SQL Schema:
+    HIS_inputs
+    HIS_alarmevents
+    cmd_inputs
+    set_settings
+   Besucher
+   Bewohner
+    cmd_cron
+   gcm_users
+    set_Szenen
+    cmd_wecker
+    out_hue
+   hue_autolicht
+    cmd_KeyActions
+    out_LightstripSchlafzi
+    out_Marantz
+    set_satellites
+    out_Sideboard
+    out_Sonos
+    out_TuerSPi
     
