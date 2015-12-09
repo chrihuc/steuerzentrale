@@ -70,7 +70,7 @@ class temp_derivator:
                 for i in range (0,len(row)):
                    #print row[i]
                    value = row[i]
-            if type(value) == str:
+            if str(value) == "None":
                 value = 0
             return value 
         con.close()        

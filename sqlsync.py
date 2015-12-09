@@ -15,8 +15,8 @@ def main():
 
 class sync:
     def __init__(self):
-        self.user_r = "python_user"
-        self.pass_r = "python"
+        self.user_r = "customer"
+        self.pass_r = "user"
         self.host_r = constants.redundancy_.partner_IP
         self.user_ = "customer"
         self.pass_ = "user"

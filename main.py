@@ -20,15 +20,15 @@ syncliste = []
 syncliste += ["Settings"]
 syncliste += ["Besucher"]
 syncliste += ["Bewohner"]
-#syncliste += ["cron"]
+syncliste += ["cron"]
 syncliste += ["gcm_users"]
-#syncliste += ["Szenen"]
+syncliste += ["Szenen"]
 syncliste += ["Wecker"]
-#syncliste += ["Sideboard"]
+syncliste += ["Sideboard"]
 for table in syncliste:
     try:
         ssync.export(table, "XS1DB")
-        ssync.trunc_import(table, "XS1DB") 
+        #ssync.trunc_import(table, "XS1DB") 
         aes.new_event(description="Success sync "+table, prio=0)
     except:
         aes.new_event(description="Error sync "+table, prio=0)

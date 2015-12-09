@@ -708,6 +708,9 @@ def interner_befehl(befehl):
     if befehl == "activate_usb_keys":
         anw_status.activate_keys() 
     if befehl == "restart_homecontrol":
+        for sat in pies:
+            if sat.Type == "sat":     
+                sat.kill_python()
         zeit =  time.time()
         now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))  
         setting_s("Laststart", str(now))        
