@@ -66,3 +66,6 @@ V1: rewrite communication to acknowledge
     Alle inputs in einen Table
     Tables ordern historische vs Einstellungen d sensible Daten
     setup creates all tables in sql root password not stored
+    satellites add thread supervision
+    historic tables in reverse
+    forced restart start also all satellites
