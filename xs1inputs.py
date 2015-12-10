@@ -382,6 +382,7 @@ def on_receive(data):
     
 def heartbeat_sup():
   if selfsupervision:
+    constants.run = False
     zeit =  time.time()
     now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))  
     setting_s("Autorestart", str(now))
@@ -392,11 +393,13 @@ def heartbeat_sup():
         aes.new_event(description="XS1 nicht erreichbar", prio=2)
         setting_s("XS1_off", "Active")
     setting_s("NumRestart", str(count + 1))
-    exectext = "sudo killall python"
+    exectext = "killall python"
     if ping(constants.router_IP):
+        #sys.exit("Error message")
         os.system(exectext)
     else:
         reset_wlan()
+        #sys.exit("Error message")
         os.system(exectext)   
 
 def reset_wlan():
