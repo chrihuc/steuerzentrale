@@ -69,3 +69,6 @@ V1: rewrite communication to acknowledge
     satellites add thread supervision
     historic tables in reverse
     forced restart start also all satellites
+    add logging into receiving
+    Use new Key as input events
+    Howto update sql tables?
