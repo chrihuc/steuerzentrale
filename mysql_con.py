@@ -7,9 +7,17 @@ from Sonos2Py import sonos
 from threading import Timer
 
 sn=sonos()
+datab = constants.sql_.DB
+
+#auto add entry to inputs
+#replace all dbs with constants
+#rewrite defs at the end
 
 def main():
-    print mdb_get_table("sattelites")
+    print inputs('Temp',10)
+    #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
+    #print re_calc(['lin_calc',[1,'temp',1]])
+    #print re_calc(10)
     #set_automode(device="Stehlampe", mode="auto")
     #print mdb_szene_r("Device_Typ")
     #typ_dict = mdb_szene_r("Device_Typ")
@@ -24,76 +32,38 @@ def main():
         #if typ_dict.get(device) == "Hue":
             #hue_devices.append(device)            
     #print hue_devices
-    
-def gcm_users_read():
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    dicti = {}
-    liste = []
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM gcm_users'
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        j = 0
-        for row in results:
-            for i in range (0,len(row)):
-                #print row[i]
-                dicti[field_names[i]] = row[i]
-            liste.append(dicti)
-            dicti = {}
-            j = j + 1
-        return liste    
-    
-def mdb_sonos_r(player):
-    dicti = {}
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM Sonos WHERE Name = "' + str(player) +'"'
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            for i in range (0,len(row)):
-               #print row[i]
-               dicti[field_names[i]] = row[i]            
-        return dicti
-        for row in results:
-            MasterZone = row[1]
-            Pause = row[2]
-            Sender = row[3]
-            Radio = row[4]   
-            TitelNr = row[5]
-            Time = row[6]
-            PlayListNr = row[7]     
-            Volume = row[8]
-        return {'Pause':Pause,'Radio':Radio,'Sender':Sender,'TitelNr':TitelNr,'Time':Time,'MasterZone':MasterZone,'PlayListNr':PlayListNr, 'Volume':Volume}
-    con.close()  
 
-def mdb_sonos_s(player, Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume):
-    if player in sn.Names:
-        playern = sn.Names.get(player)
+def re_calc(inpt):
+    #['lin_calc',[1,'temp',1]]
+    #['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]]
+    if "calc" in str(inpt):
+        try:
+            if type(eval(str(inpt))) == list:
+                lst = eval(str(inpt))
+                for num, sub in enumerate(lst[1]):
+                    if "calc" in str(sub):
+                        lst[1][num] = re_calc(sub)
+                    elif type(sub) == str:
+                        lst[1][num] = float(setting_r(lst[1][num]))
+                if lst[0] == "lin_calc":
+                    return (lst[1][0] * lst[1][1]) + lst[1][2]
+        except:
+            return inpt
+    if "set" in str(inpt): 
+        lst = eval(str(inpt))  
+        return float(setting_r(lst[1]))
     else:
-        playern = player
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    if Volume == 'None':
-        with con:
-            cur = con.cursor()
-            sql = "UPDATE Sonos SET MasterZone = '" + str(MasterZone) + "', Pause = '" + str(Pause) + "', Sender = '" + str(Sender) + "', Radio = '" + str(Radio) + "', TitelNr = '" + str(TitelNr) + "', Time = '" + str(Time) + "', Volume = NULL WHERE Name = '" + str(playern) + "'"
-            cur.execute(sql)
-    else:
-        with con:
-            cur = con.cursor()
-            sql = "UPDATE Sonos SET MasterZone = '" + str(MasterZone) + "', Pause = '" + str(Pause) + "', Sender = '" + str(Sender) + "', Radio = '" + str(Radio) + "', TitelNr = '" + str(TitelNr) + "', Time = '" + str(Time) + "', Volume = '" + str(Volume) + "' WHERE Name = '" + str(playern) + "'" 
-            cur.execute(sql)        
-    con.close()
-    
+        return inpt
+       
 def setting_s(setting, wert):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
-        sql = 'UPDATE Settings SET Value = "' + str(wert) + '" WHERE Name = "'+ str(setting) + '"'
+        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
+        if cur.fetchone()[0] == 0:
+            sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES ("' + str(wert) + '","'+ str(setting) + '")'
+        else:
+            sql = 'UPDATE '+constants.sql_tables.settings.name+' SET Value = "' + str(wert) + '" WHERE Name = "'+ str(setting) + '"'
         cur.execute(sql)
     con.close() 
     
@@ -102,222 +72,116 @@ def setting_r(setting):
     value = None
     with con:
         cur = con.cursor()
-        sql = 'SELECT * FROM Settings WHERE Name = "' + str(setting) +'"'
-        cur.execute(sql)
-        results = cur.fetchall()
-        for row in results:
-            fname = row[1]
-            value = row[2]
-    con.close()            
-    return value
-        
-def app_r(name):
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM App WHERE Kommando = "' + str(name) +'"'
-        cur.execute(sql)
-        results = cur.fetchall()
-        for row in results:
-            fname = row[1]
-            value = row[2]
+        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
+        if cur.fetchone()[0] == 0:   
+            sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES ("None","'+ str(setting) + '")'
+            value = 'None'
+        else:
+            sql = 'SELECT * FROM '+constants.sql_tables.settings.name+' WHERE Name = "' + str(setting) +'"'
+            cur.execute(sql)
+            results = cur.fetchall()
+            for row in results:
+                fname = row[1]
+                value = row[2]
     con.close()            
     return value
 
-def set_automode(device, mode):
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        sql = 'UPDATE Szenen SET '+device+' = "' + str(mode) + '" WHERE Name = "Auto_Mode"'
-        cur.execute(sql)
-    con.close()             
-    
-
-def mdb_hue_s(device, setting):
-    #setting must be a dict
-    #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        sql = "UPDATE Hue SET hue = '" + str(setting.get("hue")) + "', bri = '" + str(setting.get("bri")) + "', sat = '" + str(setting.get("sat")) + "', an = '" + str(setting.get("an")) + "' WHERE Name = '" + device +"'"
-        cur.execute(sql) 
-    con.close()
-    
-def mdb_fern_r(Table, Knopf):
-    setting_ = setting_r("Status")
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    szenen = []
-    dicti = {}
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT Szene FROM ' + str(Table)
-        cur.execute(sql)
-        results = cur.fetchall()
-        for row in results:
-            for i in range (0,len(row)):   
-               szenen.append(row[i])
-    if setting_ in szenen:
-        pass
-    else:
-        setting_ = "Rest"
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM ' + str(Table) +' WHERE Szene = "' + str(setting_) +'"'
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            for i in range (0,len(row)):
-               #print row[i]
-               dicti[field_names[i]] = row[i]  
-    con.close()               
-    return dicti.get(Knopf) 
-
-def mdb_fern_r_neu(Setting, Table, Knopf):
-    setting_ = setting_r(Setting)
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    szenen = []
-    dicti = {}
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT Szene FROM ' + str(Table)
-        cur.execute(sql)
-        results = cur.fetchall()
-        for row in results:
-            for i in range (0,len(row)):   
-               szenen.append(row[i])
-    if setting_ in szenen:
-        pass
-    else:
-        setting_ = "Rest"
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM ' + str(Table) +' WHERE Szene = "' + str(setting_) +'"'
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            for i in range (0,len(row)):
-               #print row[i]
-               dicti[field_names[i]] = row[i]
-        if ((dicti.get("NeuerStatus") <> "") and (str(dicti.get("NeuerStatus")) <> "None")):
-            try:
-                if type(eval(dicti.get("NeuerStatus"))) == list:
-                    kommandos = eval(dicti.get("NeuerStatus"))
-                else:
-                    kommandos = [dicti.get("NeuerStatus")]
-            except NameError as serr:
-                kommandos = [dicti.get("NeuerStatus")]
-            try:
-                if type(eval(dicti.get("Status_Delay"))) == list:
-                    delays = eval(dicti.get("Status_Delay"))
-                else:
-                    delays = [dicti.get("Status_Delay")]
-            except NameError as serr:
-                delays = [dicti.get("Status_Delay")]                 
-            for index, kommando in enumerate(kommandos):
-                #lgd.log(" Wait " + str(delays[index]) + " szene " + str(kommando))
-                StatusFolgt = Timer(float(delays[index]), set_status, [Setting, str(kommando)])
-                StatusFolgt.start() 
-    con.close()                
-    return dicti.get(Knopf)        
-
-def set_status(Setting, neuer_Status):
-        setting_s(Setting, neuer_Status)
-        
-def mdb_fern_schluessel_r(schlue_c, schlue_s, schlue_c_n, schlue_s_n):
-    setting_ = setting_r("Status")
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    szenen = []
-    dicti = {}
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM Fern_Schluessel WHERE Status = "' + str(setting_) +'" and Schluessel_Christoph = "' + str(schlue_c) +'" and Schluessel_Sabina = "' + str(schlue_s) +'" and Schluessel_Christoph_neu = "' + str(schlue_c_n) +'" and Schluessel_Sabina_neu = "' + str(schlue_s_n) + '"'
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            for i in range (0,len(row)):
-               #print row[i]
-               dicti[field_names[i]] = row[i]            
-    con.close()    
-    return dicti.get("Szene")
-
-
-def mdb_marantz_s(name, setting):
-    #setting must be a dict
-    #{'Treble': '7', 'Bass': '2', 'Power': 'True', 'Mute': 'False', 'Attenuate': 'False', 'Volume': '-25', 'Source': '11'}
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        sql = "UPDATE Marantz SET Power = '" + str(setting.get("Power")) + "', Volume = '0" + str(setting.get("Volume")) + "', Source = '" + str(setting.get("Source")) + "', Mute = '" + str(setting.get("Mute")) + "' WHERE Name = '" + name +"'"
-        cur.execute(sql) 
-    con.close()        
-        
-
-def mdb_sideb_s(name, setting):
-    #setting must be a dict
-    #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        sql = "UPDATE Sideboard SET rot = '" + str(setting.get("rot")) + "', gruen = '" + str(setting.get("gruen")) + "', blau = '" + str(setting.get("blau")) + "' WHERE Name = '" + name +"'"
-        cur.execute(sql)     
-    con.close()        
-
-## alle mit dicti:
-def mdb_get_dicti(db, name):
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    dicti = {}
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM ' + db + ' WHERE Name = "' + str(name) +'"'
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            for i in range (0,len(row)):
-               dicti[field_names[i]] = row[i]            
-    con.close()    
-    return dicti       
-
-def mdb_sideb_r(name):
-    return mdb_get_dicti('Sideboard', name) 
-
-def mdb_marantz_r(name):
-    return mdb_get_dicti('Marantz', name) 
-        
-def mdb_ls_sz_r(name):
-    return mdb_get_dicti('LightstrSchlafzi', name)    
-
-def hue_autolicht(name):
-    return mdb_get_dicti('hue_autolicht', name)  
-    
-def mdb_szene_r(name):
-    return mdb_get_dicti('Szenen', name)       
-        
-def mdb_hue_r(name):
-    return mdb_get_dicti('Hue', name)
-
-def mdb_tspled_r(name):
-    return mdb_get_dicti('TuerSPiLED', name) 
-
-def mdb_read_table_entry(table,name):
-    return mdb_get_dicti(table, name) 
-    
 def settings_r():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     with con:
         cur = con.cursor()
-        sql = 'SELECT * FROM Settings'
+        sql = 'SELECT * FROM '+constants.sql_tables.settings.name
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
         for row in results:
             dicti[row[1]] = row[2]            
     con.close()    
-    return dicti        
+    return dicti 
+
+def set_automode(device, mode):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    with con:
+        cur = con.cursor()
+        sql = 'UPDATE '+constants.sql_tables.szenen.name+' SET '+device+' = "' + str(mode) + '" WHERE Name = "Auto_Mode"'
+        cur.execute(sql)
+    con.close()                   
+
+## alle mit dicti:
+def mdb_read_table_entry(db, entry):
+    cmds = teg_raw_cmds(db)
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    dicti = {}
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT * FROM ' + db + ' WHERE Name = "' + str(entry) +'"'
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            for i in range (0,len(row)):
+                if len(cmds) == 0:
+                    commando = field_names[i]
+                else:
+                    commando = cmds.get(field_names[i])                
+                dicti[commando] = re_calc(row[i])            
+    con.close()    
+    return dicti       
+
+def get_raw_cmds(db):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    dicti = {}
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT * FROM ' + db + ' WHERE Name = "Name"'
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            for i in range (0,len(row)):
+               dicti[row[i]] = field_names[i]            
+    con.close()    
+    return dicti
+
+def teg_raw_cmds(db):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    dicti = {}
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT * FROM ' + db + ' WHERE Name = "Name"'
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            for i in range (0,len(row)):
+               dicti[field_names[i]] =  row[i]           
+    con.close()    
+    return dicti
+#def mdb_sideb_r(name):
+    #return mdb_read_table_entry('Sideboard', name) 
+
+#def mdb_marantz_r(name):
+    #return mdb_read_table_entry('Marantz', name) 
+        
+#def mdb_ls_sz_r(name):
+    #return mdb_read_table_entry('LightstrSchlafzi', name)    
+
+#def hue_autolicht(name):
+    #return mdb_read_table_entry('hue_autolicht', name)  
+    
+#def mdb_szene_r(name):
+    #return mdb_read_table_entry('Szenen', name)       
+        
+#def mdb_hue_r(name):
+    #return mdb_read_table_entry('Hue', name)
+
+#def mdb_tspled_r(name):
+    #return mdb_read_table_entry('TuerSPiLED', name) 
+    
+#def mdb_sonos_r(player):
+    #return mdb_read_table_entry('Sonos', player) 
+           
 
 #kompletter table:
 def mdb_get_table(db):
@@ -336,6 +200,116 @@ def mdb_get_table(db):
             rlist.append(dicti)
     con.close()    
     return rlist  
+
+def mdb_set_table(table, device, commands):
+    if device in sn.Names:
+        playern = sn.Names.get(device)
+    else:
+        playern = device
+    cmds = get_raw_cmds(constants.sql_tables.Sonos.name)
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    with con:
+        cur = con.cursor()
+        for cmd in commands:
+            if len(cmds) == 0:
+                commando = cmd
+            else:
+                commando = cmds.get(cmd)
+            sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(playern) + '"'
+            cur.execute(sql)       
+    con.close() 
+
+#def mdb_sonos_s(player, commands):
+    ##commands = Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume
+    #if player in sn.Names:
+        #playern = sn.Names.get(player)
+    #else:
+        #playern = player
+    #cmds = get_raw_cmds(constants.sql_tables.Sonos.name)
+    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    #with con:
+        #cur = con.cursor()
+        #for cmd in commands:
+            #if len(cmds) == 0:
+                #commando = cmd
+            #else:
+                #commando = cmds.get(cmd)
+            #sql = 'UPDATE '+constants.sql_tables.Sonos.name+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(playern) + '"'
+            #cur.execute(sql)       
+    #con.close()          
+    
+#def mdb_hue_s(device, commands):
+    ##setting must be a dict
+    ##{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
+    #cmds = get_raw_cmds(constants.sql_tables.hue.name)
+    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    #with con:
+        #cur = con.cursor()
+        #for cmd in commands:
+            #if len(cmds) == 0:
+                #commando = cmd
+            #else:
+                #commando = cmds.get(cmd)            
+            #sql = 'UPDATE '+constants.sql_tables.hue.name+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(device) + '"'
+            #print sql
+            #cur.execute(sql)  
+    #con.close()       
+        
+##to rewrite  
+
+#def mdb_marantz_s(name, setting):
+    ##setting must be a dict
+    ##{'Treble': '7', 'Bass': '2', 'Power': 'True', 'Mute': 'False', 'Attenuate': 'False', 'Volume': '-25', 'Source': '11'}
+    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    #with con:
+        #cur = con.cursor()
+        #sql = "UPDATE Marantz SET Power = '" + str(setting.get("Power")) + "', Volume = '0" + str(setting.get("Volume")) + "', Source = '" + str(setting.get("Source")) + "', Mute = '" + str(setting.get("Mute")) + "' WHERE Name = '" + name +"'"
+        #cur.execute(sql) 
+    #con.close()        
+        
+#def mdb_sideb_s(name, setting):
+    ##setting must be a dict
+    ##{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
+    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    #with con:
+        #cur = con.cursor()
+        #sql = "UPDATE Sideboard SET rot = '" + str(setting.get("rot")) + "', gruen = '" + str(setting.get("gruen")) + "', blau = '" + str(setting.get("blau")) + "' WHERE Name = '" + name +"'"
+        #cur.execute(sql)     
+    #con.close() 
+    
+def inputs(device, value):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    dicti = {}
+    szenen = []    
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"'")
+        if cur.fetchone()[0] == 0:    
+            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Input) VALUES ("' + str(device) + '")'
+            cur.execute(sql)
+        else:
+            sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Input = "' + str(device) +'"'
+            value = str(value)
+            sql = sql + ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
+            sql = sql + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
+            sql = sql + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
+            sql = sql + ');' 
+            cur.execute(sql)
+            results = cur.fetchall()
+            field_names = [i[0] for i in cur.description]
+            #dicti = {key: "" for (key) in szene_columns}
+            for row in results:
+                for i in range (0,len(row)):
+                    dicti[field_names[i]] = row[i]  
+                szenen.append(dicti.get(setting_r("Status")))
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Logging = 1")
+            if cur.fetchone()[0] > 0: 
+                setting_s(device, value)
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Setting = '1'")
+            if cur.fetchone()[0] > 0: 
+                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(device) + '",' + str(value) + ', NOW())'
+                cur.execute(insertstatement) 
+            return szenen
         
 if __name__ == '__main__':
     main()    

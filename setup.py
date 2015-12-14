@@ -40,12 +40,32 @@ def main():
                 results = cur.fetchall()      
                 print results
         for att in constants.sql_tables.inps:
-            for dev in att:
+            for dev in att.columns:
                 try:
                     query = "ALTER TABLE "+constants.sql_.DB+"."+constants.sql_tables.szenen.name+" ADD %s VARCHAR(20)" % (dev)
                     cur.execute( query )
                 except:
                     pass
+        cur.execute("SELECT COUNT(*) FROM "+constants.sql_.DB+"."+constants.sql_tables.szenen.name+" WHERE Name = 'Device_Type'")
+        if cur.fetchone()[0] == 0:
+            sql = 'INSERT INTO '+constants.sql_tables.szenen.name+' (Id,Name) VALUES (1,"Device_Type")'  
+            cur.execute(sql)
+        for att in constants.sql_tables.inps:
+            for dev in att.columns:
+                sql = 'UPDATE '+constants.sql_tables.szenen.name+' SET '+dev+' = "' + att.name + '" WHERE Name = "Device_Type"'
+                cur.execute(sql)
+        cur.execute("SELECT COUNT(*) FROM "+constants.sql_.DB+"."+constants.sql_tables.szenen.name+" WHERE Name = 'Auto_Mode'")
+        if cur.fetchone()[0] == 0:
+            sql = 'INSERT INTO '+constants.sql_tables.szenen.name+' (Id,Name) VALUES (2,"Auto_Mode")'  
+            cur.execute(sql)
+        for att in constants.sql_tables.inps:
+            for dev in att.columns:
+                sql = 'UPDATE '+constants.sql_tables.szenen.name+' SET '+dev+' = "auto" WHERE Name = "Auto_Mode"'
+                cur.execute(sql)    
+        cur.execute("SELECT COUNT(*) FROM "+constants.sql_.DB+"."+constants.sql_tables.szenen.name+" WHERE Name = 'Group'")
+        if cur.fetchone()[0] == 0:
+            sql = 'INSERT INTO '+constants.sql_tables.szenen.name+' (Id,Name) VALUES (3,"Group")'  
+            cur.execute(sql)                
     con.close()  
 
 

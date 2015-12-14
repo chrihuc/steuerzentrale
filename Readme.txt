@@ -57,18 +57,20 @@ Satellite with IP and Port in table Satellites
 
 ###########
 todo:
-    wecker from cron not wecker.py
     remove temperatur prediction
 
 V1: rewrite communication to acknowledge
     szenen_timer is recursive not working
-    Einer wach wird Nachtruhe
+    Einer wach wird Leise
     Alle inputs in einen Table
-    Tables ordern historische vs Einstellungen d sensible Daten
-    setup creates all tables in sql root password not stored
+    auto add input when not existing
     satellites add thread supervision
+    scanner is satellite
     historic tables in reverse
     forced restart start also all satellites
     add logging into receiving
     Use new Key as input events
-    Howto update sql tables?
+    Howto update sql tables (try add colum, if table exists)
+    calc algos for Analog values
+    lin_calc(m, x, b)
+    command line in tables
