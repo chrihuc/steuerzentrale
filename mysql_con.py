@@ -70,13 +70,13 @@ def setting_s(setting, wert):
     
 def setting_r(setting):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    value = None
+    value = 0
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
         if cur.fetchone()[0] == 0:   
-            sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES ("None","'+ str(setting) + '")'
-            value = 'None'
+            sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES (0,"'+ str(setting) + '")'
+            value = 0
             cur.execute(sql)
         else:
             sql = 'SELECT * FROM '+constants.sql_tables.settings.name+' WHERE Name = "' + str(setting) +'"'
@@ -304,10 +304,10 @@ def inputs(device, value):
                 for i in range (0,len(row)):
                     dicti[field_names[i]] = row[i]  
                 szenen.append(dicti.get(setting_r("Status")))
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Logging = 1")
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Setting = 1")
             if cur.fetchone()[0] > 0: 
                 setting_s(device, value)
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Setting = '1'")
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Logging = '1'")
             if cur.fetchone()[0] > 0: 
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(device) + '",' + str(value) + ', NOW())'
                 cur.execute(insertstatement) 
