@@ -13,8 +13,9 @@ ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 def  get_satellites():
-    list = mdb_get_table("satellites")
+    list = mdb_get_table(constants.sql_tables.satellites.name)
     simplelist = []
+    x = None
     for satellite in list:
         x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"),satellite.get("command_set"))
         x.attr = satellite
@@ -22,8 +23,9 @@ def  get_satellites():
     return simplelist
 
 def  get_satellite(name):
-    list = mdb_get_table("satellites")
+    list = mdb_get_table(constants.sql_tables.satellites.name)
     simplelist = []
+    x = None
     for satellite in list:
         if satellite.get("Name") == name:
             x = sputnik(satellite.get("Name"),satellite.get("IP"),satellite.get("PORT"),satellite.get("Type"),satellite.get("USER"),satellite.get("PASS"),satellite.get("command_set"))

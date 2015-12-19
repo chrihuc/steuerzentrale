@@ -58,19 +58,15 @@ Satellite with IP and Port in table Satellites
 ###########
 todo:
     remove temperatur prediction
+    
+    gcm setting id is empty
 
 V1: rewrite communication to acknowledge
     szenen_timer is recursive not working
-    Einer wach wird Leise
-    Alle inputs in einen Table
-    auto add input when not existing
     satellites add thread supervision
     scanner is satellite
     historic tables in reverse
     forced restart start also all satellites
     add logging into receiving
     Use new Key as input events
-    Howto update sql tables (try add colum, if table exists)
-    calc algos for Analog values
-    lin_calc(m, x, b)
-    command line in tables
+    alarm event missing hue feedback

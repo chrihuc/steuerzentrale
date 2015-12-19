@@ -5,7 +5,7 @@ import constants
 from Sonos2Py import sonos
 from classes import myezcontrol, ping
 import MySQLdb as mdb
-from mysql_con import mdb_fern_r, mdb_sonos_r, mdb_sonos_s, mdb_szene_r, mdb_hue_r, setting_s, setting_r, settings_r, mdb_marantz_r, mdb_hue_s, mdb_fern_schluessel_r, mdb_sideb_r, mdb_ls_sz_r, hue_autolicht, mdb_tspled_r, mdb_get_dicti
+from mysql_con import setting_s, setting_r, settings_r, mdb_read_table_entry
 import mysql_con
 import time
 from socket import socket, AF_INET, SOCK_DGRAM
@@ -73,7 +73,7 @@ TuerSPi_sock = socket( AF_INET, SOCK_DGRAM )
 
 #plex = PlexServer()
 
-typ_dict = mdb_szene_r("Device_Typ")
+typ_dict = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Typ")
 ezcontrol_devices = []
 TF_LEDs = []
 hue_devices = []
@@ -101,55 +101,40 @@ def main():
     print datetime.datetime.now() - start_t
     #set_szene("Test")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
+    #mdb_read_table_entry(constants.sql_tables.Sonos.name, player) 
     #test("Stehlampe")
     #deactivate_usb_keys()
     #sonos_write_szene(sn.Bad)
     
 
-def autolicht(helligkeit, offset = 60, minimum = 0, maximum=160):    
-    #helligkeit gemessene
-    #offset startpunkt der beleuchtung
-    #gradient steigung der beleuchtung
-    #mindest kleinste beleuchtung
-    if int(helligkeit) <= int(offset):
-        bel_wert = float(minimum) - (float(helligkeit)-float(offset))*(int(maximum)-int(minimum))/int(offset)
-    else:
-        bel_wert=0
-    return bel_wert
-
 def deactivate_usb_keys():
     anw_status.deactivate_keys()
     
 def sonos_write_szene(player):
-    Pause = 0
-    Radio = 0
-    TitelNr = 0
-    Sender = ""
-    Time = ""
-    MasterZone = "Own"
-    Volume = "None"
+    dicti = {}
+    dicti['MasterZone'] = "Own"
     posinfo = sn.GetPositionInfo(player)
     pos = sn.GetPosition(player)
     transinfo = sn.GetTransportInfo(player)
     for zone in sn.Zones:
         if zone in posinfo:
-            MasterZone = zone
-    if MasterZone == "Own":
+            dicti['MasterZone'] = zone
+    if dicti.get('MasterZone') == "Own":
         if "PLAYING" in transinfo:
-            Pause = 0
+            dicti['Pause'] = 0
         else:
-            Pause = 1
+            dicti['Pause'] = 1
         if "file" in posinfo:
-            Radio = 0
+            dicti['Radio'] = 0
         else:
-            Radio = 1
+            dicti['Radio'] = 1
         antwort = posinfo
         pos1 = antwort.find ('<TrackURI>',0) #('*&quot;&gt;',0)
         pos2 = antwort.find ('</TrackURI>',0) #('&lt;/res&gt;&lt;r:',0)
-        Sender = antwort [pos1+10:pos2]
-        TitelNr = int(pos[0])
-        Time = pos[1]
-    Volume = sn.GetVolume(player)
+        dicti['Sender'] = antwort [pos1+10:pos2]
+        dicti['TitelNr'] = int(pos[0])
+        dicti['Time'] = pos[1]
+    dicti['Volume'] = sn.GetVolume(player)
     if player == sn.WohnZi:
         playern = "WohnZi"
         plnum = 33
@@ -166,42 +151,7 @@ def sonos_write_szene(player):
         playern = player
         plnum = 0
     sn.SaveList(player, "Bad", 34)
-    mdb_sonos_s(player, Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume)   
-
-def sonos_write_szene_chris(player):
-    Pause = 0
-    Radio = 0
-    TitelNr = 0
-    Sender = ""
-    Time = ""
-    MasterZone = "Own"
-    Volume = "None"
-    posinfo = sn.GetPositionInfo(player)
-    pos = sn.GetPosition(player)
-    transinfo = sn.GetTransportInfo(player)
-    for zone in sn.Zones:
-        if zone in posinfo:
-            MasterZone = zone
-    if MasterZone == "Own":
-        if "PLAYING" in transinfo:
-            Pause = 0
-        else:
-            Pause = 1
-        if "file" in posinfo:
-            Radio = 0
-        else:
-            Radio = 1
-        antwort = posinfo
-        pos1 = antwort.find ('<TrackURI>',0) #('*&quot;&gt;',0)
-        pos2 = antwort.find ('</TrackURI>',0) #('&lt;/res&gt;&lt;r:',0)
-        Sender = antwort [pos1+10:pos2]
-        TitelNr = int(pos[0])
-        Time = pos[1]
-    else:
-        return
-    Volume = sn.GetVolume(player)
-    sn.SaveList(player, "Christ Aktuell", 51)
-    mdb_sonos_s("ChrisAktuell", Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume)    
+    mdb_set_table(constants.sql_tables.Sonos.name,player,dicti) 
     
 def sonos_read_szene(player, sonos_szene, hergestellt = False):
     #read szene from Sonos DB and execute
@@ -255,9 +205,7 @@ def sonos_set_szene(player, szenen):
                     else:
                         ezcontrol.SetSwitch(sonos_ezcont.get(player), "0.0")
                 elif str(szene) == "Save":
-                    sonos_write_szene(player)  
-                elif str(szene) == "SaveChris":
-                    sonos_write_szene_chris(player)                  
+                    sonos_write_szene(player)                   
                 elif str(szene) == "Time":
                     sonos_write_szene(player)
                     lt = localtime()
@@ -266,24 +214,24 @@ def sonos_set_szene(player, szenen):
                     if (minute <> 0) and (minute <> 30):
                         text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
                         laenge = downloadAudioFile(text)
-                        sonos_read_szene(player, mdb_sonos_r("TextToSonos"))
+                        sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
                         time.sleep(laenge + 1)            
-                        sonos_read_szene(player, mdb_sonos_r(sonos_szenen.get(str(player))))
+                        sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))
                 elif str(szene) == "Durchsage":
                     sonos_write_szene(player)   
                     text = setting_r("Durchsage")        
                     laenge = downloadAudioFile(text)
-                    sonos_read_szene(player, mdb_sonos_r("TextToSonos"))
+                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
                     time.sleep(laenge + 1)            
-                    sonos_read_szene(player, mdb_sonos_r(sonos_szenen.get(str(player))))            
+                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))            
                 elif str(szene) == "Return":
-                    sonos_read_szene(player, mdb_sonos_r(sonos_szenen.get(str(player))), hergestellt = True)          
+                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))), hergestellt = True)          
                 elif ((str(szene) == "An") and (ezcontrol.GetSwitch(sonos_ezcont.get(player))== "0.0")):
                     ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
                 elif ((str(szene) == "resume") and (ezcontrol.GetSwitch(sonos_ezcont.get(player))== "0.0")):
                     ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
                     time.sleep(60)
-                    sonos_read_szene(player, mdb_sonos_r(sonos_szenen.get(str(player))))            
+                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))            
                 elif (str(szene) == "lauter"):
                     ActVol = sn.GetVolume(player)
                     if ActVol >= 20: increment = 8
@@ -318,11 +266,11 @@ def sonos_set_szene(player, szenen):
                     setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
                     text = setting_r("Durchsage")        
                     laenge = downloadAudioFile(text)
-                    sonos_read_szene(player, mdb_sonos_r("TextToSonos"))
+                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
                     time.sleep(laenge + 1)  
                     sn.SetPause(player)
                 elif ((str(szene) <> "resume") and (str(szene) <> "An") and (str(szene) <> "None")):
-                    sonos_szene = mdb_sonos_r(szene)
+                    sonos_szene = mdb_read_table_entry(constants.sql_tables.Sonos.name,szene)
                     sonos_read_szene(player, sonos_szene)
                 if "WeckerPhase" in str(szene) and str(player) == "SonosSchlafZi":
                     transinfo = sn.GetTransportInfo(player)
@@ -333,7 +281,7 @@ def sonos_set_szene(player, szenen):
                         if not ping(str(sn.SchlafZi), number = 2):
                             ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
                             time.sleep(30)
-                        sonos_szene = mdb_sonos_r("Wecker2")
+                        sonos_szene = mdb_read_table_entry(constants.sql_tables.Sonos.name,"Wecker2")
                         sonos_read_szene(player, sonos_szene)
                         time.sleep(5)
                         transinfo = sn.GetTransportInfo(player)
@@ -344,7 +292,7 @@ def sonos_set_szene(player, szenen):
                             if not ping(str(sn.SchlafZi), number = 2):
                                 ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
                                 time.sleep(30)
-                            sonos_szene = mdb_sonos_r("WeckerAlternative")
+                            sonos_szene = mdb_read_table_entry(constants.sql_tables.Sonos.name,"WeckerAlternative")
                             sonos_read_szene(player, sonos_szene)                    
                 break
             except socket_error as serr:
@@ -419,7 +367,7 @@ def send_cmd_satellite(device, szene):
         return
     for item in pies:
         if item.name == str(device):
-            command = mdb_get_dicti(str(item.command_set),szene)
+            command = mdb_read_table_entry(str(item.command_set),szene)
             command["device"] = device
             item.send_udp_cmd(command)
                 
@@ -434,7 +382,7 @@ def hue_set_szene(device, szene):
         an = hbridge.get_light(device, 'on') 
         #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
         setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
-        mdb_hue_s(device, setting)
+        mdb_set_table(constants.sql_tables.hue.name,device, setting)
         return
     elif szene == 'toggle':
         an = hbridge.get_light(device, 'on') 
@@ -451,16 +399,9 @@ def hue_set_szene(device, szene):
             hbridge.set_light(device, {'on':True})
             return      
     keys = ['bri', 'hue', 'sat', 'transitiontime']
-    szene = mdb_hue_r(szene)
+    szene = mdb_read_table_entry(constants.sql_tables.hue.name,szene)
     if szene.get('bri') <> None:
-        try:
-            szene['bri'] = int(szene.get('bri'))
-        except ValueError:
-            auto_l_settings = hue_autolicht(szene.get('bri'))
-            szene['bri'] = int(autolicht(helligkeit = setting_r("Helligkeit"), offset = auto_l_settings.get("offset"), minimum = auto_l_settings.get("min"), maximum=auto_l_settings.get("max")))   
-            if szene.get('bri') < 1:
-                szene['an'] =  0   
-                szene['bri'] =  0
+        szene['bri'] = int(szene.get('bri'))
     if str(szene.get('an')) == "1" or str(szene.get('an')) == "True":
         hbridge.set_light(device, {'on':True}) 
         time.sleep(0.5)
@@ -515,10 +456,6 @@ def Tuer_auf():
     if str(setting_r("Einbruch")) == "True":
         aes.new_event(description="Einbruch", prio=3.1)
         Tuer_auf()
-
-def TuerSPi(szene):
-    kommando = mdb_tspled_r(szene)
-    TuerSPi_sock.sendto(str(kommando),(TuerSPi_IP,PORT_NUMBER))
     
 def Schluessel_weg():
     anwesende = schluessel.anwesende()
@@ -538,7 +475,7 @@ def set_szene(name):
     if str(name) == "Schluessel_weg":
         t = threading.Thread(target=Schluessel_weg)
         t.start()         
-    szene = mdb_szene_r(name)
+    szene = mdb_read_table_entry(constants.sql_tables.szenen.name,name)
     if str(szene) == "{}": return
     no_list = ["Priority", "Beschreibung", "Status", "Durchsage"]
     bedingungen = {}
@@ -584,7 +521,7 @@ def set_szene(name):
     if erfuellt:
         interlocks = {}
         if str(szene.get("Auto_Mode")) == "True":
-            interlocks = mdb_szene_r("Auto_Mode")
+            interlocks = mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
         hue_count = 0
         hue_delay = 0
         if str(szene.get("Durchsage")) <> "None":
@@ -592,11 +529,6 @@ def set_szene(name):
         if ((szene.get("Amp") <> "") and (str(szene.get("Amp")) <> "None")):
             setting_s("AV_cmd", "1")
             setting_s("Kommando", str(szene.get("Amp")))
-            delay = 20
-            if mdb_marantz_r('Aktuell').get('Power') == "False":
-                delay = 30
-            mar_fb = Timer(delay, marantz_fb)
-            #mar_fb.start() 
         if name in ["WeckerMute", "WeckerPhase1"] or "Schlummern" in name:
             schlummern.cancel()
         if name in ["Bad_ir"]:
@@ -729,65 +661,7 @@ def interner_befehl(befehl):
     if befehl == "poweroff":       
         exectext = "sudo poweroff"
         os.system(exectext)          
-                    
-
-def set_TF_LEDs(device, kommando):
-    if kommando in ["man", "auto"]:
-        mysql_con.set_automode(device=device, mode=kommando)
-        return
-    Ubersetzung = mdb_sideb_r(kommando)
-    if device <>  "Sideb_oben":
-        if device == "Sideb_links":
-            Ubersetzung['start'] = '[30]'
-        if device == "Sideb_mitte":
-            Ubersetzung['start'] = '[15]'
-        if device == "Sideb_rechts":
-            Ubersetzung['start'] = '[0]'            
-    if kommando == "toggle":
-        time.sleep(1)
-        if ezcontrol.GetSwitch("Wohnzimmer_Decke") == "100.0":
-            MarantzSocket.sendto("hell",(MARANTZ_IP,MARANTZ_PORT))
-            ezcontrol.SetSwitch("Sideboard", "100.0")
-        else:
-            if str(setting_r("Beleuchtung")) == "Abends":
-                folgen = Timer(0.1, set_szene, ['SidebAbends'])
-                folgen.start()            
-                #set_szene("gemuetlich")
-                #MarantzSocket.sendto(str(Ubersetzung),(MARANTZ_IP,MARANTZ_PORT))
-                #ezcontrol.SetSwitch("Sideboard", "0.0")
-            else:
-                MarantzSocket.sendto("aus",(MARANTZ_IP,MARANTZ_PORT))
-                ezcontrol.SetSwitch("Sideboard", "0.0")
-    else:
-        if str(Ubersetzung) <> 'None':
-          MarantzSocket.sendto(str(Ubersetzung),(MARANTZ_IP,MARANTZ_PORT))
-        else:  
-          MarantzSocket.sendto(kommando,(MARANTZ_IP,MARANTZ_PORT))
-        
-def marantz_fb():
-    marantz_set_szene("Update")
-    i = 0
-    if (str(setting_r("Kommando")) == "Aus"):
-        while ((mdb_marantz_r('Aktuell').get('Power') <> mdb_marantz_r(str(setting_r("Kommando"))).get('Power'))):
-            marantz_set_szene(str(setting_r("Kommando")))
-            marantz_set_szene("Update")
-            time.sleep(1)
-            i = i + 1
-        setting_s("AV_mode", str(setting_r("Kommando")))
-        time.sleep(6)
-        setting_s("AV_cmd", "0") 
-    else:
-        while ((mdb_marantz_r('Aktuell').get('Source') <> mdb_marantz_r(str(setting_r("Kommando"))).get('Source'))):
-            marantz_set_szene(str(setting_r("Kommando")))
-            marantz_set_szene("Update")
-            time.sleep(1)
-            i = i + 1               
-        setting_s("AV_mode", str(setting_r("Kommando")))
-        time.sleep(6)
-        setting_s("AV_cmd", "0")
-    if i > 5:
-        aes.new_event(description="Probleme mit Marantzcontrol", prio=0)
-                
+                 
 def tv_set_szene(szene):
     #ineffektiv try with sendkey
     t = threading.Thread(target=tv_remote_lan.sendKey, args=[str(szene)])
@@ -806,14 +680,7 @@ def tv_set_szene(szene):
             MarantzSocket.sendto("TV_ein",(MARANTZ_IP,MARANTZ_PORT))
         else:
             tv_remote.sendKey([str(szene)])
-            tv_remote_lan.sendKey([str(szene)])
-
-def test(bri):
-    try:
-        int(bri)
-    except ValueError:
-        auto_l_settings = hue_autolicht(bri)
-        print autolicht(helligkeit = 10, offset = auto_l_settings.get("offset"), gradient = auto_l_settings.get("gradient"), mindest=0)                         
+            tv_remote_lan.sendKey([str(szene)])                    
             
 schlummern = Timer(1, set_szene, ["NONE"])
 bad_ir = Timer(1, set_szene, ["NONE"])

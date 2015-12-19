@@ -14,7 +14,8 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    print inputs('Temp',10)
+    #print inputs('Temp',10)
+    print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
     #print re_calc(10)
@@ -76,6 +77,7 @@ def setting_r(setting):
         if cur.fetchone()[0] == 0:   
             sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES ("None","'+ str(setting) + '")'
             value = 'None'
+            cur.execute(sql)
         else:
             sql = 'SELECT * FROM '+constants.sql_tables.settings.name+' WHERE Name = "' + str(setting) +'"'
             cur.execute(sql)
