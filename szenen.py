@@ -95,10 +95,10 @@ def main():
     global start_t
     #mysql_con.set_automode(device="Stehlampe", mode="man")
     #xs1_set_szene(device="Wohnzimmer_Decke", szene="man")
-    constants.redundancy_.master = True
-    start_t = datetime.datetime.now()
-    set_szene("Sideb_OL_Aus")
-    print datetime.datetime.now() - start_t
+    #constants.redundancy_.master = True
+    #start_t = datetime.datetime.now()
+    #set_szene("Sideb_OL_Aus")
+    interner_befehl("restart_homecontrol")
     #set_szene("Test")
     #sonos_read_szene(sonos_devices.get("SonosBad"), mdb_sonos_r("TextToSonos"))
     #test("Stehlampe")
@@ -667,7 +667,7 @@ def set_szene(name):
                         setting_s(key, str(kommando))
                 elif key == "Zusatz_Status":
                     for kommando in kommandos:
-                        set_del = Timer(1, setting_s, [str(kommando), str(kommandos.get(kommando))])
+                        set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
                         set_del.start()                                           
         if ((szene.get("Szene_folgt") <> "") and (str(szene.get("Szene_folgt")) <> "None")):
             try:
@@ -714,7 +714,7 @@ def interner_befehl(befehl):
         zeit =  time.time()
         now = (strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))  
         setting_s("Laststart", str(now))        
-        exectext = "sudo /home/chris/homecontrol/restart_services.sh"
+        exectext = "killall python"
         os.system(exectext)
     if befehl == "keys_in_hub":
         anw_status.keys_in_hub()

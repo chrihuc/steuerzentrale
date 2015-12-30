@@ -57,9 +57,9 @@ Satellite with IP and Port in table Satellites
 
 ###########
 todo:
-    wecker from cron not wecker.py
     szenen_timer is recursive not working
     rewrite communication to acknowledge
+    make sure slave is slave when master takes over
         
 Changes in Mysql
     rename LightstrSchlafzi in LightstripSchlafzi

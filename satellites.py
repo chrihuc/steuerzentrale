@@ -33,7 +33,7 @@ def  get_satellite(name):
 def main():
     pies = get_satellites()
     for pi in pies:
-        if pi.Type == "sat":
+        if pi.name == "TuerSPi":
             print pi.reboot()
 
 class sputnik:
@@ -72,7 +72,7 @@ class sputnik:
         return success
 
     def reboot(self):
-        return self.send_ssh_cmd("sudo reboot","neugestarted")
+        return self.send_ssh_cmd("sudo /sbin/reboot -f > /dev/null 2>&1 &","neugestarted")
     
     def kill_python(self):
         return self.send_ssh_cmd("sudo killall python","python killed")  

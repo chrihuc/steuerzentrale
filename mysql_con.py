@@ -9,7 +9,7 @@ from threading import Timer
 sn=sonos()
 
 def main():
-    print mdb_get_table("sattelites")
+    print mdb_get_dicti("LightstripSchlafzi","Wetter")
     #set_automode(device="Stehlampe", mode="auto")
     #print mdb_szene_r("Device_Typ")
     #typ_dict = mdb_szene_r("Device_Typ")
