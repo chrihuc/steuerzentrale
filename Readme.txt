@@ -57,11 +57,17 @@ Satellite with IP and Port in table Satellites
 
 ###########
 todo:
-    remove temperatur prediction
     
     gcm setting id is empty
 
-V1: rewrite communication to acknowledge
+V1: separate szenen
+        Interlocks für PS3 o.ä?
+        write back correct status of aktuatoren
+    add "empty" sattelite for all TiFo aktuatoren
+    finish doppelklick und dreifachklick
+        bei dreifachklick wird doppelklick und einfach auch ausgeführt
+    move table creation to cmd_modules
+    rewrite communication to acknowledge
     szenen_timer is recursive not working
     satellites add thread supervision
     scanner is satellite

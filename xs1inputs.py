@@ -11,7 +11,7 @@ import time
 import sys
 from time import localtime,strftime
 from socket import socket, AF_INET, SOCK_DGRAM
-from szenen import set_szene
+#from szenen import set_szene
 from alarmevents import alarm_event
 
 selfsupervision = True
@@ -91,11 +91,9 @@ def main():
         while not ping(constants.router_IP):
             #reset_wlan()
             time.sleep(60)        
-            
     heartbeat = Timer(constants.heartbt, heartbeat_sup)
     heartbeat.start()
     ldt = Timer(2, last_data_reset)
-
     conn = pycurl.Curl()  
     conn.setopt(pycurl.URL, constants.xs1_.STREAM_URL)  
     conn.setopt(pycurl.WRITEFUNCTION, on_receive)

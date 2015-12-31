@@ -5,6 +5,9 @@ import constants
 import MySQLdb as mdb
 from Sonos2Py import sonos
 from threading import Timer
+import time
+from time import localtime, strftime
+import datetime
 
 sn=sonos()
 datab = constants.sql_.DB
@@ -14,8 +17,8 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    #print inputs('Temp',10)
-    print setting_r("Notify_Christoph")
+    print inputs('Temp',10)
+    #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
     #print re_calc(10)
@@ -102,11 +105,11 @@ def settings_r():
     con.close()    
     return dicti 
 
-def set_automode(device, mode):
+def set_val_in_szenen(device, szene, value):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
-        sql = 'UPDATE '+constants.sql_tables.szenen.name+' SET '+device+' = "' + str(mode) + '" WHERE Name = "Auto_Mode"'
+        sql = 'UPDATE '+constants.sql_tables.szenen.name+' SET '+device+' = "' + str(value) + '" WHERE Name = "' + str(szene) + '"'
         cur.execute(sql)
     con.close()                   
 
@@ -212,6 +215,10 @@ def mdb_set_table(table, device, commands):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
+        cur.execute("SELECT COUNT(*) FROM "+datab+"."+table+" WHERE Name = '"+device+"'")
+        if cur.fetchone()[0] == 0:
+            sql = 'INSERT INTO '+table+' (Name) VALUES ("'+ str(playern) + '")'     
+            cur.execute(sql)   
         for cmd in commands:
             if len(cmds) == 0:
                 commando = cmd
@@ -282,28 +289,42 @@ def mdb_set_table(table, device, commands):
 def inputs(device, value):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
-    szenen = []    
+    szenen = []  
+    lt = datetime.datetime.now()
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"'")
         if cur.fetchone()[0] == 0:    
-            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Input) VALUES ("' + str(device) + '")'
+            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Input, Logging) VALUES ("' + str(device) + '",1)'
             cur.execute(sql)
         else:
             sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Input = "' + str(device) +'"'
             value = str(value)
-            sql = sql + ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
-            sql = sql + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
-            sql = sql + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
-            sql = sql + ');' 
-            cur.execute(sql)
+            sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
+            sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
+            sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
+            sql2 = sql2 + ');' 
+            cur.execute(sql + sql2)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
             #dicti = {key: "" for (key) in szene_columns}
             for row in results:
+                single = True
                 for i in range (0,len(row)):
-                    dicti[field_names[i]] = row[i]  
-                szenen.append(dicti.get(setting_r("Status")))
+                    dicti[field_names[i]] = row[i]                     
+                if str(dicti.get("last2")) <> "None":             
+                    if lt - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
+                        szenen.append(dicti.get("Dreifach")) 
+                        single = False
+                    elif lt - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
+                        szenen.append(dicti.get("Doppel"))     
+                        single = False
+                if single: szenen.append(dicti.get(setting_r("Status")))         
+            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Input = "' + str(device) +'"'
+            cur.execute(sql + sql2)          
+            if str(dicti.get("last1")) <> "None":
+                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Input = "' + str(device) +'"'
+                cur.execute(sql + sql2)            
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Setting = 1")
             if cur.fetchone()[0] > 0: 
                 setting_s(device, value)
@@ -311,7 +332,8 @@ def inputs(device, value):
             if cur.fetchone()[0] > 0: 
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(device) + '",' + str(value) + ', NOW())'
                 cur.execute(insertstatement) 
-            return szenen
+    con.close()
+    return szenen
         
 if __name__ == '__main__':
     main()    

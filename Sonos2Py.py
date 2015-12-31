@@ -50,8 +50,8 @@ def send_command(self, player, endpoint, action, body):
 def main():
     sn = sonos()
     #sn.ClearZones(sn.Bad)
-    print sn.SaveList(sn.Bad, "Bad", "34")
-    print sn.Names.get(sn.Bad)
+    print sn.SaveList(sn.SchlafZi, "Bad", "34")
+    #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPlay(sn.Bad)
 

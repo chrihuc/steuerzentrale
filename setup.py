@@ -65,7 +65,11 @@ def main():
         cur.execute("SELECT COUNT(*) FROM "+constants.sql_.DB+"."+constants.sql_tables.szenen.name+" WHERE Name = 'Group'")
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+constants.sql_tables.szenen.name+' (Id,Name) VALUES (3,"Group")'  
-            cur.execute(sql)                
+            cur.execute(sql)     
+        cur.execute("SELECT COUNT(*) FROM "+constants.sql_.DB+"."+constants.sql_tables.szenen.name+" WHERE Name = 'Value'")
+        if cur.fetchone()[0] == 0:
+            sql = 'INSERT INTO '+constants.sql_tables.szenen.name+' (Id,Name) VALUES (4,"Value")'  
+            cur.execute(sql)              
     con.close()  
 
 

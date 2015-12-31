@@ -10,7 +10,6 @@ import mysql_con
 import time
 from socket import socket, AF_INET, SOCK_DGRAM
 from socket import error as socket_error
-from phue import Bridge
 import threading
 from threading import Timer
 from alarmevents import alarm_event
@@ -38,7 +37,6 @@ crn = cron()
 PS3_IP = '192.168.192.27'
 BettPi_PIP = '192.168.192.24'
 
-ezcontrol_status = {'Kueche':'Licht_Kueche'}
 sonos_devices = {'SonosWohnZi':sn.WohnZi,'SonosKueche':sn.Kueche,'SonosBad':sn.Bad,'SonosSchlafZi':sn.SchlafZi}
 sonos_zonen = {str(sn.WohnZi):sn.WohnZiZone,str(sn.Kueche):sn.KuecheZone,str(sn.Bad):sn.BadZone,str(sn.SchlafZi):sn.SchlafZiZone}
 sonos_ezcont = {str(sn.WohnZi):'Sonos_Wohnzi',str(sn.Kueche):'Sonos_Kueche',str(sn.Bad):'Sonos_Bad',str(sn.SchlafZi):'Sonos_Schlafzi'}
@@ -51,7 +49,6 @@ tv_remote_lan = remotecontrol(constants.eigene_IP,'192.168.192.29','00:30:1b:a0:
 no_event = ['Alarm','Achtung','Hinweis','Hue_Meldung','set_hinweis']
 
 ezcontrol = myezcontrol(constants.xs1_.IP,constants.xs1_.USER,constants.xs1_.PASS)
-hbridge = Bridge(constants.hue_.IP)
 
 router = satellites.get_satellite("Router")
 pies = satellites.get_satellites()
@@ -303,64 +300,7 @@ def RaspBMC_off():
     RaspBMC.sendto('PowerOff',(RaspBMC_IP,PORT_NUMBER))    
     Rasp_aus_del = Timer(60, xs1_set_szene, ['RaspberryPi','0'])
     Rasp_aus_del.start()
-
-def dimmen(device):
-    setting_s(device, "heller")
-    while str(setting_r(device)) <> 'fixed':
-        Helligkeit = ezcontrol.GetSwitch(device)
-        if (Helligkeit == "100.0"):
-            setting_s(device, "dunkler")
-        elif (Helligkeit == "0.0"):
-            setting_s(device, "heller")
-        if str(setting_r(device)) == "heller":
-            n_Helligkeit = str(float(Helligkeit)+10)
-        else:
-            n_Helligkeit = str(float(Helligkeit)-10)
-        ezcontrol.SetSwitch(device, str((n_Helligkeit)))
-        time.sleep(1.5)
-        
-def xs1_set_szene(device, szene):
-    if szene in ["man", "auto"]:
-        mysql_con.set_automode(device=device, mode=szene)
-        return
-    if (device == "Video_Audio") and str(szene) == "0":
-        if ping(ezcont_interlock.get(device)):
-            aes.new_event(description="PS3 noch eingeschaltet", prio=1)
-            return
-        while setting_r("AV_mode") <> "Aus":
-        #if setting_r("AV_mode") <> "Aus":
-            #return
-            marantz_set_szene("Aus")
-            time.sleep(20)
-    elif (ezcont_interlock.get(device) <> None) and (str(szene) == "0"):
-        if ping(ezcont_interlock.get(device)):
-            if device == 'RaspberryPi':
-                RaspBMC_off()
-            else:
-                aes.new_event(description="PS3 noch eingeschaltet", prio=1)
-            return
-    if szene == "dimmen":
-        if str(setting_r(device)) <> 'fixed':
-            setting_s(device, "fixed")
-        else:
-            dimmen(device)
-        return
-    if szene == str(-1):
-        if ezcontrol.GetSwitch(str(device)) > "0.0":
-            ezcontrol.SetSwitch(str(device), "0.0")
-        else:
-            ezcontrol.SetSwitch(str(device), "100.0")
-    else:
-        ezcontrol.SetSwitch(str(device), str(szene))
-        if ezcontrol_status.get(str(device)) <> "":
-            if str(szene) == "0.0":
-                setting_s(ezcontrol_status.get(str(device)),"Aus")
-            else:
-                setting_s(ezcontrol_status.get(str(device)),"An")
-    #now = datetime.datetime.now().strftime("%H:%M:%S.%f") 
-    #aes.new_event(description="Versandt: " + str(now), prio=0)
                 
-
 def send_cmd_satellite(device, szene):
     if szene in ["man", "auto"]:
         mysql_con.set_automode(device=device, mode=szene)
@@ -371,51 +311,6 @@ def send_cmd_satellite(device, szene):
             command["device"] = device
             item.send_udp_cmd(command)
                 
-def hue_set_szene(device, szene):
-    if szene in ["man", "auto"]:
-        mysql_con.set_automode(device=device, mode=szene)
-        return
-    elif szene == 'Save': 
-        hue = hbridge.get_light(device, 'hue')
-        bri = hbridge.get_light(device, 'bri')
-        sat = hbridge.get_light(device, 'sat')
-        an = hbridge.get_light(device, 'on') 
-        #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
-        setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
-        mdb_set_table(constants.sql_tables.hue.name,device, setting)
-        return
-    elif szene == 'toggle':
-        an = hbridge.get_light(device, 'on') 
-        if an:
-            hbridge.set_light(device, {'on':False})
-        else:
-            hbridge.set_light(device, {'on':True}) 
-        return
-    elif szene == 'sz_toggle':
-        an = hbridge.get_light(device, 'on') 
-        if an:
-            szene="SZ_Aus"
-        else:
-            hbridge.set_light(device, {'on':True})
-            return      
-    keys = ['bri', 'hue', 'sat', 'transitiontime']
-    szene = mdb_read_table_entry(constants.sql_tables.hue.name,szene)
-    if szene.get('bri') <> None:
-        szene['bri'] = int(szene.get('bri'))
-    if str(szene.get('an')) == "1" or str(szene.get('an')) == "True":
-        hbridge.set_light(device, {'on':True}) 
-        time.sleep(0.5)
-    command = {}
-    for key in keys:
-        if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
-            command[key] = szene.get(key)
-    if command <> {}:
-        hbridge.set_light(device, command)
-    if str(szene.get('an')) == "0" or str(szene.get('an')) == "False":
-        hbridge.set_light(device, {'on':False})  
-    #now = datetime.datetime.now().strftime("%H:%M:%S.%f") 
-    #aes.new_event(description="Versandt: " + str(now), prio=0)
-
 def Tuer_auf():
     Anwesend_init = setting_r("Anwesenheit")
     if str(setting_r("Status")) in ["Schlafen", "Abwesend", "Urlaub"]:

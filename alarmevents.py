@@ -32,13 +32,13 @@ import time
 # * 4.2 lights red in anticipation (Schlafzimmer only when not awake)
 # * 4.3 lights blinking red in higher alarm, same as above
 
-table = constants.sql_tables.alarm_events.name
+
 
 
 def main():
     aes = alarm_event()
     
-    aes.new_event(description="anderer Alarm", prio=1.3)
+    aes.new_event(description="anderer Alarm", prio=0)
     
     #acknowledge_alarm(alarm_id=1)
     
@@ -52,13 +52,42 @@ def main():
     
     aes.check_liste()
 
+class sql_object:
+    def __init__(self,name,typ,columns):
+        self.name = name
+        self.typ = typ
+        self.columns = columns
+
+table    = sql_object("HIS_alarmevents", "Historic", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"), ("Description","VARCHAR(20)"),("Prio","DECIMAL(2,0)"),("Date","DATETIME"),("Acknowledged","DATETIME")))
+
 class alarm_event:
     def __init__(self):
+        self.__init_table__()
         self.mes = messaging()
         #self.mySocket = socket( AF_INET, SOCK_DGRAM )
         #self.OUTPUTS_IP   = '192.168.192.10'
         #self.OUTPUTS_PORT = 5000
         #self.szs = set_szene()
+
+    def __init_table__(self):
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+        with con:
+            cur = con.cursor()
+            cur.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '"+table.name+"'")
+            if cur.fetchone()[0] == 0:       
+                command = "CREATE TABLE "+constants.sql_.DB+"."+table.name +"("
+                for num, col in enumerate(table.columns):
+                    if num == len(table.columns)-1:
+                        for co in col:
+                            command += co + " "
+                        command +=  ");"
+                    else:
+                        for co in col:
+                            command += co + " "                    
+                        command +=  ", "
+                cur.execute(command)
+                results = cur.fetchall()      
+        con.close() 
 
     def new_event(self, description, prio=0, durchsage="", karenz=-1):
         t = threading.Thread(target=self.new_event_t, args=[description, prio, durchsage, karenz])
@@ -83,9 +112,9 @@ class alarm_event:
             with XS1DB:
                 cur = XS1DB.cursor()
                 if prio < 1:
-                    insertstatement = 'INSERT INTO '+table+'(description, prio, acknowledged) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
+                    insertstatement = 'INSERT INTO '+table.name+'(description, prio, acknowledged) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
                 else:
-                    insertstatement = 'INSERT INTO '+table+'(description, prio) VALUES("' + str(description) + '", "' + str(prio) + '")'
+                    insertstatement = 'INSERT INTO '+table.name+'(description, prio) VALUES("' + str(description) + '", "' + str(prio) + '")'
                 cur.execute(insertstatement)
             if str(setting_r("Status")) == "Wach":
                 anwesend = True
@@ -126,7 +155,7 @@ class alarm_event:
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
-            sql = 'UPDATE '+table+' SET acknowledged = CURRENT_TIMESTAMP WHERE id = '+ str(alarm_id) 
+            sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE id = '+ str(alarm_id) 
             cur.execute(sql)
         con.close() 
 
@@ -134,7 +163,7 @@ class alarm_event:
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
-            sql = 'UPDATE '+table+' SET acknowledged = CURRENT_TIMESTAMP WHERE description = '+ str(alarm_name) 
+            sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE description = '+ str(alarm_name) 
             cur.execute(sql)
         con.close()         
         
@@ -142,7 +171,7 @@ class alarm_event:
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
-            sql = 'UPDATE '+table+' SET acknowledged = CURRENT_TIMESTAMP WHERE acknowledged is NULL'
+            sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE acknowledged is NULL'
             cur.execute(sql)        
         con.close()
         #self.mySocket.sendto('az_Hinweis_gesehen',(self.OUTPUTS_IP,self.OUTPUTS_PORT))
@@ -154,9 +183,9 @@ class alarm_event:
         with con:
             cur = con.cursor()
             if unacknowledged:
-                sql = 'SELECT * FROM '+table+' WHERE acknowledged is NULL AND prio >= ' + str(prio) +' AND date > DATE_ADD(NOW(), INTERVAL -' + str(time) + ' MINUTE) ORDER BY ID DESC'
+                sql = 'SELECT * FROM '+table.name+' WHERE acknowledged is NULL AND prio >= ' + str(prio) +' AND date > DATE_ADD(NOW(), INTERVAL -' + str(time) + ' MINUTE) ORDER BY ID DESC'
             else:
-                sql = 'SELECT * FROM '+table+' WHERE prio >= ' + str(prio) +' AND date > DATE_ADD(NOW(), INTERVAL -' + str(time) + ' MINUTE) ORDER BY ID DESC'
+                sql = 'SELECT * FROM '+table.name+' WHERE prio >= ' + str(prio) +' AND date > DATE_ADD(NOW(), INTERVAL -' + str(time) + ' MINUTE) ORDER BY ID DESC'
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]

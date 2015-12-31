@@ -5,11 +5,14 @@ import constants
 from gcm import GCM
 from mysql_con import setting_r, mdb_get_table# gcm_users_read
 import time
+import MySQLdb as mdb
 
 def main():
     mes = messaging()
     constants.redundancy_.master = True
     print mes.send_direkt(to="Christoph", titel="Hinweis", text="test")
+    
+table = constants.sql_tables.Bewohner    
     
 class messaging:
     def __init__(self):
@@ -21,11 +24,32 @@ class messaging:
         self.tf201 = ['tf201'] 
         self.alle = self.chris + self.sabina + self.tf201
         self.dict_namen = {self.chris[0]:self.chris_vorname, self.sabina[0]:self.sabina_vorname}
+        self.__init_table__()
+    
+    def __init_table__(self):
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+        with con:
+            cur = con.cursor()
+            cur.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '"+table.name+"'")
+            if cur.fetchone()[0] == 0:       
+                command = "CREATE TABLE "+constants.sql_.DB+"."+table.name +"("
+                for num, col in enumerate(table.columns):
+                    if num == len(table.columns)-1:
+                        for co in col:
+                            command += co + " "
+                        command +=  ");"
+                    else:
+                        for co in col:
+                            command += co + " "                    
+                        command +=  ", "
+                cur.execute(command)
+                results = cur.fetchall()      
+        con.close()     
     
     def send_direkt(self, to, titel, text):
         success = True
         data = {'titel': titel, 'message': text}
-        gcm_users = mdb_get_table(constants.sql_tables.Bewohner.name)
+        gcm_users = mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') <> None:
                 if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "Ein") and constants.redundancy_.master:
@@ -38,7 +62,7 @@ class messaging:
     def send_zuhause(self, to, titel, text):
         success = True
         data = {'titel': titel, 'message': text}
-        gcm_users = mdb_get_table(constants.sql_tables.Bewohner.name)
+        gcm_users = mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') <> None:
                 if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "Ein") and constants.redundancy_.master:
@@ -52,7 +76,7 @@ class messaging:
     def send_abwesend(self, to, titel, text):
         success = True
         data = {'titel': titel, 'message': text}
-        gcm_users = mdb_get_table(constants.sql_tables.Bewohner.name)
+        gcm_users = mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') <> None:
                 if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "Ein") and constants.redundancy_.master:
