@@ -2,7 +2,6 @@
 
 import constants
 
-from Sonos2Py import sonos
 from classes import myezcontrol, ping
 import MySQLdb as mdb
 from mysql_con import setting_s, setting_r, settings_r, mdb_read_table_entry
@@ -27,7 +26,6 @@ from anwesenheit import anwesenheit
 import satellites
 #from delay_list import szenen_timer
 
-sn=sonos()
 aes = alarm_event()
 anw_status = anwesenheit()
 mes = messaging()
@@ -37,11 +35,7 @@ crn = cron()
 PS3_IP = '192.168.192.27'
 BettPi_PIP = '192.168.192.24'
 
-sonos_devices = {'SonosWohnZi':sn.WohnZi,'SonosKueche':sn.Kueche,'SonosBad':sn.Bad,'SonosSchlafZi':sn.SchlafZi}
-sonos_zonen = {str(sn.WohnZi):sn.WohnZiZone,str(sn.Kueche):sn.KuecheZone,str(sn.Bad):sn.BadZone,str(sn.SchlafZi):sn.SchlafZiZone}
-sonos_ezcont = {str(sn.WohnZi):'Sonos_Wohnzi',str(sn.Kueche):'Sonos_Kueche',str(sn.Bad):'Sonos_Bad',str(sn.SchlafZi):'Sonos_Schlafzi'}
 schluessellist = {'Christoph':'C86000BDB9E9EE10800000B0','Sabina':'6CF049E0FBE2FD40B95F273B', 'Huckle':'00D0C9CCDE48EDB14000F139','Russ':'C86000BDB9F2EE10AA310081'}
-sonos_szenen = {str(sn.WohnZi):'WohnZi',str(sn.Kueche):'Kueche',str(sn.Bad):'Bad',str(sn.SchlafZi):'SchlafZi'}
 ezcont_interlock = {'Video_Audio':PS3_IP, 'BettPi':BettPi_PIP, 'Sonos_Wohnzi':PS3_IP, sn.WohnZi:PS3_IP}
 
 tv_remote = remotecontrol(constants.eigene_IP,'192.168.192.26','00:30:1b:a0:2f:05')
@@ -107,194 +101,6 @@ def main():
 def deactivate_usb_keys():
     anw_status.deactivate_keys()
     
-def sonos_write_szene(player):
-    dicti = {}
-    dicti['MasterZone'] = "Own"
-    posinfo = sn.GetPositionInfo(player)
-    pos = sn.GetPosition(player)
-    transinfo = sn.GetTransportInfo(player)
-    for zone in sn.Zones:
-        if zone in posinfo:
-            dicti['MasterZone'] = zone
-    if dicti.get('MasterZone') == "Own":
-        if "PLAYING" in transinfo:
-            dicti['Pause'] = 0
-        else:
-            dicti['Pause'] = 1
-        if "file" in posinfo:
-            dicti['Radio'] = 0
-        else:
-            dicti['Radio'] = 1
-        antwort = posinfo
-        pos1 = antwort.find ('<TrackURI>',0) #('*&quot;&gt;',0)
-        pos2 = antwort.find ('</TrackURI>',0) #('&lt;/res&gt;&lt;r:',0)
-        dicti['Sender'] = antwort [pos1+10:pos2]
-        dicti['TitelNr'] = int(pos[0])
-        dicti['Time'] = pos[1]
-    dicti['Volume'] = sn.GetVolume(player)
-    if player == sn.WohnZi:
-        playern = "WohnZi"
-        plnum = 33
-    elif player == sn.Kueche:
-        playern = "Kueche"
-        plnum = 40
-    elif player == sn.Bad:
-        playern = "Bad"
-        plnum = 34
-    elif player == sn.SchlafZi:
-        playern = "SchlafZi"
-        plnum = 35
-    else:
-        playern = player
-        plnum = 0
-    sn.SaveList(player, "Bad", 34)
-    mdb_set_table(constants.sql_tables.Sonos.name,player,dicti) 
-    
-def sonos_read_szene(player, sonos_szene, hergestellt = False):
-    #read szene from Sonos DB and execute
-    if str(sonos_szene.get('Volume')) <> 'None':
-        sn.SetVolume(player, sonos_szene.get('Volume'))
-    zone = sonos_szene.get('MasterZone')
-    if (str(zone) <> "None") and (str(zone) <> "Own"):
-        sn.CombineZones(player, zone)
-    else:
-        zoneown = sonos_zonen.get(str(player))
-        if str(sonos_szene.get('Radio')) == '1':
-            sn.setRadio(player, str(sonos_szene.get('Sender')))
-        elif str(zone) <> "None":
-            sn.ClearZones(player)
-            sn.ClearList(player)
-            sn.PlayListNr(player, str(sonos_szene.get('PlayListNr')))
-            sn.ActivateList(player, zoneown)
-            sn.Seek(player, "TRACK_NR", str(sonos_szene.get('TitelNr')))
-            if str(sonos_szene.get('Time')) <> 'None':
-                sn.Seek(player, "REL_TIME", sonos_szene.get('Time'))
-        if (sonos_szene.get('Pause') == 1) or hergestellt:
-            sn.SetPause(player)
-        elif sonos_szene.get('Pause') == 0:
-            sn.SetPlay(player)
-    
-def sonos_set_szene(player, szenen):
-    #execute specific scenes, or go to sonos_read_szene
-    try:
-        if type(eval(str(szenen))) == list:
-            pass
-        else:
-            szenen = [szenen]
-    except NameError as serr:
-        szenen = [szenen]        
-    for szene in szenen:
-        for anzahl in range(4):
-            try:
-                if str(szene) == "Pause":
-                    sn.SetPause(player)
-                elif str(szene) == "Play":
-                    sn.SetPlay(player)                
-                elif str(szene) == "Aus":
-                    if ezcontrol.GetSwitch(sonos_ezcont.get(player)) > "0.0":
-                        sonos_write_szene(player)
-                        sn.SetPause(player)
-                    if ezcont_interlock.get(player) <> None:
-                        if ping(ezcont_interlock.get(player)):
-                            aes.new_event(description="PS3 noch eingeschaltet", prio=1)
-                        else:
-                            ezcontrol.SetSwitch(sonos_ezcont.get(player), "0.0")
-                    else:
-                        ezcontrol.SetSwitch(sonos_ezcont.get(player), "0.0")
-                elif str(szene) == "Save":
-                    sonos_write_szene(player)                   
-                elif str(szene) == "Time":
-                    sonos_write_szene(player)
-                    lt = localtime()
-                    stunde = int(strftime("%H", lt))
-                    minute = int(strftime("%M", lt)) 
-                    if (minute <> 0) and (minute <> 30):
-                        text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
-                        laenge = downloadAudioFile(text)
-                        sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
-                        time.sleep(laenge + 1)            
-                        sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))
-                elif str(szene) == "Durchsage":
-                    sonos_write_szene(player)   
-                    text = setting_r("Durchsage")        
-                    laenge = downloadAudioFile(text)
-                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
-                    time.sleep(laenge + 1)            
-                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))            
-                elif str(szene) == "Return":
-                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))), hergestellt = True)          
-                elif ((str(szene) == "An") and (ezcontrol.GetSwitch(sonos_ezcont.get(player))== "0.0")):
-                    ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
-                elif ((str(szene) == "resume") and (ezcontrol.GetSwitch(sonos_ezcont.get(player))== "0.0")):
-                    ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
-                    time.sleep(60)
-                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))            
-                elif (str(szene) == "lauter"):
-                    ActVol = sn.GetVolume(player)
-                    if ActVol >= 20: increment = 8
-                    if ActVol < 20: increment = 8
-                    if ActVol < 8: increment = 8
-                    VOLUME = ActVol + increment 
-                    sn.SetVolume(player, VOLUME)
-                elif (str(szene) == "leiser"):
-                    ActVol = sn.GetVolume(player)
-                    if ActVol >= 20: increment = 8
-                    if ActVol < 20: increment = 8
-                    if ActVol < 8: increment = 8
-                    VOLUME = ActVol - increment 
-                    sn.SetVolume(player, VOLUME)
-                elif (str(szene) == "inc_lauter"):
-                    ActVol = sn.GetVolume(player)
-                    if ActVol >= 20: increment = 8
-                    if ActVol < 20: increment = 4
-                    if ActVol < 8: increment = 2
-                    VOLUME = ActVol + increment 
-                    sn.SetVolume(player, VOLUME)
-                elif (str(szene) == "inc_leiser"):
-                    ActVol = sn.GetVolume(player)
-                    if ActVol >= 20: increment = 8
-                    if ActVol < 20: increment = 4
-                    if ActVol < 8: increment = 2
-                    VOLUME = ActVol - increment 
-                    sn.SetVolume(player, VOLUME)                
-                elif (str(szene) == "WeckerAnsage"):
-                    sn.SetPause(player)
-                    sn.SetVolume(player, 20)
-                    setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
-                    text = setting_r("Durchsage")        
-                    laenge = downloadAudioFile(text)
-                    sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
-                    time.sleep(laenge + 1)  
-                    sn.SetPause(player)
-                elif ((str(szene) <> "resume") and (str(szene) <> "An") and (str(szene) <> "None")):
-                    sonos_szene = mdb_read_table_entry(constants.sql_tables.Sonos.name,szene)
-                    sonos_read_szene(player, sonos_szene)
-                if "WeckerPhase" in str(szene) and str(player) == "SonosSchlafZi":
-                    transinfo = sn.GetTransportInfo(player)
-                    if "PLAYING" in transinfo or str(setting_r("Status")) <> "Wecken":
-                        pass
-                    else:
-                        aes.new_event(description="Alternativer Wecker", prio=0)
-                        if not ping(str(sn.SchlafZi), number = 2):
-                            ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
-                            time.sleep(30)
-                        sonos_szene = mdb_read_table_entry(constants.sql_tables.Sonos.name,"Wecker2")
-                        sonos_read_szene(player, sonos_szene)
-                        time.sleep(5)
-                        transinfo = sn.GetTransportInfo(player)
-                        if "PLAYING" in transinfo or str(setting_r("Status")) <> "Wecken":
-                            pass
-                        else:
-                            aes.new_event(description="Alternativer Wecker", prio=0)
-                            if not ping(str(sn.SchlafZi), number = 2):
-                                ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
-                                time.sleep(30)
-                            sonos_szene = mdb_read_table_entry(constants.sql_tables.Sonos.name,"WeckerAlternative")
-                            sonos_read_szene(player, sonos_szene)                    
-                break
-            except socket_error as serr:
-                ezcontrol.SetSwitch(sonos_ezcont.get(player), "100.0")
-                time.sleep(10)                    
 
 def RaspBMC_off():
     RaspBMC.sendto('PowerOff',(RaspBMC_IP,PORT_NUMBER))    

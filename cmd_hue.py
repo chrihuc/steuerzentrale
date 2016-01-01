@@ -2,7 +2,7 @@
 
 import constants
 
-from mysql_con import mdb_set_table, mdb_read_table_entry,set_val_in_szenen
+from mysql_con import mdb_set_table, mdb_read_table_entry,set_val_in_szenen,mdb_get_table
 from phue import Bridge
 import MySQLdb as mdb
 import time
@@ -20,6 +20,7 @@ hbridge = Bridge(constants.hue_.IP)
 def main():
     hue_l = hue_lights()
     hue_l.set_device("Stablampe_1", "Aus")
+    print hue_l.list_devices()
     
 class hue_lights():
     def __init__(self):
@@ -45,7 +46,26 @@ class hue_lights():
                 results = cur.fetchall()      
         con.close()     
     
+    def list_commands(self):
+        comands = mdb_get_table(table.name)
+        liste = []
+        for comand in comands:
+            liste.append(comand.get("Name"))
+        liste.remove("Name")
+        return liste
+
+    def list_devices(self):
+        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        liste = []
+        for comand in comands:
+            if comands.get(comand) == "HUE":
+                liste.append(comand)
+        #liste.remove("Name")
+        return liste
+
     def set_device(self, device, commd):
+        keys = ['bri', 'hue', 'sat', 'transitiontime']
+        szene = mdb_read_table_entry(table.name,commd)
         if commd in ["man", "auto"]:
             set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
             return
@@ -61,36 +81,29 @@ class hue_lights():
         elif commd == 'toggle':
             an = hbridge.get_light(device, 'on') 
             if an:
-                hbridge.set_light(device, {'on':False})
+                szene['on'] = False
             else:
-                hbridge.set_light(device, {'on':True}) 
-            return
+                szene['on'] = True
         elif commd == 'sz_toggle':
             an = hbridge.get_light(device, 'on') 
             if an:
                 commd="SZ_Aus"
             else:
-                hbridge.set_light(device, {'on':True})
-                return  
-        else:
-            keys = ['bri', 'hue', 'sat', 'transitiontime']
-            szene = mdb_read_table_entry(table.name,commd)
-            if szene =={}:
-                mdb_set_table(table.name,commd, {})
-            if szene.get('bri') <> None:
-                szene['bri'] = int(szene.get('bri'))
-            if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
-                hbridge.set_light(device, {'on':True}) 
-                time.sleep(0.5)
-            command = {}
-            for key in keys:
-                if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
-                    command[key] = szene.get(key)
-            if command <> {}:
-                hbridge.set_light(device, command)
-            if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
-                hbridge.set_light(device, {'on':False})   
-        #set_val_in_szenen(device=device, szene="Value", value=commd)
+                szene['on'] = True
+        if szene.get('bri') <> None:
+            szene['bri'] = int(szene.get('bri'))
+        if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
+            hbridge.set_light(device, {'on':True}) 
+            time.sleep(0.5)
+        command = {}
+        for key in keys:
+            if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
+                command[key] = szene.get(key)
+        if command <> {}:
+            hbridge.set_light(device, command)
+        if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
+            hbridge.set_light(device, {'on':False})   
+        set_val_in_szenen(device=device, szene="Value", value=szene.get('on'))
 
 if __name__ == '__main__':
     main()  

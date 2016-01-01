@@ -67,14 +67,14 @@ class sql_tables:
     LightstripSchlafzi = sql_object("out_LightstripSchlafzi", "Outputs", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("rot","VARCHAR(45)"),("gruen","VARCHAR(45)"),("blau","VARCHAR(45)"),("transitiontime","VARCHAR(45)")))
     Marantz         = sql_object("out_Marantz", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("PWR","VARCHAR(45)"),("VOL","VARCHAR(45)"),("SRC","VARCHAR(45)"),("AMT","VARCHAR(45)"),("DIP","VARCHAR(45)")))
     Sideboard       = sql_object("out_Sideboard", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("rot","VARCHAR(45)"),("gruen","VARCHAR(45)"),("blau","VARCHAR(45)"),("transitiontime","VARCHAR(45)")))
-    Sonos           = sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("MasterZone","VARCHAR(45)"),("Pause","INT(4)"),("Sender","VARCHAR(300)"),("Radio","INT(4)"),("TitelNr","VARCHAR(45)"),("Time","TIME"),("PlaylistNr","VARCHAR(45)"),("Volume","VARCHAR(45)")))
+    #Sonos           = sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("MasterZone","VARCHAR(45)"),("Pause","INT(4)"),("Sender","VARCHAR(300)"),("Radio","INT(4)"),("TitelNr","VARCHAR(45)"),("Time","TIME"),("PlaylistNr","VARCHAR(45)"),("Volume","VARCHAR(45)")))
     TuerSPi         = sql_object("out_TuerSPi", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("rot","VARCHAR(20)"),("gruen","VARCHAR(20)"),("gelb","VARCHAR(20)")))
     ##setting tables with sensible data
     Besucher        = sql_object("sst_Besucher", "SensData",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Handy_IP","VARCHAR(20)"),("Handy_State","INT(11)"),("USB_ID","VARCHAR(45)"),("USB_State","INT(4)"),("prod","VARCHAR(45)"),("gcm_regid","VARCHAR(255)"),("gcm_name","VARCHAR(50)")))
     Bewohner        = sql_object("sst_Bewohner", "SensData",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Handy_IP","VARCHAR(20)"),("Handy_State","INT(11)"),("USB_ID","VARCHAR(45)"),("USB_State","INT(4)"),("prod","VARCHAR(45)"),("gcm_regid","VARCHAR(255)"),("gcm_name","VARCHAR(50)"))) 
     
     
-    tables = [his_inputs,inputs,cron,wecker,settings,szenen,satellites,LightstripSchlafzi,Marantz,Sideboard,Sonos,TuerSPi,Besucher,Bewohner]
+    tables = [his_inputs,inputs,cron,wecker,settings,szenen,satellites,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner]
     HUE = sql_object("HUE", "HUE",('BettChris', 'Stablampe_1', 'Stablampe_2', 'Lightstrip_Eingang', 'Lightstrip_Kueche', 'Balkonlampe', 'Stehlampe', 'BettSabina', 'Buero', 'Bad', 'Monaco_Lampe'))
     SATELLITE = sql_object("SATELLITE", "SATELLITE",('Sideb_links', 'LightstripSchlafzi', 'Sideb_mitte', 'Sideb_rechts', 'Marantz', 'Sideb_oben', 'TuerSPi','Scanner'))
     XS1 = sql_object("XS1", "XS1",('Sideboard', 'Kueche', 'Diele', 'Video_Audio', 'Lattenrost', 'Wohnzimmer_Decke', 'Schlafzimmer', 'Webcams', 'Elchlampe', 'Adventslichter', 'Reduit', 'Pflanzen', 'Saugstauber', 'PC_Peripherie', 'Weihnachtsbaum', 'Esszimmer','Rauchmelder'))

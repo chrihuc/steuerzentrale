@@ -3,11 +3,12 @@
 import constants
 
 import urllib2
-
+from mysql_con import mdb_read_table_entry,set_val_in_szenen
 
 def main():
     ezcontrol = myezcontrol(constants.xs1_.IP) 
     ezcontrol.set_device("Esszimmer", "100")
+    print ezcontrol.list_commands()
 
 #def dimmen(device):
     #setting_s(device, "heller")
@@ -101,17 +102,41 @@ class myezcontrol:
         Wert = html [position1+9:position2-4]
         f.close()
         return Wert       
+    
+    def list_commands(self):
+        #comands = mdb_get_table(table.name)
+        liste = ["toggle",0,100]
+        #for comand in comands:
+            #liste.append(comand.get("Name"))
+        #liste.remove("Name")
+        return liste
 
+    def list_devices(self):
+        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        liste = []
+        for comand in comands:
+            if comands.get(comand) == "XS1":
+                liste.append(comand)
+        #liste.remove("Name")
+        return liste
+    
     def set_device(self, device, commd):
-        if commd in ["man", "auto"]:
-            set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
-        if commd == str(-1) or commd == "toggle":
-            if self.GetSwitch(str(device)) > "0.0":
-                self.SetSwitch(str(device), "0.0")
+        try:
+            if commd in ["man", "auto"]:
+                set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
+            if commd == str(-1) or commd == "toggle":
+                if self.GetSwitch(str(device)) > "0.0":
+                    self.SetSwitch(str(device), "0.0")
+                    set_val_in_szenen(device=device, szene="Value", value=0)
+                else:
+                    self.SetSwitch(str(device), "100.0")
+                    set_val_in_szenen(device=device, szene="Value", value=100)
             else:
-                self.SetSwitch(str(device), "100.0")
-        else:
-            self.SetSwitch(str(device), str(commd))            
+                self.SetSwitch(str(device), str(commd))  
+                set_val_in_szenen(device=device, szene="Value", value=commd)
+            return True
+        except:
+            return False
             
 if __name__ == '__main__':
     main()  

@@ -73,6 +73,5 @@ V1: separate szenen
     scanner is satellite
     historic tables in reverse
     forced restart start also all satellites
-    add logging into receiving
     Use new Key as input events
-    alarm event missing hue feedback
+    ensure wecker is really working

@@ -3,13 +3,11 @@
 import constants
 
 import MySQLdb as mdb
-from Sonos2Py import sonos
 from threading import Timer
 import time
 from time import localtime, strftime
 import datetime
 
-sn=sonos()
 datab = constants.sql_.DB
 
 #auto add entry to inputs
@@ -161,7 +159,7 @@ def teg_raw_cmds(db):
         for row in results:
             for i in range (0,len(row)):
                dicti[field_names[i]] =  row[i]           
-    con.close()    
+    con.close()
     return dicti
 #def mdb_sideb_r(name):
     #return mdb_read_table_entry('Sideboard', name) 
@@ -207,17 +205,13 @@ def mdb_get_table(db):
     return rlist  
 
 def mdb_set_table(table, device, commands):
-    if device in sn.Names:
-        playern = sn.Names.get(device)
-    else:
-        playern = device
     cmds = get_raw_cmds(constants.sql_tables.Sonos.name)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+table+" WHERE Name = '"+device+"'")
         if cur.fetchone()[0] == 0:
-            sql = 'INSERT INTO '+table+' (Name) VALUES ("'+ str(playern) + '")'     
+            sql = 'INSERT INTO '+table+' (Name) VALUES ("'+ str(device) + '")'     
             cur.execute(sql)   
         for cmd in commands:
             if len(cmds) == 0:
