@@ -7,19 +7,20 @@ import datetime
 
 liste = {}
 global start_t
+sz_t = szenen_timer(def_to_run = print_it)
+
+def main():
+    global start_t
+    start_t = datetime.datetime.now()
+    
+    id_nr = sz_t.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus")
+    time.sleep(5)
+    sz_t.retrigger_add(parent = "Bad_ir",delay = 15, child = "Bad_aus")
 
 def print_it(it):
     print datetime.datetime.now() - start_t
     print it
 
-def main():
-    global start_t
-    start_t = datetime.datetime.now()
-    sz_t = szenen_timer(def_to_run = print_it)
-    id_nr = sz_t.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus")
-    time.sleep(5)
-    sz_t.retrigger_add(parent = "Bad_ir",delay = 15, child = "Bad_aus")
-    
 class szenen_timer:
     def __init__(self,def_to_run):
         self.liste = []

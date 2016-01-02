@@ -107,7 +107,9 @@ def set_val_in_szenen(device, szene, value):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
-        sql = 'UPDATE '+constants.sql_tables.szenen.name+' SET '+device+' = "' + str(value) + '" WHERE Name = "' + str(szene) + '"'
+        sql = 'SET SQL_SAFE_UPDATES = 0'
+        cur.execute(sql)        
+        sql = 'UPDATE '+constants.sql_.DB+'.'+constants.sql_tables.szenen.name+' SET '+device+' = "' + str(value) + '" WHERE Name = "' + str(szene) + '"'
         cur.execute(sql)
     con.close()                   
 
@@ -205,7 +207,7 @@ def mdb_get_table(db):
     return rlist  
 
 def mdb_set_table(table, device, commands):
-    cmds = get_raw_cmds(constants.sql_tables.Sonos.name)
+    cmds = get_raw_cmds(table)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
@@ -218,7 +220,7 @@ def mdb_set_table(table, device, commands):
                 commando = cmd
             else:
                 commando = cmds.get(cmd)
-            sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(playern) + '"'
+            sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
             cur.execute(sql)       
     con.close() 
 

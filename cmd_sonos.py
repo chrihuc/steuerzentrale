@@ -8,7 +8,7 @@ import time
 from time import localtime,strftime
 from datetime import date
 import MySQLdb as mdb
-from mysql_con import mdb_read_table_entry, set_val_in_szenen, mdb_get_table
+from mysql_con import mdb_read_table_entry, set_val_in_szenen, mdb_get_table, mdb_set_table
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, StreamInput, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList, ClearList, PlayList (defect), PlayListNr)
 #RenderingControl (SetMute, GetVolume, SetVolume)
@@ -21,8 +21,6 @@ class sql_object:
 
 table           = sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("MasterZone","VARCHAR(45)"),("Pause","INT(4)"),("Sender","VARCHAR(300)"),("Radio","INT(4)"),("TitelNr","VARCHAR(45)"),("Time","TIME"),("PlaylistNr","VARCHAR(45)"),("Volume","VARCHAR(45)")))
 
-#sonos_devices = {'SonosWohnZi':sn.WohnZi,'SonosKueche':sn.Kueche,'SonosBad':sn.Bad,'SonosSchlafZi':sn.SchlafZi}
-#sonos_zonen = {str(sn.WohnZi):sn.WohnZiZone,str(sn.Kueche):sn.KuecheZone,str(sn.Bad):sn.BadZone,str(sn.SchlafZi):sn.SchlafZiZone}
 #sonos_ezcont = {str(sn.WohnZi):'Sonos_Wohnzi',str(sn.Kueche):'Sonos_Kueche',str(sn.Bad):'Sonos_Bad',str(sn.SchlafZi):'Sonos_Schlafzi'}
 #sonos_szenen = {str(sn.WohnZi):'WohnZi',str(sn.Kueche):'Kueche',str(sn.Bad):'Bad',str(sn.SchlafZi):'SchlafZi'}
 
@@ -72,9 +70,9 @@ def main():
     #print sn.SaveList(sn.SchlafZi, "Bad", "34")
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
-    #sn.SetPlay(sn.Bad)
+    #sn.SetPause(sn.Kueche)
     print sn.list_commands()
-    print sn.list_devices()
+    #print sn.list_devices()
 
 class sonos:
     def __init__(self):
@@ -88,6 +86,8 @@ class sonos:
         self.KuecheZone = "RINCON_000E58CB9E3E01400"  
         self.Zones = [self.SchlafZiZone, self.BadZone, self.WohnZiZone, self.KuecheZone]
         self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche"}
+        self.Devices = {'SonosWohnZi':self.WohnZi,'SonosKueche':self.Kueche,'SonosBad':self.Bad,'SonosSchlafZi':self.SchlafZi}
+        self.sonos_zonen = {str(self.WohnZi):self.WohnZiZone,str(self.Kueche):self.KuecheZone,str(self.Bad):self.BadZone,str(self.SchlafZi):self.SchlafZiZone}
         self.SERVER_PORT = 1400
         self.VOLUME = 0
         self.__init_table__()
@@ -112,6 +112,20 @@ class sonos:
                 results = cur.fetchall()      
         con.close()
 
+    def Envelope(self, Player, body, SOAPAction):
+        blen = len(body)
+        requestor = httplib.HTTP(Player, self.SERVER_PORT)
+        requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
+        requestor.putheader("HOST", Player)
+        requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
+        requestor.putheader("Content-Length", str(blen))
+        requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
+        requestor.endheaders()
+        requestor.send(body)
+        (status_code, message, reply_headers) = requestor.getreply()
+        reply_body = requestor.getfile().read()  
+        return reply_body
+
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList)
 
     def GetTransportInfo(self, Player):
@@ -134,7 +148,7 @@ class sonos:
             </s:Body>
             </s:Envelope>"""
         SOAPAction = "AVTransport:1#Pause"
-        Envelope(self, Player, body, SOAPAction)
+        return self.Envelope(Player, body, SOAPAction)
 
     def SetPlay(self, Player):
         body = """<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
@@ -422,7 +436,7 @@ class sonos:
         except socket.error:
             return ReturnV          
 
-    def sonos_write_szene(player):
+    def sonos_write_szene(self, player):
         dicti = {}
         dicti['MasterZone'] = "Own"
         posinfo = self.GetPositionInfo(player)
@@ -462,10 +476,11 @@ class sonos:
         else:
             playern = player
             plnum = 0
-        self.SaveList(player, "Bad", 34)
-        mdb_set_table(constants.sql_tables.Sonos.name,player,dicti) 
+        self.SaveList(player, playern, plnum)
+        mdb_set_table(table.name,self.Names.get(player),dicti) 
+        return True
         
-    def sonos_read_szene(player, sonos_szene, hergestellt = False):
+    def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
         if str(sonos_szene.get('Volume')) <> 'None':
             self.SetVolume(player, sonos_szene.get('Volume'))
@@ -473,7 +488,7 @@ class sonos:
         if (str(zone) <> "None") and (str(zone) <> "Own"):
             self.CombineZones(player, zone)
         else:
-            zoneown = sonos_zonen.get(str(player))
+            zoneown = self.sonos_zonen.get(str(player))
             if str(sonos_szene.get('Radio')) == '1':
                 self.setRadio(player, str(sonos_szene.get('Sender')))
             elif str(zone) <> "None":
@@ -489,74 +504,75 @@ class sonos:
             elif sonos_szene.get('Pause') == 0:
                 self.SetPlay(player)
         
-    def set_device(self, player, szenen):
-        if commd in ["man", "auto"]:
-            set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)      
-        if str(szene) == "Pause":
+    def set_device(self, player, command):
+        if command in ["man", "auto"]:
+            set_val_in_szenen(device=device, szene="Auto_Mode", value=command)   
+        player = self.Devices.get(str(player))
+        if str(command) == "Pause":
             self.SetPause(player)
-        elif str(szene) == "Play":
+        elif str(command) == "Play":
             self.SetPlay(player)                
-        elif str(szene) == "Save":
-            sonos_write_szene(player)                   
-        elif str(szene) == "Announce_Time":
-            sonos_write_szene(player)
+        elif str(command) == "Save":
+            self.sonos_write_szene(player)                   
+        elif str(command) == "Announce_Time":
+            self.sonos_write_szene(player)
             lt = localtime()
             stunde = int(strftime("%H", lt))
             minute = int(strftime("%M", lt)) 
             if (minute <> 0) and (minute <> 30):
                 text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
                 laenge = downloadAudioFile(text)
-                sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
+                self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
                 time.sleep(laenge + 1)            
-                sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))
-        elif str(szene) == "Durchsage":
-            sonos_write_szene(player)   
+                self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))))
+        elif str(command) == "Durchsage":
+            self.sonos_write_szene(player)   
             text = setting_r("Durchsage")        
             laenge = downloadAudioFile(text)
-            sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
             time.sleep(laenge + 1)            
-            sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))            
-        elif str(szene) == "Return":
-            sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))), hergestellt = True)          
-        elif ((str(szene) == "resume") ):
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))))            
+        elif str(command) == "Return":
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))), hergestellt = True)          
+        elif ((str(command) == "resume") ):
             time.sleep(60)
-            sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,sonos_szenen.get(str(player))))            
-        elif (str(szene) == "lauter"):
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))))            
+        elif (str(command) == "lauter"):
             ActVol = self.GetVolume(player)
             increment = 8
             VOLUME = ActVol + increment 
             self.SetVolume(player, VOLUME)
-        elif (str(szene) == "leiser"):
+        elif (str(command) == "leiser"):
             ActVol = self.GetVolume(player)
             increment = 8
             VOLUME = ActVol - increment 
             self.SetVolume(player, VOLUME)
-        elif (str(szene) == "inc_lauter"):
+        elif (str(command) == "inc_lauter"):
             ActVol = self.GetVolume(player)
             if ActVol >= 20: increment = 8
             if ActVol < 20: increment = 4
             if ActVol < 8: increment = 2
             VOLUME = ActVol + increment 
             self.SetVolume(player, VOLUME)
-        elif (str(szene) == "inc_leiser"):
+        elif (str(command) == "inc_leiser"):
             ActVol = self.GetVolume(player)
             if ActVol >= 20: increment = 8
             if ActVol < 20: increment = 4
             if ActVol < 8: increment = 2
             VOLUME = ActVol - increment 
             self.SetVolume(player, VOLUME)                
-        elif (str(szene) == "WeckerAnsage"):
+        elif (str(command) == "WeckerAnsage"):
             self.SetPause(player)
             self.SetVolume(player, 20)
             setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
             text = setting_r("Durchsage")        
             laenge = downloadAudioFile(text)
-            sonos_read_szene(player, mdb_read_table_entry(constants.sql_tables.Sonos.name,"TextToSonos"))
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
             time.sleep(laenge + 1)  
             self.SetPause(player)
-        elif ((str(szene) <> "resume") and (str(szene) <> "An") and (str(szene) <> "None")):
-            sonos_szene = mdb_read_table_entry(constants.sql_tables.Sonos.name,szene)
-            sonos_read_szene(player, sonos_szene)                                      
+        elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
+            sonos_szene = mdb_read_table_entry(table.name,command)
+            self.sonos_read_szene(player, sonos_szene)                                      
         return True
 
     def list_commands(self):
