@@ -7,148 +7,210 @@ from cmd_sonos import sonos
 from cmd_xs1 import myezcontrol
 from cmd_hue import hue_lights
 
-import sys
-from PyQt4.QtGui import *
+from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import *
+import sys
 
-class MyPopup(QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
+xs1 = myezcontrol(constants.xs1_.IP)
+hue = hue_lights()
+sn = sonos()
+xs1_devs = xs1.list_devices()
+xs1_cmds = xs1.list_commands()
+hue_devs = hue.list_devices()
+hue_cmds = hue.list_commands()
+sns_devs = sn.list_devices()
+sns_cmds = sn.list_commands()
+System = None
+Device = None
 
-    def paintEvent(self, e):
-        dc = QPainter(self)
-        dc.drawLine(0, 0, 100, 100)
-        dc.drawLine(100, 0, 0, 100)
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
 
-class Example(QWidget):
-    
-    def __init__(self):
-        super(Example, self).__init__()
-        
-        self.sn = sonos()
-        self.xs1 = myezcontrol(constants.xs1_.IP)
-        self.hue = hue_lights()
-        self.dev_mod = None
-        self.cmd_mod = None
-        self.mode = None
-        self.initUI()
-        
-    def initUI(self):
-        global dev_mod
-        global cmd_mod
-        QToolTip.setFont(QFont('SansSerif', 10))
-        
-        #self.setToolTip('This is a <b>QWidget</b> widget')
-        
-        dev_lst = QListView(self)
-        dev_lst.setWindowTitle('Devices')
-        dev_lst.move(0, 50) 
-        dev_lst.setMinimumSize(200, 400)
-            
-        self.dev_mod = QStandardItemModel(dev_lst)
-        
-        dev_lst.setModel(self.dev_mod)
-        
-        cmds_lst = QListView(self)
-        cmds_lst.setWindowTitle('Devices')
-        cmds_lst.move(260, 50) 
-        cmds_lst.setMinimumSize(200, 400)
-            
-        self.cmd_mod = QStandardItemModel(cmds_lst)
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
-        cmds_lst.setModel(self.cmd_mod)
-        
-        sns = QPushButton('Sonos', self)
-        #sns.setToolTip('This is a <b>QPushButton</b> widget')
-        sns.resize(sns.sizeHint())
-        sns.clicked.connect(self.sns_clicked)
-        
-        xs1 = QPushButton('XS1', self)
-        #xs1.setToolTip('This is a <b>QPushButton</b> widget')
-        xs1.resize(xs1.sizeHint())
-        xs1.clicked.connect(self.xs1_clicked)        
-        xs1.move(70, 0)  
-        
-        hue = QPushButton('Hue', self)
-        #xs1.setToolTip('This is a <b>QPushButton</b> widget')
-        hue.resize(hue.sizeHint())
-        hue.clicked.connect(self.hue_clicked)        
-        hue.move(140, 0) 
-        
-        btn = QPushButton('Execute', self)
-        #btn.setToolTip('This is a <b>QPushButton</b> widget')
-        btn.resize(100,100)#btn.sizeHint())
-        btn.clicked.connect(self.btn_clicked)        
-        btn.move(600, 20)       
-        
-        self.setGeometry(700, 500, 750, 450)
-        self.setWindowTitle('Kontrollraum')    
-        self.show()
-        
-    def set_liste(self, devices, commands):
-        global dev_mod
-        global cmd_mod   
-        self.dev_mod.clear()
-        self.cmd_mod.clear()
-        for dev in devices:
-            item = QStandardItem(dev)
-            item.setCheckable(True)
-            self.dev_mod.appendRow(item)  
-        for cmd in commands:
-            item = QStandardItem(str(cmd))
-            item.setCheckable(True)
-            self.cmd_mod.appendRow(item)            
-        
-        
-    def sns_clicked(self):
-        devs = self.sn.list_devices()
-        cmds = self.sn.list_commands() 
-        global mode
-        self.mode = "Sonos"
-        self.set_liste(devs, cmds)
-        
+class Main(QtGui.QMainWindow):
+    def __init__(self, parent = None):
+        super(Main, self).__init__(parent)
+
+        self.setupUi(self)
+
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.resize(700, 500)
+        self.centralwidget = QtGui.QWidget(MainWindow)
+        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.tabWidget = QtGui.QTabWidget(self.centralwidget)
+        self.tabWidget.setGeometry(QtCore.QRect(0, 0, 800, 480))
+        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
+        self.tab = QtGui.QWidget()
+        self.tab.setObjectName(_fromUtf8("tab"))
+        self.tabWidget.addTab(self.tab, _fromUtf8(""))
+        self.tab_2 = QtGui.QWidget()
+        self.tab_2.setObjectName(_fromUtf8("tab_2"))
+        self.pushButton = QtGui.QPushButton(self.tab_2)
+        self.pushButton.setGeometry(QtCore.QRect(0, 10, 91, 24))
+        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.pushButton.clicked.connect(self.xs1_clicked)
+        self.pushButton_2 = QtGui.QPushButton(self.tab_2)
+        self.pushButton_2.setGeometry(QtCore.QRect(0, 40, 91, 24))
+        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
+        self.pushButton_2.clicked.connect(self.hue_clicked)
+        self.pushButton_3 = QtGui.QPushButton(self.tab_2)
+        self.pushButton_3.setGeometry(QtCore.QRect(100, 10, 91, 24))
+        self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
+        self.pushButton_3.clicked.connect(self.sns_clicked)
+        self.scrollLayout = QtGui.QFormLayout()
+        self.scrollArea = QtGui.QScrollArea(self.tab_2)
+        self.scrollArea.setGeometry(QtCore.QRect(10, 70, 180, 380))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 430))
+        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.scrollAreaWidgetContents.setLayout(self.scrollLayout)        
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtGui.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setObjectName(_fromUtf8("menubar"))
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtGui.QStatusBar(MainWindow)
+        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(0)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
     def xs1_clicked(self):
-        devs = self.xs1.list_devices()
-        cmds = self.xs1.list_commands() 
-        global mode
-        self.mode = "XS1"
-        self.set_liste(devs, cmds)   
-        
+        global System
+        System = "XS1"
+        self.clearLayout(self.scrollLayout)
+        #while self.scrollLayout.rowCount() > 0:
+            #self.scrollLayout.deleteLater()
+        for item in xs1_devs:
+            self.scrollLayout.addRow(Buttn(None,item,"Device"))
+
+    def clearLayout(self, layout):
+        while layout.count() > 0:
+            item = layout.takeAt(0)
+            if not item:
+                continue
+
+            w = item.widget()
+            if w:
+                w.deleteLater()
+
     def hue_clicked(self):
-        devs = self.hue.list_devices()
-        cmds = self.hue.list_commands() 
-        global mode
-        self.mode = "Hue"
-        self.set_liste(devs, cmds)         
-        
-    def set_popup(self):
-        self.w = MyPopup()
-        self.w.setGeometry(QRect(100, 100, 100, 100))
-        self.w.show()        
-        
-    def btn_clicked(self):
-        commds = []
-        for i in range(self.cmd_mod.rowCount()):
-            if self.cmd_mod.item(i).checkState():
-                commds.append(self.cmd_mod.item(i).text())
-        for i in range(self.dev_mod.rowCount()):
-            if self.dev_mod.item(i).checkState():
-                for cmmd in commds:
-                    print self.dev_mod.item(i).text(), cmmd
-                    if self.mode == "Sonos":
-                        if self.sn.set_device(player=self.dev_mod.item(i).text(), command=cmmd):
-                            self.set_popup()
-                    elif self.mode == "XS1":
-                        self.xs1.set_device(self.dev_mod.item(i).text(), cmmd)   
-                    elif self.mode == "Hue":
-                        self.hue.set_device(self.dev_mod.item(i).text(), cmmd)                          
-        
-def main():
-    
-    app = QApplication(sys.argv)
-    ex = Example()
-    sys.exit(app.exec_())
+        global System
+        System = "Hue"
+        self.clearLayout(self.scrollLayout)
+        for item in hue_devs:
+            self.scrollLayout.addRow(Buttn(None,item,"Device"))
 
+    def sns_clicked(self):
+        global System
+        System = "Sonos"
+        self.clearLayout(self.scrollLayout)
+        for item in sns_devs:
+            self.scrollLayout.addRow(Buttn(None,item,"Device"))
 
-if __name__ == '__main__':
-    main()
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(_translate("MainWindow", "Kontrollraum", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tab 1", None))
+        self.pushButton.setText(_translate("MainWindow", "XS1", None))
+        self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
+        self.pushButton_3.setText(_translate("MainWindow", "Sonos", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Direkt", None))
+
+class Buttn(QtGui.QWidget):
+    def __init__( self ,parent=None, Name=None, Type="Device"):
+      super(Buttn, self).__init__(parent)
+
+      self.pushButton = QtGui.QPushButton(Name)
+      
+      layout = QtGui.QHBoxLayout()
+      layout.addWidget(self.pushButton)
+      if Type=="Device":
+        self.pushButton.clicked.connect(lambda: self.set_popup(Name)) 
+      elif Type=="Command":
+        self.pushButton.clicked.connect(lambda: self.send_command(Name))         
+      self.setLayout(layout)
+      
+    def set_popup(self,Name): 
+        global Device
+        Device = Name
+        self.w = MyPopup(self,Name)
+        self.w.setGeometry(QRect(500, 100, 200, 400))
+        self.w.show() 
+        
+    def send_command(self,Command):
+        print Device, Command
+        if System == "Sonos":
+            sn.set_device(player=Device, command=Command)
+        elif System == "XS1":
+            xs1.set_device(Device, Command)   
+        elif System == "Hue":
+            hue.set_device(Device, Command)         
+
+class MyPopup(QtGui.QMainWindow):
+    def __init__(self, parent=None, Text="Test"):
+        #super(MyPopup, self).__init__(parent)
+        QtGui.QWidget.__init__(self)
+        # scroll area widget contents - layout
+        self.scrollLayout = QtGui.QFormLayout()
+
+        # scroll area widget contents
+        self.scrollWidget = QtGui.QWidget()
+        self.scrollWidget.setLayout(self.scrollLayout)
+
+        # scroll area
+        self.scrollArea = QtGui.QScrollArea()
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setWidget(self.scrollWidget)
+
+        # main layout
+        self.mainLayout = QtGui.QVBoxLayout()
+
+        # add all main to the main vLayout
+        self.mainLayout.addWidget(self.scrollArea) 
+        
+        # central widget
+        self.centralWidget = QtGui.QWidget()
+        self.centralWidget.setLayout(self.mainLayout)
+
+        # set central widget
+        self.setCentralWidget(self.centralWidget)          
+
+        if System == "XS1":
+            for item in xs1_cmds:
+                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))
+        elif System == "Hue":
+            for item in hue_cmds:
+                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))       
+        elif System == "Sonos":
+            for item in sns_cmds:
+                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))                 
+        
+    #def paintEvent(self, e):
+        #self.scrollLayout.addRow(Test("test"))
+        #pass
+        #dc = QtGui.QPainter(self)
+        #dc.drawLine(0, 0, 100, 100)
+        #dc.drawLine(100, 0, 0, 100)
+
+app = QtGui.QApplication(sys.argv)
+myWidget = Main()
+myWidget.setGeometry(QRect(0, 0, 800, 500))
+myWidget.show()
+app.exec_() 
