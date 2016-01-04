@@ -4,8 +4,12 @@ import constants
 
 from mysql_con import mdb_set_table, mdb_read_table_entry,set_val_in_szenen,mdb_get_table
 from phue import Bridge
+
 import MySQLdb as mdb
 import time
+
+import logging
+logging.basicConfig()
 
 class sql_object:
     def __init__(self,name,typ,columns):
@@ -13,14 +17,14 @@ class sql_object:
         self.typ = typ
         self.columns = columns
 
-table = sql_object("out_hue", "Outputs", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("hue","VARCHAR(45)"),("bri","VARCHAR(45)"),("sat","VARCHAR(45)"),("an","VARCHAR(45)")))
+table = sql_object("out_hue", "Outputs", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("hue","VARCHAR(45)"),("bri","VARCHAR(45)"),("sat","VARCHAR(45)"),("an","VARCHAR(45)"),("transitiontime","VARCHAR(45)")))
 
 hbridge = Bridge(constants.hue_.IP)
 
 def main():
     hue_l = hue_lights()
-    hue_l.set_device("Stablampe_1", "Aus")
-    print hue_l.list_devices()
+    hue_l.set_device("Stablampe_2", "Rot")
+    #print hue_l.list_devices()
     
 class hue_lights():
     def __init__(self):
@@ -94,11 +98,11 @@ class hue_lights():
             szene['bri'] = int(szene.get('bri'))
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
             hbridge.set_light(device, {'on':True}) 
-            time.sleep(0.5)
+            #time.sleep(0.5)
         command = {}
         for key in keys:
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
-                command[key] = szene.get(key)
+                command[key] = int(szene.get(key))
         if command <> {}:
             hbridge.set_light(device, command)
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":

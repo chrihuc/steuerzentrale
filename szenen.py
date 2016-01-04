@@ -362,26 +362,7 @@ def interner_befehl(befehl):
     if befehl == "poweroff":       
         exectext = "sudo poweroff"
         os.system(exectext)          
-                 
-def tv_set_szene(szene):
-    #ineffektiv try with sendkey
-    t = threading.Thread(target=tv_remote_lan.sendKey, args=[str(szene)])
-    t.start()  
-    t = threading.Thread(target=tv_remote.sendKey, args=[str(szene)])
-    t.start()  
-    if tv_remote_lan.sendKey([str(szene)]) or tv_remote.sendKey([str(szene)]):
-        pass
-    else:
-        count = 0
-        while szene <> "KEY_POWEROFF" and not(ping('192.168.192.26')) and not(ping('192.168.192.29')) and count < 10:
-            MarantzSocket.sendto("TV_ein",(MARANTZ_IP,MARANTZ_PORT))
-            count = count + 1
-            time.sleep(10)
-        if (szene == "TV_ein"):
-            MarantzSocket.sendto("TV_ein",(MARANTZ_IP,MARANTZ_PORT))
-        else:
-            tv_remote.sendKey([str(szene)])
-            tv_remote_lan.sendKey([str(szene)])                    
+                                   
             
 schlummern = Timer(1, set_szene, ["NONE"])
 bad_ir = Timer(1, set_szene, ["NONE"])

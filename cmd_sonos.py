@@ -8,7 +8,7 @@ import time
 from time import localtime,strftime
 from datetime import date
 import MySQLdb as mdb
-from mysql_con import mdb_read_table_entry, set_val_in_szenen, mdb_get_table, mdb_set_table
+from mysql_con import mdb_read_table_entry, set_val_in_szenen, mdb_get_table, mdb_set_table, setting_s, setting_r
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, StreamInput, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList, ClearList, PlayList (defect), PlayListNr)
 #RenderingControl (SetMute, GetVolume, SetVolume)
@@ -19,7 +19,7 @@ class sql_object:
         self.typ = typ
         self.columns = columns
 
-table           = sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("MasterZone","VARCHAR(45)"),("Pause","INT(4)"),("Sender","VARCHAR(300)"),("Radio","INT(4)"),("TitelNr","VARCHAR(45)"),("Time","TIME"),("PlaylistNr","VARCHAR(45)"),("Volume","VARCHAR(45)")))
+table           = sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("MasterZone","VARCHAR(45)"),("Pause","INT(4)"),("Sender","VARCHAR(300)"),("Radio","INT(4)"),("TitelNr","VARCHAR(45)"),("Time","VARCHAR(45)"),("PlayListNr","VARCHAR(45)"),("Volume","VARCHAR(45)")))
 
 #sonos_ezcont = {str(sn.WohnZi):'Sonos_Wohnzi',str(sn.Kueche):'Sonos_Kueche',str(sn.Bad):'Sonos_Bad',str(sn.SchlafZi):'Sonos_Schlafzi'}
 #sonos_szenen = {str(sn.WohnZi):'WohnZi',str(sn.Kueche):'Kueche',str(sn.Bad):'Bad',str(sn.SchlafZi):'SchlafZi'}
@@ -310,7 +310,7 @@ class sonos:
                 <u:Seek xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
                 <InstanceID>0</InstanceID>
                 <Unit>""" + What + """</Unit>
-                <Target>""" + Position + """</Target>
+                <Target>""" + str(Position) + """</Target>
                 </u:Seek>
                 </s:Body>
                 </s:Envelope>"""
@@ -506,7 +506,7 @@ class sonos:
         
     def set_device(self, player, command):
         if command in ["man", "auto"]:
-            set_val_in_szenen(device=device, szene="Auto_Mode", value=command)   
+            set_val_in_szenen(device=player, szene="Auto_Mode", value=command)   
         player = self.Devices.get(str(player))
         if str(command) == "Pause":
             self.SetPause(player)

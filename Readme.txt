@@ -63,6 +63,7 @@ todo:
 V1: separate szenen
         Interlocks für PS3 o.ä?
         write back correct status of aktuatoren
+    tv on with sattelite
     add "empty" sattelite for all TiFo aktuatoren
     finish doppelklick und dreifachklick
         bei dreifachklick wird doppelklick und einfach auch ausgeführt

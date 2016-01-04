@@ -6,6 +6,7 @@ import constants
 from cmd_sonos import sonos
 from cmd_xs1 import myezcontrol
 from cmd_hue import hue_lights
+from cmd_samsung import TV
 
 from mysql_con import mdb_read_table_entry
 
@@ -18,12 +19,11 @@ descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
 xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
 sn = sonos()
+tv = TV()
 xs1_devs = xs1.list_devices()
-xs1_cmds = xs1.list_commands()
 hue_devs = hue.list_devices()
-hue_cmds = hue.list_commands()
 sns_devs = sn.list_devices()
-sns_cmds = sn.list_commands()
+tvs_devs = tv.list_devices()
 System = None
 Device = None
 
@@ -111,6 +111,10 @@ class Main(QtGui.QMainWindow):
         self.pushButton_3.setGeometry(QtCore.QRect(100, 10, 91, 24))
         self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
         self.pushButton_3.clicked.connect(self.sns_clicked)
+        self.pushButton_4 = QtGui.QPushButton(self.tab_3)
+        self.pushButton_4.setGeometry(QtCore.QRect(100, 40, 91, 24))
+        self.pushButton_4.setObjectName(_fromUtf8("pushButton_4"))
+        self.pushButton_4.clicked.connect(self.tvs_clicked)        
         self.scrollLayout = QtGui.QFormLayout()
         self.scrollArea = QtGui.QScrollArea(self.tab_3)
         self.scrollArea.setGeometry(QtCore.QRect(10, 70, 180, 380))
@@ -167,6 +171,13 @@ class Main(QtGui.QMainWindow):
         self.clearLayout(self.scrollLayout)
         for item in sns_devs:
             self.scrollLayout.addRow(Buttn(None,item,"Device"))
+            
+    def tvs_clicked(self):
+        global System
+        System = "TV"
+        self.clearLayout(self.scrollLayout)
+        for item in tvs_devs:
+            self.scrollLayout.addRow(Buttn(None,item,"Device"))            
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Kontrollraum", None))
@@ -177,6 +188,7 @@ class Main(QtGui.QMainWindow):
         self.pushButton.setText(_translate("MainWindow", "XS1", None))
         self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
         self.pushButton_3.setText(_translate("MainWindow", "Sonos", None))
+        self.pushButton_4.setText(_translate("MainWindow", "TV", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Direkt", None))
 
     def set_popup(self,Name): 
@@ -218,11 +230,14 @@ class Buttn(QtGui.QWidget):
         elif System == "XS1":
             xs1.set_device(Device, Command)   
         elif System == "Hue":
-            hue.set_device(Device, Command)         
+            hue.set_device(Device, Command)   
+        elif System == "TV":
+            hue.set_device(Device, Command)             
 
 class MyPopup(QtGui.QMainWindow):
     def __init__(self, parent=None, Text="Test"):
         #super(MyPopup, self).__init__(parent)
+        global System
         QtGui.QWidget.__init__(self)
         
         self.setWindowTitle(Text)
@@ -253,16 +268,20 @@ class MyPopup(QtGui.QMainWindow):
 
         if Text in xs1_devs:
             System = "XS1"
-            for item in xs1_cmds:
+            for item in xs1.list_commands():
                 self.scrollLayout.addRow(Buttn(self,str(item),"Command"))
         elif Text in hue_devs:
             System = "Hue"
-            for item in hue_cmds:
+            for item in hue.list_commands():
                 self.scrollLayout.addRow(Buttn(self,str(item),"Command"))       
         elif Text in sns_devs:
             System = "Sonos"
-            for item in sns_cmds:
-                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))                 
+            for item in sn.list_commands():
+                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))     
+        elif Text in tvs_devs:
+            System = "TV"
+            for item in tv.list_commands():
+                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))                  
         
     #def paintEvent(self, e):
         #self.scrollLayout.addRow(Test("test"))
