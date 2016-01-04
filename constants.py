@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 run = True
 
-eigene_IP = "192.168.192.33"
+eigene_IP = "192.168.192.10"
 name = "BueroPi"
 
 xs1_IP = "192.168.192.4"
