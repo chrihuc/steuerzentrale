@@ -64,7 +64,7 @@ class Main(QtGui.QMainWindow):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(0, 0, 800, 480))
+        self.tabWidget.setGeometry(QtCore.QRect(0, 0, 800, 400))
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         
         # Keller
@@ -117,11 +117,11 @@ class Main(QtGui.QMainWindow):
         self.pushButton_4.clicked.connect(self.tvs_clicked)        
         self.scrollLayout = QtGui.QFormLayout()
         self.scrollArea = QtGui.QScrollArea(self.tab_3)
-        self.scrollArea.setGeometry(QtCore.QRect(10, 70, 180, 380))
+        self.scrollArea.setGeometry(QtCore.QRect(10, 70, 200, 280))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 430))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 360))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -232,7 +232,7 @@ class Buttn(QtGui.QWidget):
         elif System == "Hue":
             hue.set_device(Device, Command)   
         elif System == "TV":
-            hue.set_device(Device, Command)             
+            tv.set_device(Device, Command)             
 
 class MyPopup(QtGui.QMainWindow):
     def __init__(self, parent=None, Text="Test"):
@@ -292,6 +292,6 @@ class MyPopup(QtGui.QMainWindow):
 
 app = QtGui.QApplication(sys.argv)
 myWidget = Main()
-myWidget.setGeometry(QRect(0, 0, 800, 500))
+myWidget.setGeometry(QRect(0, 0, 800, 400))
 myWidget.show()
 app.exec_() 

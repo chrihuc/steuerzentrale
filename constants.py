@@ -60,7 +60,7 @@ class sql_tables:
     szenen          = sql_object("set_Szenen", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Prio","INT(11)"),("Beschreibung","TEXT"),("Durchsage","TEXT"),("Gruppe","VARCHAR(45)"),("inApp","VARCHAR(45)"),("Setting","TEXT"),("Follows","TEXT"),("After","VARCHAR(45)"),("Bedingung","TEXT"),("XS1_Bedingung","TEXT"),("AutoMode","VARCHAR(45)"),("setTask","VARCHAR(45)"),("setTaskZuhause","VARCHAR(45)"),("intCmd","VARCHAR(45)"),("LastUsed","DATETIME")))
     
     #move to sats
-    satellites      = sql_object("set_satellites", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("IP","VARCHAR(45)"),("PORT","INT(11)"),("Type","VARCHAR(45)"),("USER","VARCHAR(45)"),("PASS","VARCHAR(45)"),("command_set","VARCHAR(45)")))
+    #satellites      = sql_object("set_satellites", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("IP","VARCHAR(45)"),("PORT","INT(11)"),("Type","VARCHAR(45)"),("USER","VARCHAR(45)"),("PASS","VARCHAR(45)"),("command_set","VARCHAR(45)")))
     
     ##tables for outputs
     #hue             = sql_object("out_hue", "Outputs", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("hue","VARCHAR(45)"),("bri","VARCHAR(45)"),("sat","VARCHAR(45)"),("an","VARCHAR(45)"),("transitiontime","VARCHAR(45)")))
@@ -74,7 +74,7 @@ class sql_tables:
     Bewohner        = sql_object("sst_Bewohner", "SensData",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Handy_IP","VARCHAR(20)"),("Handy_State","INT(11)"),("USB_ID","VARCHAR(45)"),("USB_State","INT(4)"),("prod","VARCHAR(45)"),("gcm_regid","VARCHAR(255)"),("gcm_name","VARCHAR(50)"))) 
     
     
-    tables = [his_inputs,inputs,cron,wecker,settings,szenen,satellites,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner]
+    tables = [his_inputs,inputs,cron,wecker,settings,szenen,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner]
     HUE = sql_object("HUE", "HUE",('BettChris', 'Stablampe_1', 'Stablampe_2', 'Lightstrip_Eingang', 'Lightstrip_Kueche', 'Balkonlampe', 'Stehlampe', 'BettSabina', 'Buero', 'Bad', 'Monaco_Lampe'))
     SATELLITE = sql_object("SATELLITE", "SATELLITE",('Sideb_links', 'LightstripSchlafzi', 'Sideb_mitte', 'Sideb_rechts', 'Marantz', 'Sideb_oben', 'TuerSPi','Scanner'))
     XS1 = sql_object("XS1", "XS1",('Sideboard', 'Kueche', 'Diele', 'Video_Audio', 'Lattenrost', 'Wohnzimmer_Decke', 'Schlafzimmer', 'Webcams', 'Elchlampe', 'Adventslichter', 'Reduit', 'Pflanzen', 'Saugstauber', 'PC_Peripherie', 'Weihnachtsbaum', 'Esszimmer','Rauchmelder'))

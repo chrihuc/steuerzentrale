@@ -51,7 +51,7 @@ def re_calc(inpt):
                     return (lst[1][0] * lst[1][1]) + lst[1][2]
         except:
             return inpt
-    if "set" in str(inpt): 
+    if "sett" in str(inpt): 
         lst = eval(str(inpt))  
         return float(setting_r(lst[1]))
     else:
