@@ -108,6 +108,7 @@ class hue_lights():
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
             hbridge.set_light(device, {'on':False})  
         set_val_in_szenen(device=device, szene="Value", value=szene.get('on'))
+        return True
 
 if __name__ == '__main__':
     main()  

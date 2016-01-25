@@ -542,11 +542,13 @@ class sonos:
             increment = 8
             VOLUME = ActVol + increment 
             self.SetVolume(player, VOLUME)
+            return
         elif (str(command) == "leiser"):
             ActVol = self.GetVolume(player)
             increment = 8
             VOLUME = ActVol - increment 
             self.SetVolume(player, VOLUME)
+            return
         elif (str(command) == "inc_lauter"):
             ActVol = self.GetVolume(player)
             if ActVol >= 20: increment = 8

@@ -64,7 +64,7 @@ class Main(QtGui.QMainWindow):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(0, 0, 800, 400))
+        self.tabWidget.setGeometry(QtCore.QRect(0, 0, 800, 500))
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         
         # Keller
@@ -139,6 +139,9 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+    def close_clicked(self):
+        QtCore.QCoreApplication.instance().quit()
+
     def xs1_clicked(self):
         global System
         System = "XS1"
@@ -201,7 +204,7 @@ class Main(QtGui.QMainWindow):
 class Buttn(QtGui.QWidget):
     def __init__( self ,parent=None, Name=None, Type="Device"):
       super(Buttn, self).__init__(parent)
-
+      self.parent = parent
       if str(descs.get(Name)) <> "None":
         desc = str(descs.get(Name))
       else:
@@ -226,13 +229,18 @@ class Buttn(QtGui.QWidget):
     def send_command(self,Command):
         print Device, Command
         if System == "Sonos":
-            sn.set_device(player=Device, command=Command)
+            if sn.set_device(player=Device, command=Command):
+                self.parent.close()
         elif System == "XS1":
-            xs1.set_device(Device, Command)   
+            if xs1.set_device(Device, Command):
+                self.parent.close()
         elif System == "Hue":
-            hue.set_device(Device, Command)   
+            if hue.set_device(Device, Command):
+                self.parent.close()
         elif System == "TV":
-            tv.set_device(Device, Command)             
+            if tv.set_device(Device, Command):
+                self.parent.close()
+         
 
 class MyPopup(QtGui.QMainWindow):
     def __init__(self, parent=None, Text="Test"):
@@ -292,6 +300,6 @@ class MyPopup(QtGui.QMainWindow):
 
 app = QtGui.QApplication(sys.argv)
 myWidget = Main()
-myWidget.setGeometry(QRect(0, 0, 800, 400))
+myWidget.setGeometry(QRect(0, 0, 800, 500))
 myWidget.show()
 app.exec_() 

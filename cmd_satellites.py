@@ -3,7 +3,7 @@
 import constants
 
 from mysql_con import mdb_get_table, mdb_read_table_entry
-from socket import socket, AF_INET, SOCK_DGRAM
+import socket
 from socket import error as socket_error
 from alarmevents import alarm_event
 import paramiko
@@ -45,11 +45,11 @@ def  get_satellite(name):
 def main():
     sats = satelliten()
     print sats.list_devices()
-    print sats.list_commands()
-    sats.set_device('Sideb_links','Halloween')
+    print sats.list_commands("Test")
+    print sats.set_device('Test','test')
 
 class satelliten:
-    mysocket = socket( AF_INET, SOCK_DGRAM )
+    mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     
     def __init__ (self):
         self.__init_table__()
@@ -107,11 +107,12 @@ class satelliten:
         return liste    
         
     def list_commands(self,device='alle'):
-        liste = []        
+        liste = [] 
+        list_cmds_of = []
         if device == 'alle':
             list_cmds_of = self.list_devices()
         else:
-            list_cmds_of = device
+            list_cmds_of.append(device)
         for sates in list_cmds_of:
             cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
             self.__check_table_exists__(cmds_table)            
@@ -123,11 +124,23 @@ class satelliten:
     def set_device(self, device, commd):   
         satellit=mdb_read_table_entry(table.name,device)
         command = mdb_read_table_entry(satellit.get('command_set'),commd)
-        command[device]=commd
-        satelliten.mysocket.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
+        command["Device"]=device
+        satelliten.mysocket.settimeout(10)
+        satelliten.mysocket.connect((satellit.get('IP'),satellit.get('PORT')))
+        satelliten.mysocket.send(str(command))
+        try:
+            data=satelliten.mysocket.recv(1024)
+            satelliten.mysocket.close()
+        except:
+            satelliten.mysocket.close()
+        if data  == "True":
+            return True
+        else:
+            return False
+             
         
 class sputnik:
-    mysocket = socket( AF_INET, SOCK_DGRAM )
+    mysocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     
     def __init__ (self, name, IP, PORT, Type, USER, PASS, command_set):
         self.name = name
