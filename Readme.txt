@@ -59,6 +59,8 @@ Satellite with IP and Port in table Satellites
 todo:
     check if hue command was executed only then return true
     gcm setting id is empty
+    gui 
+        klick on values gives trend
 
 V1: separate szenen
         Interlocks für PS3 o.ä?

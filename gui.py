@@ -7,6 +7,7 @@ from cmd_sonos import sonos
 from cmd_xs1 import myezcontrol
 from cmd_hue import hue_lights
 from cmd_samsung import TV
+from cmd_satellites import satelliten
 
 from mysql_con import mdb_read_table_entry
 
@@ -20,10 +21,12 @@ xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
 sn = sonos()
 tv = TV()
+sat = satelliten()
 xs1_devs = xs1.list_devices()
 hue_devs = hue.list_devices()
 sns_devs = sn.list_devices()
 tvs_devs = tv.list_devices()
+sat_devs = sat.list_devices()
 System = None
 Device = None
 
@@ -114,10 +117,14 @@ class Main(QtGui.QMainWindow):
         self.pushButton_4 = QtGui.QPushButton(self.tab_3)
         self.pushButton_4.setGeometry(QtCore.QRect(100, 40, 91, 24))
         self.pushButton_4.setObjectName(_fromUtf8("pushButton_4"))
-        self.pushButton_4.clicked.connect(self.tvs_clicked)        
+        self.pushButton_4.clicked.connect(self.tvs_clicked)   
+        self.pushButton_5 = QtGui.QPushButton(self.tab_3)
+        self.pushButton_5.setGeometry(QtCore.QRect(200, 10, 91, 24))
+        self.pushButton_5.setObjectName(_fromUtf8("pushButton_5"))
+        self.pushButton_5.clicked.connect(self.sat_clicked)          
         self.scrollLayout = QtGui.QFormLayout()
         self.scrollArea = QtGui.QScrollArea(self.tab_3)
-        self.scrollArea.setGeometry(QtCore.QRect(10, 70, 200, 280))
+        self.scrollArea.setGeometry(QtCore.QRect(10, 70, 250, 350))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
@@ -125,6 +132,7 @@ class Main(QtGui.QMainWindow):
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.xs1_clicked()
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -182,6 +190,13 @@ class Main(QtGui.QMainWindow):
         for item in tvs_devs:
             self.scrollLayout.addRow(Buttn(None,item,"Device"))            
 
+    def sat_clicked(self):
+        global System
+        System = "Satelliten"
+        self.clearLayout(self.scrollLayout)
+        for item in sat_devs:
+            self.scrollLayout.addRow(Buttn(None,item,"Device")) 
+
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Kontrollraum", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_0), _translate("MainWindow", "Keller", None))
@@ -192,6 +207,7 @@ class Main(QtGui.QMainWindow):
         self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
         self.pushButton_3.setText(_translate("MainWindow", "Sonos", None))
         self.pushButton_4.setText(_translate("MainWindow", "TV", None))
+        self.pushButton_5.setText(_translate("MainWindow", "Satelliten", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Direkt", None))
 
     def set_popup(self,Name): 
@@ -240,6 +256,9 @@ class Buttn(QtGui.QWidget):
         elif System == "TV":
             if tv.set_device(Device, Command):
                 self.parent.close()
+        elif System == "Satelliten":
+            if sat.set_device(Device, Command):
+                self.parent.close()     
          
 
 class MyPopup(QtGui.QMainWindow):
@@ -289,7 +308,11 @@ class MyPopup(QtGui.QMainWindow):
         elif Text in tvs_devs:
             System = "TV"
             for item in tv.list_commands():
-                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))                  
+                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))   
+        elif Text in sat_devs:
+            System = "Satelliten"
+            for item in sat.list_commands(Text):
+                self.scrollLayout.addRow(Buttn(self,str(item),"Command"))                 
         
     #def paintEvent(self, e):
         #self.scrollLayout.addRow(Test("test"))

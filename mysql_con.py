@@ -15,7 +15,7 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    print inputs('Temp',10)
+    print mdb_read_table_column('set_Szenen','Name')
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
@@ -133,6 +133,19 @@ def mdb_read_table_entry(db, entry):
                 dicti[commando] = re_calc(row[i])            
     con.close()    
     return dicti       
+
+def mdb_read_table_column(db, column):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    rlist = []
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT '+column+' FROM ' + db
+        cur.execute(sql)
+        results = cur.fetchall()
+        for row in results:
+            rlist.append(row[0])
+    con.close()    
+    return rlist 
 
 def get_raw_cmds(db):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
