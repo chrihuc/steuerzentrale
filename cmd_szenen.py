@@ -17,6 +17,7 @@ from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
 from alarmevents import alarm_event
+from szn_timer import szenen_timer
 
 xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
@@ -35,9 +36,12 @@ aes = alarm_event()
 def main():
     scenes = szenen()
     print scenes.list_commands()
+    scenes.execute("Test")
     
-class szenen:
+class szenen:    
+    
     def __init__ (self):
+        self.sz_t = szenen_timer(def_to_run = self.execute)
         pass
     
     def list_commands(self,gruppe='alle'):    
@@ -52,15 +56,9 @@ class szenen:
                     liste.append(szene.get("Name"))            
         return liste
 
-    def execute(self, szene):
-        szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
-        #check bedingung
-        bedingungen = {}
+    def __bedingung__(self,bedingungen):
         erfuellt = True
-        if str(szene_dict.get("Bedingung")) <> "None":
-            bedingungen = eval(szene_dict.get("Bedingung"))    
-            erfuellt = True
-        settings = settings_r()
+        settings = settings_r() 
         for bedingung in bedingungen:
             try:
                 groesser = bedingungen.get(bedingung).find('>')
@@ -85,12 +83,31 @@ class szenen:
                         erfuellt = False
             except Exception as e:
                 if not(str(settings.get(bedingung)) in bedingungen.get(bedingung)):
-                    erfuellt = False  
+                    erfuellt = False      
+        return erfuellt
+
+    def execute(self, szene):
+        szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
+        print szene_dict
+        #check bedingung
+        bedingungen = {}
+        erfuellt = True
+        if str(szene_dict.get("Bedingung")) <> "None":
+            bedingungen = eval(szene_dict.get("Bedingung"))    
+        erfuellt = self.__bedingung__(bedingungen)
         if erfuellt:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                aes.new_event(description="Szenen: " + szene, prio=eval(szene_dict.get("Prio")), karenz = 0.03)
+                aes.new_event(description="Szenen: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)
             else:
-                aes.new_event(description= str(szene_dict.get("Beschreibung")), prio=eval(szene_dict.get("Prio")), karenz = 0.03)                    
+                aes.new_event(description= str(szene_dict.get("Beschreibung")), prio=(szene_dict.get("Prio")), karenz = 0.03) 
+        interlocks = {}        
+        if str(szene_dict.get("AutoMode")) == "True":
+            interlocks = mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
+        #
+        #szenen timmer
+        #
+        self.sz_t.retrigger_add(parent = "Test",delay = 10, child = "Test", exact = False, retrig = True)
+        
 
 if __name__ == '__main__':
     main()      
