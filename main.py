@@ -1,6 +1,7 @@
 #!  /usr/bin/python
 
 import constants
+from szn_timer import szenen_timer
 
 import threading
 #from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM

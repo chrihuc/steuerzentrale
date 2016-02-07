@@ -17,6 +17,7 @@ from threading import Timer
 import time
 
 import datetime
+import uuid
 
 liste = {}
 global start_t
@@ -50,7 +51,7 @@ class szenen_timer:
         dicti["child"] = child
         dicti["exact"] = exact
         dicti["retrig"] = retrig
-        hash_id = "asbfaer"
+        hash_id = uuid.uuid4()
         dicti["hash_id"] = hash_id     
         t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
         dicti["timer"] = t
@@ -78,8 +79,7 @@ class szenen_timer:
                     item["timer"] = t
                     item.get("timer").start()
                 else:
-                    pass
-                    #loesche ientrag
+                    self.liste.remove(item)
                 found = True
         return found   
     
@@ -88,12 +88,15 @@ class szenen_timer:
             self.add_timer_start(parent, delay, child, exact, retrig)
 
     def zeige(self):
-        for item in self.liste:  
-            print item
+        print self.liste 
+
         
     def entferne_eintrag(self, hash_id, child):
-        #entferten eintra
+        for item in self.liste:
+            if item.get("hash_id") == hash_id:
+                self.liste.remove(item)
         self.def_to_run(child)
+        #print self.liste
       
 if __name__ == '__main__':
     main()  
