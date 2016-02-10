@@ -1,33 +1,68 @@
 #!  /usr/bin/python 
 
-from collections import OrderedDict
+import ConfigParser
 
-run = True
+config = ConfigParser.RawConfigParser()
 
-eigene_IP = "192.168.192.10"
-name = "BueroPi"
+cfg_main={'eigene_IP':'192.168.192.10', 'name':'BueroPi',\
+        'xs1_IP':'192.168.192.4','router_IP':'192.168.192.1','UDP_PORT':'5000',\
+        'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
+        'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
+        'tts':'False','heartbt':'125'}
+cfg_xs1 ={'USER':'admin','PASS':'admin'}
 
-xs1_IP = "192.168.192.4"
-router_IP = "192.168.192.1"
-UDP_PORT = 5000
-installation_folder = "/home/pi/steuerzentrale"
-temp_folder = "/home/pi/temp/"
-gcm_ID = ''
-
-automatic_backup = False
-webcam_supervision = False
-tts = False
-
-#timeout for connection in seconds
-heartbt = 125
-
-class xs1_:
-    STREAM_URL = xs1_IP+"/control?callback=cname&cmd=subscribe&format=txt" 
-    # constants.xs1_.IP    
-    IP = xs1_IP
-    USER = "admin"
-    PASS = "admin"
+def init_cfg():
+    if not config.has_section('Main'):
+        config.add_section('Main')
+    for cfg in cfg_main:
+        if not config.has_option('Main', cfg):
+            config.set('Main', cfg, cfg_main.get(cfg))
+    if not config.has_section('XS1'):
+        config.add_section('XS1')
+    for cfg in cfg_xs1:
+        if not config.has_option('XS1', cfg):
+            config.set('XS1', cfg, cfg_xs1.get(cfg))            
     
+    # Writing our configuration file to 'main.cfg'
+    with open('main.cfg', 'wb') as configfile:
+        config.write(configfile)
+
+
+
+for i in range(0,3):
+    while True:
+        try:
+            run = True
+            config.readfp(open('main.cfg'))
+            eigene_IP = config.get('Main', 'eigene_IP')
+            name = config.get('Main', 'name')
+            
+            xs1_IP = config.get('Main', 'xs1_IP')
+            router_IP = config.get('Main', 'router_IP')
+            UDP_PORT = config.getint('Main', 'UDP_PORT')
+            installation_folder = config.get('Main', 'installation_folder')
+            temp_folder = config.get('Main', 'temp_folder')
+            gcm_ID = config.get('Main', 'gcm_ID')
+            
+            automatic_backup = config.getboolean('Main', 'automatic_backup')
+            webcam_supervision = config.getboolean('Main', 'webcam_supervision')
+            tts = config.getboolean('Main', 'tts')
+        
+            #timeout for connection in seconds
+            heartbt = config.getint('Main', 'heartbt')
+            
+            class xs1_:
+                STREAM_URL = xs1_IP+"/control?callback=cname&cmd=subscribe&format=txt" 
+                # constants.xs1_.IP    
+                IP = xs1_IP
+                USER = config.get('XS1', 'USER')
+                PASS = config.get('XS1', 'PASS')            
+        except:
+            init_cfg()
+            continue
+        break
+
+
 class sql_:
     # constants.sql_.IP
     IP = eigene_IP
@@ -57,7 +92,7 @@ class sql_tables:
     #hue_autolight   = sql_object("set_hue_autolicht", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("offset","INT(11)"),("min","INT(11)"),("max","INT(11)")))
     
     #move to szenen
-    szenen          = sql_object("set_Szenen", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Prio","INT(11)"),("Beschreibung","TEXT"),("Durchsage","TEXT"),("Gruppe","VARCHAR(45)"),("inApp","VARCHAR(45)"),("Setting","TEXT"),("Follows","TEXT"),("After","VARCHAR(45)"),("Bedingung","TEXT"),("XS1_Bedingung","TEXT"),("AutoMode","VARCHAR(45)"),("setTask","VARCHAR(45)"),("setTaskZuhause","VARCHAR(45)"),("intCmd","VARCHAR(45)"),("LastUsed","DATETIME")))
+    szenen          = sql_object("set_Szenen", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Prio","INT(11)"),("Beschreibung","TEXT"),("Durchsage","TEXT"),("Gruppe","VARCHAR(45)"),("inApp","VARCHAR(45)"),("Setting","TEXT"),("Follows","TEXT"),("Bedingung","TEXT"),("AutoMode","VARCHAR(45)"),("setTask","VARCHAR(45)"),("setTaskZuhause","VARCHAR(45)"),("intCmd","VARCHAR(45)"),("LastUsed","DATETIME")))
     
     #move to sats
     #satellites      = sql_object("set_satellites", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("IP","VARCHAR(45)"),("PORT","INT(11)"),("Type","VARCHAR(45)"),("USER","VARCHAR(45)"),("PASS","VARCHAR(45)"),("command_set","VARCHAR(45)")))
