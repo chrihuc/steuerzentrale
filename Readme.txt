@@ -9,6 +9,7 @@ sudo pip install pyephem                #??
 sudo pip install paramiko               #??
 sudo pip install tinkerforge
 sudo pip install gitpython
+sudo pip install pyqtgraph
 
 ##################################
 setup of daemon tools

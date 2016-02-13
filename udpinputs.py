@@ -6,7 +6,7 @@ from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 #from socket import error as socket_error
 #from socket import socket, AF_INET, SOCK_DGRAM
 import sys
-from Sonos2Py import sonos
+from cmd_sonos import sonos
 #from samspy import remotecontrol
 from classes import myezcontrol, ping
 import os
