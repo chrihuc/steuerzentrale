@@ -52,7 +52,7 @@ class hue_lights():
     
     def list_commands(self):
         comands = mdb_get_table(table.name)
-        liste = []
+        liste = ['Umschalten']
         for comand in comands:
             liste.append(comand.get("Name"))
         liste.remove("Name")
@@ -82,7 +82,7 @@ class hue_lights():
             setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
             mdb_set_table(table.name,device, setting)
             return
-        elif commd == 'toggle':
+        elif commd == 'Umschalten':
             an = hbridge.get_light(device, 'on') 
             if an:
                 szene['on'] = False

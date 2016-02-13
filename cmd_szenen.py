@@ -22,6 +22,9 @@ from messaging import messaging
 
 import threading
 from threading import Timer
+import uuid
+import datetime
+import time
 
 xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
@@ -33,12 +36,14 @@ hue_devs = hue.list_devices()
 sns_devs = sn.list_devices()
 tvs_devs = tv.list_devices()
 sat_devs = sat.list_devices()
+cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 aes = alarm_event()
 mes = messaging()
 
 
 def main():
     scenes = szenen()
+    constants.redundancy_.master = True
     print scenes.list_commands()
     scenes.execute("Test")
     
@@ -46,6 +51,8 @@ class szenen:
     
     def __init__ (self):
         self.sz_t = szenen_timer(def_to_run = self.execute)
+        self.kommando_dict = {}
+        self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=10)
         pass
     
     def list_commands(self,gruppe='alle'):    
@@ -90,11 +97,54 @@ class szenen:
                     erfuellt = False      
         return erfuellt
 
+    def __sub_cmds__(self, szn_id, device, commando):
+        global kommando_dict
+        executed = False
+        t_list = self.kommando_dict.get(szn_id)      
+        if device in xs1_devs:
+            executed = xs1.set_device(device, commando)
+        elif device == "set_Task":
+            executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando)) 
+        elif device == "set_Task_zuhause":
+            executed = mes.send_zuhause(to=mes.alle, titel="Setting", text=str(commando))                  
+        elif device in sns_devs:
+            executed = sn.set_device(device, commando)               
+        elif device in hue_devs:
+            executed = hue.set_device(device, commando)  
+#            for kommando in kommandos:
+#                if hue_count > 1:
+#                    hue_delay += 0.75
+#                    hue_count = 0
+#                hue_del = Timer(hue_delay, hue.set_device, [key, commando])
+#                hue_del.start()
+#                hue_count += 1
+        elif device in sat_devs:
+            executed = sat.set_device(device, commando)                            
+        elif device == tvs_devs:
+            executed = tv.set_device(device, commando)         
+#            for idx, kommando in enumerate(kommandos):
+#                folgen = Timer((float(idx)/5), tv.set_device, [key,commando])
+#                folgen.start()                                                 
+#                        elif key == "Interner_Befehl":
+#                            for kommando in kommandos:
+#                                t = threading.Thread(target=interner_befehl, args=[commando])
+#                                t.start()    
+        if executed:
+            for itm in t_list:
+                if itm[0] == device and itm[1] == commando:
+                    t_list.remove(itm)
+        self.kommando_dict[szn_id] = t_list
+
     def execute(self, szene):
         szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
+        start_t = datetime.datetime.now()
         #check bedingung
         bedingungen = {}
+        global kommando_dict
         erfuellt = True
+        erfolg = False
+        szn_id = uuid.uuid4()
+        self.kommando_dict[szn_id] = []
         if str(szene_dict.get("Bedingung")) <> "None":
             bedingungen = eval(szene_dict.get("Bedingung"))    
         erfuellt = self.__bedingung__(bedingungen)
@@ -124,41 +174,13 @@ class szenen:
                     else:
                         kommandos = [szene_dict.get(key)]
                     if constants.redundancy_.master:
-                        if key in xs1_devs:
-                            for kommando in kommandos:
-                                t = threading.Thread(target=xs1.set_device, args=[key, kommando])
-                                t.start()
-                        elif key == "set_Task":
-                            for kommando in kommandos:
-                                mes.send_direkt(to=mes.alle, titel="Setting", text=str(kommando))  
-                        elif key == "set_Task_zuhause":
-                            for kommando in kommandos:
-                                mes.send_zuhause(to=mes.alle, titel="Setting", text=str(kommando))                          
-                                #mes.send_direkt(mes.tf201,"Setting",str(kommando))                    
-                        elif key in sns_devs:
-                            for kommando in kommandos:
-                                t = threading.Thread(target=sn.set_device, args=[key, kommando])
-                                t.start()                
-                        elif key in hue_devs:
-                            for kommando in kommandos:
-                                if hue_count > 1:
-                                    hue_delay += 0.75
-                                    hue_count = 0
-                                hue_del = Timer(hue_delay, hue.set_device, [key, kommando])
-                                hue_del.start()
-                                hue_count += 1
-                        elif key in sat_devs:
-                            for kommando in kommandos:
-                                t = threading.Thread(target=sat.set_device, args=[key,kommando])
-                                t.start()                          
-                        elif key == tvs_devs:
-                            for idx, kommando in enumerate(kommandos):
-                                folgen = Timer((float(idx)/5), tv.set_device, [key,kommando])
-                                folgen.start()                                                 
-#                        elif key == "Interner_Befehl":
-#                            for kommando in kommandos:
-#                                t = threading.Thread(target=interner_befehl, args=[kommando])
-#                                t.start()   
+                        for kommando in kommandos:
+                            if key in cmd_devs:
+                                t_list = self.kommando_dict.get(szn_id)
+                                t_list.append([key,kommando])
+                                self.kommando_dict[szn_id] = t_list
+                            t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, key, kommando])
+                            t.start()                         
 #==============================================================================
 # change settings table                                
 #==============================================================================
@@ -190,8 +212,26 @@ class szenen:
                 kommandos = [szene_dict.get("Follows")]      
             for kommando in kommandos:
                 sub_cmds = eval(kommando)
-                self.sz_t.retrigger_add(parent = szene,delay = sub_cmds[1], child = sub_cmds[0], exact = False, retrig = True)
-        
+                if sub_cmds[2] == 0:
+                    self.sz_t.retrigger_add(parent = szene,delay = sub_cmds[1], child = sub_cmds[0], exact = False, retrig = True)
+                elif sub_cmds[2] == 1:
+                    self.sz_t.retrigger_add(parent = szene,delay = sub_cmds[1], child = sub_cmds[0], exact = True, retrig = True)
+                elif sub_cmds[2] == 2:
+                    self.sz_t.retrigger_add(parent = szene,delay = sub_cmds[1], child = sub_cmds[0], exact = False, retrig = False)                    
+#==============================================================================
+# Check for timeout
+#==============================================================================
+        while datetime.datetime.now() - start_t < self.timeout:
+            t_list = self.kommando_dict.get(szn_id)
+            time.sleep(.1)
+            if len(t_list) == 0:
+                erfolg = True
+                break
+        t_list = self.kommando_dict.get(szn_id)
+        for item in t_list:
+            aes.new_event(description="CMD Timeout: " + str(item), prio=0, karenz = 0.03)
+        del self.kommando_dict[szn_id]
+        return erfolg
 
 if __name__ == '__main__':
     main()      
