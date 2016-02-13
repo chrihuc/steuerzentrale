@@ -15,24 +15,24 @@ import sqlsync
 time.sleep(10)
 
 aes = alarm_event()
-ssync = sqlsync.sync()
-
-syncliste = []
-syncliste += ["Settings"]
-syncliste += ["Besucher"]
-syncliste += ["Bewohner"]
-#syncliste += ["cron"]
-syncliste += ["gcm_users"]
-#syncliste += ["Szenen"]
-syncliste += ["Wecker"]
-#syncliste += ["Sideboard"]
-for table in syncliste:
-    try:
-        ssync.export(table, "XS1DB")
-        ssync.trunc_import(table, "XS1DB") 
-        aes.new_event(description="Success sync "+table, prio=0)
-    except:
-        aes.new_event(description="Error sync "+table, prio=0)
+#ssync = sqlsync.sync()
+#
+#syncliste = []
+#syncliste += ["Settings"]
+#syncliste += ["Besucher"]
+#syncliste += ["Bewohner"]
+##syncliste += ["cron"]
+#syncliste += ["gcm_users"]
+##syncliste += ["Szenen"]
+#syncliste += ["Wecker"]
+##syncliste += ["Sideboard"]
+#for table in syncliste:
+#    try:
+#        ssync.export(table, "XS1DB")
+#        ssync.trunc_import(table, "XS1DB") 
+#        aes.new_event(description="Success sync "+table, prio=0)
+#    except:
+#        aes.new_event(description="Error sync "+table, prio=0)
 
 threadliste = []
 
@@ -40,17 +40,17 @@ t = threading.Thread(name="xs1", target=xs1inputs.main, args = [])
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(name="udp",target=udpinputs.main, args = [])
-threadliste.append(t)
-t.start()
-
-t = threading.Thread(name="redun",target=redundancy.main, args = [])
-threadliste.append(t)
-t.start()
-
-t = threading.Thread(name="peri",target=periodic_sup.periodic_supervision, args = [])
-threadliste.append(t)
-t.start()
+#t = threading.Thread(name="udp",target=udpinputs.main, args = [])
+#threadliste.append(t)
+#t.start()
+#
+#t = threading.Thread(name="redun",target=redundancy.main, args = [])
+#threadliste.append(t)
+#t.start()
+#
+#t = threading.Thread(name="peri",target=periodic_sup.periodic_supervision, args = [])
+#threadliste.append(t)
+#t.start()
 
 #print threadliste
 #add supervision of threads
