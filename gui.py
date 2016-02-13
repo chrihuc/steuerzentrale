@@ -153,10 +153,10 @@ class Main(QtGui.QMainWindow):
         #Settings
         self.tab_4 = QtGui.QWidget()
         self.tab_4.setObjectName(_fromUtf8("tab_4"))
-        self.pushButton = QtGui.QPushButton(self.tab_4)
-        self.pushButton.setGeometry(QtCore.QRect(0, 10, 91, 24))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.pushButton.clicked.connect(self.git_update())        
+        self.pushButton_6 = QtGui.QPushButton(self.tab_4)
+        self.pushButton_6.setGeometry(QtCore.QRect(0, 10, 91, 24))
+        self.pushButton_6.setObjectName(_fromUtf8("gitupdate"))
+        self.pushButton_6.clicked.connect(self.git_update)       
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -176,7 +176,7 @@ class Main(QtGui.QMainWindow):
         QtCore.QCoreApplication.instance().quit()
 
     def git_update(self):
-        g = git.cmd.Git("https://github.com/chrihuc/steuerzentrale.git")
+        g = git.cmd.Git()
         g.pull()
         QtCore.QCoreApplication.instance().quit()
 
@@ -240,11 +240,13 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Erdgeschoss", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), _translate("MainWindow", "1. Stock", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "2. Stock", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Settings", None))
         self.pushButton.setText(_translate("MainWindow", "XS1", None))
         self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
         self.pushButton_3.setText(_translate("MainWindow", "Sonos", None))
         self.pushButton_4.setText(_translate("MainWindow", "TV", None))
         self.pushButton_5.setText(_translate("MainWindow", "Satelliten", None))
+        self.pushButton_6.setText(_translate("MainWindow", "GIT Update", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Direkt", None))
 
     def set_popup(self,Name): 
