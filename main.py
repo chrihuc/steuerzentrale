@@ -7,7 +7,7 @@ import threading
 #from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import time, os, sys
 #import urllib2
-import xs1inputs, udpinputs, redundancy, periodic_sup
+import xs1inputs#, udpinputs, redundancy, periodic_sup
 from alarmevents import alarm_event
 import sqlsync
 
