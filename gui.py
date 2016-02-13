@@ -8,12 +8,14 @@ from cmd_xs1 import myezcontrol
 from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
+from cmd_szenen import szenen
 
 from mysql_con import mdb_read_table_entry
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import *
 import sys
+import git
 
 descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
 
@@ -22,14 +24,16 @@ hue = hue_lights()
 sn = sonos()
 tv = TV()
 sat = satelliten()
+scenes = szenen()
 xs1_devs = xs1.list_devices()
 hue_devs = hue.list_devices()
 sns_devs = sn.list_devices()
 tvs_devs = tv.list_devices()
 sat_devs = sat.list_devices()
+szn_cmds = scenes.list_commands()
 System = None
 Device = None
-
+constants.redundancy_.master = True
 
 #tab Wecker
 #tab settings
@@ -132,8 +136,29 @@ class Main(QtGui.QMainWindow):
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollLayout2 = QtGui.QFormLayout()
+        self.scrollArea2 = QtGui.QScrollArea(self.tab_3)
+        self.scrollArea2.setGeometry(QtCore.QRect(260, 70, 250, 350))
+        self.scrollArea2.setWidgetResizable(True)
+        self.scrollArea2.setObjectName(_fromUtf8("scrollArea2"))
+        self.scrollAreaWidgetContents2 = QtGui.QWidget()
+        self.scrollAreaWidgetContents2.setGeometry(QtCore.QRect(0, 0, 165, 360))
+        self.scrollAreaWidgetContents2.setObjectName(_fromUtf8("scrollAreaWidgetContents2"))
+        self.scrollAreaWidgetContents2.setLayout(self.scrollLayout2)        
+        self.scrollArea2.setWidget(self.scrollAreaWidgetContents2)        
         self.xs1_clicked()
+        self.fill_szenen()
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
+        
+        #Settings
+        self.tab_4 = QtGui.QWidget()
+        self.tab_4.setObjectName(_fromUtf8("tab_4"))
+        self.pushButton = QtGui.QPushButton(self.tab_4)
+        self.pushButton.setGeometry(QtCore.QRect(0, 10, 91, 24))
+        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.pushButton.clicked.connect(self.git_update())        
+        self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
@@ -148,6 +173,11 @@ class Main(QtGui.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def close_clicked(self):
+        QtCore.QCoreApplication.instance().quit()
+
+    def git_update(self):
+        g = git.cmd.Git("https://github.com/chrihuc/steuerzentrale.git")
+        g.pull()
         QtCore.QCoreApplication.instance().quit()
 
     def xs1_clicked(self):
@@ -197,6 +227,13 @@ class Main(QtGui.QMainWindow):
         for item in sat_devs:
             self.scrollLayout.addRow(Buttn(None,item,"Device")) 
 
+    def fill_szenen(self):
+        self.clearLayout(self.scrollLayout2)
+        #while self.scrollLayout.rowCount() > 0:
+            #self.scrollLayout.deleteLater()
+        for item in szn_cmds:
+            self.scrollLayout2.addRow(Buttn(None,item,"Szene"))
+
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Kontrollraum", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_0), _translate("MainWindow", "Keller", None))
@@ -232,7 +269,9 @@ class Buttn(QtGui.QWidget):
       if Type=="Device":
         self.pushButton.clicked.connect(lambda: self.set_popup(Name)) 
       elif Type=="Command":
-        self.pushButton.clicked.connect(lambda: self.send_command(Name))         
+        self.pushButton.clicked.connect(lambda: self.send_command(Name))       
+      elif Type=="Szene":
+        self.pushButton.clicked.connect(lambda: scenes.execute(Name))          
       self.setLayout(layout)
       
     def set_popup(self,Name): 

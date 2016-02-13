@@ -57,14 +57,20 @@ class szenen:
     
     def list_commands(self,gruppe='alle'):    
         table = mdb_get_table(constants.sql_tables.szenen.name)
-        liste = []
+        liste = {}
         if gruppe == "alle":
             for szene in table:
                 if szene.get("Gruppe") <>"Intern":
-                    liste.append(szene.get("Name"))
+                    if str(szene.get("Beschreibung")) <> "None":
+                        liste[szene.get("Name")] = szene.get("Beschreibung")
+                    else:
+                        liste[szene.get("Name")] = szene.get("Name")
         else:
                 if szene.get("Gruppe") <>"Intern" and szene.get("Gruppe") == gruppe:
-                    liste.append(szene.get("Name"))            
+                    if str(szene.get("Beschreibung")) <> "None":
+                        liste[szene.get("Name")] = szene.get("Beschreibung")
+                    else:
+                        liste[szene.get("Name")] = szene.get("Name")           
         return liste
 
     def __bedingung__(self,bedingungen):
@@ -149,7 +155,7 @@ class szenen:
             bedingungen = eval(szene_dict.get("Bedingung"))    
         erfuellt = self.__bedingung__(bedingungen)
 #==============================================================================
-# commandos to devices and intern commands        
+# commandos to devices and internal commands        
 #==============================================================================
         if erfuellt:
             if str(szene_dict.get("Beschreibung")) in ['None','']:

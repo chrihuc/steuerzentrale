@@ -8,6 +8,7 @@ sudo pip install gcm                    #??
 sudo pip install pyephem                #??
 sudo pip install paramiko               #??
 sudo pip install tinkerforge
+sudo pip install gitpython
 
 ##################################
 setup of daemon tools
