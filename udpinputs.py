@@ -23,8 +23,8 @@ from phue import Bridge
 ##mail
 #from email.mime.text import MIMEText
 #from subprocess import Popen, PIPE
-from mysql_con import mdb_sonos_r, mdb_sonos_s, setting_s, setting_r, mdb_szene_r, mdb_marantz_r, mdb_marantz_s, mdb_fern_r_neu, mdb_sideb_r, app_r, mdb_hue_s, mdb_sideb_s
-from szenen import set_szene, sonos_set_szene, tv_set_szene, set_TF_LEDs, hue_set_szene, set_TF_LEDs
+from mysql_con import setting_r, mdb_marantz_r, mdb_marantz_s, mdb_fern_r_neu, app_r, mdb_hue_s, mdb_sideb_s
+from szenen import setting_s, set_szene, hue_set_szene, set_TF_LEDs
 from messaging import messaging
 from alarmevents import alarm_event
 #from text_to_sonos import downloadAudioFile
@@ -313,9 +313,6 @@ def main():
             elif (data == "Schlafen"):
                 t = threading.Thread(target=set_szene, args=["Schlafen1"])
                 t.start()
-        #Alles aus
-            elif (data == "Alles_aus"):
-                Alles_aus()  
     #Mediaquellen            
         #Fernsehen$
             elif (data == "Media_TV"):
@@ -331,8 +328,6 @@ def main():
                 os.system(exectext)     
             elif (data == "Neustart_raspberry"):
                 os.system("sudo reboot")
-            elif (data == "SonosWrite"):
-                SonosWriteConfig()
     #temp_alar,       
             elif (data == "alle_alarme_gesehen"):
                 aes.acknowledge_all()       
