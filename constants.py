@@ -1,15 +1,18 @@
 #!  /usr/bin/python 
 
 import ConfigParser
+import socket
+own_ip = socket.gethostbyname(socket.gethostname())
 
 config = ConfigParser.RawConfigParser()
 
-cfg_main={'eigene_IP':'192.168.192.10', 'name':'BueroPi',\
-        'xs1_IP':'192.168.192.4','router_IP':'192.168.192.1','UDP_PORT':'5000',\
+cfg_main={'eigene_IP':own_ip, 'name':'',\
+        'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
         'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
         'tts':'False','heartbt':'125'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
+cfg_sql ={'IP':own_ip,'USER':'','PASS':'','DB':'Steuerzentrale'}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -21,7 +24,12 @@ def init_cfg():
         config.add_section('XS1')
     for cfg in cfg_xs1:
         if not config.has_option('XS1', cfg):
-            config.set('XS1', cfg, cfg_xs1.get(cfg))            
+            config.set('XS1', cfg, cfg_xs1.get(cfg))      
+    if not config.has_section('SQL'):
+        config.add_section('SQL')
+    for cfg in cfg_sql:
+        if not config.has_option('SQL', cfg):
+            config.set('SQL', cfg, cfg_sql.get(cfg))             
     
     # Writing our configuration file to 'main.cfg'
     with open('main.cfg', 'wb') as configfile:
@@ -56,19 +64,18 @@ for i in range(0,3):
                 # constants.xs1_.IP    
                 IP = xs1_IP
                 USER = config.get('XS1', 'USER')
-                PASS = config.get('XS1', 'PASS')            
+                PASS = config.get('XS1', 'PASS')     
+            class sql_:
+                # constants.sql_.IP
+                IP = config.get('SQL', 'IP')
+                USER = config.get('SQL', 'USER')
+                PASS = config.get('SQL', 'PASS')
+                DB = config.get('SQL', 'DB')                
         except:
             init_cfg()
             continue
         break
 
-
-class sql_:
-    # constants.sql_.IP
-    IP = eigene_IP
-    USER = "customer"
-    PASS = "user"
-    DB = "Steuerzentrale"
 
 class sql_object:
     def __init__(self,name,typ,columns):

@@ -31,6 +31,7 @@ sns_devs = sn.list_devices()
 tvs_devs = tv.list_devices()
 sat_devs = sat.list_devices()
 szn_cmds = scenes.list_commands()
+szn_favs = scenes.list_commands(gruppe='App')
 System = None
 Device = None
 constants.redundancy_.master = True
@@ -147,7 +148,7 @@ class Main(QtGui.QMainWindow):
         self.scrollAreaWidgetContents2.setLayout(self.scrollLayout2)        
         self.scrollArea2.setWidget(self.scrollAreaWidgetContents2)        
         self.xs1_clicked()
-        self.fill_szenen()
+        self.fill_szenen_favs()
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
         
         #Settings
@@ -227,12 +228,12 @@ class Main(QtGui.QMainWindow):
         for item in sat_devs:
             self.scrollLayout.addRow(Buttn(None,item,"Device")) 
 
-    def fill_szenen(self):
+    def fill_szenen_favs(self):
         self.clearLayout(self.scrollLayout2)
         #while self.scrollLayout.rowCount() > 0:
             #self.scrollLayout.deleteLater()
-        for item in szn_cmds:
-            self.scrollLayout2.addRow(Buttn(None,item,"Szene"))
+        for item in szn_favs:
+            self.scrollLayout2.addRow(Buttn(None,Name=item,Type="Szene",description =szn_cmds.get(item) ))
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Kontrollraum", None))
@@ -257,11 +258,13 @@ class Main(QtGui.QMainWindow):
         self.w.show() 
 
 class Buttn(QtGui.QWidget):
-    def __init__( self ,parent=None, Name=None, Type="Device"):
+    def __init__( self ,parent=None, Name=None, Type="Device", description=None):
       super(Buttn, self).__init__(parent)
       self.parent = parent
       if str(descs.get(Name)) <> "None":
         desc = str(descs.get(Name))
+      elif description <> None:
+        desc = description
       else:
         desc= Name
       self.pushButton = QtGui.QPushButton(desc)

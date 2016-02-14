@@ -55,18 +55,25 @@ class szenen:
         self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=10)
         pass
     
-    def list_commands(self,gruppe='alle'):    
+    def list_commands(self,gruppe='default'):    
         table = mdb_get_table(constants.sql_tables.szenen.name)
         liste = {}
-        if gruppe == "alle":
+        if gruppe == "default":
             for szene in table:
                 if szene.get("Gruppe") <>"Intern":
                     if str(szene.get("Beschreibung")) <> "None":
                         liste[szene.get("Name")] = szene.get("Beschreibung")
                     else:
                         liste[szene.get("Name")] = szene.get("Name")
+        elif gruppe == "alle":
+            for szene in table:
+                if str(szene.get("Beschreibung")) <> "None":
+                    liste[szene.get("Name")] = szene.get("Beschreibung")
+                else:
+                    liste[szene.get("Name")] = szene.get("Name")                        
         else:
-                if szene.get("Gruppe") <>"Intern" and szene.get("Gruppe") == gruppe:
+            for szene in table:
+                if szene.get("Gruppe") == gruppe:
                     if str(szene.get("Beschreibung")) <> "None":
                         liste[szene.get("Name")] = szene.get("Beschreibung")
                     else:
@@ -175,7 +182,7 @@ class szenen:
                                 kommandos = eval(szene_dict.get(key))
                             else:
                                 kommandos = [szene_dict.get(key)]
-                        except NameError:
+                        except:
                             kommandos = [szene_dict.get(key)]
                     else:
                         kommandos = [szene_dict.get(key)]
