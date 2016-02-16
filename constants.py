@@ -99,7 +99,7 @@ class sql_tables:
     #hue_autolight   = sql_object("set_hue_autolicht", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("offset","INT(11)"),("min","INT(11)"),("max","INT(11)")))
     
     #move to szenen
-    szenen          = sql_object("set_Szenen", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Prio","INT(11)"),("Beschreibung","TEXT"),("Durchsage","TEXT"),("Gruppe","VARCHAR(45)"),("inApp","VARCHAR(45)"),("Setting","TEXT"),("Follows","TEXT"),("Bedingung","TEXT"),("AutoMode","VARCHAR(45)"),("setTask","VARCHAR(45)"),("setTaskZuhause","VARCHAR(45)"),("intCmd","VARCHAR(45)"),("LastUsed","DATETIME")))
+    szenen          = sql_object("set_Szenen", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Prio","INT(11)"),("Beschreibung","TEXT"),("Durchsage","TEXT"),("Gruppe","VARCHAR(45)"),("inApp","VARCHAR(45)"),("Setting","TEXT"),("Delay","VARCHAR(45)"),("Follows","TEXT"),("Bedingung","TEXT"),("AutoMode","VARCHAR(45)"),("setTask","VARCHAR(45)"),("intCmd","VARCHAR(45)"),("LastUsed","DATETIME")))
     
     #move to sats
     #satellites      = sql_object("set_satellites", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("IP","VARCHAR(45)"),("PORT","INT(11)"),("Type","VARCHAR(45)"),("USER","VARCHAR(45)"),("PASS","VARCHAR(45)"),("command_set","VARCHAR(45)")))

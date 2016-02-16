@@ -109,6 +109,19 @@ class szenen:
                 if not(str(settings.get(bedingung)) in bedingungen.get(bedingung)):
                     erfuellt = False      
         return erfuellt
+        
+    def __return_liste__(self,eingabe):
+        if (type(eingabe) == str):
+            try:
+                if type(eval(eingabe)) == list or type(eval(eingabe)) == dict:
+                    kommandos = eval(eingabe)
+                else:
+                    kommandos = [eingabe]
+            except NameError:
+                kommandos = [eingabe]
+        else:
+            kommandos = [eingabe]    
+        return kommandos        
 
     def __sub_cmds__(self, szn_id, device, commando):
         global kommando_dict
@@ -116,9 +129,8 @@ class szenen:
         t_list = self.kommando_dict.get(szn_id)      
         if device in xs1_devs:
             executed = xs1.set_device(device, commando)
-        elif device == "set_Task":
-            executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando)) 
-        elif device == "set_Task_zuhause":
+        elif device == "setTask":
+            executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando)) ":
             executed = mes.send_zuhause(to=mes.alle, titel="Setting", text=str(commando))                  
         elif device in sns_devs:
             executed = sn.set_device(device, commando)               
@@ -165,6 +177,8 @@ class szenen:
 # commandos to devices and internal commands        
 #==============================================================================
         if erfuellt:
+            if ((szene_dict.get("Delay") <> "None")):
+                time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 aes.new_event(description="Szenen: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)
             else:
@@ -176,16 +190,7 @@ class szenen:
                 interlocks = mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
             for idk, key in enumerate(szene_dict):        
                 if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
-                    if (type(szene_dict.get(key)) == str):
-                        try:
-                            if type(eval(szene_dict.get(key))) == list or type(eval(szene_dict.get(key))) == dict:
-                                kommandos = eval(szene_dict.get(key))
-                            else:
-                                kommandos = [szene_dict.get(key)]
-                        except:
-                            kommandos = [szene_dict.get(key)]
-                    else:
-                        kommandos = [szene_dict.get(key)]
+                    kommandos = self.__return_liste__(szene_dict.get(key))
                     if constants.redundancy_.master:
                         for kommando in kommandos:
                             if key in cmd_devs:
