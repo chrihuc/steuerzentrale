@@ -233,7 +233,7 @@ class Main(QtGui.QMainWindow):
         #while self.scrollLayout.rowCount() > 0:
             #self.scrollLayout.deleteLater()
         for item in szn_favs:
-            self.scrollLayout2.addRow(Buttn(None,Name=item,Type="Szene",description =szn_cmds.get(item) ))
+            self.scrollLayout2.addRow(Buttn(None,Name=item,Type="Szene",description =szn_favs.get(item) ))
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Kontrollraum", None))

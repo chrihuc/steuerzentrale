@@ -44,8 +44,8 @@ mes = messaging()
 def main():
     scenes = szenen()
     constants.redundancy_.master = True
-    print scenes.list_commands()
-    scenes.execute("Test")
+    #print scenes.list_commands()
+    scenes.execute("sz_Findme")
     
 class szenen:    
     
@@ -117,11 +117,11 @@ class szenen:
                     kommandos = eval(eingabe)
                 else:
                     kommandos = [eingabe]
-            except NameError:
+            except (NameError, SyntaxError) as e:
                 kommandos = [eingabe]
         else:
             kommandos = [eingabe]    
-        return kommandos        
+        return kommandos 
 
     def __sub_cmds__(self, szn_id, device, commando):
         global kommando_dict
@@ -130,8 +130,12 @@ class szenen:
         if device in xs1_devs:
             executed = xs1.set_device(device, commando)
         elif device == "setTask":
-            executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando)) ":
-            executed = mes.send_zuhause(to=mes.alle, titel="Setting", text=str(commando))                  
+            if commando[0] == 'Alle':
+                executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando[1]))
+            elif commando[0] == 'Zuhause':
+                executed = mes.send_zuhause(to=mes.alle, titel="Setting", text=str(commando[1]))  
+            else:
+                executed = mes.send_zuhause(to=str(commando[0]), titel="Setting", text=str(commando[1]))                 
         elif device in sns_devs:
             executed = sn.set_device(device, commando)               
         elif device in hue_devs:
@@ -146,10 +150,7 @@ class szenen:
         elif device in sat_devs:
             executed = sat.set_device(device, commando)                            
         elif device == tvs_devs:
-            executed = tv.set_device(device, commando)         
-#            for idx, kommando in enumerate(kommandos):
-#                folgen = Timer((float(idx)/5), tv.set_device, [key,commando])
-#                folgen.start()                                                 
+            executed = tv.set_device(device, commando)                                                          
 #                        elif key == "Interner_Befehl":
 #                            for kommando in kommandos:
 #                                t = threading.Thread(target=interner_befehl, args=[commando])
@@ -177,7 +178,7 @@ class szenen:
 # commandos to devices and internal commands        
 #==============================================================================
         if erfuellt:
-            if ((szene_dict.get("Delay") <> "None")):
+            if (str(szene_dict.get("Delay")) <> "None"):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 aes.new_event(description="Szenen: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)
@@ -202,21 +203,21 @@ class szenen:
 #==============================================================================
 # change settings table                                
 #==============================================================================
-        key = "Setting"
-        if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
-            if (type(szene_dict.get(key)) == str):
-                try:
-                    if type(eval(szene_dict.get(key))) == list or type(eval(szene_dict.get(key))) == dict:
-                        kommandos = eval(szene_dict.get(key))
-                    else:
+            key = "Setting"
+            if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
+                if (type(szene_dict.get(key)) == str):
+                    try:
+                        if type(eval(szene_dict.get(key))) == list or type(eval(szene_dict.get(key))) == dict:
+                            kommandos = eval(szene_dict.get(key))
+                        else:
+                            kommandos = [szene_dict.get(key)]
+                    except NameError:
                         kommandos = [szene_dict.get(key)]
-                except NameError:
-                    kommandos = [szene_dict.get(key)]
-            else:
-                kommandos = [szene_dict.get(key)]  
-            for kommando in kommandos:
-                set_del = Timer(1, setting_s, [str(kommando), str(kommandos.get(kommando))])
-                set_del.start()  
+                else:
+                    kommandos = [szene_dict.get(key)]  
+                for kommando in kommandos:
+                    set_del = Timer(1, setting_s, [str(kommando), str(kommandos.get(kommando))])
+                    set_del.start()  
 #==============================================================================
 # start timer with following actions                               
 #==============================================================================
