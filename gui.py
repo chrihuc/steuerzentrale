@@ -16,6 +16,8 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import *
 import sys
 import git
+import pyqtgraph as pg
+import numpy as np
 
 descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
 
@@ -157,7 +159,11 @@ class Main(QtGui.QMainWindow):
         self.pushButton_6 = QtGui.QPushButton(self.tab_4)
         self.pushButton_6.setGeometry(QtCore.QRect(0, 10, 91, 24))
         self.pushButton_6.setObjectName(_fromUtf8("gitupdate"))
-        self.pushButton_6.clicked.connect(self.git_update)       
+        self.pushButton_6.clicked.connect(self.git_update)    
+        self.pushButton_7 = QtGui.QPushButton(self.tab_4)
+        self.pushButton_7.setGeometry(QtCore.QRect(0, 40, 91, 24))
+        self.pushButton_7.setObjectName(_fromUtf8("gitupdate"))
+        self.pushButton_7.clicked.connect(self.set_g_popup)         
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -254,6 +260,13 @@ class Main(QtGui.QMainWindow):
         global Device
         Device = Name
         self.w = MyPopup(self,Name)
+        self.w.setGeometry(QRect(500, 100, 200, 400))
+        self.w.show() 
+
+    def set_g_popup(self,Name): 
+        global Device
+        Device = Name
+        self.w = MyGraphPopup(self,Name)
         self.w.setGeometry(QRect(500, 100, 200, 400))
         self.w.show() 
 
@@ -364,6 +377,19 @@ class MyPopup(QtGui.QMainWindow):
         #dc = QtGui.QPainter(self)
         #dc.drawLine(0, 0, 100, 100)
         #dc.drawLine(100, 0, 0, 100)
+
+class MyGraphPopup(QtGui.QMainWindow):
+    def __init__(self, parent=None, Text="Test"):
+        #super(MyPopup, self).__init__(parent)
+        #global System
+        #QtGui.QWidget.__init__(self)
+        self.win = pg.GraphicsWindow(title="Basic plotting examples")
+        #win.resize(1000,600)
+        self.win.setWindowTitle('Homecontrol Graph')
+        
+        graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
+        
+        p1 = self.win.addPlot(title="Whatever", y=graph)        
 
 app = QtGui.QApplication(sys.argv)
 myWidget = Main()

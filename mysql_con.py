@@ -15,7 +15,7 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    print mdb_read_table_column('set_Szenen','Name')
+    print mdb_get_table('set_Szenen','Name')
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
@@ -58,6 +58,10 @@ def re_calc(inpt):
         return inpt
        
 def setting_s(setting, wert):
+    if wert in ('Ein','ein','an'):
+        wert = True
+    if wert in ('Aus','aus'):
+        wert = False
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()

@@ -45,7 +45,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    scenes.execute("sz_Findme")
+    scenes.execute("AutoBelEin")
     
 class szenen:    
     
@@ -83,42 +83,66 @@ class szenen:
     def __bedingung__(self,bedingungen):
         erfuellt = True
         settings = settings_r() 
-        for bedingung in bedingungen:
-            try:
-                groesser = bedingungen.get(bedingung).find('>')
-                kleiner = bedingungen.get(bedingung).find('<')
-                if groesser >-1 and kleiner >-1:
-                    schwelle_u = float(bedingungen.get(bedingung)[groesser+1:kleiner])
-                    if float(settings.get(bedingung)) <= schwelle_u:
-                        erfuellt = False
-                    schwelle_o = float(bedingungen.get(bedingung)[kleiner+1:len(bedingungen.get(bedingung))])
-                    if float(settings.get(bedingung)) >= schwelle_o:
-                        erfuellt = False    
-                elif groesser >-1:
-                    schwelle = float(bedingungen.get(bedingung)[groesser+1:len(bedingungen.get(bedingung))])
-                    if float(settings.get(bedingung)) <= schwelle:
-                        erfuellt = False                     
-                elif kleiner >-1:
-                    schwelle = float(bedingungen.get(bedingung)[kleiner+1:len(bedingungen.get(bedingung))])
-                    if float(settings.get(bedingung)) >= schwelle:
-                        erfuellt = False        
-                else:
+        if type(bedingungen) == dict:
+#==============================================================================
+#             Deprecated
+#==============================================================================
+            for bedingung in bedingungen:
+                try:
+                    groesser = bedingungen.get(bedingung).find('>')
+                    kleiner = bedingungen.get(bedingung).find('<')
+                    if groesser >-1 and kleiner >-1:
+                        schwelle_u = float(bedingungen.get(bedingung)[groesser+1:kleiner])
+                        if float(settings.get(bedingung)) <= schwelle_u:
+                            erfuellt = False
+                        schwelle_o = float(bedingungen.get(bedingung)[kleiner+1:len(bedingungen.get(bedingung))])
+                        if float(settings.get(bedingung)) >= schwelle_o:
+                            erfuellt = False    
+                    elif groesser >-1:
+                        schwelle = float(bedingungen.get(bedingung)[groesser+1:len(bedingungen.get(bedingung))])
+                        if float(settings.get(bedingung)) <= schwelle:
+                            erfuellt = False                     
+                    elif kleiner >-1:
+                        schwelle = float(bedingungen.get(bedingung)[kleiner+1:len(bedingungen.get(bedingung))])
+                        if float(settings.get(bedingung)) >= schwelle:
+                            erfuellt = False        
+                    else:
+                        if not(str(settings.get(bedingung)) in bedingungen.get(bedingung)):
+                            erfuellt = False
+                except Exception:
                     if not(str(settings.get(bedingung)) in bedingungen.get(bedingung)):
-                        erfuellt = False
-            except Exception:
-                if not(str(settings.get(bedingung)) in bedingungen.get(bedingung)):
-                    erfuellt = False      
+                        erfuellt = False      
+        elif type(bedingungen) == list:
+#==============================================================================
+#             new way
+#==============================================================================
+            for bedingung in bedingungen:
+                item, operand, wert = bedingung
+                if operand == '=':
+                    if not str(item) == str(wert):
+                        erfuellt = False 
+                elif operand == '<':
+                    if not str(item) < str(wert):
+                        erfuellt = False  
+                elif operand == '>':
+                    if not str(item) > str(wert):
+                        erfuellt = False   
+                elif operand == '<=':
+                    if not str(item) <= str(wert):
+                        erfuellt = False                         
         return erfuellt
         
-    def __return_liste__(self,eingabe):
+    def __return_enum__(self,eingabe):
         if (type(eingabe) == str):
             try:
-                if type(eval(eingabe)) == list or type(eval(eingabe)) == dict:
+                if type(eval(eingabe)) == list or type(eval(eingabe)) == dict or type(eval(eingabe)) == tuple:
                     kommandos = eval(eingabe)
                 else:
                     kommandos = [eingabe]
             except (NameError, SyntaxError) as e:
                 kommandos = [eingabe]
+        elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
+            return eingabe
         else:
             kommandos = [eingabe]    
         return kommandos 
@@ -191,7 +215,7 @@ class szenen:
                 interlocks = mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
             for idk, key in enumerate(szene_dict):        
                 if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
-                    kommandos = self.__return_liste__(szene_dict.get(key))
+                    kommandos = self.__return_enum__(szene_dict.get(key))
                     if constants.redundancy_.master:
                         for kommando in kommandos:
                             if key in cmd_devs:
@@ -205,16 +229,7 @@ class szenen:
 #==============================================================================
             key = "Setting"
             if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
-                if (type(szene_dict.get(key)) == str):
-                    try:
-                        if type(eval(szene_dict.get(key))) == list or type(eval(szene_dict.get(key))) == dict:
-                            kommandos = eval(szene_dict.get(key))
-                        else:
-                            kommandos = [szene_dict.get(key)]
-                    except NameError:
-                        kommandos = [szene_dict.get(key)]
-                else:
-                    kommandos = [szene_dict.get(key)]  
+                kommandos = self.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
                     set_del = Timer(1, setting_s, [str(kommando), str(kommandos.get(kommando))])
                     set_del.start()  
@@ -222,21 +237,15 @@ class szenen:
 # start timer with following actions                               
 #==============================================================================
         if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
-            try:
-                if type(eval(szene_dict.get("Follows"))) == list:
-                    kommandos = eval(szene.get("Follows"))
-                else:
-                    kommandos = [szene_dict.get("Follows")]
-            except NameError:
-                kommandos = [szene_dict.get("Follows")]      
+            kommandos = self.__return_enum__(szene_dict.get("Follows"))
             for kommando in kommandos:
-                sub_cmds = eval(kommando)
-                if sub_cmds[2] == 0:
-                    self.sz_t.retrigger_add(parent = szene,delay = sub_cmds[1], child = sub_cmds[0], exact = False, retrig = True)
-                elif sub_cmds[2] == 1:
-                    self.sz_t.retrigger_add(parent = szene,delay = sub_cmds[1], child = sub_cmds[0], exact = True, retrig = True)
-                elif sub_cmds[2] == 2:
-                    self.sz_t.retrigger_add(parent = szene,delay = sub_cmds[1], child = sub_cmds[0], exact = False, retrig = False)                    
+                szn, dlay, ex_re = kommando
+                if ex_re == 0:
+                    self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
+                elif ex_re == 1:
+                    self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
+                elif ex_re == 2:
+                    self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)                    
 #==============================================================================
 # Check for timeout
 #==============================================================================
