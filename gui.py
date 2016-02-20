@@ -38,6 +38,9 @@ System = None
 Device = None
 constants.redundancy_.master = True
 
+eg_buttons = [{'Name':'Wohnzimmer_Decke','desc':'Decke','type':'dev','pos_x':100,'pos_y':100},
+              {'Name':'Wohnzimmer_Decke','desc':'Decke','type':'dev','pos_x':100,'pos_y':200}]
+
 #tab Wecker
 #tab settings
 #   graphs for values
@@ -86,12 +89,13 @@ class Main(QtGui.QMainWindow):
         #Erdgeschoss
         self.tab = QtGui.QWidget()
         self.tab.setStyleSheet("QWidget {background-image:url(./EG.png)}")
-        self.tab.setObjectName(_fromUtf8("Erdgeschoss"))
-        self.pushButton = QtGui.QPushButton(self.tab)
-        self.pushButton.setGeometry(QtCore.QRect(100, 100, 91, 24))
-        self.pushButton.setObjectName(_fromUtf8("WohnziDecke"))
-        self.pushButton.setText("Decke")
-        self.pushButton.clicked.connect(lambda: self.set_popup("Wohnzimmer_Decke"))        
+        self.tab.setObjectName(_fromUtf8("Erdgeschoss")) 
+        self.buttons = []
+        for btn in eg_buttons:
+            self.buttons.append(QtGui.QPushButton(self.tab))
+            self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 91, 24))
+            self.buttons[-1].clicked.connect(lambda: self.set_popup(btn.get('Name')))
+            self.buttons[-1].setText(btn.get('desc'))
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         
         #1. Stock

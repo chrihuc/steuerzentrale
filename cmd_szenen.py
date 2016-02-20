@@ -45,7 +45,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    scenes.execute("AutoBelEin")
+    scenes.execute("Test")
     
 class szenen:    
     
@@ -116,6 +116,7 @@ class szenen:
 #==============================================================================
 #             new way
 #==============================================================================
+        #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
             for bedingung in bedingungen:
                 item, operand, wert = bedingung
                 if operand == '=':
@@ -129,6 +130,12 @@ class szenen:
                         erfuellt = False   
                 elif operand == '<=':
                     if not str(item) <= str(wert):
+                        erfuellt = False   
+                elif operand == '>=':
+                    if not str(item) >= str(wert):
+                        erfuellt = False      
+                elif operand == '!':
+                    if str(item) == str(wert):
                         erfuellt = False                         
         return erfuellt
         
@@ -196,7 +203,7 @@ class szenen:
         szn_id = uuid.uuid4()
         self.kommando_dict[szn_id] = []
         if str(szene_dict.get("Bedingung")) <> "None":
-            bedingungen = eval(szene_dict.get("Bedingung"))    
+            bedingungen = eval(str(szene_dict.get("Bedingung")))    
         erfuellt = self.__bedingung__(bedingungen)
 #==============================================================================
 # commandos to devices and internal commands        

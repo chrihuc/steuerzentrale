@@ -46,7 +46,7 @@ def main():
     sats = satelliten()
     print sats.list_devices()
     print sats.list_commands("Sideb_links")
-    print sats.set_device('Sideb_links','Aus')
+    print sats.set_device('LightstripSchlafzi','Hell')
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -126,11 +126,15 @@ class satelliten:
         satellit=mdb_read_table_entry(table.name,device)
         command = mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
-        satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
-        satelliten.mysocket.settimeout(10)
-        satelliten.mysocket.connect((satellit.get('IP'),satellit.get('PORT')))
-        satelliten.mysocket.send(str(command))
+        data = ""
         try:
+            satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
+        except:
+            pass
+        try:
+            satelliten.mysocket.settimeout(10)
+            satelliten.mysocket.connect((satellit.get('IP'),satellit.get('PORT')))
+            satelliten.mysocket.send(str(command))
             data=satelliten.mysocket.recv(1024)
             satelliten.mysocket.close()
         except:

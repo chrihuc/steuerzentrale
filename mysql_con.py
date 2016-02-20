@@ -15,7 +15,7 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    print mdb_get_table('set_Szenen','Name')
+    print mdb_read_table_entry('set_Szenen','Test')
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
@@ -38,6 +38,7 @@ def main():
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
     #['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]]
+    #['sett','Temperatur_Balkon']
     if "calc" in str(inpt):
         try:
             if type(eval(str(inpt))) == list:
@@ -53,7 +54,13 @@ def re_calc(inpt):
             return inpt
     if "sett" in str(inpt): 
         lst = eval(str(inpt))  
-        return float(setting_r(lst[1]))
+        if lst[0] == "sett":
+            return float(setting_r(lst[1]))
+        else:
+            for num, sub in enumerate(lst):
+                if "sett" in str(sub):
+                    lst[num] = re_calc(sub)
+            return lst
     else:
         return inpt
        

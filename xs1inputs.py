@@ -30,11 +30,12 @@ def on_receive(data):
     global heartbeat
     global last_data
     global ldt
-    ldt.cancel()
-    ldt = Timer(1, last_data_reset)
-    ldt.start() 
-    if last_data == data:
-        return
+    if True:
+        ldt.cancel()
+        ldt = Timer(1, last_data_reset)
+        ldt.start() 
+        if last_data == data:
+            return
     count = int(setting_r("NumRestart"))
     if count > 0:
         setting_s("NumRestart", str(0))
