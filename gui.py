@@ -446,5 +446,5 @@ app = QtGui.QApplication(sys.argv)
 myWidget = Main()
 myWidget.setGeometry(QRect(0, 0, 800, 500))
 myWidget.show()
-running = False
 app.exec_() 
+running = False
