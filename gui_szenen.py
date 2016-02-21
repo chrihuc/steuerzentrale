@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import mdb_get_table
+from mysql_con import mdb_get_table, mdb_read_table_entry
 
 app = QtGui.QApplication([])
 import pyqtgraph.parametertree.parameterTypes as pTypes
@@ -87,9 +87,46 @@ class ScalableGroup(pTypes.GroupParameter):
         }[typ]
         self.addChild(dict(name="ScalableParam %d" % (len(self.childs)+1), type=typ, value=val, removable=True, renamable=True))
 
+def __return_enum__(eingabe):
+    if (type(eingabe) == str):
+        try:
+            if type(eval(eingabe)) == list or type(eval(eingabe)) == dict or type(eval(eingabe)) == tuple:
+                kommandos = eval(eingabe)
+            else:
+                kommandos = [eingabe]
+        except (NameError, SyntaxError) as e:
+            kommandos = [eingabe]
+    elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
+        return eingabe
+    else:
+        kommandos = [eingabe]    
+    return kommandos 
 
+def dict_constructor(name, values, value):
+    if str(name) == "None": name = ''
+    dicti = {'name':name, 'type':'list','values':values}
+    for val in values:
+        if str(val) == str(value):
+            dicti['value'] = values.get(val)
+    return dicti
 
-szenen = mdb_get_table(db='set_Szenen')
+def group_constructor(name, namen, values, values2):
+    if str(name) == "None": name = ''
+    dicti = {'name':name, 'type':'group', 'expanded': True}    
+    liste = []
+    itera = 0
+    for value in values2:
+        try:
+            name = namen[itera]
+        except:
+            name = "Kommando " + str(itera+1)
+        liste.append(dict_constructor(name, values, value))
+        itera += 1
+    dicti['children']= liste
+    return dicti
+
+#szenen = mdb_get_table(db='set_Szenen')
+szenen = [mdb_read_table_entry(db='set_Szenen',entry='Alles_ein')]
 params = []
 for szene in szenen:
     if int(szene.get('Id')) >9:
@@ -112,23 +149,11 @@ for szene in szenen:
         for item in szene:
             szn_d_child = {}
             if str(item) in xs1_devs:
-                szn_d_child['name'] = str(item)
-                szn_d_child['type'] = 'list'
-                szn_d_child['values'] = xs1_cmds
-                for cmd in xs1_cmds:
-                    szn_d_child['value']= 0
-                    if cmd == str(szene.get(item)):
-                        szn_d_child['value']= xs1_cmds.get(cmd)
-                szn_xs_child_l.append(szn_d_child)
+                listeee =group_constructor(str(item), [], xs1_cmds, __return_enum__(szene.get(item)))
+                szn_xs_child_l.append(listeee)
             elif str(item) in hue_devs:
-                szn_d_child['name'] = str(item)
-                szn_d_child['type'] = 'list'
-                szn_d_child['values'] = hue_cmds
-                for cmd in hue_cmds:
-                    szn_d_child['value']= 0
-                    if cmd == str(szene.get(item)):
-                        szn_d_child['value']= hue_cmds.get(cmd)  
-                szn_hu_child_l.append(szn_d_child)
+                listeee =group_constructor(str(item), [], hue_devs, __return_enum__(szene.get(item)))                
+                szn_hu_child_l.append(listeee)
             elif str(item) in sns_devs:
                 szn_d_child['name'] = str(item)
                 szn_d_child['type'] = 'list'
@@ -250,13 +275,14 @@ p.sigTreeStateChanged.connect(change)
 
 
 def valueChanging(param, value):
+    return    
     print("Value changing (not finalized):", param, value)
     
 # Too lazy for recursion:
-#for child in p.children():
-#    child.sigValueChanging.connect(valueChanging)
-#    for ch2 in child.children():
-#        ch2.sigValueChanging.connect(valueChanging)
+for child in p.children():
+    child.sigValueChanging.connect(valueChanging)
+    for ch2 in child.children():
+        ch2.sigValueChanging.connect(valueChanging)
         
 
 

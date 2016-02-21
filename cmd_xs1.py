@@ -105,7 +105,7 @@ class myezcontrol:
     
     def list_commands(self):
         #comands = mdb_get_table(table.name)
-        liste = ["toggle",0,100]
+        liste = ["Umschalten",0,100]
         #for comand in comands:
             #liste.append(comand.get("Name"))
         #liste.remove("Name")

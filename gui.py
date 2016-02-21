@@ -40,14 +40,15 @@ Device = None
 constants.redundancy_.master = True
 
 eg_buttons = [{'Name':'Wohnzimmer_Decke','desc':'Decke','type':'dev','pos_x':100,'pos_y':100},
-              {'Name':'Wohnzimmer_Decke','desc':'Decke 1','type':'dev','pos_x':100,'pos_y':200},
+              {'Name':'Buero','desc':'Büro','type':'dev','pos_x':100,'pos_y':200},
               {'Name':'Temperatur_Balkon','desc':'T Balkon','type':'sens','pos_x':200,'pos_y':200},
               {'Name':'Temperatur_Wohnzi','desc':'T Balkon','type':'sens','pos_x':300,'pos_y':200},
               {'Name':'Temperatur_Schlafzi','desc':'T Balkon','type':'sens','pos_x':400,'pos_y':200}]
 
+
+
 #tab Wecker
 #tab settings
-#   graphs for values
 #tab timer
 #tab szenen
 #   modify
@@ -72,7 +73,7 @@ except AttributeError:
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
         super(Main, self).__init__(parent)
-
+        self.set_buttons = [{'Name':'xs1_clicked','desc':'XS1','type':'int','command':self.xs1_clicked,'pos_x':0,'pos_y':10}]
         self.setupUi(self)
 
     def setupUi(self, MainWindow):
@@ -98,11 +99,11 @@ class Main(QtGui.QMainWindow):
         self.buttons = []
         for btn in eg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab))
-            self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 91, 24))
+            self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 50, 50))
             self.buttons[-1].setObjectName(btn.get('Name'))
             if btn.get('type') == 'dev':
                 self.buttons[-1].clicked.connect(self.make_set_popup(btn.get('Name')))
-                self.buttons[-1].setText(btn.get('desc'))
+                self.buttons[-1].setText(_fromUtf8(btn.get('desc')))
             elif btn.get('type') == 'sens':
                 self.buttons[-1].clicked.connect(self.make_set_g_popup(btn.get('Name')))
                 self.buttons[-1].setText(settings.get(btn.get('Name')))           
@@ -123,10 +124,19 @@ class Main(QtGui.QMainWindow):
         #Direkt
         self.tab_3 = QtGui.QWidget()
         self.tab_3.setObjectName(_fromUtf8("tab_3"))
-        self.pushButton = QtGui.QPushButton(self.tab_3)
-        self.pushButton.setGeometry(QtCore.QRect(0, 10, 91, 24))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.pushButton.clicked.connect(self.xs1_clicked)
+        for btn in self.set_buttons:
+            self.buttons.append(QtGui.QPushButton(self.tab_3))
+            self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 91, 24))
+            self.buttons[-1].setObjectName(btn.get('Name'))
+            if btn.get('type') == 'dev':
+                self.buttons[-1].clicked.connect(self.make_set_popup(btn.get('Name')))
+                self.buttons[-1].setText(_fromUtf8(btn.get('desc')))
+            elif btn.get('type') == 'sens':
+                self.buttons[-1].clicked.connect(self.make_set_g_popup(btn.get('Name')))
+                self.buttons[-1].setText(settings.get(btn.get('Name'))) 
+            elif btn.get('type') == 'int':
+                self.buttons[-1].clicked.connect(btn.get('command'))
+                self.buttons[-1].setText(_fromUtf8(btn.get('desc')))                 
         self.pushButton_2 = QtGui.QPushButton(self.tab_3)
         self.pushButton_2.setGeometry(QtCore.QRect(0, 40, 91, 24))
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
@@ -265,7 +275,7 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), _translate("MainWindow", "1. Stock", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "2. Stock", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Settings", None))
-        self.pushButton.setText(_translate("MainWindow", "XS1", None))
+        #self.pushButton.setText(_translate("MainWindow", "XS1", None))
         self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
         self.pushButton_3.setText(_translate("MainWindow", "Sonos", None))
         self.pushButton_4.setText(_translate("MainWindow", "TV", None))
@@ -319,7 +329,7 @@ class Buttn(QtGui.QWidget):
       else:
         desc= Name
       self.pushButton = QtGui.QPushButton(desc)
-      
+      self.pushButton.setGeometry(QtCore.QRect(0, 0, 50, 50))
       layout = QtGui.QHBoxLayout()
       layout.addWidget(self.pushButton)
       if Type=="Device":
@@ -361,7 +371,7 @@ class MyPopup(QtGui.QMainWindow):
         #super(MyPopup, self).__init__(parent)
         global System
         QtGui.QWidget.__init__(self)
-        
+        self.showMaximized()
         self.setWindowTitle(Text)
         # scroll area widget contents - layout
         self.scrollLayout = QtGui.QFormLayout()

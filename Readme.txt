@@ -66,8 +66,9 @@ Satellite with IP and Port in table Satellites
 todo:
     check if hue command was executed only then return true
     gcm setting id is empty
-    gui 
-        klick on values gives trend
+    szenen gui
+        liste für aktuatoren
+    input gui
 
 V1: separate szenen
         Interlocks für PS3 o.ä?
@@ -76,9 +77,6 @@ V1: separate szenen
     add "empty" sattelite for all TiFo aktuatoren
     finish doppelklick und dreifachklick
         bei dreifachklick wird doppelklick und einfach auch ausgeführt
-    move table creation to cmd_modules
-    rewrite communication to acknowledge
-    szenen_timer is recursive not working
     satellites add thread supervision
     scanner is satellite
     historic tables in reverse
