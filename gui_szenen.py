@@ -14,14 +14,38 @@ as well as some customized parameter types
 
 """
 
+import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-
+from mysql_con import mdb_get_table
 
 app = QtGui.QApplication([])
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
+
+from cmd_sonos import sonos
+from cmd_xs1 import myezcontrol
+from cmd_hue import hue_lights
+from cmd_samsung import TV
+from cmd_satellites import satelliten
+
+xs1 = myezcontrol(constants.xs1_.IP)
+hue = hue_lights()
+sn = sonos()
+tv = TV()
+sat = satelliten()
+xs1_devs = xs1.list_devices()
+xs1_cmds = xs1.dict_commands()
+hue_devs = hue.list_devices()
+hue_cmds = hue.dict_commands()
+sns_devs = sn.list_devices()
+sns_cmds = sn.dict_commands()
+tvs_devs = tv.list_devices()
+tvs_cmds = tv.dict_commands()
+sat_devs = sat.list_devices()
+sat_cmds = sat.dict_commands()
+cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
 
 ## test subclassing parameters
@@ -65,14 +89,111 @@ class ScalableGroup(pTypes.GroupParameter):
 
 
 
+szenen = mdb_get_table(db='set_Szenen')
+params = []
+for szene in szenen:
+    if int(szene.get('Id')) >9:
+        szn_dict = {}
+        szn_dict['name']=szene.get('Name')
+        szn_dict['type']='group'
+        szn_dict['expanded'] = False
+        szn_l_child = []
+        szn_xs_child = {'name': 'XS1 Devices', 'type': 'group', 'expanded': False}
+        szn_xs_child_l = []
+        szn_hu_child = {'name': 'Hue Devices', 'type': 'group', 'expanded': False}
+        szn_hu_child_l = []  
+        szn_sn_child = {'name': 'Sonos Devices', 'type': 'group', 'expanded': False}
+        szn_sn_child_l = []       
+        szn_tv_child = {'name': 'TVs', 'type': 'group', 'expanded': False}
+        szn_tv_child_l = []
+        szn_sat_child = {'name': 'Satellites', 'type': 'group', 'expanded': False}
+        szn_sat_child_l = []        
+        del szene['Name']
+        for item in szene:
+            szn_d_child = {}
+            if str(item) in xs1_devs:
+                szn_d_child['name'] = str(item)
+                szn_d_child['type'] = 'list'
+                szn_d_child['values'] = xs1_cmds
+                for cmd in xs1_cmds:
+                    szn_d_child['value']= 0
+                    if cmd == str(szene.get(item)):
+                        szn_d_child['value']= xs1_cmds.get(cmd)
+                szn_xs_child_l.append(szn_d_child)
+            elif str(item) in hue_devs:
+                szn_d_child['name'] = str(item)
+                szn_d_child['type'] = 'list'
+                szn_d_child['values'] = hue_cmds
+                for cmd in hue_cmds:
+                    szn_d_child['value']= 0
+                    if cmd == str(szene.get(item)):
+                        szn_d_child['value']= hue_cmds.get(cmd)  
+                szn_hu_child_l.append(szn_d_child)
+            elif str(item) in sns_devs:
+                szn_d_child['name'] = str(item)
+                szn_d_child['type'] = 'list'
+                szn_d_child['values'] = sns_cmds
+                for cmd in sns_cmds:
+                    szn_d_child['value']= 0
+                    if cmd == str(szene.get(item)):
+                        szn_d_child['value']= sns_cmds.get(cmd)   
+                szn_sn_child_l.append(szn_d_child)
+            elif str(item) in tvs_devs:
+                szn_d_child['name'] = str(item)
+                szn_d_child['type'] = 'list'
+                szn_d_child['values'] = tvs_cmds
+                for cmd in tvs_cmds:
+                    szn_d_child['value']= 0
+                    if cmd == str(szene.get(item)):
+                        szn_d_child['value']= tvs_cmds.get(cmd)   
+                szn_tv_child_l.append(szn_d_child)
+            elif str(item) in sat_devs:
+                szn_d_child['name'] = str(item)
+                szn_d_child['type'] = 'list'
+                szn_d_child['values'] = sat_cmds
+                for cmd in sat_cmds:
+                    szn_d_child['value']= 0
+                    if cmd == str(szene.get(item)):
+                        szn_d_child['value']= sat_cmds.get(cmd)   
+                szn_sat_child_l.append(szn_d_child)                
+            else:
+                szn_d_child['name'] = str(item)
+                szn_d_child['type'] = 'str'
+                szn_d_child['expanded'] = False
+                if str(szene.get(item)) <> "None":
+                    szn_d_child['value'] = str(szene.get(item))
+                else:
+                    szn_d_child['value'] = ''
+                szn_l_child.append(szn_d_child)
+            #if int(szene.get('Id')) >6: break
+            szn_xs_child['children']= szn_xs_child_l
+            szn_hu_child['children']= szn_hu_child_l
+            szn_sn_child['children']= szn_sn_child_l
+            szn_tv_child['children']= szn_tv_child_l
+            szn_sat_child['children']= szn_sat_child_l            
+        szn_l_child.append(szn_xs_child)
+        szn_l_child.append(szn_hu_child)
+        szn_l_child.append(szn_sn_child)
+        szn_l_child.append(szn_tv_child)
+        szn_l_child.append(szn_sat_child)        
+        szn_dict['children']= szn_l_child
+        params.append(szn_dict)
+szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
+        {'name': 'Save State', 'type': 'action'},
+        {'name': 'Restore State', 'type': 'action', 'children': [
+            {'name': 'Add missing items', 'type': 'bool', 'value': True},
+            {'name': 'Remove extra items', 'type': 'bool', 'value': True},
+        ]},
+    ]}
+params.append(szn_dict)    
 
-params = [
+params1 = [
     {'name': 'Basic parameter data types', 'type': 'group', 'children': [
         {'name': 'Integer', 'type': 'int', 'value': 10},
         {'name': 'Float', 'type': 'float', 'value': 10.5, 'step': 0.1},
         {'name': 'String', 'type': 'str', 'value': "hi"},
         {'name': 'List', 'type': 'list', 'values': [1,2,3], 'value': 2},
-        {'name': 'Named List', 'type': 'list', 'values': {"one": 1, "two": "twosies", "three": [3,3,3]}, 'value': 2},
+        {'name': 'Named List', 'type': 'list', 'values': {"one": 1, "two": "twosies", "three": [3,3,3]}, 'value': 0},
         {'name': 'Boolean', 'type': 'bool', 'value': True, 'tip': "This is a checkbox"},
         {'name': 'Color', 'type': 'color', 'value': "FF0", 'tip': "This is a color button"},
         {'name': 'Gradient', 'type': 'colormap'},
@@ -132,10 +253,10 @@ def valueChanging(param, value):
     print("Value changing (not finalized):", param, value)
     
 # Too lazy for recursion:
-for child in p.children():
-    child.sigValueChanging.connect(valueChanging)
-    for ch2 in child.children():
-        ch2.sigValueChanging.connect(valueChanging)
+#for child in p.children():
+#    child.sigValueChanging.connect(valueChanging)
+#    for ch2 in child.children():
+#        ch2.sigValueChanging.connect(valueChanging)
         
 
 
@@ -169,8 +290,8 @@ win.show()
 win.resize(800,800)
 
 ## test save/restore
-s = p.saveState()
-p.restoreState(s)
+#s = p.saveState()
+#p.restoreState(s)
 
 
 ## Start Qt event loop unless running in interactive mode or using pyside.

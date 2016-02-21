@@ -10,7 +10,7 @@ from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
 
-from mysql_con import mdb_read_table_entry
+from mysql_con import mdb_read_table_entry, settings_r, mdb_read_table_column_filt
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import *
@@ -18,6 +18,7 @@ import sys
 import git
 import pyqtgraph as pg
 import numpy as np
+from threading import Timer
 
 descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
 
@@ -39,7 +40,10 @@ Device = None
 constants.redundancy_.master = True
 
 eg_buttons = [{'Name':'Wohnzimmer_Decke','desc':'Decke','type':'dev','pos_x':100,'pos_y':100},
-              {'Name':'Wohnzimmer_Decke','desc':'Decke','type':'dev','pos_x':100,'pos_y':200}]
+              {'Name':'Wohnzimmer_Decke','desc':'Decke 1','type':'dev','pos_x':100,'pos_y':200},
+              {'Name':'Temperatur_Balkon','desc':'T Balkon','type':'sens','pos_x':200,'pos_y':200},
+              {'Name':'Temperatur_Wohnzi','desc':'T Balkon','type':'sens','pos_x':300,'pos_y':200},
+              {'Name':'Temperatur_Schlafzi','desc':'T Balkon','type':'sens','pos_x':400,'pos_y':200}]
 
 #tab Wecker
 #tab settings
@@ -74,6 +78,7 @@ class Main(QtGui.QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(700, 500)
+        settings = settings_r()
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
@@ -94,8 +99,13 @@ class Main(QtGui.QMainWindow):
         for btn in eg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab))
             self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 91, 24))
-            self.buttons[-1].clicked.connect(lambda: self.set_popup(btn.get('Name')))
-            self.buttons[-1].setText(btn.get('desc'))
+            self.buttons[-1].setObjectName(btn.get('Name'))
+            if btn.get('type') == 'dev':
+                self.buttons[-1].clicked.connect(self.make_set_popup(btn.get('Name')))
+                self.buttons[-1].setText(btn.get('desc'))
+            elif btn.get('type') == 'sens':
+                self.buttons[-1].clicked.connect(self.make_set_g_popup(btn.get('Name')))
+                self.buttons[-1].setText(settings.get(btn.get('Name')))           
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         
         #1. Stock
@@ -167,7 +177,8 @@ class Main(QtGui.QMainWindow):
         self.pushButton_7 = QtGui.QPushButton(self.tab_4)
         self.pushButton_7.setGeometry(QtCore.QRect(0, 40, 91, 24))
         self.pushButton_7.setObjectName(_fromUtf8("gitupdate"))
-        self.pushButton_7.clicked.connect(self.set_g_popup)         
+        self.pushButton_7.setText('Update')
+        self.pushButton_7.clicked.connect(self.update_values)         
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -182,6 +193,8 @@ class Main(QtGui.QMainWindow):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        refresh = Timer(5, self.update_values, [])
+        refresh.start()
 
     def close_clicked(self):
         QtCore.QCoreApplication.instance().quit()
@@ -266,13 +279,34 @@ class Main(QtGui.QMainWindow):
         self.w = MyPopup(self,Name)
         self.w.setGeometry(QRect(500, 100, 200, 400))
         self.w.show() 
+        return True
+        
+    def make_set_popup(self, Name):
+        def set_popup(): 
+            global Device
+            Device = Name
+            self.w = MyPopup(self,Name)
+            self.w.setGeometry(QRect(500, 100, 200, 400))
+            self.w.show() 
+        return set_popup
+        
+    def make_set_g_popup(self, Name):
+        def set_g_popup(): 
+            self.w = MyGraphPopup(self,Name)
+            #self.w.setGeometry(QRect(500, 100, 200, 400))
+            self.w.show() 
+        return set_g_popup
 
-    def set_g_popup(self,Name): 
-        global Device
-        Device = Name
-        self.w = MyGraphPopup(self,Name)
-        self.w.setGeometry(QRect(500, 100, 200, 400))
-        self.w.show() 
+    def update_values(self):
+        settings = settings_r()
+        for btn in self.buttons:
+            name = btn.objectName()
+            if str(name) in settings:
+                btn.setText(settings.get(str(name)))
+        QApplication.processEvents()
+        refresh = Timer(5, self.update_values, [])
+        if running: 
+            refresh.start()        
 
 class Buttn(QtGui.QWidget):
     def __init__( self ,parent=None, Name=None, Type="Device", description=None):
@@ -383,20 +417,34 @@ class MyPopup(QtGui.QMainWindow):
         #dc.drawLine(100, 0, 0, 100)
 
 class MyGraphPopup(QtGui.QMainWindow):
-    def __init__(self, parent=None, Text="Test"):
-        #super(MyPopup, self).__init__(parent)
+    def __init__(self, parent, item):
+        #super(MyGraphPopup, self).__init__(parent)
         #global System
         #QtGui.QWidget.__init__(self)
+        
         self.win = pg.GraphicsWindow(title="Basic plotting examples")
         #win.resize(1000,600)
         self.win.setWindowTitle('Homecontrol Graph')
+        self.win.showMaximized()#showFullScreen()
         
-        graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
+        self.axis = TimeAxisItem('bottom')
         
-        p1 = self.win.addPlot(title="Whatever", y=graph)        
+        graph = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Value', filt=item, amount=1000, order="desc"))
+        time = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1000, order="desc"))
+        #graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
+        #time = np.array([0,1,2,3,4,3,2,1])
+        self.win.addPlot(title="Whatever",axisItems={'bottom':self.axis},x=time, y=graph)  
+        #curve = p1.plot()
 
+class TimeAxisItem(pg.AxisItem):
+    def tickStrings(self, values, scale, spacing):
+        return [QDateTime(1970,1,1,0.0,0).addSecs(value).toString('yyyy-MM-dd hh:mm') for value in values]
+
+
+running = True
 app = QtGui.QApplication(sys.argv)
 myWidget = Main()
 myWidget.setGeometry(QRect(0, 0, 800, 500))
 myWidget.show()
+running = False
 app.exec_() 

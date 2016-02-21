@@ -119,6 +119,7 @@ class szenen:
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
             for bedingung in bedingungen:
                 item, operand, wert = bedingung
+                item = settings.get(item)
                 if operand == '=':
                     if not str(item) == str(wert):
                         erfuellt = False 

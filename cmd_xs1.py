@@ -111,6 +111,17 @@ class myezcontrol:
         #liste.remove("Name")
         return liste
 
+    def dict_commands(self):
+        #comands = mdb_get_table(table.name)
+        dicti = {}
+        itera = 1
+        dicti[''] = itera
+        liste = self.list_commands()
+        for item in liste:
+            itera +=1            
+            dicti[str(item)] = itera
+        return dicti    
+
     def list_devices(self):
         comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
         liste = []

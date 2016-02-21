@@ -15,7 +15,7 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    print mdb_read_table_entry('set_Szenen','Test')
+    print mdb_get_table(db='set_Szenen')
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
@@ -155,6 +155,23 @@ def mdb_read_table_column(db, column):
         results = cur.fetchall()
         for row in results:
             rlist.append(row[0])
+    con.close()    
+    return rlist 
+
+def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc"):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    rlist = []
+    with con:
+        cur = con.cursor()
+        #SELECT * FROM Steuerzentrale.HIS_inputs where Name like '%Rose%' order by id desc limit 1000;
+        sql = 'SELECT '+column+' FROM ' + db + ' WHERE Name LIKE "%' + filt + '%" ORDER BY ID ' + order + ' LIMIT ' + str(amount)
+        cur.execute(sql)
+        results = cur.fetchall()
+        for row in results:
+            if type(row[0]) == datetime.datetime:
+                rlist.append((int(row[0].strftime("%s"))))
+            else:
+                rlist.append(eval(str(row[0])))
     con.close()    
     return rlist 
 

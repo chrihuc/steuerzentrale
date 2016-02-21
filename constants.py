@@ -19,7 +19,11 @@ def init_cfg():
         config.add_section('Main')
     for cfg in cfg_main:
         if not config.has_option('Main', cfg):
-            config.set('Main', cfg, cfg_main.get(cfg))
+            if cfg_main.get(cfg) == '':
+                value = raw_input(cfg+': ')
+            else:
+                value = cfg_main.get(cfg)
+            config.set('Main', cfg, value)
     if not config.has_section('XS1'):
         config.add_section('XS1')
     for cfg in cfg_xs1:
