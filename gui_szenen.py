@@ -158,6 +158,7 @@ def dict_constructor_(device, cmmds):
         for val in values:
             if str(val) == str(cmd):
                 dicti['value'] = values.get(val)
+                #dicti['default'] = (val)
         liste.append(dicti)
     return liste
 
@@ -291,9 +292,8 @@ def change(param, changes):
         print('  change:    %s'% change)
         print('  data:      %s'% str(data))
         print('  ----------')
-    for item in szenen:
-        if str(item) == param.name():
-            print item
+        print param.getValues().items()
+        print param.value()
     
 p.sigTreeStateChanged.connect(change)
 
@@ -308,19 +308,37 @@ for child in p.children():
     for ch2 in child.children():
         ch2.sigValueChanging.connect(valueChanging)
         
+def check_iter(some_object):
+    try:
+        iter(some_object)
+        return True
+    except TypeError, te:
+        return False   
 
+def return_list(some_object):
+    for item in some_object:
+        print item.items()
+
+def itera(some_object):
+    if check_iter(some_object):
+        for item in some_object:
+            if str(item) in szenen[0]:
+                print item.name(), item.value()
+            itera(item)
+    else:
+        print some_object
 
 def save():
     global state
-    state = p.saveState()
+    state = p.saveState() 
+    itera(state)
     
 def restore():
-    for child in p[0]:
-        print child.name()
-    #global state
-    #add = p['Save/Restore functionality', 'Restore State', 'Add missing items']
-    #rem = p['Save/Restore functionality', 'Restore State', 'Remove extra items']
-    #p.restoreState(state, addChildren=add, removeChildren=rem)
+    #itera(p)
+    global state
+    add = p['Save/Restore functionality', 'Restore State', 'Add missing items']
+    rem = p['Save/Restore functionality', 'Restore State', 'Remove extra items']
+    p.restoreState(state, addChildren=add, removeChildren=rem)
 p.param('Save/Restore functionality', 'Save State').sigActivated.connect(save)
 p.param('Save/Restore functionality', 'Restore State').sigActivated.connect(restore)
 
