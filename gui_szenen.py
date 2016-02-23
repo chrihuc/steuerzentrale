@@ -87,6 +87,20 @@ class ScalableGroup(pTypes.GroupParameter):
         }[typ]
         self.addChild(dict(name="ScalableParam %d" % (len(self.childs)+1), type=typ, value=val, removable=True, renamable=True))
 
+class KommandoGroup(pTypes.GroupParameter):
+    def __init__(self, cmds, **opts):
+        opts['type'] = 'group'
+        opts['addText'] = "Add"
+        opts['addList'] = ['list']
+        self.cmds = cmds
+        pTypes.GroupParameter.__init__(self, **opts)
+    
+    def addNew(self, typ):
+        val = {
+            'list': self.cmds
+        }[typ]
+        self.addChild(dict(name="Kommando %d" % (len(self.childs)+1), type=typ, values=self.cmds, value=val, removable=True, renamable=True))
+
 def __return_enum__(eingabe):
     if (type(eingabe) == str):
         try:
@@ -125,6 +139,36 @@ def group_constructor(name, namen, values, values2):
     dicti['children']= liste
     return dicti
 
+def get_commando_set(device):
+    if device in xs1_devs: values = xs1_cmds
+    if device in hue_devs: values = hue_cmds
+    if device in sns_devs: values = sns_cmds
+    if device in tvs_devs: values = tvs_cmds
+    if device in sat_devs: values = sat_cmds
+    return values
+
+def dict_constructor_(device, cmmds):
+    liste = []
+    itera  = 1
+    for cmd in cmmds:
+        dicti = {}
+        values = get_commando_set(device)
+        dicti = {'name':'Kommando ' + str(itera), 'type':'list','values':values}
+        itera += 1
+        for val in values:
+            if str(val) == str(cmd):
+                dicti['value'] = values.get(val)
+        liste.append(dicti)
+    return liste
+
+def group_constructor_(device, cmmds):
+    if type(cmmds) <> list: cmmds = [cmmds]
+    children=dict_constructor_(device,cmmds)
+    return KommandoGroup(name=device,cmds=get_commando_set(device), children=children)
+    dicti = {'name':device, 'type':'group', 'expanded': True}    
+    dicti['children']= dict_constructor_(device,cmmds)
+    return dicti
+
 #szenen = mdb_get_table(db='set_Szenen')
 szenen = [mdb_read_table_entry(db='set_Szenen',entry='Alles_ein')]
 params = []
@@ -149,38 +193,15 @@ for szene in szenen:
         for item in szene:
             szn_d_child = {}
             if str(item) in xs1_devs:
-                listeee =group_constructor(str(item), [], xs1_cmds, __return_enum__(szene.get(item)))
-                szn_xs_child_l.append(listeee)
-            elif str(item) in hue_devs:
-                listeee =group_constructor(str(item), [], hue_devs, __return_enum__(szene.get(item)))                
-                szn_hu_child_l.append(listeee)
-            elif str(item) in sns_devs:
-                szn_d_child['name'] = str(item)
-                szn_d_child['type'] = 'list'
-                szn_d_child['values'] = sns_cmds
-                for cmd in sns_cmds:
-                    szn_d_child['value']= 0
-                    if cmd == str(szene.get(item)):
-                        szn_d_child['value']= sns_cmds.get(cmd)   
-                szn_sn_child_l.append(szn_d_child)
-            elif str(item) in tvs_devs:
-                szn_d_child['name'] = str(item)
-                szn_d_child['type'] = 'list'
-                szn_d_child['values'] = tvs_cmds
-                for cmd in tvs_cmds:
-                    szn_d_child['value']= 0
-                    if cmd == str(szene.get(item)):
-                        szn_d_child['value']= tvs_cmds.get(cmd)   
-                szn_tv_child_l.append(szn_d_child)
-            elif str(item) in sat_devs:
-                szn_d_child['name'] = str(item)
-                szn_d_child['type'] = 'list'
-                szn_d_child['values'] = sat_cmds
-                for cmd in sat_cmds:
-                    szn_d_child['value']= 0
-                    if cmd == str(szene.get(item)):
-                        szn_d_child['value']= sat_cmds.get(cmd)   
-                szn_sat_child_l.append(szn_d_child)                
+                szn_xs_child_l.append(group_constructor_(str(item),szene.get(item)))
+            elif str(item) in hue_devs:               
+                szn_hu_child_l.append(group_constructor_(str(item),szene.get(item)))
+            elif str(item) in sns_devs: 
+                szn_sn_child_l.append(group_constructor_(str(item),szene.get(item)))
+            elif str(item) in tvs_devs: 
+                szn_tv_child_l.append(group_constructor_(str(item),szene.get(item)))
+            elif str(item) in sat_devs: 
+                szn_sat_child_l.append(group_constructor_(str(item),szene.get(item)))               
             else:
                 szn_d_child['name'] = str(item)
                 szn_d_child['type'] = 'str'
@@ -270,6 +291,9 @@ def change(param, changes):
         print('  change:    %s'% change)
         print('  data:      %s'% str(data))
         print('  ----------')
+    for item in szenen:
+        if str(item) == param.name():
+            print item
     
 p.sigTreeStateChanged.connect(change)
 
@@ -291,10 +315,12 @@ def save():
     state = p.saveState()
     
 def restore():
-    global state
-    add = p['Save/Restore functionality', 'Restore State', 'Add missing items']
-    rem = p['Save/Restore functionality', 'Restore State', 'Remove extra items']
-    p.restoreState(state, addChildren=add, removeChildren=rem)
+    for child in p[0]:
+        print child.name()
+    #global state
+    #add = p['Save/Restore functionality', 'Restore State', 'Add missing items']
+    #rem = p['Save/Restore functionality', 'Restore State', 'Remove extra items']
+    #p.restoreState(state, addChildren=add, removeChildren=rem)
 p.param('Save/Restore functionality', 'Save State').sigActivated.connect(save)
 p.param('Save/Restore functionality', 'Restore State').sigActivated.connect(restore)
 
