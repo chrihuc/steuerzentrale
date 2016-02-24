@@ -319,18 +319,32 @@ def return_list(some_object):
     for item in some_object:
         print item.items()
 
-def itera(some_object):
+level_cnt = 0
+def itera(some_object, level = 50):
+    global level_cnt
     if check_iter(some_object):
         for item in some_object:
-            if str(item) in szenen[0]:
-                print item.name(), item.value()
-            itera(item)
+            #if str(item) in szenen[0]:
+            try:
+                if type(some_object.get(item)) <> str and check_iter(some_object.get(item)):
+                    itera(some_object.get(item))
+                else:
+                    if str(item) == 'name' and str(some_object.get('value')) <> 'None':
+                        print some_object.get(item), some_object.get('value')
+                    if str(some_object.get('name')) == 'None':
+                        itera(item)
+                    if str(item) == 'type' and str(some_object.get('value')) <> 'list' and str(some_object.get('value')) <> 'None':
+                        print some_object.get('values'), some_object.get('value')
+#                    else:
+#                        print some_object
+            except:
+                pass
     else:
         print some_object
 
 def save():
     global state
-    state = p.saveState() 
+    state = p.saveState()
     itera(state)
     
 def restore():
