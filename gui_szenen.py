@@ -311,41 +311,67 @@ for child in p.children():
 def check_iter(some_object):
     try:
         iter(some_object)
-        return True
+        if type(some_object) <> str:  
+            return True
+        else:
+            return False
     except TypeError, te:
         return False   
 
 def return_list(some_object):
+    liste = []
     for item in some_object:
-        print item.items()
-
-level_cnt = 0
-def itera(some_object, level = 50):
-    global level_cnt
-    if check_iter(some_object):
-        for item in some_object:
-            #if str(item) in szenen[0]:
-            try:
-                if type(some_object.get(item)) <> str and check_iter(some_object.get(item)):
-                    itera(some_object.get(item))
-                else:
-                    if str(item) == 'name' and str(some_object.get('value')) <> 'None':
-                        print some_object.get(item), some_object.get('value')
-                    if str(some_object.get('name')) == 'None':
-                        itera(item)
-                    if str(item) == 'type' and str(some_object.get('value')) <> 'list' and str(some_object.get('value')) <> 'None':
-                        print some_object.get('values'), some_object.get('value')
-#                    else:
-#                        print some_object
-            except:
-                pass
+        dicti = some_object.get(item)
+        sub_dicti = dicti.get('values')
+        wert = dicti.get('value')
+        for jtem in sub_dicti:
+            if sub_dicti[jtem] == wert:   
+                wert_str = jtem
+        if wert_str <> '':
+            liste.append(wert_str)
+    if len(liste) > 0:
+        return liste
     else:
-        print some_object
+        return ''
+
+
+def itera(some_object, only_change = False):
+    dicti = {}
+    h_dict = {}
+    if check_iter(some_object):
+        try:
+            if some_object.get('type') == 'group':
+                if some_object.get('name') in szenen[0]:
+                    device  = some_object.get('name')
+                    kommandos = return_list(some_object.get('children'))
+                    if szenen[0].get(device) <> kommandos and only_change:
+                        dicti[some_object.get('name')] = kommandos
+                    else:
+                        dicti[some_object.get('name')] = kommandos
+                else:
+                    #strucutre group
+                    dicti.update(itera(some_object.get('children')))
+            else:
+                if some_object.get('name') <> None:
+                    if some_object.get('name') in szenen[0]:
+                        device  = some_object.get('name')
+                        value = some_object.get('value')
+                        if szenen[0].get(device) <> kommandos and only_change:
+                            print some_object.get('name'), value
+                        else:
+                            print some_object.get('name'), value                    
+                else:
+                    #ordered dict:
+                    for item in some_object:
+                        dicti.update(itera(some_object.get(item)))
+        except:
+            pass
+    return dicti
 
 def save():
     global state
     state = p.saveState()
-    itera(state)
+    print itera(state)
     
 def restore():
     #itera(p)
