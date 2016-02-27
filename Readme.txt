@@ -70,6 +70,10 @@ todo:
         liste für aktuatoren
     input gui
 
+issue:
+    szenen commands coming back as string
+
+
 V1: separate szenen
         Interlocks für PS3 o.ä?
         write back correct status of aktuatoren

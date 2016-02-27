@@ -35,6 +35,7 @@ def main():
             #hue_devices.append(device)            
     #print hue_devices
 
+
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
     #['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]]

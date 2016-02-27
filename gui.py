@@ -34,7 +34,7 @@ sns_devs = sn.list_devices()
 tvs_devs = tv.list_devices()
 sat_devs = sat.list_devices()
 szn_cmds = scenes.list_commands()
-szn_favs = scenes.list_commands(gruppe='App')
+szn_favs = scenes.list_commands(gruppe='Favorit')
 System = None
 Device = None
 constants.redundancy_.master = True

@@ -47,6 +47,7 @@ sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
+szene_to_read = 'TV'
 
 ## test subclassing parameters
 ## This parameter automatically generates two child parameters which are always reciprocals of each other
@@ -150,7 +151,7 @@ def get_commando_set(device):
 def dict_constructor_(device, cmmds):
     liste = []
     itera  = 1
-    for cmd in cmmds:
+    for cmd in (cmmds):
         dicti = {}
         values = get_commando_set(device)
         dicti = {'name':'Kommando ' + str(itera), 'type':'list','values':values}
@@ -162,21 +163,16 @@ def dict_constructor_(device, cmmds):
         liste.append(dicti)
     return liste
 
-def group_constructor_(device, cmmds):
-    if type(cmmds) <> list: cmmds = [cmmds]
-    children=dict_constructor_(device,cmmds)
-    return KommandoGroup(name=device,cmds=get_commando_set(device), children=children)
-    dicti = {'name':device, 'type':'group', 'expanded': True}    
-    dicti['children']= dict_constructor_(device,cmmds)
-    return dicti
-
 #szenen = mdb_get_table(db='set_Szenen')
-szenen = [mdb_read_table_entry(db='set_Szenen',entry='Alles_ein')]
+szenen = [mdb_read_table_entry(db='set_Szenen',entry=szene_to_read)]
 params = []
 for szene in szenen:
     if int(szene.get('Id')) >9:
         szn_dict = {}
-        szn_dict['name']=szene.get('Name')
+        if str(szene.get('Beschreibung')) <> 'None':
+            szn_dict['name']=szene.get('Beschreibung')
+        else:
+            szn_dict['name']=szene.get('Name')
         szn_dict['type']='group'
         szn_dict['expanded'] = False
         szn_l_child = []
@@ -193,19 +189,40 @@ for szene in szenen:
         del szene['Name']
         for item in szene:
             szn_d_child = {}
+            if str(item) in cmd_devs:
+                kom_group = KommandoGroup(name=str(item),cmds=get_commando_set(str(item)), children=dict_constructor_(str(item),__return_enum__(szene.get(item))))
             if str(item) in xs1_devs:
-                szn_xs_child_l.append(group_constructor_(str(item),szene.get(item)))
+                szn_xs_child_l.append(kom_group)
             elif str(item) in hue_devs:               
-                szn_hu_child_l.append(group_constructor_(str(item),szene.get(item)))
+                szn_hu_child_l.append(kom_group)
             elif str(item) in sns_devs: 
-                szn_sn_child_l.append(group_constructor_(str(item),szene.get(item)))
+                szn_sn_child_l.append(kom_group)
             elif str(item) in tvs_devs: 
-                szn_tv_child_l.append(group_constructor_(str(item),szene.get(item)))
+                szn_tv_child_l.append(kom_group)
             elif str(item) in sat_devs: 
-                szn_sat_child_l.append(group_constructor_(str(item),szene.get(item)))               
+                szn_sat_child_l.append(kom_group)
+            elif str(item) in ['Setting','Bedingung']: 
+                pass       
+            elif str(item) in ['setTask']: 
+                pass     
+            elif str(item) in ['Follows']: 
+                pass  
+            elif str(item) in ['AutoMode']: 
+                szn_d_child['name'] = str(item)
+                szn_d_child['type'] = 'bool'
+                szn_d_child['expanded'] = False
+                if str(szene.get(item)) <> "None":
+                    szn_d_child['value'] = str(szene.get(item))
+                else:
+                    szn_d_child['value'] = False
+                szn_l_child.append(szn_d_child)             
             else:
                 szn_d_child['name'] = str(item)
-                szn_d_child['type'] = 'str'
+                if str(item) in ['Prio','Delay__']:
+                    szn_d_child['type'] = 'float'
+                    szn_d_child['step'] = 0.1
+                else:
+                    szn_d_child['type'] = 'str'
                 szn_d_child['expanded'] = False
                 if str(szene.get(item)) <> "None":
                     szn_d_child['value'] = str(szene.get(item))
@@ -295,7 +312,7 @@ def change(param, changes):
         print param.getValues().items()
         print param.value()
     
-p.sigTreeStateChanged.connect(change)
+#p.sigTreeStateChanged.connect(change)
 
 
 def valueChanging(param, value):
@@ -332,10 +349,10 @@ def return_list(some_object):
     if len(liste) > 0:
         return liste
     else:
-        return ''
+        return None
 
 
-def itera(some_object, only_change = False):
+def itera(some_object, only_change = True):
     dicti = {}
     h_dict = {}
     if check_iter(some_object):
@@ -344,8 +361,9 @@ def itera(some_object, only_change = False):
                 if some_object.get('name') in szenen[0]:
                     device  = some_object.get('name')
                     kommandos = return_list(some_object.get('children'))
-                    if szenen[0].get(device) <> kommandos and only_change:
-                        dicti[some_object.get('name')] = kommandos
+                    if only_change:
+                        if szenen[0].get(device) <> kommandos:
+                            dicti[some_object.get('name')] = kommandos
                     else:
                         dicti[some_object.get('name')] = kommandos
                 else:
@@ -356,10 +374,12 @@ def itera(some_object, only_change = False):
                     if some_object.get('name') in szenen[0]:
                         device  = some_object.get('name')
                         value = some_object.get('value')
-                        if szenen[0].get(device) <> kommandos and only_change:
-                            print some_object.get('name'), value
+                        if value == '': value = None
+                        if only_change:
+                            if szenen[0].get(device) <> value:
+                                dicti[some_object.get('name')] =  value
                         else:
-                            print some_object.get('name'), value                    
+                            dicti[some_object.get('name')] =  value                    
                 else:
                     #ordered dict:
                     for item in some_object:
