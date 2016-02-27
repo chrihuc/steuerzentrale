@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import mdb_get_table, mdb_read_table_entry
+from mysql_con import mdb_get_table, mdb_read_table_entry, mdb_set_table
 
 app = QtGui.QApplication([])
 import pyqtgraph.parametertree.parameterTypes as pTypes
@@ -47,7 +47,9 @@ sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
+
 szene_to_read = 'TV'
+
 
 ## test subclassing parameters
 ## This parameter automatically generates two child parameters which are always reciprocals of each other
@@ -167,6 +169,7 @@ def dict_constructor_(device, cmmds):
 szenen = [mdb_read_table_entry(db='set_Szenen',entry=szene_to_read)]
 params = []
 for szene in szenen:
+<<<<<<< HEAD
     if int(szene.get('Id')) >9:
         szn_dict = {}
         if str(szene.get('Beschreibung')) <> 'None':
@@ -242,6 +245,101 @@ for szene in szenen:
         szn_l_child.append(szn_sat_child)        
         szn_dict['children']= szn_l_child
         params.append(szn_dict)
+=======
+    szn_dict = {}
+    if str(szene.get('Beschreibung')) <> 'None':
+        szn_dict['name']=szene.get('Beschreibung')
+    else:
+        szn_dict['name']=szene.get('Name')
+    szn_dict['type']='group'
+    szn_dict['expanded'] = False
+    szn_l_child = []
+    szn_xs_child = {'name': 'XS1 Devices', 'type': 'group', 'expanded': False}
+    szn_xs_child_l = []
+    szn_hu_child = {'name': 'Hue Devices', 'type': 'group', 'expanded': False}
+    szn_hu_child_l = []  
+    szn_sn_child = {'name': 'Sonos Devices', 'type': 'group', 'expanded': False}
+    szn_sn_child_l = []       
+    szn_tv_child = {'name': 'TVs', 'type': 'group', 'expanded': False}
+    szn_tv_child_l = []
+    szn_sat_child = {'name': 'Satellites', 'type': 'group', 'expanded': False}
+    szn_sat_child_l = []        
+    del szene['Name']
+    for item in szene:
+        szn_d_child = {}
+        szn_d_child_l = []
+        if str(item) in cmd_devs:
+            kom_group = KommandoGroup(name=str(item),cmds=get_commando_set(str(item)), children=dict_constructor_(str(item),__return_enum__(szene.get(item))))
+        if str(item) in xs1_devs:
+            szn_xs_child_l.append(kom_group)
+        elif str(item) in hue_devs:               
+            szn_hu_child_l.append(kom_group)
+        elif str(item) in sns_devs: 
+            szn_sn_child_l.append(kom_group)
+        elif str(item) in tvs_devs: 
+            szn_tv_child_l.append(kom_group)
+        elif str(item) in sat_devs: 
+            szn_sat_child_l.append(kom_group)
+        elif str(item) in ['Setting']: 
+            szn_d_child = {'name': item, 'type': 'group'} 
+            for child in __return_enum__(szene.get(item)):
+                if type(__return_enum__(szene.get(item))) == dict:
+                    szn_d_child_l.append({'name': child, 'type': 'str', 'value': __return_enum__(szene.get(item)).get(child)})
+            szn_d_child['children']= szn_d_child_l
+            szn_l_child.append(szn_d_child) 
+        elif str(item) in ['Bedingung']: 
+            szn_d_child = {'name': item, 'type': 'group'} 
+            kinder = __return_enum__(szene.get(item))
+            for child in kinder:
+                if type(kinder) == dict:
+                    szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child},
+                {'name': 'Operand', 'type': 'str', 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}]})
+                else:
+                    for kind in kinder:
+                        szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': kind[0]},
+                {'name': 'Operand', 'type': 'str', 'value': kind[1]},{'name': 'Bedingung', 'type': 'str', 'value': kind[2]}]})
+            szn_d_child['children']= szn_d_child_l
+            szn_l_child.append(szn_d_child)                             
+        elif str(item) in ['setTask']: 
+            pass     
+        elif str(item) in ['Follows']: 
+            pass  
+        elif str(item) in ['AutoMode']: 
+            szn_d_child['name'] = str(item)
+            szn_d_child['type'] = 'bool'
+            szn_d_child['expanded'] = False
+            if str(szene.get(item)) <> "None":
+                szn_d_child['value'] = eval(szene.get(item))
+            else:
+                szn_d_child['value'] = False
+            szn_l_child.append(szn_d_child)             
+        else:
+            szn_d_child['name'] = str(item)
+            if str(item) in ['Prio','Delay__']:
+                szn_d_child['type'] = 'float'
+                szn_d_child['step'] = 0.1
+            else:
+                szn_d_child['type'] = 'str'
+            szn_d_child['expanded'] = False
+            if str(szene.get(item)) <> "None":
+                szn_d_child['value'] = str(szene.get(item))
+            else:
+                szn_d_child['value'] = ''
+            szn_l_child.append(szn_d_child)
+        #if int(szene.get('Id')) >6: break
+        szn_xs_child['children']= szn_xs_child_l
+        szn_hu_child['children']= szn_hu_child_l
+        szn_sn_child['children']= szn_sn_child_l
+        szn_tv_child['children']= szn_tv_child_l
+        szn_sat_child['children']= szn_sat_child_l            
+    szn_l_child.append(szn_xs_child)
+    szn_l_child.append(szn_hu_child)
+    szn_l_child.append(szn_sn_child)
+    szn_l_child.append(szn_tv_child)
+    szn_l_child.append(szn_sat_child)        
+    szn_dict['children']= szn_l_child
+    params.append(szn_dict)
+>>>>>>> 85fbf4406834521644c6175bceb1f5f8a1aff8aa
 szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
         {'name': 'Save State', 'type': 'action'},
         {'name': 'Restore State', 'type': 'action', 'children': [
@@ -341,11 +439,12 @@ def return_list(some_object):
         dicti = some_object.get(item)
         sub_dicti = dicti.get('values')
         wert = dicti.get('value')
-        for jtem in sub_dicti:
-            if sub_dicti[jtem] == wert:   
-                wert_str = jtem
-        if wert_str <> '':
-            liste.append(wert_str)
+        if sub_dicti <> None:
+            for jtem in sub_dicti:
+                if sub_dicti[jtem] == wert:   
+                    wert_str = jtem
+            if wert_str <> '':
+                liste.append(wert_str)
     if len(liste) > 0:
         return liste
     else:
@@ -356,18 +455,40 @@ def itera(some_object, only_change = True):
     dicti = {}
     h_dict = {}
     if check_iter(some_object):
-        try:
+        if True:
+        #try:
             if some_object.get('type') == 'group':
+<<<<<<< HEAD
                 if some_object.get('name') in szenen[0]:
                     device  = some_object.get('name')
                     kommandos = return_list(some_object.get('children'))
                     if only_change:
                         if szenen[0].get(device) <> kommandos:
                             dicti[some_object.get('name')] = kommandos
+=======
+                device  = some_object.get('name')
+                if device in szenen[0]:
+                    if device in ['Setting']:
+                        set_dict = {}
+                        for sub in some_object.get('children'):
+                            set_dict[some_object.get('children').get(sub).get('name')]  = some_object.get('children').get(sub).get('value')
+                        dicti[device] = set_dict
+                    elif device in ['Bedingung']:
+                        set_lst = []
+                        for child in some_object.get('children'):
+                            bed_tuple = some_object.get('children').get(child).get('children')
+                            set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), bed_tuple.get('Bedingung').get('value')])
+                        dicti[device] = set_lst                        
+>>>>>>> 85fbf4406834521644c6175bceb1f5f8a1aff8aa
                     else:
-                        dicti[some_object.get('name')] = kommandos
+                        kommandos = return_list(some_object.get('children'))
+                        if only_change:
+                            if szenen[0].get(device) <> kommandos:
+                                dicti[device] = kommandos
+                        else:
+                            dicti[device] = kommandos
                 else:
-                    #strucutre group
+                    #strucutre group only if name not ambivalent
                     dicti.update(itera(some_object.get('children')))
             else:
                 if some_object.get('name') <> None:
@@ -384,14 +505,17 @@ def itera(some_object, only_change = True):
                     #ordered dict:
                     for item in some_object:
                         dicti.update(itera(some_object.get(item)))
-        except:
-            pass
+#        except Exception,e:
+#            print e
     return dicti
 
 def save():
     global state
     state = p.saveState()
-    print itera(state)
+    neu_szene = itera(state)
+    print neu_szene
+    mdb_set_table(table='set_Szenen', device=szene_to_read, commands=neu_szene)
+        
     
 def restore():
     #itera(p)

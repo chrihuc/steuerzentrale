@@ -12,7 +12,9 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
         'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
         'tts':'False','heartbt':'125'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
-cfg_sql ={'IP':own_ip,'USER':'','PASS':'','DB':'Steuerzentrale'}
+cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
+cfg_hue ={'IP':''}
+
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -33,7 +35,20 @@ def init_cfg():
         config.add_section('SQL')
     for cfg in cfg_sql:
         if not config.has_option('SQL', cfg):
-            config.set('SQL', cfg, cfg_sql.get(cfg))             
+            if cfg_sql.get(cfg) == '':
+                value = raw_input('SQL ' +cfg+': ')
+            else:
+                value = cfg_sql.get(cfg)
+            config.set('SQL', cfg, value) 
+    if not config.has_section('HUE'):
+        config.add_section('HUE')
+    for cfg in cfg_hue:
+        if not config.has_option('HUE', cfg):
+            if cfg_hue.get(cfg) == '':
+                value = raw_input('HUE ' +cfg+': ')
+            else:
+                value = cfg_hue.get(cfg)
+            config.set('HUE', cfg, value)            
     
     # Writing our configuration file to 'main.cfg'
     with open('main.cfg', 'wb') as configfile:
@@ -74,7 +89,13 @@ for i in range(0,3):
                 IP = config.get('SQL', 'IP')
                 USER = config.get('SQL', 'USER')
                 PASS = config.get('SQL', 'PASS')
-                DB = config.get('SQL', 'DB')                
+                DB = config.get('SQL', 'DB')    
+            class hue_:
+                # hue lights for notification
+                # constants.hue_.devices
+                notify_devices = []
+                # constants.hue_.IP
+                IP = config.get('HUE', 'IP') #"192.168.192.190"                 
         except:
             init_cfg()
             continue
@@ -137,14 +158,7 @@ class scanner_:
     # constants.scanner_.IP
     IP = "192.168.192.10"
     # constants.scanner_.PORT
-    PORT = 5010
-    
-class hue_:
-    # hue lights for notification
-    # constants.hue_.devices
-    notify_devices = ['Stehlampe','Stablampe 1', 'Stablampe 2', 'LightStrips 2']
-    # constants.hue_.IP
-    IP = "192.168.192.190"    
+    PORT = 5010   
     
 class mail_:
     # constants.mail_.receiver

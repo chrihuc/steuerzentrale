@@ -45,7 +45,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    scenes.execute("Test")
+    scenes.execute("Alles_ein")
     
 class szenen:    
     
@@ -88,6 +88,8 @@ class szenen:
 #             Deprecated
 #==============================================================================
             for bedingung in bedingungen:
+                if settings.get(bedingung) == None:
+                    setting_s(bedingung, '')
                 try:
                     groesser = bedingungen.get(bedingung).find('>')
                     kleiner = bedingungen.get(bedingung).find('<')
@@ -118,25 +120,27 @@ class szenen:
 #==============================================================================
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
             for bedingung in bedingungen:
+                if settings.get(bedingung) == None:
+                    setting_s(bedingung, '')                
                 item, operand, wert = bedingung
                 item = settings.get(item)
                 if operand == '=':
                     if not str(item) == str(wert):
                         erfuellt = False 
                 elif operand == '<':
-                    if not str(item) < str(wert):
+                    if not (item) < (wert):
                         erfuellt = False  
                 elif operand == '>':
-                    if not str(item) > str(wert):
+                    if not (item) > (wert):
                         erfuellt = False   
                 elif operand == '<=':
-                    if not str(item) <= str(wert):
+                    if not (item) <= (wert):
                         erfuellt = False   
                 elif operand == '>=':
-                    if not str(item) >= str(wert):
+                    if not (item) >= (wert):
                         erfuellt = False      
                 elif operand == '!':
-                    if str(item) == str(wert):
+                    if (item) == (wert):
                         erfuellt = False                         
         return erfuellt
         
@@ -204,8 +208,9 @@ class szenen:
         szn_id = uuid.uuid4()
         self.kommando_dict[szn_id] = []
         if str(szene_dict.get("Bedingung")) <> "None":
-            bedingungen = eval(str(szene_dict.get("Bedingung")))    
+            bedingungen = eval(str(szene_dict.get("Bedingung")))   
         erfuellt = self.__bedingung__(bedingungen)
+        print erfuellt
 #==============================================================================
 # commandos to devices and internal commands        
 #==============================================================================
@@ -239,6 +244,7 @@ class szenen:
             if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = self.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
+                    print kommando, kommandos.get(kommando)
                     set_del = Timer(1, setting_s, [str(kommando), str(kommandos.get(kommando))])
                     set_del.start()  
 #==============================================================================
