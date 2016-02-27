@@ -265,7 +265,8 @@ def mdb_set_table(table, device, commands):
             if str(commands.get(cmd)) == 'None':
                 sql = 'UPDATE '+table+' SET '+str(commando)+' = NULL WHERE Name = "' + str(device) + '"'
             else:
-                sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
+                #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
+                sql = 'UPDATE %s SET %s="%s" WHERE Name="%s"' % (table, (commando), commands.get(cmd), (device))
             cur.execute(sql)       
     con.close() 
 

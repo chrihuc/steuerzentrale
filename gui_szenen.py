@@ -18,7 +18,9 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import mdb_get_table, mdb_read_table_entry, mdb_set_table
+from mysql_con import settings_r, mdb_read_table_entry, mdb_set_table
+
+import easygui
 
 app = QtGui.QApplication([])
 import pyqtgraph.parametertree.parameterTypes as pTypes
@@ -29,6 +31,8 @@ from cmd_xs1 import myezcontrol
 from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
+from cmd_szenen import szenen
+
 
 xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
@@ -47,8 +51,8 @@ sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
-
-szene_to_read = 'TV'
+szn = szenen()
+szn_lst = szn.list_commands()
 
 
 ## test subclassing parameters
@@ -79,24 +83,26 @@ class ScalableGroup(pTypes.GroupParameter):
     def __init__(self, **opts):
         opts['type'] = 'group'
         opts['addText'] = "Add"
-        opts['addList'] = ['str', 'float', 'int']
+        opts['addList'] = []
+        for seting in settings_r():
+            opts['addList'].append(seting)
+        #opts['addList'] = ['str', 'float', 'int']
         pTypes.GroupParameter.__init__(self, **opts)
     
     def addNew(self, typ):
-        val = {
-            'str': '',
-            'float': 0.0,
-            'int': 0
-        }[typ]
-        self.addChild(dict(name="ScalableParam %d" % (len(self.childs)+1), type=typ, value=val, removable=True, renamable=True))
+        values = settings_r()
+        val=values.get(typ)
+        self.addChild(dict(name=typ, type="str", value=val, removable=True, renamable=True))
 
 class KommandoGroup(pTypes.GroupParameter):
     def __init__(self, cmds, **opts):
         opts['type'] = 'group'
         opts['addText'] = "Add"
         opts['addList'] = ['list']
+        opts['expanded'] = False
         self.cmds = cmds
         pTypes.GroupParameter.__init__(self, **opts)
+        self.autoExpand()
     
     def addNew(self, typ):
         val = {
@@ -104,446 +110,444 @@ class KommandoGroup(pTypes.GroupParameter):
         }[typ]
         self.addChild(dict(name="Kommando %d" % (len(self.childs)+1), type=typ, values=self.cmds, value=val, removable=True, renamable=True))
 
-def __return_enum__(eingabe):
-    if (type(eingabe) == str):
-        try:
-            if type(eval(eingabe)) == list or type(eval(eingabe)) == dict or type(eval(eingabe)) == tuple:
-                kommandos = eval(eingabe)
-            else:
-                kommandos = [eingabe]
-        except (NameError, SyntaxError) as e:
-            kommandos = [eingabe]
-    elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
-        return eingabe
-    else:
-        kommandos = [eingabe]    
-    return kommandos 
-
-def dict_constructor(name, values, value):
-    if str(name) == "None": name = ''
-    dicti = {'name':name, 'type':'list','values':values}
-    for val in values:
-        if str(val) == str(value):
-            dicti['value'] = values.get(val)
-    return dicti
-
-def group_constructor(name, namen, values, values2):
-    if str(name) == "None": name = ''
-    dicti = {'name':name, 'type':'group', 'expanded': True}    
-    liste = []
-    itera = 0
-    for value in values2:
-        try:
-            name = namen[itera]
-        except:
-            name = "Kommando " + str(itera+1)
-        liste.append(dict_constructor(name, values, value))
-        itera += 1
-    dicti['children']= liste
-    return dicti
-
-def get_commando_set(device):
-    if device in xs1_devs: values = xs1_cmds
-    if device in hue_devs: values = hue_cmds
-    if device in sns_devs: values = sns_cmds
-    if device in tvs_devs: values = tvs_cmds
-    if device in sat_devs: values = sat_cmds
-    return values
-
-def dict_constructor_(device, cmmds):
-    liste = []
-    itera  = 1
-    for cmd in (cmmds):
-        dicti = {}
-        values = get_commando_set(device)
-        dicti = {'name':'Kommando ' + str(itera), 'type':'list','values':values}
-        itera += 1
-        for val in values:
-            if str(val) == str(cmd):
-                dicti['value'] = values.get(val)
-                #dicti['default'] = (val)
-        liste.append(dicti)
-    return liste
-
-#szenen = mdb_get_table(db='set_Szenen')
-szenen = [mdb_read_table_entry(db='set_Szenen',entry=szene_to_read)]
-params = []
-for szene in szenen:
-<<<<<<< HEAD
-    if int(szene.get('Id')) >9:
-        szn_dict = {}
-        if str(szene.get('Beschreibung')) <> 'None':
-            szn_dict['name']=szene.get('Beschreibung')
-        else:
-            szn_dict['name']=szene.get('Name')
-        szn_dict['type']='group'
-        szn_dict['expanded'] = False
-        szn_l_child = []
-        szn_xs_child = {'name': 'XS1 Devices', 'type': 'group', 'expanded': False}
-        szn_xs_child_l = []
-        szn_hu_child = {'name': 'Hue Devices', 'type': 'group', 'expanded': False}
-        szn_hu_child_l = []  
-        szn_sn_child = {'name': 'Sonos Devices', 'type': 'group', 'expanded': False}
-        szn_sn_child_l = []       
-        szn_tv_child = {'name': 'TVs', 'type': 'group', 'expanded': False}
-        szn_tv_child_l = []
-        szn_sat_child = {'name': 'Satellites', 'type': 'group', 'expanded': False}
-        szn_sat_child_l = []        
-        del szene['Name']
-        for item in szene:
-            szn_d_child = {}
-            if str(item) in cmd_devs:
-                kom_group = KommandoGroup(name=str(item),cmds=get_commando_set(str(item)), children=dict_constructor_(str(item),__return_enum__(szene.get(item))))
-            if str(item) in xs1_devs:
-                szn_xs_child_l.append(kom_group)
-            elif str(item) in hue_devs:               
-                szn_hu_child_l.append(kom_group)
-            elif str(item) in sns_devs: 
-                szn_sn_child_l.append(kom_group)
-            elif str(item) in tvs_devs: 
-                szn_tv_child_l.append(kom_group)
-            elif str(item) in sat_devs: 
-                szn_sat_child_l.append(kom_group)
-            elif str(item) in ['Setting','Bedingung']: 
-                pass       
-            elif str(item) in ['setTask']: 
-                pass     
-            elif str(item) in ['Follows']: 
-                pass  
-            elif str(item) in ['AutoMode']: 
-                szn_d_child['name'] = str(item)
-                szn_d_child['type'] = 'bool'
-                szn_d_child['expanded'] = False
-                if str(szene.get(item)) <> "None":
-                    szn_d_child['value'] = str(szene.get(item))
-                else:
-                    szn_d_child['value'] = False
-                szn_l_child.append(szn_d_child)             
-            else:
-                szn_d_child['name'] = str(item)
-                if str(item) in ['Prio','Delay__']:
-                    szn_d_child['type'] = 'float'
-                    szn_d_child['step'] = 0.1
-                else:
-                    szn_d_child['type'] = 'str'
-                szn_d_child['expanded'] = False
-                if str(szene.get(item)) <> "None":
-                    szn_d_child['value'] = str(szene.get(item))
-                else:
-                    szn_d_child['value'] = ''
-                szn_l_child.append(szn_d_child)
-            #if int(szene.get('Id')) >6: break
-            szn_xs_child['children']= szn_xs_child_l
-            szn_hu_child['children']= szn_hu_child_l
-            szn_sn_child['children']= szn_sn_child_l
-            szn_tv_child['children']= szn_tv_child_l
-            szn_sat_child['children']= szn_sat_child_l            
-        szn_l_child.append(szn_xs_child)
-        szn_l_child.append(szn_hu_child)
-        szn_l_child.append(szn_sn_child)
-        szn_l_child.append(szn_tv_child)
-        szn_l_child.append(szn_sat_child)        
-        szn_dict['children']= szn_l_child
-        params.append(szn_dict)
-=======
-    szn_dict = {}
-    if str(szene.get('Beschreibung')) <> 'None':
-        szn_dict['name']=szene.get('Beschreibung')
-    else:
-        szn_dict['name']=szene.get('Name')
-    szn_dict['type']='group'
-    szn_dict['expanded'] = False
-    szn_l_child = []
-    szn_xs_child = {'name': 'XS1 Devices', 'type': 'group', 'expanded': False}
-    szn_xs_child_l = []
-    szn_hu_child = {'name': 'Hue Devices', 'type': 'group', 'expanded': False}
-    szn_hu_child_l = []  
-    szn_sn_child = {'name': 'Sonos Devices', 'type': 'group', 'expanded': False}
-    szn_sn_child_l = []       
-    szn_tv_child = {'name': 'TVs', 'type': 'group', 'expanded': False}
-    szn_tv_child_l = []
-    szn_sat_child = {'name': 'Satellites', 'type': 'group', 'expanded': False}
-    szn_sat_child_l = []        
-    del szene['Name']
-    for item in szene:
-        szn_d_child = {}
-        szn_d_child_l = []
-        if str(item) in cmd_devs:
-            kom_group = KommandoGroup(name=str(item),cmds=get_commando_set(str(item)), children=dict_constructor_(str(item),__return_enum__(szene.get(item))))
-        if str(item) in xs1_devs:
-            szn_xs_child_l.append(kom_group)
-        elif str(item) in hue_devs:               
-            szn_hu_child_l.append(kom_group)
-        elif str(item) in sns_devs: 
-            szn_sn_child_l.append(kom_group)
-        elif str(item) in tvs_devs: 
-            szn_tv_child_l.append(kom_group)
-        elif str(item) in sat_devs: 
-            szn_sat_child_l.append(kom_group)
-        elif str(item) in ['Setting']: 
-            szn_d_child = {'name': item, 'type': 'group'} 
-            for child in __return_enum__(szene.get(item)):
-                if type(__return_enum__(szene.get(item))) == dict:
-                    szn_d_child_l.append({'name': child, 'type': 'str', 'value': __return_enum__(szene.get(item)).get(child)})
-            szn_d_child['children']= szn_d_child_l
-            szn_l_child.append(szn_d_child) 
-        elif str(item) in ['Bedingung']: 
-            szn_d_child = {'name': item, 'type': 'group'} 
-            kinder = __return_enum__(szene.get(item))
-            for child in kinder:
-                if type(kinder) == dict:
-                    szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child},
-                {'name': 'Operand', 'type': 'str', 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}]})
-                else:
-                    for kind in kinder:
-                        szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': kind[0]},
-                {'name': 'Operand', 'type': 'str', 'value': kind[1]},{'name': 'Bedingung', 'type': 'str', 'value': kind[2]}]})
-            szn_d_child['children']= szn_d_child_l
-            szn_l_child.append(szn_d_child)                             
-        elif str(item) in ['setTask']: 
-            pass     
-        elif str(item) in ['Follows']: 
-            pass  
-        elif str(item) in ['AutoMode']: 
-            szn_d_child['name'] = str(item)
-            szn_d_child['type'] = 'bool'
-            szn_d_child['expanded'] = False
-            if str(szene.get(item)) <> "None":
-                szn_d_child['value'] = eval(szene.get(item))
-            else:
-                szn_d_child['value'] = False
-            szn_l_child.append(szn_d_child)             
-        else:
-            szn_d_child['name'] = str(item)
-            if str(item) in ['Prio','Delay__']:
-                szn_d_child['type'] = 'float'
-                szn_d_child['step'] = 0.1
-            else:
-                szn_d_child['type'] = 'str'
-            szn_d_child['expanded'] = False
-            if str(szene.get(item)) <> "None":
-                szn_d_child['value'] = str(szene.get(item))
-            else:
-                szn_d_child['value'] = ''
-            szn_l_child.append(szn_d_child)
-        #if int(szene.get('Id')) >6: break
-        szn_xs_child['children']= szn_xs_child_l
-        szn_hu_child['children']= szn_hu_child_l
-        szn_sn_child['children']= szn_sn_child_l
-        szn_tv_child['children']= szn_tv_child_l
-        szn_sat_child['children']= szn_sat_child_l            
-    szn_l_child.append(szn_xs_child)
-    szn_l_child.append(szn_hu_child)
-    szn_l_child.append(szn_sn_child)
-    szn_l_child.append(szn_tv_child)
-    szn_l_child.append(szn_sat_child)        
-    szn_dict['children']= szn_l_child
-    params.append(szn_dict)
->>>>>>> 85fbf4406834521644c6175bceb1f5f8a1aff8aa
-szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
-        {'name': 'Save State', 'type': 'action'},
-        {'name': 'Restore State', 'type': 'action', 'children': [
-            {'name': 'Add missing items', 'type': 'bool', 'value': True},
-            {'name': 'Remove extra items', 'type': 'bool', 'value': True},
-        ]},
-    ]}
-params.append(szn_dict)    
-
-params1 = [
-    {'name': 'Basic parameter data types', 'type': 'group', 'children': [
-        {'name': 'Integer', 'type': 'int', 'value': 10},
-        {'name': 'Float', 'type': 'float', 'value': 10.5, 'step': 0.1},
-        {'name': 'String', 'type': 'str', 'value': "hi"},
-        {'name': 'List', 'type': 'list', 'values': [1,2,3], 'value': 2},
-        {'name': 'Named List', 'type': 'list', 'values': {"one": 1, "two": "twosies", "three": [3,3,3]}, 'value': 0},
-        {'name': 'Boolean', 'type': 'bool', 'value': True, 'tip': "This is a checkbox"},
-        {'name': 'Color', 'type': 'color', 'value': "FF0", 'tip': "This is a color button"},
-        {'name': 'Gradient', 'type': 'colormap'},
-        {'name': 'Subgroup', 'type': 'group', 'children': [
-            {'name': 'Sub-param 1', 'type': 'int', 'value': 10},
-            {'name': 'Sub-param 2', 'type': 'float', 'value': 1.2e6},
-        ]},
-        {'name': 'Text Parameter', 'type': 'text', 'value': 'Some text...'},
-        {'name': 'Action Parameter', 'type': 'action'},
-    ]},
-    {'name': 'Numerical Parameter Options', 'type': 'group', 'children': [
-        {'name': 'Units + SI prefix', 'type': 'float', 'value': 1.2e-6, 'step': 1e-6, 'siPrefix': True, 'suffix': 'V'},
-        {'name': 'Limits (min=7;max=15)', 'type': 'int', 'value': 11, 'limits': (7, 15), 'default': -6},
-        {'name': 'DEC stepping', 'type': 'float', 'value': 1.2e6, 'dec': True, 'step': 1, 'siPrefix': True, 'suffix': 'Hz'},
-        
-    ]},
-    {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
-        {'name': 'Save State', 'type': 'action'},
-        {'name': 'Restore State', 'type': 'action', 'children': [
-            {'name': 'Add missing items', 'type': 'bool', 'value': True},
-            {'name': 'Remove extra items', 'type': 'bool', 'value': True},
-        ]},
-    ]},
-    {'name': 'Extra Parameter Options', 'type': 'group', 'children': [
-        {'name': 'Read-only', 'type': 'float', 'value': 1.2e6, 'siPrefix': True, 'suffix': 'Hz', 'readonly': True},
-        {'name': 'Renamable', 'type': 'float', 'value': 1.2e6, 'siPrefix': True, 'suffix': 'Hz', 'renamable': True},
-        {'name': 'Removable', 'type': 'float', 'value': 1.2e6, 'siPrefix': True, 'suffix': 'Hz', 'removable': True},
-    ]},
-    ComplexParameter(name='Custom parameter group (reciprocal values)'),
-    ScalableGroup(name="Expandable Parameter Group", children=[
-        {'name': 'ScalableParam 1', 'type': 'str', 'value': "default param 1"},
-        {'name': 'ScalableParam 2', 'type': 'str', 'value': "default param 2"},
-    ]),
-]
-
-## Create tree of Parameter objects
-p = Parameter.create(name='params', type='group', children=params)
-
-## If anything changes in the tree, print a message
-def change(param, changes):
-    print("tree changes:")
-    for param, change, data in changes:
-        path = p.childPath(param)
-        if path is not None:
-            childName = '.'.join(path)
-        else:
-            childName = param.name()
-        print('  parameter: %s'% childName)
-        print('  change:    %s'% change)
-        print('  data:      %s'% str(data))
-        print('  ----------')
-        print param.getValues().items()
-        print param.value()
-    
-#p.sigTreeStateChanged.connect(change)
-
-
-def valueChanging(param, value):
-    return    
-    print("Value changing (not finalized):", param, value)
-    
-# Too lazy for recursion:
-for child in p.children():
-    child.sigValueChanging.connect(valueChanging)
-    for ch2 in child.children():
-        ch2.sigValueChanging.connect(valueChanging)
-        
-def check_iter(some_object):
-    try:
-        iter(some_object)
-        if type(some_object) <> str:  
-            return True
+    def shouldExpand(self):
+        for kind in self.children():
+            if kind.value() > 1:
+                return True
         else:
             return False
-    except TypeError, te:
-        return False   
+            
+    def autoExpand(self):
+        for kind in self.children():
+            if kind.value() > 1:
+                self.setOpts(expanded = True)
+        else:
+            return False            
 
-def return_list(some_object):
-    liste = []
-    for item in some_object:
-        dicti = some_object.get(item)
-        sub_dicti = dicti.get('values')
-        wert = dicti.get('value')
-        if sub_dicti <> None:
-            for jtem in sub_dicti:
-                if sub_dicti[jtem] == wert:   
-                    wert_str = jtem
-            if wert_str <> '':
-                liste.append(wert_str)
-    if len(liste) > 0:
-        return liste
-    else:
-        return None
-
-
-def itera(some_object, only_change = True):
-    dicti = {}
-    h_dict = {}
-    if check_iter(some_object):
-        if True:
-        #try:
-            if some_object.get('type') == 'group':
-<<<<<<< HEAD
-                if some_object.get('name') in szenen[0]:
-                    device  = some_object.get('name')
-                    kommandos = return_list(some_object.get('children'))
-                    if only_change:
-                        if szenen[0].get(device) <> kommandos:
-                            dicti[some_object.get('name')] = kommandos
-=======
-                device  = some_object.get('name')
-                if device in szenen[0]:
-                    if device in ['Setting']:
-                        set_dict = {}
-                        for sub in some_object.get('children'):
-                            set_dict[some_object.get('children').get(sub).get('name')]  = some_object.get('children').get(sub).get('value')
-                        dicti[device] = set_dict
-                    elif device in ['Bedingung']:
-                        set_lst = []
-                        for child in some_object.get('children'):
-                            bed_tuple = some_object.get('children').get(child).get('children')
-                            set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), bed_tuple.get('Bedingung').get('value')])
-                        dicti[device] = set_lst                        
->>>>>>> 85fbf4406834521644c6175bceb1f5f8a1aff8aa
-                    else:
-                        kommandos = return_list(some_object.get('children'))
-                        if only_change:
-                            if szenen[0].get(device) <> kommandos:
-                                dicti[device] = kommandos
-                        else:
-                            dicti[device] = kommandos
-                else:
-                    #strucutre group only if name not ambivalent
-                    dicti.update(itera(some_object.get('children')))
-            else:
-                if some_object.get('name') <> None:
-                    if some_object.get('name') in szenen[0]:
-                        device  = some_object.get('name')
-                        value = some_object.get('value')
-                        if value == '': value = None
-                        if only_change:
-                            if szenen[0].get(device) <> value:
-                                dicti[some_object.get('name')] =  value
-                        else:
-                            dicti[some_object.get('name')] =  value                    
-                else:
-                    #ordered dict:
-                    for item in some_object:
-                        dicti.update(itera(some_object.get(item)))
-#        except Exception,e:
-#            print e
-    return dicti
-
-def save():
-    global state
-    state = p.saveState()
-    neu_szene = itera(state)
-    print neu_szene
-    mdb_set_table(table='set_Szenen', device=szene_to_read, commands=neu_szene)
+class Szenen_tree():
+    def __init__(self, Szene_to_read):
+        self.szene_to_read = Szene_to_read
+        self.p = None
+        self.name = None
+        self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read)]
+        self.set_paratree()
         
+    def __return_enum__(self,eingabe):
+        if (type(eingabe) == str):
+            try:
+                if type(eval(eingabe)) == list or type(eval(eingabe)) == dict or type(eval(eingabe)) == tuple:
+                    kommandos = eval(eingabe)
+                else:
+                    kommandos = [eingabe]
+            except (NameError, SyntaxError) as e:
+                kommandos = [eingabe]
+        elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
+            return eingabe
+        else:
+            kommandos = [eingabe]    
+        return kommandos 
+
+    def dict_constructor(self,name, values, value):
+        if str(name) == "None": name = ''
+        dicti = {'name':name, 'type':'list','values':values}
+        for val in values:
+            if str(val) == str(value):
+                dicti['value'] = values.get(val)
+        return dicti
+
+    def group_constructor(self,name, namen, values, values2):
+        if str(name) == "None": name = ''
+        dicti = {'name':name, 'type':'group', 'expanded': True}    
+        liste = []
+        itera = 0
+        for value in values2:
+            try:
+                name = namen[itera]
+            except:
+                name = "Kommando " + str(itera+1)
+            liste.append(self.dict_constructor(name, values, value))
+            itera += 1
+        dicti['children']= liste
+        return dicti
+
+    def get_commando_set(self,device):
+        if device in xs1_devs: values = xs1_cmds
+        if device in hue_devs: values = hue_cmds
+        if device in sns_devs: values = sns_cmds
+        if device in tvs_devs: values = tvs_cmds
+        if device in sat_devs: values = sat_cmds
+        return values
+
+    def dict_constructor_(self,device, cmmds):
+        liste = []
+        itera  = 1
+        for cmd in (cmmds):
+            dicti = {}
+            values = self.get_commando_set(device)
+            dicti = {'name':'Kommando ' + str(itera), 'type':'list','values':values}
+            itera += 1
+            for val in values:
+                if str(val) == str(cmd):
+                    dicti['value'] = values.get(val)
+                    if values.get(val) == 1:
+                        dicti['expanded'] = False
+            liste.append(dicti)
+        return liste
+        
+    def set_paratree(self):
+        global p, name
+        #szenen = mdb_get_table(db='set_Szenen')
+        params = []
+        for szene in self.szenen:
+            szn_dict = {}
+            if str(szene.get('Beschreibung')) <> 'None':
+                self.name = szene.get('Beschreibung')
+            else:
+                self.name = 'Szenen Name: '+szene.get('Name')
+            szn_dict['name'] = self.name
+            szn_dict['type']='group'
+            szn_dict['expanded'] = True
+            szn_l_child = []
+            szn_xs_child = {'name': 'XS1 Devices', 'type': 'group', 'expanded': False}
+            szn_xs_child_l = []
+            szn_hu_child = {'name': 'Hue Devices', 'type': 'group', 'expanded': False}
+            szn_hu_child_l = []  
+            szn_sn_child = {'name': 'Sonos Devices', 'type': 'group', 'expanded': False}
+            szn_sn_child_l = []       
+            szn_tv_child = {'name': 'TVs', 'type': 'group', 'expanded': False}
+            szn_tv_child_l = []
+            szn_sat_child = {'name': 'Satellites', 'type': 'group', 'expanded': False}
+            szn_sat_child_l = []        
+            del szene['Name']
+            for item in szene:
+                szn_d_child = {}
+                szn_d_child_l = []
+                if str(item) in cmd_devs:
+                    kom_group = KommandoGroup(name=str(item),cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
+                if str(item) in xs1_devs:
+                    szn_xs_child_l.append(kom_group)
+                    if kom_group.shouldExpand():
+                        szn_xs_child['expanded']= True
+                elif str(item) in hue_devs:               
+                    szn_hu_child_l.append(kom_group)
+                    if kom_group.shouldExpand():
+                        szn_hu_child['expanded']= True                    
+                elif str(item) in sns_devs: 
+                    szn_sn_child_l.append(kom_group)
+                    if kom_group.shouldExpand():
+                        szn_sn_child['expanded']= True                    
+                elif str(item) in tvs_devs: 
+                    szn_tv_child_l.append(kom_group)
+                    if kom_group.shouldExpand():
+                        szn_tv_child['expanded']= True                    
+                elif str(item) in sat_devs: 
+                    szn_sat_child_l.append(kom_group)
+                    if kom_group.shouldExpand():
+                        szn_sat_child['expanded']= True                    
+                elif str(item) in ['Setting']: 
+                    for child in self.__return_enum__(szene.get(item)):
+                        if type(self.__return_enum__(szene.get(item))) == dict:
+                            szn_d_child_l.append({'name': child, 'type': 'str', 'value': self.__return_enum__(szene.get(item)).get(child)})
+                    szn_d_child = ScalableGroup(name= item, children= szn_d_child_l) 
+                    #szn_d_child['children']= szn_d_child_l
+                    szn_l_child.append(szn_d_child) 
+                elif str(item) in ['Bedingung']: 
+                    szn_d_child = {'name': item, 'type': 'action'} 
+                    kinder = self.__return_enum__(szene.get(item))
+                    for child in kinder:
+                        if type(kinder) == dict:
+                            szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child},
+                        {'name': 'Operand', 'type': 'str', 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}]})
+                        else:
+                            if child <> None:
+                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child[0]},
+                        {'name': 'Operand', 'type': 'str', 'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
+                    szn_d_child['children']= szn_d_child_l
+                    szn_l_child.append(szn_d_child)                             
+                elif str(item) in ['setTask']: 
+                    pass     
+                elif str(item) in ['Follows']: 
+                    pass  
+                elif str(item) in ['AutoMode']: 
+                    szn_d_child['name'] = str(item)
+                    szn_d_child['type'] = 'bool'
+                    szn_d_child['expanded'] = False
+                    if str(szene.get(item)) <> "None":
+                        szn_d_child['value'] = eval(szene.get(item))
+                    else:
+                        szn_d_child['value'] = False
+                    szn_l_child.append(szn_d_child)             
+                else:
+                    szn_d_child['name'] = str(item)
+                    if str(item) in ['Prio','Delay__']:
+                        szn_d_child['type'] = 'float'
+                        szn_d_child['step'] = 0.1
+                    else:
+                        szn_d_child['type'] = 'str'
+                    szn_d_child['expanded'] = False
+                    if str(szene.get(item)) <> "None":
+                        szn_d_child['value'] = str(szene.get(item))
+                    else:
+                        szn_d_child['value'] = ''
+                    szn_l_child.append(szn_d_child)
+                #if int(szene.get('Id')) >6: break
+                szn_xs_child['children']= szn_xs_child_l
+                szn_hu_child['children']= szn_hu_child_l
+                szn_sn_child['children']= szn_sn_child_l
+                szn_tv_child['children']= szn_tv_child_l
+                szn_sat_child['children']= szn_sat_child_l            
+            szn_l_child.append(szn_xs_child)
+            szn_l_child.append(szn_hu_child)
+            szn_l_child.append(szn_sn_child)
+            szn_l_child.append(szn_tv_child)
+            szn_l_child.append(szn_sat_child)        
+            szn_dict['children']= szn_l_child
+            params.append(szn_dict)
+        szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
+                {'name': 'Save State', 'type': 'action'},
+                {'name': 'Check Bedingung', 'type': 'action'},
+                {'name': 'Execute', 'type': 'action'}
+                
+            ]}
+        params.append(szn_dict)   
+        self.p = Parameter.create(name='params', type='group', children=params)
+        self.p.param('Save/Restore functionality', 'Save State').sigActivated.connect(self.save)
+        self.p.param('Save/Restore functionality', 'Check Bedingung').sigActivated.connect(self.check_bedingung)
+        self.p.param('Save/Restore functionality', 'Execute').sigActivated.connect(self.execute)
+        #self.p.param(self.name, 'Setting').sigActivated.connect(self.add_setting)
+        self.p.param(self.name, 'Bedingung').sigActivated.connect(self.add_bedingung)
+        return params
+
+    def add_setting(self):
+        global p
+        self.p.param(self.name, 'Setting').addChild({'name': '', 'type': 'str', 'value': ''})
+
+    def add_bedingung(self):
+        global p
+        self.p.param(self.name, 'Bedingung').addChild({'name': 'Bedingung ','type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': ''},
+                        {'name': 'Operand', 'type': 'str', 'value': ''},{'name': 'Bedingung', 'type': 'str', 'value': ''}]}, autoIncrementName=True)
+
+#params1 = [
+#    {'name': 'Basic parameter data types', 'type': 'group', 'children': [
+#        {'name': 'Integer', 'type': 'int', 'value': 10},
+#        {'name': 'Float', 'type': 'float', 'value': 10.5, 'step': 0.1},
+#        {'name': 'String', 'type': 'str', 'value': "hi"},
+#        {'name': 'List', 'type': 'list', 'values': [1,2,3], 'value': 2},
+#        {'name': 'Named List', 'type': 'list', 'values': {"one": 1, "two": "twosies", "three": [3,3,3]}, 'value': 0},
+#        {'name': 'Boolean', 'type': 'bool', 'value': True, 'tip': "This is a checkbox"},
+#        {'name': 'Color', 'type': 'color', 'value': "FF0", 'tip': "This is a color button"},
+#        {'name': 'Gradient', 'type': 'colormap'},
+#        {'name': 'Subgroup', 'type': 'group', 'children': [
+#            {'name': 'Sub-param 1', 'type': 'int', 'value': 10},
+#            {'name': 'Sub-param 2', 'type': 'float', 'value': 1.2e6},
+#        ]},
+#        {'name': 'Text Parameter', 'type': 'text', 'value': 'Some text...'},
+#        {'name': 'Action Parameter', 'type': 'action'},
+#    ]},
+#    {'name': 'Numerical Parameter Options', 'type': 'group', 'children': [
+#        {'name': 'Units + SI prefix', 'type': 'float', 'value': 1.2e-6, 'step': 1e-6, 'siPrefix': True, 'suffix': 'V'},
+#        {'name': 'Limits (min=7;max=15)', 'type': 'int', 'value': 11, 'limits': (7, 15), 'default': -6},
+#        {'name': 'DEC stepping', 'type': 'float', 'value': 1.2e6, 'dec': True, 'step': 1, 'siPrefix': True, 'suffix': 'Hz'},
+#        
+#    ]},
+#    {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
+#        {'name': 'Save State', 'type': 'action'},
+#        {'name': 'Restore State', 'type': 'action', 'children': [
+#            {'name': 'Add missing items', 'type': 'bool', 'value': True},
+#            {'name': 'Remove extra items', 'type': 'bool', 'value': True},
+#        ]},
+#    ]},
+#    {'name': 'Extra Parameter Options', 'type': 'group', 'children': [
+#        {'name': 'Read-only', 'type': 'float', 'value': 1.2e6, 'siPrefix': True, 'suffix': 'Hz', 'readonly': True},
+#        {'name': 'Renamable', 'type': 'float', 'value': 1.2e6, 'siPrefix': True, 'suffix': 'Hz', 'renamable': True},
+#        {'name': 'Removable', 'type': 'float', 'value': 1.2e6, 'siPrefix': True, 'suffix': 'Hz', 'removable': True},
+#    ]},
+#    ComplexParameter(name='Custom parameter group (reciprocal values)'),
+#    ScalableGroup(name="Expandable Parameter Group", children=[
+#        {'name': 'ScalableParam 1', 'type': 'str', 'value': "default param 1"},
+#        {'name': 'ScalableParam 2', 'type': 'str', 'value': "default param 2"},
+#    ]),
+#]
+
+## Create tree of Parameter objects
+
+
+## If anything changes in the tree, print a message
+#def change(param, changes):
+#    print("tree changes:")
+#    for param, change, data in changes:
+#        path = p.childPath(param)
+#        if path is not None:
+#            childName = '.'.join(path)
+#        else:
+#            childName = param.name()
+#        print('  parameter: %s'% childName)
+#        print('  change:    %s'% change)
+#        print('  data:      %s'% str(data))
+#        print('  ----------')
+#        print param.getValues().items()
+#        print param.value()
+#    
+##p.sigTreeStateChanged.connect(change)
+#
+#
+#def valueChanging(param, value):
+#    return    
+#    print("Value changing (not finalized):", param, value)
     
-def restore():
-    #itera(p)
-    global state
-    add = p['Save/Restore functionality', 'Restore State', 'Add missing items']
-    rem = p['Save/Restore functionality', 'Restore State', 'Remove extra items']
-    p.restoreState(state, addChildren=add, removeChildren=rem)
-p.param('Save/Restore functionality', 'Save State').sigActivated.connect(save)
-p.param('Save/Restore functionality', 'Restore State').sigActivated.connect(restore)
+# Too lazy for recursion:
+#for child in p.children():
+#    child.sigValueChanging.connect(valueChanging)
+#    for ch2 in child.children():
+#        ch2.sigValueChanging.connect(valueChanging)
+        
+    def check_iter(self,some_object):
+        try:
+            iter(some_object)
+            if type(some_object) <> str:  
+                return True
+            else:
+                return False
+        except TypeError, te:
+            return False   
+
+    def return_list(self,some_object):
+        liste = []
+        for item in some_object:
+            dicti = some_object.get(item)
+            sub_dicti = dicti.get('values')
+            wert = dicti.get('value')
+            if sub_dicti <> None:
+                for jtem in sub_dicti:
+                    if sub_dicti[jtem] == wert:   
+                        wert_str = jtem
+                if wert_str <> '':
+                    liste.append(wert_str)
+        if len(liste) > 0:
+            return liste
+        else:
+            return None
 
 
-## Create two ParameterTree widgets, both accessing the same data
+    def itera(self,some_object, only_change = True):
+        dicti = {}
+        h_dict = {}
+        if self.check_iter(some_object):
+            if True:
+            #try:
+                if some_object.get('type') == 'group' or some_object.get('type') == 'action':
+                    device  = some_object.get('name')
+                    if device in self.szenen[0]:
+                        if device in ['Setting']:
+                            set_dict = {}
+                            for sub in some_object.get('children'):
+                                if some_object.get('children').get(sub).get('value') <> '':
+                                    set_dict[some_object.get('children').get(sub).get('name')]  = some_object.get('children').get(sub).get('value')
+                            dicti[device] = set_dict
+                        elif device in ['Bedingung']:
+                            set_lst = []
+                            for child in some_object.get('children'):
+                                bed_tuple = some_object.get('children').get(child).get('children')
+                                if bed_tuple.get('Setting').get('value') <> '':
+                                    #check if list:
+                                    try:
+                                        set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), eval(bed_tuple.get('Bedingung').get('value'))])
+                                    except:
+                                        set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), (bed_tuple.get('Bedingung').get('value'))])
+                            dicti[device] = set_lst                        
+                        else:
+                            kommandos = self.return_list(some_object.get('children'))
+                            if only_change:
+                                if self.szenen[0].get(device) <> kommandos:
+                                    dicti[device] = kommandos
+                            else:
+                                dicti[device] = kommandos
+                    else:
+                        #strucutre group only if name not ambivalent
+                        dicti.update(self.itera(some_object.get('children')))
+                else:
+                    if some_object.get('name') <> None:
+                        if some_object.get('name') in self.szenen[0]:
+                            device  = some_object.get('name')
+                            value = some_object.get('value')
+                            if value == '': value = None
+                            if only_change:
+                                if self.szenen[0].get(device) <> value:
+                                    dicti[some_object.get('name')] =  value
+                            else:
+                                dicti[some_object.get('name')] =  value                    
+                    else:
+                        #ordered dict:
+                        for item in some_object:
+                            dicti.update(self.itera(some_object.get(item)))
+    #        except Exception,e:
+    #            print e
+        return dicti
+
+    def save(self):
+        global state
+        self.state = self.p.saveState()
+        neu_szene = self.itera(self.state)
+        print neu_szene
+        mdb_set_table(table='set_Szenen', device=self.szene_to_read, commands=neu_szene)
+            
+
+    def check_bedingung(self):
+        if szn.execute(self.szene_to_read,True):
+            easygui.msgbox("Szene würde ausgeführt", title="Bedingung Check")
+        else:
+            easygui.msgbox("Szene würde NICHT ausgeführt", title="Bedingung Check")
+
+    def execute(self):
+        constants.redundancy_.master = True
+        if szn.execute(self.szene_to_read):
+            pass            
+            #easygui.msgbox("Szene ausgeführt", title="Execute")
+        else:
+            easygui.msgbox("Szene wurde NICHT ausgeführt", title="Execute")
+        constants.redundancy_.master = False            
+
+def selected(text):
+    global sz, t
+    sz=Szenen_tree(text)
+    t.setParameters(sz.p, showTop=False)
+    print text
+
+#==============================================================================
+#Uncomment following block to use as class 
+#
+#==============================================================================
+
+
+#comboBox.activated[str].connect(self.style_choice)
+
 t = ParameterTree()
-t.setParameters(p, showTop=False)
-t.setWindowTitle('pyqtgraph example: Parameter Tree')
+sz=Szenen_tree("Alles_ein")
+t.setParameters(sz.p, showTop=False)
+t.setWindowTitle('Szenen Setup:')
 #t2 = ParameterTree()
 #t2.setParameters(p, showTop=False)
 
 win = QtGui.QWidget()
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
-layout.addWidget(QtGui.QLabel("These are two views of the same data. They should always display the same values."), 0,  0, 1, 2)
-layout.addWidget(t, 1, 0, 1, 1)
+comboBox = QtGui.QComboBox(win)
+for szne in szn_lst:
+    comboBox.addItem(szne)
+comboBox.setMaxVisibleItems(50)    
+comboBox.activated[str].connect(selected)
+layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
+layout.addWidget(t, 20, 0, 1, 1)
+layout.addWidget(comboBox, 1, 0, 1, 1)
 #layout.addWidget(t2, 1, 1, 1, 1)
 win.show()
 win.resize(800,800)
 
-## test save/restore
+#==============================================================================
+# till here
+#==============================================================================
+
+# test save/restore
 #s = p.saveState()
 #p.restoreState(s)
 
@@ -553,3 +557,4 @@ if __name__ == '__main__':
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         QtGui.QApplication.instance().exec_()
+    

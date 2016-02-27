@@ -9,6 +9,7 @@ from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
+#from gui_szenen import Szenen_tree
 
 from mysql_con import mdb_read_table_entry, settings_r, mdb_read_table_column_filt
 
@@ -19,6 +20,9 @@ import git
 import pyqtgraph as pg
 import numpy as np
 from threading import Timer
+
+import pyqtgraph.parametertree.parameterTypes as pTypes
+from pyqtgraph.parametertree import Parameter, ParameterTree
 
 descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
 
@@ -188,7 +192,12 @@ class Main(QtGui.QMainWindow):
         self.pushButton_7.setGeometry(QtCore.QRect(0, 40, 91, 24))
         self.pushButton_7.setObjectName(_fromUtf8("gitupdate"))
         self.pushButton_7.setText('Update')
-        self.pushButton_7.clicked.connect(self.update_values)         
+        self.pushButton_7.clicked.connect(self.update_values)     
+        self.pushButton_8 = QtGui.QPushButton(self.tab_4)
+        self.pushButton_8.setGeometry(QtCore.QRect(0, 80, 91, 24))
+        self.pushButton_8.setObjectName(_fromUtf8("gitupdate"))
+        self.pushButton_8.setText('Tree test')
+        #self.pushButton_8.clicked.connect(self.make_set_tree_popup("Name"))          
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -306,6 +315,13 @@ class Main(QtGui.QMainWindow):
             #self.w.setGeometry(QRect(500, 100, 200, 400))
             self.w.show() 
         return set_g_popup
+
+    def make_set_tree_popup(self, Name):
+        def set_tree_popup(): 
+            self.w = MySZTreePopup(self,Name)
+            #self.w.setGeometry(QRect(500, 100, 200, 400))
+            self.w.show() 
+        return set_tree_popup
 
     def update_values(self):
         settings = settings_r()
@@ -445,6 +461,29 @@ class MyGraphPopup(QtGui.QMainWindow):
         #time = np.array([0,1,2,3,4,3,2,1])
         self.win.addPlot(title="Whatever",axisItems={'bottom':self.axis},x=time, y=graph)  
         #curve = p1.plot()
+
+class MySZTreePopup(QtGui.QMainWindow):
+    def __init__(self, parent, item):
+        #super(MyGraphPopup, self).__init__(parent)
+        #global System
+        #QtGui.QWidget.__init__(self)
+        
+        #self.t = ParameterTree()
+        #self.sz=Szenen_tree("TV")
+        #self.t.setParameters(self.sz.p, showTop=False)
+        #self.t.setWindowTitle('Szenen Setup:')
+        #t2 = ParameterTree()
+        #t2.setParameters(p, showTop=False)
+        
+        self.win = QtGui.QWidget()
+        self.layout = QtGui.QGridLayout()
+        self.win.setLayout(layout)
+        self.layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
+        #layout.addWidget(t2, 1, 1, 1, 1)
+        self.win.show()
+        self.win.resize(800,800)        
+        
+
 
 class TimeAxisItem(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):

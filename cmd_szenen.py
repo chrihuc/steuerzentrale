@@ -45,7 +45,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    scenes.execute("Alles_ein")
+    scenes.execute("DRS3")
     
 class szenen:    
     
@@ -78,7 +78,7 @@ class szenen:
                         liste[szene.get("Name")] = szene.get("Beschreibung")
                     else:
                         liste[szene.get("Name")] = szene.get("Name")           
-        return liste
+        return sorted(liste)
 
     def __bedingung__(self,bedingungen):
         erfuellt = True
@@ -120,7 +120,7 @@ class szenen:
 #==============================================================================
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
             for bedingung in bedingungen:
-                if settings.get(bedingung) == None:
+                if settings.get(bedingung[0]) == None:
                     setting_s(bedingung, '')                
                 item, operand, wert = bedingung
                 item = settings.get(item)
@@ -141,7 +141,10 @@ class szenen:
                         erfuellt = False      
                 elif operand == '!':
                     if (item) == (wert):
-                        erfuellt = False                         
+                        erfuellt = False    
+                elif operand == 'in':
+                    if not (item) in (wert):
+                        erfuellt = False                          
         return erfuellt
         
     def __return_enum__(self,eingabe):
@@ -197,7 +200,7 @@ class szenen:
                     t_list.remove(itm)
         self.kommando_dict[szn_id] = t_list
 
-    def execute(self, szene):
+    def execute(self, szene, check_bedingung=False):
         szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung
@@ -210,7 +213,8 @@ class szenen:
         if str(szene_dict.get("Bedingung")) <> "None":
             bedingungen = eval(str(szene_dict.get("Bedingung")))   
         erfuellt = self.__bedingung__(bedingungen)
-        print erfuellt
+        if check_bedingung:
+            return erfuellt
 #==============================================================================
 # commandos to devices and internal commands        
 #==============================================================================
