@@ -6,7 +6,7 @@ git clone https://github.com/chrihuc/steuerzentrale.git sz
 cd sz
 git checkout Version1
 sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip
-sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph
+sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui
 
 sudo pip install phue                   #??
 sudo pip install gcm                    #??
@@ -15,6 +15,7 @@ sudo pip install paramiko               #??
 sudo pip install tinkerforge
 sudo pip install gitpython
 sudo pip install pyqtgraph
+sudo pip install easygui
 
 ##################################
 setup of daemon tools
@@ -67,7 +68,8 @@ todo:
     check if hue command was executed only then return true
     gcm setting id is empty
     szenen gui
-        liste für aktuatoren
+        sortieren nach Raum
+        wenn kommando dann expanded
     input gui
 
 V1: separate szenen

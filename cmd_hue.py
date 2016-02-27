@@ -7,6 +7,7 @@ from phue import Bridge
 
 import MySQLdb as mdb
 import time
+import easygui
 
 import logging
 logging.basicConfig()
@@ -19,7 +20,11 @@ class sql_object:
 
 table = sql_object("out_hue", "Outputs", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("hue","VARCHAR(45)"),("bri","VARCHAR(45)"),("sat","VARCHAR(45)"),("an","VARCHAR(45)"),("transitiontime","VARCHAR(45)")))
 
-hbridge = Bridge(constants.hue_.IP)
+try:
+    hbridge = Bridge(constants.hue_.IP)
+except:
+    print "Hue not connecting, press button."
+    easygui.msgbox("Hue not connecting", title="press button")
 
 def main():
     hue_l = hue_lights()
