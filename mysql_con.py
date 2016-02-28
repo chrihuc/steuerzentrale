@@ -336,12 +336,12 @@ def inputs(device, value):
     lt = datetime.datetime.now()
     with con:
         cur = con.cursor()
-        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"'")
+        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
         if cur.fetchone()[0] == 0:    
-            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Input, Description, Logging) VALUES ("' + str(device) + '","' + str(device) + '","True")'
+            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, Description, Logging) VALUES ("' + str(device) + '","' + str(device) + '","True")'
             cur.execute(sql)
         else:
-            sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Input = "' + str(device) +'"'
+            sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
             value = str(value)
             sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
             sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
@@ -363,15 +363,15 @@ def inputs(device, value):
                         szenen.append(dicti.get("Doppel"))     
                         single = False
                 if single: szenen.append(dicti.get(setting_r("Status")))         
-            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Input = "' + str(device) +'"'
+            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql + sql2)          
             if str(dicti.get("last1")) <> "None":
-                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Input = "' + str(device) +'"'
+                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)            
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Setting = 'True'")
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
             if cur.fetchone()[0] > 0: 
                 setting_s(device, value)
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Logging = 'True'")
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
             if cur.fetchone()[0] > 0: 
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(device) + '",' + str(value) + ', NOW())'
                 cur.execute(insertstatement) 

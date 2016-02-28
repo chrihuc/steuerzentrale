@@ -33,6 +33,7 @@ from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
 
+from gui_inp import SzenenTreeInputs
 
 xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
@@ -237,6 +238,8 @@ class Szenen_tree():
             og_child = {'name': '1. Stock', 'type': 'group', 'expanded': False}
             og_sch_child = {'name': 'Schlafzimmer', 'type': 'group', 'expanded': False}
             og_sch_child_l = []
+            og_bad_child = {'name': 'Bad', 'type': 'group', 'expanded': False}
+            og_bad_child_l = []            
             
             dg_child = {'name': 'Dach', 'type': 'group', 'expanded': False}
 
@@ -250,7 +253,6 @@ class Szenen_tree():
                 if str(item) in cmd_devs:
                     zwname = szenen_beschreibung.get(item)
                     if zwname <> None:
-                        print zwname
                     kom_group = KommandoGroup(name=str(item), title = zwname,cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
                 if 'V00WOH' in str(item):
                     eg_wohnzi_child_l.append(kom_group)
@@ -399,7 +401,6 @@ class Szenen_tree():
             
     def makeInit(self, Name):
         def setInit(): 
-            print Name
             self.__init__(Name) 
         return setInit
             
@@ -581,7 +582,7 @@ class Szenen_tree():
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
         print neu_szene
-        #mdb_set_table(table='set_Szenen', device=self.szene_to_read, commands=neu_szene)
+        mdb_set_table(table='set_Szenen', device=self.szene_to_read, commands=neu_szene)
             
 
     def check_bedingung(self):
@@ -619,13 +620,34 @@ def selected(text):
 
 
 #comboBox.activated[str].connect(self.style_choice)
+def change(param, changes):
+    print("tree changes:")
+    for param, change, data in changes:
+        path = inp.p.childPath(param)
+        print path
+        if path is not None:
+            childName = '.'.join(path)
+        else:
+            childName = param.name()
+        print('  parameter: %s'% childName)
+        print('  change:    %s'% change)
+        print('  data:      %s'% str(data))
+        print('  ----------')
+        if path[-1] in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
+            selected(str(data))
+    
+
+
 
 t = ParameterTree()
 sz=Szenen_tree("Alles_ein")
+inp=SzenenTreeInputs()
 t.setParameters(sz.p, showTop=False)
 t.setWindowTitle('Szenen Setup:')
-#t2 = ParameterTree()
-#t2.setParameters(p, showTop=False)
+t2 = ParameterTree()
+t2.setParameters(inp.p, showTop=False)
+
+inp.p.sigTreeStateChanged.connect(change)
 
 win = QtGui.QWidget()
 layout = QtGui.QGridLayout()
@@ -636,9 +658,9 @@ for szne in szn_lst:
 comboBox.setMaxVisibleItems(50)    
 comboBox.activated[str].connect(selected)
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
-layout.addWidget(t, 20, 0, 1, 1)
-layout.addWidget(comboBox, 1, 0, 1, 1)
-#layout.addWidget(t2, 1, 1, 1, 1)
+layout.addWidget(t, 2, 1, 1, 1)
+layout.addWidget(comboBox, 1, 1, 1, 1)
+layout.addWidget(t2, 2, 0, 1, 1)
 win.show()
 win.resize(800,800)
 

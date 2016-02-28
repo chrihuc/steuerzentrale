@@ -22,11 +22,14 @@ from cmd_szenen import szenen
 szn = szenen()
 szn_lst = sorted(szn.list_commands('alle'))
 
-class Szenen_tree():
+class SzenenTreeInputs():
     def __init__(self):
         self.p = None
         self.name = None
         self.inputs = mdb_get_table(db='cmd_inputs')
+        self.eingaenge = []
+        for inpu in self.inputs:
+            self.eingaenge.append(inpu.get('Name'))
         self.set_paratree()
         
     def set_paratree(self):
@@ -36,9 +39,9 @@ class Szenen_tree():
         inp_dict = {'name': u'Eingänge', 'type': 'group', 'expanded': True}
         inp_kinder = []
         for aktuator in self.inputs:   
-            if aktuator.get('Description') <> None:
+            if aktuator.get('Name') <> None:
                 title = aktuator.get('Description')
-                akt_dict = {'name': aktuator.get('Input'), 'title':title , 'type': 'group', 'expanded': False}
+                akt_dict = {'name': aktuator.get('Name'), 'title':title , 'type': 'group', 'expanded': False}
                 kinder1 = []
                 kinder2 = []
                 kinder3 = []
@@ -59,43 +62,66 @@ class Szenen_tree():
                 inp_kinder.append(akt_dict)
         inp_dict['children'] = inp_kinder
         params.append(inp_dict)
+        inp_dict = {'name': 'Speichern', 'type': 'group', 'children': [
+                {'name': 'Speichere Inputs', 'type': 'action'}
+            ]}   
+        params.append(inp_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
+        self.p.param('Speichern', 'Speichere Inputs').sigActivated.connect(self.save)
 
-#params = [
-#    {'name': 'Basic parameter data types', 'type': 'group', 'children': [
-#        {'name': 'Integer', 'type': 'int', 'value': 10},
-#        {'name': 'Float', 'type': 'float', 'value': 10.5, 'step': 0.1},
-#        {'name': 'String', 'type': 'str', 'value': "hi"},
-#        {'name': 'List', 'type': 'list', 'values': [1,2,3], 'value': 2},
-#        {'name': 'Named List', 'type': 'list', 'values': {"one": 1, "two": "twosies", "three": [3,3,3]}, 'value': 0},
-#        {'name': 'Boolean', 'type': 'bool', 'value': True, 'tip': "This is a checkbox"},
-#        {'name': 'Color', 'type': 'color', 'value': "FF0", 'tip': "This is a color button"},
-#        {'name': 'Gradient', 'type': 'colormap'},
-#        {'name': 'Subgroup', 'type': 'group', 'children': [
-#            {'name': 'Sub-param 1', 'type': 'int', 'value': 10},
-#            {'name': 'Sub-param 2', 'type': 'float', 'value': 1.2e6},
-#        ]},
-#        {'name': 'Text Parameter', 'type': 'text', 'value': 'Some text...'},
-#        {'name': 'Action Parameter', 'type': 'action'},
-#    ]}]
-#p = Parameter.create(name='params', type='group', children=params)
+    def save(self):
+        global state
+        self.state = self.p.saveState()
+        neu_szene = self.itera(self.state)
+        print neu_szene
+        #mdb_set_table(table='set_Szenen', device=self.szene_to_read, commands=neu_szene)
 
-t = ParameterTree()
-sz=Szenen_tree()
-#print sz
-t.setParameters(sz.p, showTop=False)
-t.setWindowTitle('Szenen Setup:')
-#t2 = ParameterTree()
-#t2.setParameters(p, showTop=False)
+    def check_iter(self,some_object):
+        try:
+            iter(some_object)
+            if type(some_object) <> str:  
+                return True
+            else:
+                return False
+        except TypeError, te:
+            return False
 
-win = QtGui.QWidget()
-layout = QtGui.QGridLayout()
-win.setLayout(layout)
-layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
-layout.addWidget(t, 20, 0, 1, 1)
-#layout.addWidget(t2, 1, 1, 1, 1)
-win.show()
-win.resize(800,800)
+    def itera(self,some_object, only_change = False):
+        dicti = {}
+        if self.check_iter(some_object):
+            if some_object.get('type') == 'group':
+                eingang = some_object.get('name')
+                if eingang in self.eingaenge and eingang <> None:
+                    for aktuator in self.inputs:
+                        if aktuator.get('Name') == str(eingang):                    
+                            for kind in some_object.get('children'):
+                                wert = some_object.get('children').get(kind).get('value')
+                                if wert == '': wert = None
+                                if wert <> aktuator.get(kind):
+                                    dicti[kind] = wert
+                            mdb_set_table(table='cmd_inputs', device=aktuator.get('Name'), commands=dicti)
+                else:
+                    self.itera(some_object.get('children'))
+            else:
+                for item in some_object: 
+                    self.itera(some_object.get(item))
+
+#t = ParameterTree()
+#sz=SzenenTreeInputs()
+##print sz
+#t.setParameters(sz.p, showTop=False)
+#t.setWindowTitle('Szenen Setup:')
+##t2 = ParameterTree()
+##t2.setParameters(p, showTop=False)
+#
+#win = QtGui.QWidget()
+#layout = QtGui.QGridLayout()
+#win.setLayout(layout)
+#layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
+#layout.addWidget(t, 20, 0, 1, 1)
+##layout.addWidget(t2, 1, 1, 1, 1)
+#win.show()
+#win.resize(800,800)
 
             
 if __name__ == '__main__':
