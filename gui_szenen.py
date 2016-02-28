@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import settings_r, mdb_read_table_entry, re_calc,mdb_set_table
+from mysql_con import settings_r, mdb_read_table_entry, re_calc, mdb_set_table
 
 import easygui
 
@@ -52,7 +52,7 @@ sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
 szn = szenen()
-szn_lst = szn.list_commands('alle')
+szn_lst = sorted(szn.list_commands('alle'))
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 
@@ -235,7 +235,11 @@ class Szenen_tree():
             eg_flur_child_l = []     
             
             og_child = {'name': '1. Stock', 'type': 'group', 'expanded': False}
+            og_sch_child = {'name': 'Schlafzimmer', 'type': 'group', 'expanded': False}
+            og_sch_child_l = []
+            
             dg_child = {'name': 'Dach', 'type': 'group', 'expanded': False}
+
             
             szn_sn_child = {'name': 'Sonos Devices', 'type': 'group', 'expanded': False}
             szn_sn_child_l = []              
@@ -268,10 +272,11 @@ class Szenen_tree():
                     if kom_group.shouldExpand():
                         ug_zim1_child['expanded']= True 
                         ug_child['expanded']= True                            
-                elif str(item) in sns_devs: 
-                    szn_sn_child_l.append(kom_group)
+                elif 'V01SCH' in str(item):               
+                    og_sch_child_l.append(kom_group)
                     if kom_group.shouldExpand():
-                        szn_sn_child['expanded']= True                                      
+                        og_sch_child['expanded']= True 
+                        og_child['expanded']= True                                     
                 elif str(item) in ['Setting']: 
                     for child in self.__return_enum__(szene.get(item)):
                         if type(self.__return_enum__(szene.get(item))) == dict:
@@ -335,7 +340,7 @@ class Szenen_tree():
                 eg_wohnzi_child['children']= eg_wohnzi_child_l
                 eg_kueche_child['children']= eg_kueche_child_l
                 eg_flur_child['children']= eg_flur_child_l
-                szn_sn_child['children']= szn_sn_child_l
+                og_sch_child['children']= og_sch_child_l
 
             ug_child_l = [ug_zim1_child]
             ug_child['children'] = ug_child_l
@@ -343,9 +348,11 @@ class Szenen_tree():
           
             eg_child_l = [eg_wohnzi_child, eg_kueche_child, eg_flur_child]
             eg_child['children'] = eg_child_l
-            szn_l_child.append(eg_child)       
+            szn_l_child.append(eg_child)    
             
-            szn_l_child.append(szn_sn_child)
+            og_child_l = [og_sch_child]
+            og_child['children'] = og_child_l
+            szn_l_child.append(og_child)             
 
       
             szn_dict['children']= szn_l_child

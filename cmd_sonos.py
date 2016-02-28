@@ -86,7 +86,7 @@ class sonos:
         self.KuecheZone = "RINCON_000E58CB9E3E01400"  
         self.Zones = [self.SchlafZiZone, self.BadZone, self.WohnZiZone, self.KuecheZone]
         self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche"}
-        self.Devices = {'SonosWohnZi':self.WohnZi,'SonosKueche':self.Kueche,'SonosBad':self.Bad,'SonosSchlafZi':self.SchlafZi}
+        self.Devices = {'V00WOH1RUM1AV11':self.WohnZi,'V00KUE1RUM1AV11':self.Kueche,'V01BAD1RUM1AV11':self.Bad,'V01SCH1RUM1AV11':self.SchlafZi}
         self.sonos_zonen = {str(self.WohnZi):self.WohnZiZone,str(self.Kueche):self.KuecheZone,str(self.Bad):self.BadZone,str(self.SchlafZi):self.SchlafZiZone}
         self.SERVER_PORT = 1400
         self.VOLUME = 0

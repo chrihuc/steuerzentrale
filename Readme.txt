@@ -65,6 +65,11 @@ Satellite with IP and Port in table Satellites
 
 ###########
 todo:
+    change names
+        sonos in module
+        xs1 on device
+        hue on device
+        sats on mysql
     check if hue command was executed only then return true
     gcm setting id is empty
     szenen gui

@@ -78,7 +78,7 @@ class szenen:
                         liste[szene.get("Name")] = szene.get("Beschreibung")
                     else:
                         liste[szene.get("Name")] = szene.get("Name")           
-        return sorted(liste)
+        return (liste)
 
     def __bedingung__(self,bedingungen, verbose = False):
         erfuellt = True

@@ -338,7 +338,7 @@ def inputs(device, value):
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"'")
         if cur.fetchone()[0] == 0:    
-            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Input, Logging) VALUES ("' + str(device) + '",1)'
+            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Input, Description, Logging) VALUES ("' + str(device) + '","' + str(device) + '","True")'
             cur.execute(sql)
         else:
             sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Input = "' + str(device) +'"'
@@ -368,10 +368,10 @@ def inputs(device, value):
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Input = "' + str(device) +'"'
                 cur.execute(sql + sql2)            
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Setting = 1")
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Setting = 'True'")
             if cur.fetchone()[0] > 0: 
                 setting_s(device, value)
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Logging = '1'")
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Input = '"+device+"' AND Logging = 'True'")
             if cur.fetchone()[0] > 0: 
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(device) + '",' + str(value) + ', NOW())'
                 cur.execute(insertstatement) 
