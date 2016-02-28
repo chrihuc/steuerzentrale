@@ -15,10 +15,11 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    print mdb_get_table(db='set_Szenen')
+    #print mdb_get_table(db='set_Szenen')
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
+    print re_calc(['sett','Temperatur_Wohnzi'])
     #print re_calc(10)
     #set_automode(device="Stehlampe", mode="auto")
     #print mdb_szene_r("Device_Typ")

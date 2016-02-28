@@ -57,7 +57,7 @@ class szenen:
     
     def list_commands(self,gruppe='default'):    
         table = mdb_get_table(constants.sql_tables.szenen.name)
-        liste = {}
+        liste = {'':''}
         if gruppe == "default":
             for szene in table:
                 if szene.get("Gruppe") <>"Intern":
@@ -80,7 +80,7 @@ class szenen:
                         liste[szene.get("Name")] = szene.get("Name")           
         return sorted(liste)
 
-    def __bedingung__(self,bedingungen):
+    def __bedingung__(self,bedingungen, verbose = False):
         erfuellt = True
         settings = settings_r() 
         if type(bedingungen) == dict:
@@ -124,20 +124,24 @@ class szenen:
                     setting_s(bedingung, '')                
                 item, operand, wert = bedingung
                 item = settings.get(item)
+                if verbose: print item, operand, wert
                 if operand == '=':
-                    if not str(item) == str(wert):
+                    if not float(item) == float(wert):
                         erfuellt = False 
+                elif operand == '==':
+                    if not str(item) == str(wert):
+                        erfuellt = False                         
                 elif operand == '<':
-                    if not (item) < (wert):
+                    if not float(item) < float(wert):
                         erfuellt = False  
                 elif operand == '>':
-                    if not (item) > (wert):
+                    if not float(item) > float(wert):
                         erfuellt = False   
                 elif operand == '<=':
-                    if not (item) <= (wert):
+                    if not float(item) <= float(wert):
                         erfuellt = False   
                 elif operand == '>=':
-                    if not (item) >= (wert):
+                    if not float(item) >= float(wert):
                         erfuellt = False      
                 elif operand == '!':
                     if (item) == (wert):
@@ -145,6 +149,7 @@ class szenen:
                 elif operand == 'in':
                     if not (item) in (wert):
                         erfuellt = False                          
+        if verbose: print "Ergebniss: ",erfuellt
         return erfuellt
         
     def __return_enum__(self,eingabe):

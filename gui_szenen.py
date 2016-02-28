@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import settings_r, mdb_read_table_entry, mdb_set_table
+from mysql_con import settings_r, mdb_read_table_entry, re_calc,mdb_set_table
 
 import easygui
 
@@ -52,7 +52,15 @@ sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
 szn = szenen()
-szn_lst = szn.list_commands()
+szn_lst = szn.list_commands('alle')
+
+szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
+
+#==============================================================================
+# Todo:
+#   all list to be updated (no need to use dicts)
+#   gehe zu szenen
+#==============================================================================
 
 
 ## test subclassing parameters
@@ -194,6 +202,12 @@ class Szenen_tree():
             liste.append(dicti)
         return liste
         
+    def getValueFromValues(self,value, values):
+        for num, val in enumerate(values):
+            if str(val) == str(value):
+                print val, num
+                return num + 1
+        
     def set_paratree(self):
         global p, name
         #szenen = mdb_get_table(db='set_Szenen')
@@ -208,66 +222,93 @@ class Szenen_tree():
             szn_dict['type']='group'
             szn_dict['expanded'] = True
             szn_l_child = []
-            szn_xs_child = {'name': 'XS1 Devices', 'type': 'group', 'expanded': False}
-            szn_xs_child_l = []
-            szn_hu_child = {'name': 'Hue Devices', 'type': 'group', 'expanded': False}
-            szn_hu_child_l = []  
+            ug_child = {'name': 'Untergeschoss', 'type': 'group', 'expanded': False}
+            ug_zim1_child = {'name': 'Raum 1', 'type': 'group', 'expanded': False}
+            ug_zim1_child_l = []
+            
+            eg_child = {'name': 'Erdgeschoss', 'type': 'group', 'expanded': False}
+            eg_wohnzi_child = {'name': 'Wohnzimmer', 'type': 'group', 'expanded': False}
+            eg_wohnzi_child_l = []
+            eg_kueche_child = {'name': u'Küche', 'type': 'group', 'expanded': False}
+            eg_kueche_child_l = []   
+            eg_flur_child = {'name': u'Flur', 'type': 'group', 'expanded': False}
+            eg_flur_child_l = []     
+            
+            og_child = {'name': '1. Stock', 'type': 'group', 'expanded': False}
+            dg_child = {'name': 'Dach', 'type': 'group', 'expanded': False}
+            
             szn_sn_child = {'name': 'Sonos Devices', 'type': 'group', 'expanded': False}
-            szn_sn_child_l = []       
-            szn_tv_child = {'name': 'TVs', 'type': 'group', 'expanded': False}
-            szn_tv_child_l = []
-            szn_sat_child = {'name': 'Satellites', 'type': 'group', 'expanded': False}
-            szn_sat_child_l = []        
+            szn_sn_child_l = []              
             del szene['Name']
             for item in szene:
                 szn_d_child = {}
                 szn_d_child_l = []
                 if str(item) in cmd_devs:
-                    kom_group = KommandoGroup(name=str(item),cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
-                if str(item) in xs1_devs:
-                    szn_xs_child_l.append(kom_group)
+                    zwname = szenen_beschreibung.get(item)
+                    if zwname <> None:
+                        print zwname
+                    kom_group = KommandoGroup(name=str(item), title = zwname,cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
+                if 'V00WOH' in str(item):
+                    eg_wohnzi_child_l.append(kom_group)
                     if kom_group.shouldExpand():
-                        szn_xs_child['expanded']= True
-                elif str(item) in hue_devs:               
-                    szn_hu_child_l.append(kom_group)
+                        eg_wohnzi_child['expanded']= True
+                        eg_child['expanded']= True
+                elif 'V00KUE' in str(item):               
+                    eg_kueche_child_l.append(kom_group)
                     if kom_group.shouldExpand():
-                        szn_hu_child['expanded']= True                    
+                        eg_kueche_child['expanded']= True 
+                        eg_child['expanded']= True
+                elif 'V00FLU' in str(item):               
+                    eg_flur_child_l.append(kom_group)
+                    if kom_group.shouldExpand():
+                        eg_flur_child['expanded']= True 
+                        eg_child['expanded']= True         
+                elif 'Vm1ZIM' in str(item):               
+                    ug_zim1_child_l.append(kom_group)
+                    if kom_group.shouldExpand():
+                        ug_zim1_child['expanded']= True 
+                        ug_child['expanded']= True                            
                 elif str(item) in sns_devs: 
                     szn_sn_child_l.append(kom_group)
                     if kom_group.shouldExpand():
-                        szn_sn_child['expanded']= True                    
-                elif str(item) in tvs_devs: 
-                    szn_tv_child_l.append(kom_group)
-                    if kom_group.shouldExpand():
-                        szn_tv_child['expanded']= True                    
-                elif str(item) in sat_devs: 
-                    szn_sat_child_l.append(kom_group)
-                    if kom_group.shouldExpand():
-                        szn_sat_child['expanded']= True                    
+                        szn_sn_child['expanded']= True                                      
                 elif str(item) in ['Setting']: 
                     for child in self.__return_enum__(szene.get(item)):
                         if type(self.__return_enum__(szene.get(item))) == dict:
                             szn_d_child_l.append({'name': child, 'type': 'str', 'value': self.__return_enum__(szene.get(item)).get(child)})
-                    szn_d_child = ScalableGroup(name= item, children= szn_d_child_l) 
-                    #szn_d_child['children']= szn_d_child_l
+                    szn_d_child = ScalableGroup(name= item, children= szn_d_child_l, expanded = False) 
                     szn_l_child.append(szn_d_child) 
                 elif str(item) in ['Bedingung']: 
-                    szn_d_child = {'name': item, 'type': 'action'} 
+                    szn_d_child = {'name': item, 'type': 'action', 'expanded': False} 
                     kinder = self.__return_enum__(szene.get(item))
                     for child in kinder:
                         if type(kinder) == dict:
                             szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child},
-                        {'name': 'Operand', 'type': 'str', 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}]})
+                        {'name': 'Operand', 'type': 'str', 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
                         else:
                             if child <> None:
                                 szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child[0]},
-                        {'name': 'Operand', 'type': 'str', 'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
+                        {'name': 'Operand', 'type': 'str', 'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}],'tip': "This is a checkbox"})
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)                             
                 elif str(item) in ['setTask']: 
-                    pass     
+                    szn_d_child = {'name': 'Befehl an Handys', 'type': 'action', 'expanded': False} 
+                    kinder = self.__return_enum__(szene.get(item))  
+                    for kind in kinder:       
+                        if kind <> None:
+                            szn_d_child_l.append({'name': 'Befehl %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'An wen', 'type': 'str', 'value': kind[0]},
+                        {'name': 'Befehl', 'type': 'str', 'value': kind[1]}]})  
+                    szn_d_child['children']= szn_d_child_l
+                    szn_l_child.append(szn_d_child)                             
                 elif str(item) in ['Follows']: 
-                    pass  
+                    szn_d_child = {'name': 'Szene folgt', 'type': 'action', 'expanded': False} 
+                    kinder = self.__return_enum__(szene.get(item))  
+                    for kind in kinder:       
+                        if kind <> None:
+                            szn_d_child_l.append({'name': 'Szene %d' % (len(szn_d_child_l)+1), 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': kind[0], 'values':szn_lst},
+                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': u'Verlängerbar', 'type': 'int', 'value': kind[2]}]})  
+                    szn_d_child['children']= szn_d_child_l
+                    szn_l_child.append(szn_d_child) 
                 elif str(item) in ['AutoMode']: 
                     szn_d_child['name'] = str(item)
                     szn_d_child['type'] = 'bool'
@@ -291,31 +332,39 @@ class Szenen_tree():
                         szn_d_child['value'] = ''
                     szn_l_child.append(szn_d_child)
                 #if int(szene.get('Id')) >6: break
-                szn_xs_child['children']= szn_xs_child_l
-                szn_hu_child['children']= szn_hu_child_l
+                eg_wohnzi_child['children']= eg_wohnzi_child_l
+                eg_kueche_child['children']= eg_kueche_child_l
+                eg_flur_child['children']= eg_flur_child_l
                 szn_sn_child['children']= szn_sn_child_l
-                szn_tv_child['children']= szn_tv_child_l
-                szn_sat_child['children']= szn_sat_child_l            
-            szn_l_child.append(szn_xs_child)
-            szn_l_child.append(szn_hu_child)
+
+            ug_child_l = [ug_zim1_child]
+            ug_child['children'] = ug_child_l
+            szn_l_child.append(ug_child)   
+          
+            eg_child_l = [eg_wohnzi_child, eg_kueche_child, eg_flur_child]
+            eg_child['children'] = eg_child_l
+            szn_l_child.append(eg_child)       
+            
             szn_l_child.append(szn_sn_child)
-            szn_l_child.append(szn_tv_child)
-            szn_l_child.append(szn_sat_child)        
+
+      
             szn_dict['children']= szn_l_child
             params.append(szn_dict)
         szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
-                {'name': 'Save State', 'type': 'action'},
-                {'name': 'Check Bedingung', 'type': 'action'},
+                {'name': 'Speichere Szene', 'type': 'action'},
+                {'name': u'Prüfe Bedingung', 'type': 'action'},
                 {'name': 'Execute', 'type': 'action'}
                 
             ]}
         params.append(szn_dict)   
         self.p = Parameter.create(name='params', type='group', children=params)
-        self.p.param('Save/Restore functionality', 'Save State').sigActivated.connect(self.save)
-        self.p.param('Save/Restore functionality', 'Check Bedingung').sigActivated.connect(self.check_bedingung)
+        self.p.param('Save/Restore functionality', 'Speichere Szene').sigActivated.connect(self.save)
+        self.p.param('Save/Restore functionality', u'Prüfe Bedingung').sigActivated.connect(self.check_bedingung)
         self.p.param('Save/Restore functionality', 'Execute').sigActivated.connect(self.execute)
-        #self.p.param(self.name, 'Setting').sigActivated.connect(self.add_setting)
+        self.p.param(self.name, 'Befehl an Handys').sigActivated.connect(self.add_task)
         self.p.param(self.name, 'Bedingung').sigActivated.connect(self.add_bedingung)
+        self.p.param(self.name, 'Szene folgt').sigActivated.connect(self.addSzene)
+        self.linkSzene()
         return params
 
     def add_setting(self):
@@ -327,6 +376,26 @@ class Szenen_tree():
         self.p.param(self.name, 'Bedingung').addChild({'name': 'Bedingung ','type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': ''},
                         {'name': 'Operand', 'type': 'str', 'value': ''},{'name': 'Bedingung', 'type': 'str', 'value': ''}]}, autoIncrementName=True)
 
+    def add_task(self):
+        global p
+        self.p.param(self.name, 'Befehl an Handys').addChild({'name': 'Befehl ','type': 'group', 'children':[{'name': 'An wen', 'type': 'str', 'value': ''},
+                        {'name': 'Befehl', 'type': 'str', 'value': ''}]}, autoIncrementName=True)
+
+    def addSzene(self):
+        global p
+        self.p.param(self.name, 'Szene folgt').addChild({'name': 'Befehl ', 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': '', 'values':szn_lst},
+                        {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': u'Verlängerbar', 'type': 'int', 'value': 2}]}, autoIncrementName=True)
+
+    def linkSzene(self):
+        for kind in self.p.param(self.name, 'Szene folgt').children():
+            kind.sigActivated.connect(self.makeInit(kind.getValues().get('Szene')[0]))
+            
+    def makeInit(self, Name):
+        def setInit(): 
+            print Name
+            self.__init__(Name) 
+        return setInit
+            
 #params1 = [
 #    {'name': 'Basic parameter data types', 'type': 'group', 'children': [
 #        {'name': 'Integer', 'type': 'int', 'value': 10},
@@ -429,12 +498,13 @@ class Szenen_tree():
             return None
 
 
-    def itera(self,some_object, only_change = True):
+    def itera(self,some_object, only_change = False):
         dicti = {}
         h_dict = {}
         if self.check_iter(some_object):
             if True:
             #try:
+                if type(some_object) == list: print some_object
                 if some_object.get('type') == 'group' or some_object.get('type') == 'action':
                     device  = some_object.get('name')
                     if device in self.szenen[0]:
@@ -454,7 +524,7 @@ class Szenen_tree():
                                         set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), eval(bed_tuple.get('Bedingung').get('value'))])
                                     except:
                                         set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), (bed_tuple.get('Bedingung').get('value'))])
-                            dicti[device] = set_lst                        
+                            dicti[device] = set_lst                                  
                         else:
                             kommandos = self.return_list(some_object.get('children'))
                             if only_change:
@@ -463,8 +533,23 @@ class Szenen_tree():
                             else:
                                 dicti[device] = kommandos
                     else:
-                        #strucutre group only if name not ambivalent
-                        dicti.update(self.itera(some_object.get('children')))
+                        if device == 'Befehl an Handys':
+                            set_lst = []
+                            for child in some_object.get('children'):
+                                tsk_tuple = some_object.get('children').get(child).get('children')
+                                if tsk_tuple.get('An wen').get('value') <> '':
+                                    set_lst.append([tsk_tuple.get('An wen').get('value'), tsk_tuple.get('Befehl').get('value')])
+                            dicti['setTask'] = set_lst  
+                        elif device == 'Szene folgt':
+                            set_lst = []
+                            for child in some_object.get('children'):
+                                szn_tuple = some_object.get('children').get(child).get('children')
+                                if szn_tuple.get('Szene').get('value') <> '':
+                                    set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get(u'Verlängerbar').get('value')])
+                            dicti['Follows'] = set_lst                             
+                        else:
+                            #strucutre group only if name not ambivalent
+                            dicti.update(self.itera(some_object.get('children')))
                 else:
                     if some_object.get('name') <> None:
                         if some_object.get('name') in self.szenen[0]:
@@ -489,14 +574,21 @@ class Szenen_tree():
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
         print neu_szene
-        mdb_set_table(table='set_Szenen', device=self.szene_to_read, commands=neu_szene)
+        #mdb_set_table(table='set_Szenen', device=self.szene_to_read, commands=neu_szene)
             
 
     def check_bedingung(self):
-        if szn.execute(self.szene_to_read,True):
-            easygui.msgbox("Szene würde ausgeführt", title="Bedingung Check")
-        else:
-            easygui.msgbox("Szene würde NICHT ausgeführt", title="Bedingung Check")
+        self.state = self.p.saveState()
+        neu_szene = self.itera(self.state, False)
+        bedingungen = neu_szene.get('Bedingung')
+        for i, wert in enumerate(bedingungen):
+            for j, eintrag in enumerate(wert):
+                bedingungen[i][j]=re_calc(eintrag)
+        efuellt = szn.__bedingung__(bedingungen,verbose=True)
+#        if efuellt:
+#            easygui.msgbox("Szene würde ausgeführt", title="Bedingung Check")
+#        else:
+#            easygui.msgbox("Szene würde NICHT ausgeführt", title="Bedingung Check")
 
     def execute(self):
         constants.redundancy_.master = True
