@@ -103,6 +103,27 @@ class ScalableGroup(pTypes.GroupParameter):
         val=values.get(typ)
         self.addChild(dict(name=typ, type="str", value=val, removable=True, renamable=True))
 
+class StockRaum():
+    def __init__(self,name,zimmer = True):
+        self.name = name
+        self.dicti = {'name': 'Zimmer', 'type': 'group', 'expanded': False}
+        self.children = []
+        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','WOH':'Wohnzimer'}
+        for nam in self.namen:
+            if zimmer:
+                if nam in self.name[-3:]:
+                    self.dicti['name'] = self.namen.get(nam)   
+            else:
+                if nam in self.name[0:3]:
+                    self.dicti['name'] = self.namen.get(nam)                     
+        
+    def addChild(self,child):
+        global children
+        self.children.append(child)
+
+    def expand(self, status=True):
+        self.dicti['expanded'] = status
+
 class KommandoGroup(pTypes.GroupParameter):
     def __init__(self, cmds, **opts):
         opts['type'] = 'group'
@@ -212,6 +233,21 @@ class Szenen_tree():
     def set_paratree(self):
         global p, name
         #szenen = mdb_get_table(db='set_Szenen')
+        stock_list = []
+        stockwerke = []
+        zimmer_list = []
+        zimmer = []
+        for item in szene:
+            if str(item) in cmd_devs:
+                name = str(item)
+                stock_list.append(name[0:3])
+                zimmer_list.append(name[0:6])
+        stock_list = list(set(stock_list))
+        zimmer_list = list(set(zimmer_list))
+        for stock in stock_list:
+            stockwerke.append(StockRaum(stock))
+        for zim in zimmer_list:
+            zimmer.append(StockRaum(zim))            
         params = []
         for szene in self.szenen:
             szn_dict = {}
@@ -254,6 +290,12 @@ class Szenen_tree():
                     zwname = szenen_beschreibung.get(item)
                     if zwname <> None:
                     kom_group = KommandoGroup(name=str(item), title = zwname,cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
+                for zim in zimmer:
+                    if zim.name in str(item):
+                        zim.addChild(kom_group)
+                        if kom_group.shouldExpand():
+                            zim.expand(True)
+                            #Stockwerke auch expandieren
                 if 'V00WOH' in str(item):
                     eg_wohnzi_child_l.append(kom_group)
                     if kom_group.shouldExpand():
