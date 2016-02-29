@@ -52,7 +52,7 @@ class SzenenTreeInputs():
                         elif aktuator.get(sub) in ['0', None]:
                             kinder1.append({'name': sub, 'type': 'bool', 'value':False}) 
                         else:
-                            kinder1.append({'name': sub, 'type': 'bool', 'value':aktuator.get(sub)}) 
+                            kinder1.append({'name': sub, 'type': 'bool', 'value':eval(aktuator.get(sub))}) 
                     if sub in ['Value_lt','Value_eq','Value_gt']:
                         kinder2.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
                     if sub in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:

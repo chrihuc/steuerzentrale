@@ -237,11 +237,12 @@ class Szenen_tree():
         stockwerke = []
         zimmer_list = []
         zimmer = []
-        for item in szene:
-            if str(item) in cmd_devs:
-                name = str(item)
-                stock_list.append(name[0:3])
-                zimmer_list.append(name[0:6])
+        for szene in self.szenen:
+            for item in szene:
+                if str(item) in cmd_devs:
+                    name = str(item)
+                    stock_list.append(name[0:3])
+                    zimmer_list.append(name[0:6])
         stock_list = list(set(stock_list))
         zimmer_list = list(set(zimmer_list))
         for stock in stock_list:
@@ -289,7 +290,7 @@ class Szenen_tree():
                 if str(item) in cmd_devs:
                     zwname = szenen_beschreibung.get(item)
                     if zwname <> None:
-                    kom_group = KommandoGroup(name=str(item), title = zwname,cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
+                        kom_group = KommandoGroup(name=str(item), title = zwname,cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
                 for zim in zimmer:
                     if zim.name in str(item):
                         zim.addChild(kom_group)
