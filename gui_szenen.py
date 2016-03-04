@@ -33,7 +33,7 @@ from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
 
-from gui_inp import SzenenTreeInputs
+#from gui_inp import SzenenTreeInputs
 
 xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
@@ -108,7 +108,8 @@ class StockRaum():
         self.name = name
         self.dicti = {'name': 'Zimmer', 'type': 'group', 'expanded': False}
         self.children = []
-        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','WOH':'Wohnzimer'}
+        self.expanded = False
+        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur'}
         for nam in self.namen:
             if zimmer:
                 if nam in self.name[-3:]:
@@ -123,6 +124,11 @@ class StockRaum():
 
     def expand(self, status=True):
         self.dicti['expanded'] = status
+        self.expanded = status
+        
+    def build(self):
+        self.dicti['children'] = self.children
+        return self.dicti
 
 class KommandoGroup(pTypes.GroupParameter):
     def __init__(self, cmds, **opts):
@@ -289,14 +295,15 @@ class Szenen_tree():
                 szn_d_child_l = []
                 if str(item) in cmd_devs:
                     zwname = szenen_beschreibung.get(item)
-                    if zwname <> None:
-                        kom_group = KommandoGroup(name=str(item), title = zwname,cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
-                for zim in zimmer:
-                    if zim.name in str(item):
-                        zim.addChild(kom_group)
-                        if kom_group.shouldExpand():
-                            zim.expand(True)
-                            #Stockwerke auch expandieren
+                    if zwname == None:
+                        zwname = str(item)
+                    kom_group = KommandoGroup(name=str(item), title = zwname,cmds=self.get_commando_set(str(item)), children=self.dict_constructor_(str(item),self.__return_enum__(szene.get(item))))
+                    for zim in zimmer:
+                        if zim.name in str(item):
+                            zim.addChild(kom_group)
+                            if kom_group.shouldExpand():
+                                zim.expand(True)
+                                #Stockwerke auch expandieren
                 if 'V00WOH' in str(item):
                     eg_wohnzi_child_l.append(kom_group)
                     if kom_group.shouldExpand():
@@ -389,17 +396,22 @@ class Szenen_tree():
 
             ug_child_l = [ug_zim1_child]
             ug_child['children'] = ug_child_l
-            szn_l_child.append(ug_child)   
+            #szn_l_child.append(ug_child)   
           
             eg_child_l = [eg_wohnzi_child, eg_kueche_child, eg_flur_child]
             eg_child['children'] = eg_child_l
-            szn_l_child.append(eg_child)    
+            #szn_l_child.append(eg_child)    
             
             og_child_l = [og_sch_child]
             og_child['children'] = og_child_l
-            szn_l_child.append(og_child)             
+            #szn_l_child.append(og_child)             
 
-      
+            for stock in stockwerke:
+                for zim in zimmer:
+                    if stock.name in zim.name:
+                        stock.addChild(zim.build())
+                        stock.expand(zim.expanded)
+                szn_l_child.append(stock.build())
             szn_dict['children']= szn_l_child
             params.append(szn_dict)
         szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
@@ -684,13 +696,13 @@ def change(param, changes):
 
 t = ParameterTree()
 sz=Szenen_tree("Alles_ein")
-inp=SzenenTreeInputs()
+#inp=SzenenTreeInputs()
 t.setParameters(sz.p, showTop=False)
 t.setWindowTitle('Szenen Setup:')
-t2 = ParameterTree()
-t2.setParameters(inp.p, showTop=False)
+#t2 = ParameterTree()
+#t2.setParameters(inp.p, showTop=False)
 
-inp.p.sigTreeStateChanged.connect(change)
+#inp.p.sigTreeStateChanged.connect(change)
 
 win = QtGui.QWidget()
 layout = QtGui.QGridLayout()
@@ -703,7 +715,7 @@ comboBox.activated[str].connect(selected)
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
 layout.addWidget(t, 2, 1, 1, 1)
 layout.addWidget(comboBox, 1, 1, 1, 1)
-layout.addWidget(t2, 2, 0, 1, 1)
+#layout.addWidget(t2, 2, 0, 1, 1)
 win.show()
 win.resize(800,800)
 
