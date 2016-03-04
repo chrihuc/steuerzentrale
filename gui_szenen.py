@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import settings_r, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table
+from mysql_con import settings_r, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId
 
 import easygui
 
@@ -109,7 +109,9 @@ class StockRaum():
         self.dicti = {'name': 'Zimmer', 'type': 'group', 'expanded': False}
         self.children = []
         self.expanded = False
-        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur'}
+        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
+                      'TER':'Terasse','GRA':'Gras',
+                      'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer'}
         for nam in self.namen:
             if zimmer:
                 if nam in self.name[-3:]:
@@ -257,16 +259,19 @@ class Szenen_tree():
             zimmer.append(StockRaum(zim))            
         params = []
         for szene in self.szenen:
+            if szene.get('Name') == 'LeereVorlage':
+                szene['Name']= 'NeueSzene'
+                szene['Id'] = maxSzenenId()-maxSzenenId()%10 +10
             szn_dict = {}
             if str(szene.get('Beschreibung')) <> 'None':
                 self.name = szene.get('Beschreibung')
             else:
-                self.name = 'Szenen Name: '+szene.get('Name')
+                self.name = 'Szenen Name: '+str(szene.get('Name'))
             szn_dict['name'] = self.name
             szn_dict['type']='group'
             szn_dict['expanded'] = True
-            szn_l_child = []           
-            del szene['Name']
+            szn_l_child = []    
+            #del szene['Name']
             for item in szene:
                 szn_d_child = {}
                 szn_d_child_l = []
@@ -329,16 +334,20 @@ class Szenen_tree():
                     szn_l_child.append(szn_d_child)             
                 else:
                     szn_d_child['name'] = str(item)
-                    if str(item) in ['Prio','Delay__']:
+                    if str(item) in ['Prio','Delay']:
                         szn_d_child['type'] = 'float'
                         szn_d_child['step'] = 0.1
+                        if str(szene.get(item)) <> "None":
+                            szn_d_child['value'] = float(szene.get(item))
+                        else:
+                            szn_d_child['value'] = None                      
                     else:
                         szn_d_child['type'] = 'str'
+                        if str(szene.get(item)) <> "None":
+                            szn_d_child['value'] = str(szene.get(item))
+                        else:
+                            szn_d_child['value'] = ''                        
                     szn_d_child['expanded'] = False
-                    if str(szene.get(item)) <> "None":
-                        szn_d_child['value'] = str(szene.get(item))
-                    else:
-                        szn_d_child['value'] = ''
                     szn_l_child.append(szn_d_child)         
 
             for stock in stockwerke:
@@ -349,21 +358,36 @@ class Szenen_tree():
                 szn_l_child.append(stock.build())
             szn_dict['children']= szn_l_child
             params.append(szn_dict)
+        ichilds, schilds = [], []
+        iquellen, squellen = getSzenenSources(self.szene_to_read)
+        for quelle in iquellen:
+            ichilds.append({'name': quelle.get('Name'), 'type': 'action', 'value': quelle.get('Name'),'autoIncrementName':True})
+        for quelle in squellen:
+            schilds.append({'name': quelle.get('Name'), 'type': 'action', 'value': quelle.get('Name'),'autoIncrementName':True})   
+        szn_dict = {'name': 'Sources', 'type': 'group', 'children': [
+                {'name': 'Inputs', 'type': 'group', 'autoIncrementName':True, 'children':ichilds },
+                {'name': 'Szenen', 'type': 'group', 'autoIncrementName':True, 'children':schilds }    
+            ]}            
+        params.append(szn_dict)  
         szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
                 {'name': 'Speichere Szene', 'type': 'action'},
                 {'name': u'Prüfe Bedingung', 'type': 'action'},
-                {'name': 'Execute', 'type': 'action'}
-                
+                {'name': 'Execute', 'type': 'action'},
+                {'name': 'Neue Szene', 'type': 'action'}                
             ]}
         params.append(szn_dict)   
         self.p = Parameter.create(name='params', type='group', children=params)
-        self.p.param('Save/Restore functionality', 'Speichere Szene').sigActivated.connect(self.save)
-        self.p.param('Save/Restore functionality', u'Prüfe Bedingung').sigActivated.connect(self.check_bedingung)
-        self.p.param('Save/Restore functionality', 'Execute').sigActivated.connect(self.execute)
-        self.p.param(self.name, 'Befehl an Handys').sigActivated.connect(self.add_task)
-        self.p.param(self.name, 'Bedingung').sigActivated.connect(self.add_bedingung)
-        self.p.param(self.name, 'Szene folgt').sigActivated.connect(self.addSzene)
-        self.linkSzene()
+        try:
+            self.p.param('Save/Restore functionality', 'Speichere Szene').sigActivated.connect(self.save)
+            self.p.param('Save/Restore functionality', u'Prüfe Bedingung').sigActivated.connect(self.check_bedingung)
+            self.p.param('Save/Restore functionality', 'Execute').sigActivated.connect(self.execute)
+            #self.p.param('Save/Restore functionality', 'Neue Szene').sigActivated.connect(self.newSzene)            
+            self.p.param(self.name, 'Befehl an Handys').sigActivated.connect(self.add_task)
+            self.p.param(self.name, 'Bedingung').sigActivated.connect(self.add_bedingung)
+            self.p.param(self.name, 'Szene folgt').sigActivated.connect(self.addSzene)
+            self.linkSzene()
+        except:
+            pass
         return params
 
     def add_setting(self):
@@ -489,7 +513,8 @@ class Szenen_tree():
                     else:
                         #ordered dict:
                         for item in some_object:
-                            dicti.update(self.itera(some_object.get(item)))
+                            if some_object.get(item).get('name') <> 'Sources':
+                                dicti.update(self.itera(some_object.get(item)))
     #        except Exception,e:
     #            print e
         return dicti
@@ -524,12 +549,18 @@ class Szenen_tree():
             easygui.msgbox("Szene wurde NICHT ausgeführt", title="Execute")
         constants.redundancy_.master = False            
 
+    def newSzene(self):
+        global szenen
+        self.szenen = [mdb_read_table_entry(db='LeereVorlage',entry=self.szene_to_read)]
+        self.set_paratree()        
+
 class InputsTree():
-    def __init__(self):
+    def __init__(self, expand = None):
         self.p = None
         self.name = None
         self.inputs = mdb_get_table(db='cmd_inputs')
         self.eingaenge = []
+        self.expand = expand
         for inpu in self.inputs:
             self.eingaenge.append(str(inpu.get('Id')))
         self.set_paratree()
@@ -543,6 +574,8 @@ class InputsTree():
             if aktuator.get('Description') <> None:
                 title = aktuator.get('Description')
                 akt_dict = {'name': str(aktuator.get('Id')), 'title':title , 'type': 'group', 'expanded': False}
+                if self.expand == aktuator.get('Name'):
+                    akt_dict['expanded']= True
                 kinder1 = []
                 kinder2 = []
                 kinder3, kinder4 = [], []
@@ -600,6 +633,7 @@ class InputsTree():
                                 if wert == '': wert = None
                                 if wert <> aktuator.get(kind):
                                     dicti[kind] = wert
+                            print dicti
                             mdb_set_table(table='cmd_inputs', device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                 else:
                     self.itera(some_object.get('children'))
@@ -608,10 +642,24 @@ class InputsTree():
                     self.itera(some_object.get(item))
 
 def selected(text):
-    global sz, t
+    global sz, t, lastSelected
+    lastSelected = text
     sz=Szenen_tree(text)
     t.setParameters(sz.p, showTop=False)
-    print text
+    sz.p.sigTreeStateChanged.connect(change_sz)
+
+def update():
+    global inp, t2  
+    selected(lastSelected)  
+    inp=InputsTree()
+    t2.setParameters(inp.p, showTop=False)
+    inp.p.sigTreeStateChanged.connect(change)
+    
+def showInputs(eingang):
+    global inp, t2   
+    inp=InputsTree(expand = eingang)
+    t2.setParameters(inp.p, showTop=False)
+    inp.p.sigTreeStateChanged.connect(change)    
 
 #==============================================================================
 #Uncomment following block to use as class 
@@ -651,6 +699,15 @@ def change_sz(param, changes):
         print('  change:    %s'% change)
         print('  data:      %s'% str(data))
         print('  ----------')
+        if data <> '':
+            if path[-2] in ['Szenen']:
+                selected(str(path[-1]))     
+        if data <> '':
+            if path[-2] in ['Inputs']:
+                showInputs(str(path[-1]))   
+        if data <> '':
+            if path[0] in ['Save/Restore functionality'] and path[1] == 'Neue Szene':
+                selected('LeereVorlage')              
 
 
 t = ParameterTree()
@@ -671,13 +728,22 @@ comboBox = QtGui.QComboBox(win)
 for szne in szn_lst:
     comboBox.addItem(szne)
 comboBox.setMaxVisibleItems(50)    
+lastSelected = ''
 comboBox.activated[str].connect(selected)
+
+buttn = QtGui.QPushButton(win)
+buttn.setText('Update')
+buttn.clicked.connect(update)
+
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
+layout.addWidget(buttn, 1, 0, 1, 1)
 layout.addWidget(t, 2, 1, 1, 1)
 layout.addWidget(comboBox, 1, 1, 1, 1)
 layout.addWidget(t2, 2, 0, 1, 1)
+
+
 win.show()
-win.resize(800,800)
+win.resize(800,1200)
 
 #==============================================================================
 # till here

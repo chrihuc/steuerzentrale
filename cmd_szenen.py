@@ -67,10 +67,11 @@ class szenen:
                         liste[szene.get("Name")] = szene.get("Name")
         elif gruppe == "alle":
             for szene in table:
-                if str(szene.get("Beschreibung")) <> "None":
-                    liste[szene.get("Name")] = szene.get("Beschreibung")
-                else:
-                    liste[szene.get("Name")] = szene.get("Name")                        
+                if str(szene.get("Id")) > 19:
+                    if str(szene.get("Beschreibung")) <> "None":
+                        liste[szene.get("Name")] = szene.get("Beschreibung")
+                    else:
+                        liste[szene.get("Name")] = szene.get("Name")                        
         else:
             for szene in table:
                 if szene.get("Gruppe") == gruppe:
@@ -79,6 +80,7 @@ class szenen:
                     else:
                         liste[szene.get("Name")] = szene.get("Name")           
         return (liste)
+        
 
     def __bedingung__(self,bedingungen, verbose = False):
         erfuellt = True

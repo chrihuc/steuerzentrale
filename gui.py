@@ -44,7 +44,7 @@ Device = None
 constants.redundancy_.master = True
 
 eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':100,'pos_y':100},
-              {'Name':'V00KUEBuero','desc':'Büro','type':'dev','pos_x':100,'pos_y':200},
+              {'Name':'V01BUE1RUM1LI01','desc':'Büro','type':'dev','pos_x':100,'pos_y':200},
               {'Name':'Temperatur_Balkon','desc':'T Balkon','type':'sens','pos_x':200,'pos_y':200},
               {'Name':'Temperatur_Wohnzi','desc':'T Balkon','type':'sens','pos_x':300,'pos_y':200},
               {'Name':'Temperatur_Schlafzi','desc':'T Balkon','type':'sens','pos_x':400,'pos_y':200}]

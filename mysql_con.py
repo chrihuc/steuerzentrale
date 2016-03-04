@@ -19,7 +19,9 @@ def main():
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
-    print re_calc(['sett','Temperatur_Wohnzi'])
+    #print re_calc(['sett','Temperatur_Wohnzi'])
+    #print getSzenenSources('Webcam_aus')
+    print maxSzenenId()-maxSzenenId()%10 +10
     #print re_calc(10)
     #set_automode(device="Stehlampe", mode="auto")
     #print mdb_szene_r("Device_Typ")
@@ -206,29 +208,7 @@ def teg_raw_cmds(db):
                dicti[field_names[i]] =  row[i]           
     con.close()
     return dicti
-#def mdb_sideb_r(name):
-    #return mdb_read_table_entry('Sideboard', name) 
 
-#def mdb_marantz_r(name):
-    #return mdb_read_table_entry('Marantz', name) 
-        
-#def mdb_ls_sz_r(name):
-    #return mdb_read_table_entry('LightstrSchlafzi', name)    
-
-#def hue_autolicht(name):
-    #return mdb_read_table_entry('hue_autolicht', name)  
-    
-#def mdb_szene_r(name):
-    #return mdb_read_table_entry('Szenen', name)       
-        
-#def mdb_hue_r(name):
-    #return mdb_read_table_entry('Hue', name)
-
-#def mdb_tspled_r(name):
-    #return mdb_read_table_entry('TuerSPiLED', name) 
-    
-#def mdb_sonos_r(player):
-    #return mdb_read_table_entry('Sonos', player) 
            
 
 #kompletter table:
@@ -254,9 +234,9 @@ def mdb_set_table(table, device, commands, primary = 'Name'):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
-        cur.execute("SELECT COUNT(*) FROM "+datab+"."+table+" WHERE Name = '"+device+"'")
+        cur.execute("SELECT COUNT(*) FROM "+datab+"."+table+" WHERE "+primary+" = '"+device+"'")
         if cur.fetchone()[0] == 0:
-            sql = 'INSERT INTO '+table+' (Name) VALUES ("'+ str(device) + '")'     
+            sql = 'INSERT INTO '+table+' ('+primary+') VALUES ("'+ str(device) + '")'     
             cur.execute(sql)   
         for cmd in commands:
             if len(cmds) == 0:
@@ -264,7 +244,7 @@ def mdb_set_table(table, device, commands, primary = 'Name'):
             else:
                 commando = cmds.get(cmd)
             if str(commands.get(cmd)) == 'None':
-                sql = 'UPDATE '+table+' SET '+str(commando)+' = NULL WHERE Name = "' + str(device) + '"'
+                sql = 'UPDATE '+table+' SET '+str(commando)+' = NULL WHERE '+primary+' = "' + str(device) + '"'
             else:
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
@@ -328,6 +308,45 @@ def mdb_set_table(table, device, commands, primary = 'Name'):
         #sql = "UPDATE Sideboard SET rot = '" + str(setting.get("rot")) + "', gruen = '" + str(setting.get("gruen")) + "', blau = '" + str(setting.get("blau")) + "' WHERE Name = '" + name +"'"
         #cur.execute(sql)     
     #con.close() 
+    
+def getSzenenSources(szene):
+    if szene in ['', None]:
+        return [],[]
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    ilist, slist = [], []
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+'" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)'
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            dicti = {}
+            for i in range (0,len(row)):
+               dicti[field_names[i]] = row[i]  
+            ilist.append(dicti)
+        sql = 'SELECT * FROM '+constants.sql_tables.szenen.name+' where Follows like "%'+szene+'%"'
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            dicti = {}
+            for i in range (0,len(row)):
+               dicti[field_names[i]] = row[i]  
+            slist.append(dicti)           
+    con.close()    
+    return ilist, slist
+    
+def maxSzenenId():
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    value = 0
+    with con:
+        cur = con.cursor()
+        sql = "SELECT Id FROM Steuerzentrale.set_Szenen ORDER BY id DESC LIMIT 0, 1"
+        cur.execute(sql)
+        results = cur.fetchall()
+    con.close()            
+    return results[0][0]    
     
 def inputs(device, value):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
