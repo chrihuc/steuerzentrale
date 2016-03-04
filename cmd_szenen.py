@@ -259,16 +259,16 @@ class szenen:
 #==============================================================================
 # start timer with following actions                               
 #==============================================================================
-        if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
-            kommandos = self.__return_enum__(szene_dict.get("Follows"))
-            for kommando in kommandos:
-                szn, dlay, ex_re = kommando
-                if ex_re == 0:
-                    self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
-                elif ex_re == 1:
-                    self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
-                elif ex_re == 2:
-                    self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)                    
+            if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
+                kommandos = self.__return_enum__(szene_dict.get("Follows"))
+                for kommando in kommandos:
+                    szn, dlay, ex_re = kommando
+                    if ex_re == 0:
+                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
+                    elif ex_re == 1:
+                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
+                    elif ex_re == 2:
+                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)                    
 #==============================================================================
 # Check for timeout
 #==============================================================================

@@ -249,7 +249,7 @@ def mdb_get_table(db):
     con.close()    
     return rlist  
 
-def mdb_set_table(table, device, commands):
+def mdb_set_table(table, device, commands, primary = 'Name'):
     cmds = get_raw_cmds(table)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
@@ -267,7 +267,7 @@ def mdb_set_table(table, device, commands):
                 sql = 'UPDATE '+table+' SET '+str(commando)+' = NULL WHERE Name = "' + str(device) + '"'
             else:
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
-                sql = 'UPDATE %s SET %s="%s" WHERE Name="%s"' % (table, (commando), commands.get(cmd), (device))
+                sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             cur.execute(sql)       
     con.close() 
 

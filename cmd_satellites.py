@@ -92,11 +92,13 @@ class satelliten:
         with con:
             cur = con.cursor()
             cur.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '"+table+"'")
-            if cur.fetchone()[0] == 0:       
+            if cur.fetchone()[0] == 0:   
+                return False
                 command = "CREATE TABLE "+constants.sql_.DB+"."+table +"(`id` int(11) NOT NULL AUTO_INCREMENT, `Name` varchar(50),PRIMARY KEY (`id`));"
                 cur.execute(command)
                 results = cur.fetchall()      
-        con.close()         
+        con.close()
+        return True         
 
     def list_devices(self):
         comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
@@ -116,10 +118,10 @@ class satelliten:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
             cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
-            self.__check_table_exists__(cmds_table)            
-            comands = mdb_get_table(cmds_table)
-            for comand in comands:
-                liste.append(comand.get("Name"))
+            if self.__check_table_exists__(cmds_table):           
+                comands = mdb_get_table(cmds_table)
+                for comand in comands:
+                    liste.append(comand.get("Name"))
         return liste        
 
     def dict_commands(self,device='alle'):
@@ -133,11 +135,11 @@ class satelliten:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
             cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
-            self.__check_table_exists__(cmds_table)            
-            comands = mdb_get_table(cmds_table)
-            for comand in comands:
-                itera +=1
-                liste[comand.get("Name")] = itera                
+            if self.__check_table_exists__(cmds_table):           
+                comands = mdb_get_table(cmds_table)
+                for comand in comands:
+                    itera +=1
+                    liste[comand.get("Name")] = itera                
         return liste        
 
 
