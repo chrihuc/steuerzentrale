@@ -49,7 +49,7 @@ eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':100,
               {'Name':'Temperatur_Wohnzi','desc':'T Balkon','type':'sens','pos_x':300,'pos_y':200},
               {'Name':'Temperatur_Schlafzi','desc':'T Balkon','type':'sens','pos_x':400,'pos_y':200}]
 
-
+weckerButtons = []
 
 #tab Wecker
 #tab settings
@@ -199,6 +199,29 @@ class Main(QtGui.QMainWindow):
         self.pushButton_8.setText('Tree test')
         #self.pushButton_8.clicked.connect(self.make_set_tree_popup("Name"))          
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
+
+        #Wecker
+        self.tab_5 = QtGui.QWidget()
+        self.tab_5.setObjectName(_fromUtf8("tab_5")) 
+        self.tabWidget.addTab(self.tab_5, _fromUtf8(""))
+        self.scrollLayout3 = QtGui.QFormLayout()
+        self.scrollArea = QtGui.QScrollArea(self.tab_5)
+        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 790, 375))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 360))
+        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.scrollAreaWidgetContents.setLayout(self.scrollLayout3)        
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)  
+        
+        for i in range(1,10):
+            self.scrollLayout3.addRow(weckerRow(i))
+        self.pushButton_9 = QtGui.QPushButton(self.tab_5)
+        self.pushButton_9.setGeometry(QtCore.QRect(300, 380, 91, 50))
+        self.pushButton_9.setObjectName(_fromUtf8("saveAlarm"))
+        self.pushButton_9.setText('Speichere')
+        self.pushButton_9.clicked.connect(self.makeSaveWecker(self))         
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -284,6 +307,7 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), _translate("MainWindow", "1. Stock", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "2. Stock", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Settings", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("MainWindow", "Wecker", None))
         #self.pushButton.setText(_translate("MainWindow", "XS1", None))
         self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
         self.pushButton_3.setText(_translate("MainWindow", "Sonos", None))
@@ -333,6 +357,45 @@ class Main(QtGui.QMainWindow):
         refresh = Timer(5, self.update_values, [])
         if running: 
             refresh.start()        
+
+
+    def makeSaveWecker(self,parent=None):
+        def saveWecker(self):
+            for ii in weckerButtons:
+                if "timeEdit" in ii.objectName():
+                    print ii.objectName(), ii.time()
+                elif "comboBox" in ii.objectName():
+                    print ii.objectName(), ii.currentText()
+                else:
+                    print ii.objectName(), ii.checkState()                    
+        return saveWecker     
+        
+class weckerRow(QtGui.QWidget):
+    def __init__( self ,name=None):
+        global weckerButtons
+        super(weckerRow, self).__init__(None)
+        #horizontalLayoutWidget = QtGui.QWidget(self.scrollAreaWidgetContents)
+        #horizontalLayoutWidget.setGeometry(QtCore.QRect(30, 10, 391, 61))
+        #horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
+        horizontalLayoutWidget = QtGui.QHBoxLayout()
+        #horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.timeEdit = QtGui.QTimeEdit()
+        self.timeEdit.setObjectName(_fromUtf8(str(name)+".timeEdit"))
+        horizontalLayoutWidget.addWidget(self.timeEdit)
+        weckerButtons.append(self.timeEdit)
+        for tag in ['Mo','Di','Mi','Do','Fr','Sa','So','Eingeschaltet']:
+            self.checkBox = QtGui.QCheckBox(tag)
+            self.checkBox.setObjectName(_fromUtf8(str(name)+"."+tag))
+            horizontalLayoutWidget.addWidget(self.checkBox)
+            weckerButtons.append(self.checkBox)
+        self.comboBox = QtGui.QComboBox()
+        for szne in ['Wecker 1', 'Wecker 2']:
+            self.comboBox.addItem(szne)        
+        self.comboBox.setObjectName(_fromUtf8(str(name)+".comboBox"))
+        weckerButtons.append(self.comboBox)
+        horizontalLayoutWidget.addWidget(self.comboBox)
+        #self.scrollArea.setWidget(self.scrollAreaWidgetContents) 
+        self.setLayout(horizontalLayoutWidget)
 
 class Buttn(QtGui.QWidget):
     def __init__( self ,parent=None, Name=None, Type="Device", description=None):
