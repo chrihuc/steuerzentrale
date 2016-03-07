@@ -6,7 +6,7 @@ Created on Sun Feb 28 13:15:11 2016
 """
 
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import mdb_get_table, mdb_set_table
+from mysql_con import mdb_get_table, mdb_set_table, listCommandTable
 
 app = QtGui.QApplication([])
 from pyqtgraph.parametertree import Parameter, ParameterTree
@@ -16,24 +16,38 @@ from cmd_szenen import szenen
 szn = szenen()
 szn_lst = sorted(szn.list_commands('alle'))
 
+cmdLsts = ['out_hue','out_Sonos']
+cmdLsts.append(listCommandTable('alle'))
+
 class SzenenTreeInputs():
-    def __init__(self):
+    def __init__(self, isInputs = True, cmdTable = None):
         self.p = None
         self.name = None
-        self.inputs = mdb_get_table(db='cmd_inputs')
+        if self.isInputs:
+            self.inputs = mdb_get_table(db='cmd_inputs')
+        else:
+            self.inputs = mdb_get_table(db=cmdTable)
         self.eingaenge = []
         for inpu in self.inputs:
             self.eingaenge.append(str(inpu.get('Id')))
+        self.isInputs = isInputs
+        self.cmdTable = cmdTable
         self.set_paratree()
         
     def set_paratree(self):
         global p, name
         params = []
-        inp_dict = {'name': u'Eingänge', 'type': 'group', 'expanded': True}
+        if self.isInputs:
+            inp_dict = {'name': u'Eingänge', 'type': 'group', 'expanded': True}
+        else:
+            inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
         inp_kinder = []
         for aktuator in self.inputs:   
-            if aktuator.get('Description') <> None:
-                title = aktuator.get('Description')
+            if (aktuator.get('Description') <> None and isInputs) or (not isInputs):
+                if self.isInputs:             
+                    title = aktuator.get('Description')
+                else:
+                    title = aktuator.get('Name')
                 akt_dict = {'name': str(aktuator.get('Id')), 'title':title , 'type': 'group', 'expanded': False}
                 kinder1 = []
                 kinder2 = []
@@ -46,23 +60,29 @@ class SzenenTreeInputs():
                             kinder1.append({'name': sub, 'type': 'bool', 'value':False}) 
                         else:
                             kinder1.append({'name': sub, 'type': 'bool', 'value':eval(aktuator.get(sub))}) 
-                    if sub in ['Description']:
+                    elif sub in ['Description']:
                         kinder2.append({'name': sub, 'title':'Beschreibung', 'type': 'str', 'value':aktuator.get(sub)})                            
-                    if sub in ['Value_lt','Value_eq','Value_gt']:
+                    elif sub in ['Value_lt','Value_eq','Value_gt']:
                         kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
-                    if sub in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
-                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst})    
+                    elif sub in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
+                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst}) 
+                    elif sub in ['Name', 'Id']:
+                        pass
+                    else:
+                        kinder2.append({'name': sub, 'title':'sub', 'type': 'str', 'value':aktuator.get(sub)})
                 kinder = kinder1 + kinder2 + kinder3 + kinder4
                 akt_dict['children'] = kinder
                 inp_kinder.append(akt_dict)
         inp_dict['children'] = inp_kinder
         params.append(inp_dict)
-        inp_dict = {'name': 'Speichern', 'type': 'group', 'children': [
-                {'name': 'Speichere Inputs', 'type': 'action'}
-            ]}   
-        params.append(inp_dict)
+        if self.isInputs:
+            inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
+                    {'name': 'Speichere Inputs', 'type': 'action'}
+                ]}   
+            params.append(inp_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
-        self.p.param('Speichern', 'Speichere Inputs').sigActivated.connect(self.save)
+        if self.isInputs:
+            self.p.param('Aktionen', 'Speichere Inputs').sigActivated.connect(self.save)
 
     def save(self):
         global state
@@ -92,7 +112,8 @@ class SzenenTreeInputs():
                                 if wert == '': wert = None
                                 if wert <> aktuator.get(kind):
                                     dicti[kind] = wert
-                            mdb_set_table(table='cmd_inputs', device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
+                            if self.isInputs:
+                                mdb_set_table(table='cmd_inputs', device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                 else:
                     self.itera(some_object.get('children'))
             else:
@@ -107,10 +128,16 @@ t.setWindowTitle('Szenen Setup:')
 #t2 = ParameterTree()
 #t2.setParameters(p, showTop=False)
 
+comboBox = QtGui.QComboBox(win)
+for cmdLst in cmdLsts:
+    comboBox.addItem(cmdLst)
+
 win = QtGui.QWidget()
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
-layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
+layout.addWidget(QtGui.QLabel(""), 1,  1, 1, 2)
+
+layout.addWidget(comboBox, 0, 0, 1, 1)
 layout.addWidget(t, 20, 0, 1, 1)
 #layout.addWidget(t2, 1, 1, 1, 1)
 win.show()

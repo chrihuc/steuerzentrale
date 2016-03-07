@@ -124,6 +124,19 @@ class satelliten:
                     liste.append(comand.get("Name"))
         return liste        
 
+    def listCommandTable(self,device='alle'):
+        liste = [] 
+        list_cmds_of = []
+        if device == 'alle':
+            list_cmds_of = self.list_devices()
+        else:
+            list_cmds_of.append(device)
+        for sates in list_cmds_of:
+            cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
+            if self.__check_table_exists__(cmds_table):           
+                liste.append(cmds_table)
+        return liste
+
     def dict_commands(self,device='alle'):
         liste = {}
         itera = 1
