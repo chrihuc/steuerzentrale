@@ -6,24 +6,26 @@ Created on Sun Feb 28 13:15:11 2016
 """
 
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import mdb_get_table, mdb_set_table, listCommandTable
+from mysql_con import mdb_get_table, mdb_set_table
 
 app = QtGui.QApplication([])
 from pyqtgraph.parametertree import Parameter, ParameterTree
 
 from cmd_szenen import szenen
+from cmd_satellites import satelliten
 
 szn = szenen()
 szn_lst = sorted(szn.list_commands('alle'))
 
 cmdLsts = ['out_hue','out_Sonos']
-cmdLsts.append(listCommandTable('alle'))
+sate = satelliten()
+cmdLsts.append(sate.listCommandTable('alle'))
 
 class SzenenTreeInputs():
     def __init__(self, isInputs = True, cmdTable = None):
         self.p = None
         self.name = None
-        if self.isInputs:
+        if isInputs:
             self.inputs = mdb_get_table(db='cmd_inputs')
         else:
             self.inputs = mdb_get_table(db=cmdTable)
@@ -43,7 +45,7 @@ class SzenenTreeInputs():
             inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
         inp_kinder = []
         for aktuator in self.inputs:   
-            if (aktuator.get('Description') <> None and isInputs) or (not isInputs):
+            if (aktuator.get('Description') <> None and self.isInputs) or (not self.isInputs):
                 if self.isInputs:             
                     title = aktuator.get('Description')
                 else:
@@ -128,11 +130,12 @@ t.setWindowTitle('Szenen Setup:')
 #t2 = ParameterTree()
 #t2.setParameters(p, showTop=False)
 
+win = QtGui.QWidget()
+
 comboBox = QtGui.QComboBox(win)
 for cmdLst in cmdLsts:
     comboBox.addItem(cmdLst)
-
-win = QtGui.QWidget()
+    
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
 layout.addWidget(QtGui.QLabel(""), 1,  1, 1, 2)
