@@ -125,6 +125,7 @@ class StockRaum():
         self.children.append(child)
 
     def expand(self, status=True):
+        global expanded, dicti
         self.dicti['expanded'] = status
         self.expanded = status
         
@@ -354,7 +355,8 @@ class Szenen_tree():
                 for zim in zimmer:
                     if stock.name in zim.name:
                         stock.addChild(zim.build())
-                        stock.expand(zim.expanded)
+                        if zim.expanded:
+                            stock.expand(True)
                 szn_l_child.append(stock.build())
             szn_dict['children']= szn_l_child
             params.append(szn_dict)
@@ -555,27 +557,42 @@ class Szenen_tree():
         self.set_paratree()        
 
 class InputsTree():
-    def __init__(self, expand = None):
+    def __init__(self, expand = None, isInputs = True, inputsGroup = None, cmdTable = None):
         self.p = None
         self.name = None
-        self.inputs = mdb_get_table(db='cmd_inputs')
-        self.eingaenge = []
         self.expand = expand
+        if isInputs:
+            self.inputs = mdb_get_table(db='cmd_inputs')
+        else:
+            self.inputs = mdb_get_table(db=cmdTable)
+        if inputsGroup == None:
+            self.inputsGroup = ''
+        else:
+            self.inputsGroup = inputsGroup
+        self.eingaenge = []
         for inpu in self.inputs:
             self.eingaenge.append(str(inpu.get('Id')))
+        self.isInputs = isInputs
+        self.cmdTable = cmdTable
         self.set_paratree()
         
     def set_paratree(self):
         global p, name
         params = []
-        inp_dict = {'name': u'Eingänge', 'type': 'group', 'expanded': True}
+        if self.isInputs:
+            inp_dict = {'name': u'Eingänge', 'type': 'group', 'expanded': True}
+        else:
+            inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
         inp_kinder = []
         for aktuator in self.inputs:   
-            if aktuator.get('Description') <> None:
-                title = aktuator.get('Description')
+            if (aktuator.get('Description') <> None and self.inputsGroup in aktuator.get('Name') and self.isInputs) or (not self.isInputs and not aktuator.get('Name') in ['Name']):
+                if self.isInputs:             
+                    title = aktuator.get('Description')
+                else:
+                    title = aktuator.get('Name')
                 akt_dict = {'name': str(aktuator.get('Id')), 'title':title , 'type': 'group', 'expanded': False}
                 if self.expand == aktuator.get('Name'):
-                    akt_dict['expanded']= True
+                    akt_dict['expanded']= True                
                 kinder1 = []
                 kinder2 = []
                 kinder3, kinder4 = [], []
@@ -587,23 +604,29 @@ class InputsTree():
                             kinder1.append({'name': sub, 'type': 'bool', 'value':False}) 
                         else:
                             kinder1.append({'name': sub, 'type': 'bool', 'value':eval(aktuator.get(sub))}) 
-                    if sub in ['Description']:
+                    elif sub in ['Description']:
                         kinder2.append({'name': sub, 'title':'Beschreibung', 'type': 'str', 'value':aktuator.get(sub)})                            
-                    if sub in ['Value_lt','Value_eq','Value_gt']:
+                    elif sub in ['Value_lt','Value_eq','Value_gt']:
                         kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
-                    if sub in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
-                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst})    
+                    elif sub in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
+                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst}) 
+                    elif sub in ['Name', 'Id']:
+                        pass
+                    else:
+                        kinder2.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
                 kinder = kinder1 + kinder2 + kinder3 + kinder4
                 akt_dict['children'] = kinder
                 inp_kinder.append(akt_dict)
         inp_dict['children'] = inp_kinder
         params.append(inp_dict)
-        inp_dict = {'name': 'Speichern', 'type': 'group', 'children': [
-                {'name': 'Speichere Inputs', 'type': 'action'}
-            ]}   
-        params.append(inp_dict)
+        if self.isInputs:
+            inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
+                    {'name': 'Speichere Inputs', 'type': 'action'}
+                ]}   
+            params.append(inp_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
-        self.p.param('Speichern', 'Speichere Inputs').sigActivated.connect(self.save)
+        if self.isInputs:
+            self.p.param('Aktionen', 'Speichere Inputs').sigActivated.connect(self.save)
 
     def save(self):
         global state
@@ -633,13 +656,14 @@ class InputsTree():
                                 if wert == '': wert = None
                                 if wert <> aktuator.get(kind):
                                     dicti[kind] = wert
-                            print dicti
-                            mdb_set_table(table='cmd_inputs', device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
+                            if self.isInputs:
+                                mdb_set_table(table='cmd_inputs', device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                 else:
                     self.itera(some_object.get('children'))
             else:
                 for item in some_object: 
                     self.itera(some_object.get(item))
+
 
 def selected(text):
     global sz, t, lastSelected
@@ -712,7 +736,7 @@ def change_sz(param, changes):
 
 t = ParameterTree()
 sz=Szenen_tree("Alles_ein")
-inp=InputsTree()
+inp=InputsTree(isInputs = True, inputsGroup = 'Temp')
 t.setParameters(sz.p, showTop=False)
 t.setWindowTitle('Szenen Setup:')
 t2 = ParameterTree()

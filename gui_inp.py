@@ -19,7 +19,7 @@ szn_lst = sorted(szn.list_commands('alle'))
 
 cmdLsts = ['out_hue','out_Sonos']
 sate = satelliten()
-cmdLsts.append(sate.listCommandTable('alle'))
+cmdLsts += sate.listCommandTable('alle')
 
 class SzenenTreeInputs():
     def __init__(self, isInputs = True, cmdTable = None):
@@ -45,7 +45,7 @@ class SzenenTreeInputs():
             inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
         inp_kinder = []
         for aktuator in self.inputs:   
-            if (aktuator.get('Description') <> None and self.isInputs) or (not self.isInputs):
+            if (aktuator.get('Description') <> None and self.isInputs) or (not self.isInputs and not aktuator.get('Name') in ['Name']):
                 if self.isInputs:             
                     title = aktuator.get('Description')
                 else:
@@ -71,7 +71,7 @@ class SzenenTreeInputs():
                     elif sub in ['Name', 'Id']:
                         pass
                     else:
-                        kinder2.append({'name': sub, 'title':'sub', 'type': 'str', 'value':aktuator.get(sub)})
+                        kinder2.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
                 kinder = kinder1 + kinder2 + kinder3 + kinder4
                 akt_dict['children'] = kinder
                 inp_kinder.append(akt_dict)
@@ -122,19 +122,26 @@ class SzenenTreeInputs():
                 for item in some_object: 
                     self.itera(some_object.get(item))
 
+def selected(text):
+    global sz, t
+    sz=SzenenTreeInputs(False,text)
+    t.setParameters(sz.p, showTop=False)
+
+
+win = QtGui.QWidget()
+comboBox = QtGui.QComboBox(win)
+for cmdLst in cmdLsts:
+    comboBox.addItem(cmdLst)
+comboBox.activated[str].connect(selected)
 t = ParameterTree()
-sz=SzenenTreeInputs()
+sz=SzenenTreeInputs(False,cmdLsts[0])
 #print sz
 t.setParameters(sz.p, showTop=False)
 t.setWindowTitle('Szenen Setup:')
 #t2 = ParameterTree()
 #t2.setParameters(p, showTop=False)
 
-win = QtGui.QWidget()
 
-comboBox = QtGui.QComboBox(win)
-for cmdLst in cmdLsts:
-    comboBox.addItem(cmdLst)
     
 layout = QtGui.QGridLayout()
 win.setLayout(layout)

@@ -46,7 +46,8 @@ def main():
     sats = satelliten()
     print sats.list_devices()
     print sats.list_commands("Sideb_links")
-    print sats.set_device('LightstripSchlafzi','Hell')
+    #print sats.set_device('LightstripSchlafzi','Hell')
+    print sats.listCommandTable()
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
