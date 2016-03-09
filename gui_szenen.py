@@ -50,12 +50,15 @@ tvs_devs = tv.list_devices()
 tvs_cmds = tv.dict_commands()
 sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
+cmd_lsts = ['out_hue','out_Sonos']
+cmd_lsts += sat.listCommandTable('alle')
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
 szn = szenen()
 szn_lst = sorted(szn.list_commands('alle'))
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
+
 
 #==============================================================================
 # Todo:
@@ -320,8 +323,17 @@ class Szenen_tree():
                     kinder = self.__return_enum__(szene.get(item))  
                     for kind in kinder:       
                         if kind <> None:
+                            if len(kind)<4:
+                                immer = True
+                            else:
+                                immer = kind[3]
+                            if len(kind)<5:
+                                depErfolg = 0
+                            else:
+                                depErfolg = kind[4]                            
                             szn_d_child_l.append({'name': 'Szene %d' % (len(szn_d_child_l)+1), 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': kind[0], 'values':szn_lst},
-                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': u'Verlängerbar', 'type': 'int', 'value': kind[2]}]})  
+                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': u'Verlängerbar', 'type': 'int', 'value': kind[2]},{'name': u'Abhänging Bedingung', 'type': 'bool', 'value': immer}
+                        ,{'name': u'Abhänging Erfolg', 'type': 'int', 'value': depErfolg}]})  
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child) 
                 elif str(item) in ['AutoMode']: 
@@ -409,7 +421,8 @@ class Szenen_tree():
     def addSzene(self):
         global p
         self.p.param(self.name, 'Szene folgt').addChild({'name': 'Befehl ', 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': '', 'values':szn_lst},
-                        {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': u'Verlängerbar', 'type': 'int', 'value': 2}]}, autoIncrementName=True)
+                        {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': u'Verlängerbar', 'type': 'int', 'value': 2},{'name': u'Abhängig Bedingung', 'type': 'bool', 'value': True}
+                        ,{'name': u'Abhängig Erfolg', 'type': 'int', 'value': 0}]}, autoIncrementName=True)
 
     def linkSzene(self):
         for kind in self.p.param(self.name, 'Szene folgt').children():
@@ -496,7 +509,8 @@ class Szenen_tree():
                             for child in some_object.get('children'):
                                 szn_tuple = some_object.get('children').get(child).get('children')
                                 if szn_tuple.get('Szene').get('value') <> '':
-                                    set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get(u'Verlängerbar').get('value')])
+                                    set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get(u'Verlängerbar').get('value'),
+                                                    szn_tuple.get(u'Abhänging Bedingung').get('value'),szn_tuple.get(u'Abhänging Erfolg').get('value')])
                             dicti['Follows'] = set_lst                             
                         else:
                             #strucutre group only if name not ambivalent
@@ -733,19 +747,27 @@ def change_sz(param, changes):
             if path[0] in ['Save/Restore functionality'] and path[1] == 'Neue Szene':
                 selected('LeereVorlage')              
 
+def slctCmdLst(text):
+    global cmds, t3
+    cmds=InputsTree(isInputs = False, cmdTable = text)
+    t3.setParameters(cmds.p, showTop=False)
+
+win = QtGui.QWidget()
 
 t = ParameterTree()
 sz=Szenen_tree("Alles_ein")
 inp=InputsTree(isInputs = True, inputsGroup = 'Temp')
+cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
 t.setParameters(sz.p, showTop=False)
 t.setWindowTitle('Szenen Setup:')
 t2 = ParameterTree()
 t2.setParameters(inp.p, showTop=False)
+t3 = ParameterTree()
+t3.setParameters(cmds.p, showTop=False)
 
 sz.p.sigTreeStateChanged.connect(change_sz)
 inp.p.sigTreeStateChanged.connect(change)
 
-win = QtGui.QWidget()
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
 comboBox = QtGui.QComboBox(win)
@@ -755,19 +777,26 @@ comboBox.setMaxVisibleItems(50)
 lastSelected = ''
 comboBox.activated[str].connect(selected)
 
+comboBox2 = QtGui.QComboBox(win)
+for cmdLst in cmd_lsts:
+    comboBox2.addItem(cmdLst)
+comboBox2.activated[str].connect(slctCmdLst)
+
 buttn = QtGui.QPushButton(win)
 buttn.setText('Update')
 buttn.clicked.connect(update)
 
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
 layout.addWidget(buttn, 1, 0, 1, 1)
-layout.addWidget(t, 2, 1, 1, 1)
-layout.addWidget(comboBox, 1, 1, 1, 1)
 layout.addWidget(t2, 2, 0, 1, 1)
+layout.addWidget(comboBox, 1, 1, 1, 1)
+layout.addWidget(t, 2, 1, 1, 1)
+layout.addWidget(comboBox2, 1, 2, 1, 1)
+layout.addWidget(t3, 2, 2, 1, 1)
 
 
 win.show()
-win.resize(800,1200)
+win.resize(1200,1200)
 
 #==============================================================================
 # till here

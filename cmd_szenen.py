@@ -261,10 +261,19 @@ class szenen:
 #==============================================================================
 # start timer with following actions                               
 #==============================================================================
-            if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
-                kommandos = self.__return_enum__(szene_dict.get("Follows"))
-                for kommando in kommandos:
-                    szn, dlay, ex_re = kommando
+        if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
+            kommandos = self.__return_enum__(szene_dict.get("Follows"))
+            for kommando in kommandos:
+                szn = kommando[0]
+                dlay = kommando[1]
+                ex_re = kommando[2]
+                immer = False
+                depErfolg = 0
+                if len(kommando) > 3:
+                    immer = kommando[3]
+                if len(kommando) == 5:
+                    depErfolg = kommando[4]
+                if (immer or erfuellt) and depErfolg == 0:
                     if ex_re == 0:
                         self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
@@ -284,6 +293,28 @@ class szenen:
         for item in t_list:
             aes.new_event(description="CMD Timeout: " + str(item), prio=0, karenz = 0.03)
         del self.kommando_dict[szn_id]
+#==============================================================================
+# start timer with following actions nur wenn erfolg oder nicht erfolg                              
+#==============================================================================
+        if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
+            kommandos = self.__return_enum__(szene_dict.get("Follows"))
+            for kommando in kommandos:
+                szn = kommando[0]
+                dlay = kommando[1]
+                ex_re = kommando[2]
+                immer = False
+                depErfolg = 0
+                if len(kommando) > 3:
+                    immer = kommando[3]
+                if len(kommando) == 5:
+                    depErfolg = kommando[4]
+                if (immer or erfuellt) and ((depErfolg == 1 and erfolg) or (depErfolg == 2 and not erfolg)):
+                    if ex_re == 0:
+                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
+                    elif ex_re == 1:
+                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
+                    elif ex_re == 2:
+                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)           
         return erfolg
 
 if __name__ == '__main__':

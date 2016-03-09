@@ -70,6 +70,11 @@ todo:
         xs1 on device
         hue on device
         sats on mysql
+    neue Szene tut nicht
+    dupliziere Input
+    neuer Befehl
+    folgende Szene, 0 wenn Bedingung erfüllt, 1 immer
+    folgende Szene, 0 egal, 1 wenn true, 2 wenn false
     check if hue command was executed only then return true
     gcm setting id is empty
     szenen gui
