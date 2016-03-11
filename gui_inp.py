@@ -5,6 +5,8 @@ Created on Sun Feb 28 13:15:11 2016
 @author: christoph
 """
 
+import constants
+
 from pyqtgraph.Qt import QtCore, QtGui
 from mysql_con import mdb_get_table, mdb_set_table
 
@@ -21,70 +23,51 @@ cmdLsts = ['out_hue','out_Sonos']
 sate = satelliten()
 cmdLsts += sate.listCommandTable('alle')
 
+sets = mdb_get_table(constants.sql_tables.settings.name)
+
+
 class SzenenTreeInputs():
     def __init__(self, isInputs = True, cmdTable = None):
         self.p = None
         self.name = None
-        if isInputs:
-            self.inputs = mdb_get_table(db='cmd_inputs')
-        else:
-            self.inputs = mdb_get_table(db=cmdTable)
-        self.eingaenge = []
-        for inpu in self.inputs:
-            self.eingaenge.append(str(inpu.get('Id')))
-        self.isInputs = isInputs
-        self.cmdTable = cmdTable
         self.set_paratree()
+        
+    def __return_enum__(self,eingabe):
+        if (type(eingabe) == str):
+            try:
+                if type(eval(eingabe)) == list or type(eval(eingabe)) == dict or type(eval(eingabe)) == tuple:
+                    kommandos = eval(eingabe)
+                else:
+                    kommandos = [eingabe]
+            except (NameError, SyntaxError) as e:
+                kommandos = [eingabe]
+        elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
+            return eingabe
+        else:
+            kommandos = [eingabe]    
+        return kommandos        
         
     def set_paratree(self):
         global p, name
         params = []
-        if self.isInputs:
-            inp_dict = {'name': u'Eingänge', 'type': 'group', 'expanded': True}
-        else:
-            inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
-        inp_kinder = []
-        for aktuator in self.inputs:   
-            if (aktuator.get('Description') <> None and self.isInputs) or (not self.isInputs and not aktuator.get('Name') in ['Name']):
-                if self.isInputs:             
-                    title = aktuator.get('Description')
-                else:
-                    title = aktuator.get('Name')
-                akt_dict = {'name': str(aktuator.get('Id')), 'title':title , 'type': 'group', 'expanded': False}
-                kinder1 = []
-                kinder2 = []
-                kinder3, kinder4 = [], []
-                for sub in sorted(aktuator):
-                    if sub in ['Logging','Setting']:
-                        if aktuator.get(sub) == '1':
-                            kinder1.append({'name': sub, 'type': 'bool', 'value':True})
-                        elif aktuator.get(sub) in ['0', None]:
-                            kinder1.append({'name': sub, 'type': 'bool', 'value':False}) 
-                        else:
-                            kinder1.append({'name': sub, 'type': 'bool', 'value':eval(aktuator.get(sub))}) 
-                    elif sub in ['Description']:
-                        kinder2.append({'name': sub, 'title':'Beschreibung', 'type': 'str', 'value':aktuator.get(sub)})                            
-                    elif sub in ['Value_lt','Value_eq','Value_gt']:
-                        kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
-                    elif sub in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
-                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst}) 
-                    elif sub in ['Name', 'Id']:
-                        pass
-                    else:
-                        kinder2.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
-                kinder = kinder1 + kinder2 + kinder3 + kinder4
-                akt_dict['children'] = kinder
-                inp_kinder.append(akt_dict)
-        inp_dict['children'] = inp_kinder
-        params.append(inp_dict)
-        if self.isInputs:
-            inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
-                    {'name': 'Speichere Inputs', 'type': 'action'}
-                ]}   
-            params.append(inp_dict)
+        dicti = {'name': u'Settings', 'type': 'group', 'expanded': True}
+        kinder = []
+        for seti in sets:  
+            kind = {'name':seti.get('Name')}
+            if seti.get('Typ') == None:
+                kind['type'] = 'str'
+                kind['value'] = seti.get('Value')
+            elif '[' in seti.get('Typ'):
+                kind['type'] = 'list'
+                kind['values']=self.__return_enum__(seti.get('Typ'))
+                kind['value']  = seti.get('Value')
+            else:                    
+                kind['type'] =seti.get('Typ')
+                kind['value']  = eval(seti.get('Value'))
+            kinder.append(kind)
+        dicti['children'] = kinder
+        params.append(dicti)
         self.p = Parameter.create(name='params', type='group', children=params)
-        if self.isInputs:
-            self.p.param('Aktionen', 'Speichere Inputs').sigActivated.connect(self.save)
 
     def save(self):
         global state

@@ -302,11 +302,11 @@ class Szenen_tree():
                     for child in kinder:
                         if type(kinder) == dict:
                             szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child},
-                        {'name': 'Operand', 'type': 'str', 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
+                        {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
                         else:
                             if child <> None:
-                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child[0]},
-                        {'name': 'Operand', 'type': 'str', 'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}],'tip': "This is a checkbox"})
+                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':sorted(settings_r()), 'value': child[0]},
+                        {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'],'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)                             
                 elif str(item) in ['setTask']: 
@@ -332,8 +332,8 @@ class Szenen_tree():
                             else:
                                 depErfolg = kind[4]                            
                             szn_d_child_l.append({'name': 'Szene %d' % (len(szn_d_child_l)+1), 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': kind[0], 'values':szn_lst},
-                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': u'Verlängerbar', 'type': 'int', 'value': kind[2]},{'name': u'Abhänging Bedingung', 'type': 'bool', 'value': immer}
-                        ,{'name': u'Abhänging Erfolg', 'type': 'int', 'value': depErfolg}]})  
+                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': u'Verlängerbar', 'type': 'list', 'values':{u'Verlängerbar':0,'nur exact':1,'fest':2}, 'value': kind[2]},{'name': u'Abhänging Bedingung', 'type': 'bool', 'value': immer}
+                        ,{'name': u'Abhänging Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': depErfolg}]})  
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child) 
                 elif str(item) in ['AutoMode']: 
