@@ -248,7 +248,8 @@ def mdb_set_table(table, device, commands, primary = 'Name'):
             else:
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
-            cur.execute(sql)       
+            if commando <> primary:
+                cur.execute(sql)       
     con.close() 
 
 #def mdb_sonos_s(player, commands):

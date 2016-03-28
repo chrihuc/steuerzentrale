@@ -45,7 +45,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    scenes.execute("DRS3")
+    print scenes.list_commands("alle")
     
 class szenen:    
     
@@ -67,7 +67,7 @@ class szenen:
                         liste[szene.get("Name")] = szene.get("Name")
         elif gruppe == "alle":
             for szene in table:
-                if str(szene.get("Id")) > 19:
+                if int(szene.get("Id")) > 19:
                     if str(szene.get("Beschreibung")) <> "None":
                         liste[szene.get("Name")] = szene.get("Beschreibung")
                     else:

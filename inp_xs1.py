@@ -3,7 +3,7 @@
 import constants
 
 import pycurl,httplib,xml,urllib2,subprocess,os
-from classes import  ping
+from classes import  ping, myezcontrol
 from mysql_con import setting_s, setting_r, inputs
 from threading import Timer
 import threading
@@ -13,13 +13,14 @@ from time import localtime,strftime
 from socket import socket, AF_INET, SOCK_DGRAM
 #from szenen import set_szene
 from alarmevents import alarm_event
+from cmd_xs1 import myezcontrol
 
 selfsupervision = True
 
 aes = alarm_event()
-mySocket = socket( AF_INET, SOCK_DGRAM )
 conn = pycurl.Curl()
 last_data = ""
+ezcontrol = myezcontrol(constants.xs1_.IP) 
 
 def last_data_reset():
     last_data = ""
@@ -53,8 +54,8 @@ def on_receive(data):
     if (("heartbeat" == name) and (value == 0)):
         heartbeat.cancel()
         heartbeat = Timer(constants.heartbt, heartbeat_sup)
-        heartbeat.start()        
-        mySocket.sendto('heartbeat',(constants.udp_.IP,constants.udp_.PORT))  
+        heartbeat.start()   
+        ezcontrol.SetSwitchFunction("heartbeat", "1") 
     szns = inputs(name,value)
     last_data = data
     
@@ -71,6 +72,7 @@ def heartbeat_sup():
         setting_s("XS1_off", "Active")
     setting_s("NumRestart", str(count + 1))
     exectext = "sudo killall python"
+    print "connection lost"
     if ping(constants.router_IP):
         os.system(exectext)
     else:
@@ -94,6 +96,7 @@ def main():
             time.sleep(60)        
     heartbeat = Timer(constants.heartbt, heartbeat_sup)
     heartbeat.start()
+    ezcontrol.SetSwitchFunction("heartbeat", "1") 
     ldt = Timer(2, last_data_reset)
     conn = pycurl.Curl()  
     conn.setopt(pycurl.URL, constants.xs1_.STREAM_URL)  

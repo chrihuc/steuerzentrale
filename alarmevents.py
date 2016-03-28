@@ -112,9 +112,9 @@ class alarm_event:
             with XS1DB:
                 cur = XS1DB.cursor()
                 if prio < 1:
-                    insertstatement = 'INSERT INTO '+table.name+'(description, prio, acknowledged) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
+                    insertstatement = 'INSERT INTO '+table.name+'(description, prio, acknowledged, Date) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
                 else:
-                    insertstatement = 'INSERT INTO '+table.name+'(description, prio) VALUES("' + str(description) + '", "' + str(prio) + '")'
+                    insertstatement = 'INSERT INTO '+table.name+'(description, prio, Date) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
                 cur.execute(insertstatement)
             if str(setting_r("Status")) == "Wach":
                 anwesend = True

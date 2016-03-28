@@ -344,7 +344,7 @@ class Szenen_tree():
                         szn_d_child['value'] = eval(szene.get(item))
                     else:
                         szn_d_child['value'] = False
-                    szn_l_child.append(szn_d_child)             
+                    szn_l_child.append(szn_d_child)                     
                 else:
                     szn_d_child['name'] = str(item)
                     if str(item) in ['Prio','Delay']:
@@ -491,7 +491,9 @@ class Szenen_tree():
                             dicti[device] = set_lst                                  
                         else:
                             kommandos = self.return_list(some_object.get('children'))
-                            if only_change:
+                            if str(device) == "Id":
+                                dicti[device] = kommandos
+                            elif only_change:
                                 if self.szenen[0].get(device) <> kommandos:
                                     dicti[device] = kommandos
                             else:
@@ -540,7 +542,7 @@ class Szenen_tree():
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
         print neu_szene
-        mdb_set_table(table='set_Szenen', device=self.szene_to_read, commands=neu_szene)
+        mdb_set_table(table='set_Szenen', device=neu_szene.get('Id'), commands=neu_szene, primary = 'Id')
             
 
     def check_bedingung(self):
@@ -687,10 +689,14 @@ def selected(text):
     sz.p.sigTreeStateChanged.connect(change_sz)
 
 def update():
-    global inp, t2  
+    global inp, t2, comboBox, szn_lst
     selected(lastSelected)  
     inp=InputsTree()
     t2.setParameters(inp.p, showTop=False)
+    comboBox.clear()
+    szn_lst = sorted(szn.list_commands('alle'))
+    for szne in szn_lst:
+        comboBox.addItem(szne)    
     inp.p.sigTreeStateChanged.connect(change)
     
 def showInputs(eingang):
@@ -756,7 +762,7 @@ win = QtGui.QWidget()
 
 t = ParameterTree()
 sz=Szenen_tree("Alles_ein")
-inp=InputsTree(isInputs = True, inputsGroup = 'Temp')
+inp=InputsTree(isInputs = True, inputsGroup = 'V00')
 cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
 t.setParameters(sz.p, showTop=False)
 t.setWindowTitle('Szenen Setup:')

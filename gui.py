@@ -43,11 +43,14 @@ System = None
 Device = None
 constants.redundancy_.master = True
 
-eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':100,'pos_y':100},
-              {'Name':'V01BUE1RUM1LI01','desc':'Büro','type':'dev','pos_x':100,'pos_y':200},
-              {'Name':'Temperatur_Balkon','desc':'T Balkon','type':'sens','pos_x':200,'pos_y':200},
-              {'Name':'Temperatur_Wohnzi','desc':'T Balkon','type':'sens','pos_x':300,'pos_y':200},
-              {'Name':'Temperatur_Schlafzi','desc':'T Balkon','type':'sens','pos_x':400,'pos_y':200}]
+eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':300},
+              {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':20,'pos_y':150},
+              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':75}]
+              
+og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
+              {'Name':'V01BAD1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':550,'pos_y':120},
+              {'Name':'V01BAD1RUM1HU01','desc':'T Balkon','type':'sens','pos_x':600,'pos_y':120},
+              {'Name':'V01SCH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':450,'pos_y':300}]
 
 weckerButtons = []
 
@@ -115,8 +118,19 @@ class Main(QtGui.QMainWindow):
         
         #1. Stock
         self.tab_1 = QtGui.QWidget()
-        #self.tab_1.setStyleSheet("QWidget {background-image:url(./EG.png)}")
+        self.tab_1.setStyleSheet("QWidget {background-image:url(./OG.png)}")
         self.tab_1.setObjectName(_fromUtf8("1_Stock"))   
+        self.buttons = []
+        for btn in og_buttons:
+            self.buttons.append(QtGui.QPushButton(self.tab_1))
+            self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 50, 50))
+            self.buttons[-1].setObjectName(btn.get('Name'))
+            if btn.get('type') == 'dev':
+                self.buttons[-1].clicked.connect(self.make_set_popup(btn.get('Name')))
+                self.buttons[-1].setText(_fromUtf8(btn.get('desc')))
+            elif btn.get('type') == 'sens':
+                self.buttons[-1].clicked.connect(self.make_set_g_popup(btn.get('Name')))
+                self.buttons[-1].setText(settings.get(btn.get('Name')))          
         self.tabWidget.addTab(self.tab_1, _fromUtf8(""))  
 
         #2. Stock
