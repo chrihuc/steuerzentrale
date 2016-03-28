@@ -207,7 +207,7 @@ class szenen:
                     t_list.remove(itm)
         self.kommando_dict[szn_id] = t_list
 
-    def execute(self, szene, check_bedingung=False):
+    def execute(self, szene, check_bedingung=False, wert = 0):
         szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung

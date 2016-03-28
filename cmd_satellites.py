@@ -2,7 +2,7 @@
 
 import constants
 
-from mysql_con import mdb_get_table, mdb_read_table_entry
+from mysql_con import mdb_get_table, mdb_read_table_entry, mdb_read_table_column
 import socket
 from socket import error as socket_error
 from alarmevents import alarm_event
@@ -44,10 +44,10 @@ def  get_satellite(name):
 
 def main():
     sats = satelliten()
-    print sats.list_devices()
-    print sats.list_commands("Sideb_links")
+    #print sats.list_devices()
+    #print sats.list_commands("Sideb_links")
     #print sats.set_device('LightstripSchlafzi','Hell')
-    print sats.listCommandTable()
+    print sats.listCommandTable(device="forSave", nameReturn = False)
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -125,17 +125,22 @@ class satelliten:
                     liste.append(comand.get("Name"))
         return liste        
 
-    def listCommandTable(self,device='alle'):
+    def listCommandTable(self,device='alle', nameReturn = True):
         liste = [] 
         list_cmds_of = []
         if device == 'alle':
             list_cmds_of = self.list_devices()
+        elif device=="forSave":
+            list_cmds_of = mdb_read_table_column(table.name,"Name")            
         else:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
-            cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
-            if self.__check_table_exists__(cmds_table):           
-                liste.append(cmds_table)
+            cmds_table=mdb_read_table_entry(table.name,sates)
+            if self.__check_table_exists__(cmds_table.get('command_set')):           
+                if nameReturn:
+                    liste.append(cmds_table.get('Name'))
+                else:
+                    liste.append(cmds_table.get('command_set'))
         return liste
 
     def dict_commands(self,device='alle'):

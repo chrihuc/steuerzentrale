@@ -7,7 +7,7 @@ import threading
 #from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import time, os, sys
 #import urllib2
-import xs1inputs#, udpinputs, redundancy, periodic_sup
+import inp_xs1#, udpinputs, redundancy, periodic_sup
 from alarmevents import alarm_event
 import sqlsync
 
@@ -36,7 +36,7 @@ aes = alarm_event()
 
 threadliste = []
 
-t = threading.Thread(name="xs1", target=xs1inputs.main, args = [])
+t = threading.Thread(name="xs1", target=inp_xs1.main, args = [])
 threadliste.append(t)
 t.start()
 

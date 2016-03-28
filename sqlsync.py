@@ -24,12 +24,15 @@ class sync:
         self.temp_f = constants.temp_folder
         self.temp_folder = "/home/pi/steuerzentrale/sql/"
     
-    def export(self, table, db, for_git = False):
+    def export(self, table, db, for_git = False, folder=constants.temp_folder):
+        # for git deprecated
         #exectext = 'mysql -h '+self.host_r+' -u '+self.user_r+' --password='+self.pass_r+' -D '+db+' -e "SELECT * FROM '+table+'" > '+self.temp_f+table+'.sql'
+        if folder[-1] <> "/":
+            folder += "/"
         if for_git:
             exectext = 'mysqldump -h '+self.host_+' -u '+self.user_+' --password='+self.pass_+" "+db+' '+table+' > '+self.temp_folder+table+'.sql'
         else:
-            exectext = 'mysqldump -h '+self.host_r+' -u '+self.user_r+' --password='+self.pass_r+" "+db+' '+table+' > '+self.temp_f+table+'.sql'
+            exectext = 'mysqldump -h '+constants.sql_.IP+' -u '+constants.sql_.USER+' --password='+constants.sql_.PASS+" "+db+' '+table+' > '+folder+table+'.sql'
         #print exectext
         os.system(exectext) 
     

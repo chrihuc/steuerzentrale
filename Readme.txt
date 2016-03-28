@@ -73,18 +73,14 @@ todo:
     neue Szene tut nicht
     dupliziere Input
     neuer Befehl
-    folgende Szene, 0 wenn Bedingung erfüllt, 1 immer
-    folgende Szene, 0 egal, 1 wenn true, 2 wenn false
+    gebe wert bis zu endgütlig command weiter
     check if hue command was executed only then return true
     gcm setting id is empty
     szenen gui
-        sortieren nach Raum
-        wenn kommando dann expanded
     input gui
 
 issue:
     szenen commands coming back as string
-
 
 V1: separate szenen
         Interlocks für PS3 o.ä?
