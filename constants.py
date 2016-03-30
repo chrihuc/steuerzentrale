@@ -153,6 +153,8 @@ class udp_:
     IP = eigene_IP
     # constants.udp_.PORT
     PORT = UDP_PORT
+    biPORT = 5005
+    broadPORT = 5000
     
 class scanner_:
     # constants.scanner_.IP
