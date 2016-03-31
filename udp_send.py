@@ -7,7 +7,7 @@ Created on Wed Mar 30 15:35:24 2016
 
 import socket
 
-HOST = '127.0.0.1'   # Symbolic name meaning the local host
+HOST = '192.168.192.81'   # Symbolic name meaning the local host
 PORT = 5005    # Arbitrary non-privileged port
 while True:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

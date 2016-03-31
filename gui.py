@@ -564,7 +564,7 @@ class MySZTreePopup(QtGui.QMainWindow):
 
 class TimeAxisItem(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):
-        return [QDateTime(1970,1,1,0.0,0).addSecs(value).toString('yyyy-MM-dd hh:mm') for value in values]
+        return [QDateTime(1970,1,1,1.0,0).addSecs(value).toString('yyyy-MM-dd hh:mm') for value in values]
 
 
 running = True
