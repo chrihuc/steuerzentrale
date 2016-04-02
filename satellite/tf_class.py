@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-  
 
-HOST = "192.168.192.81"
 PORT = 4223
-SERVER_IP_1   = '192.168.192.10'
-SERVER_IP_2   = '192.168.192.33'
-OUTPUTS_PORT = 5000
+
+from functools import partial
 
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.bricklet_io16 import IO16
@@ -16,17 +14,64 @@ from tinkerforge.bricklet_voltage_current import BrickletVoltageCurrent
 from tinkerforge.bricklet_distance_us import BrickletDistanceUS
 from threading import Timer
 import time
+import datetime
+
+import tifo_config
+import constants
 
 from socket import socket, AF_INET, SOCK_DGRAM
 
 mySocket = socket( AF_INET, SOCK_DGRAM )
 
-uebersetzung = {'63mHZj.m4d':'V01ZIM1RUM1HE01'}
 
+class io16Dict:
+    def __init__(self):
+        self.liste = []
+
+    def addIO(self, IO,addr, length):
+        dicti = {}
+        dicti["IO"] = IO
+        dicti['addr'] = addr
+        dicti["value"] = 0
+        dicti["valueA"] = 0
+        dicti["valueB"] = 0
+        times = []
+        for cnt in range(0,length):
+            times.append(datetime.datetime.now())
+        dicti["times"] = times
+        self.liste.append(dicti)
+
+    def setValues(self, IO,  values, port = 'a'):
+        for ios in self.liste:
+            if ios.get('IO') == IO:
+                if port == 'a':
+                    ios["valueA"] = values
+                else:
+                    ios["valueB"] = values
+                
+    def setTime(self, IO,  addr, port = 'a'):
+        for ios in self.liste:
+            if ios.get('IO') == IO:        
+                index = int(log2(addr))
+                times = ios.get("times")
+                times[index] = datetime.datetime.now()
+                ios["times"] = times
+                
+    def getTimeDiff(self, IO,  addr, port = 'a'):
+        for ios in self.liste:
+            if ios.get('IO') == IO:        
+                index = int(log2(addr))
+                times = ios.get("times")
+                timedelta = datetime.datetime.now() - times[index]
+                #times[index] = 0
+                ios["times"] = times     
+                return timedelta
+        
 class tiFo:
     def __init__(self):
         self.led = None
-        self.io = None
+        self.io = []
+        self.io16list = io16Dict()
         self.al = []
         self.moist = None
         # Create IP Connection
@@ -37,8 +82,8 @@ class tiFo:
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED, 
                                      self.cb_connected)
         # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(HOST, PORT) 
-        self.ipcon.enumerate()        
+        self.ipcon.connect(constants.ownIP, PORT) 
+        #self.ipcon.enumerate()        
         
 
     def cb_ambLight(self, illuminance,device):
@@ -52,11 +97,35 @@ class tiFo:
         print illuminance, thresDown, thresUp
         device.set_illuminance_callback_threshold('o', thresDown, thresUp)
         dicti = {}
-        name = uebersetzung.get(str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]))
+        name = tifo_config.inputs.get(str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]))
         dicti['value'] = str(illuminance)
         dicti['name'] = name
         print dicti
-        mySocket.sendto(str(dicti) ,('192.168.192.81',OUTPUTS_PORT))        
+        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
+
+    def cb_interrupt(self, port, interrupt_mask, value_mask, device):
+#        print('Interrupt on port: ' + port + str(bin(interrupt_mask)))
+#        print('Value: ' + str(bin(value_mask)))
+        temp_uid = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+        name = tifo_config.IO16i.get(temp_uid).get(port + str(bin(interrupt_mask)))
+        if port == 'a':
+            nc_mask = tifo_config.IO16.get(temp_uid)[7]
+        else:
+            nc_mask = tifo_config.IO16.get(temp_uid)[8]
+        value = (value_mask&interrupt_mask)/interrupt_mask
+        nc_pos = (nc_mask&interrupt_mask)/interrupt_mask
+        dicti = {}
+        dicti['name'] = name
+        #print name, value
+        self.io16list.setValues(device,value_mask,port)
+        #print self.io16list.getTimeDiff(device,interrupt_mask, port)
+        if value == nc_pos:        
+            dicti['value'] = self.io16list.getTimeDiff(device,interrupt_mask, port)
+        else:
+            dicti['value'] = 0
+            self.io16list.setTime(device,interrupt_mask, port)
+        print dicti
+        #mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))       
 
     def cb_enumerate(self, uid, connected_uid, position, hardware_version, 
                      firmware_version, device_identifier, enumeration_type):
@@ -75,10 +144,20 @@ class tiFo:
                 #self.led.set_rgb_values(30, self.NUM_LEDS, self.r, self.g, self.b)
 
             if device_identifier == IO16.DEVICE_IDENTIFIER:
-                self.io = IO16(uid, self.ipcon)
-                self.io.set_debounce_period(500)
-                self.io.set_port_interrupt('a', 0b00111111)
-                self.io.register_callback(self.io.CALLBACK_INTERRUPT, self.cb_interrupt)
+                self.io.append(IO16(uid, self.ipcon))
+                temp_uid = str(self.io[-1].get_identity()[1]) +"."+ str(self.io[-1].get_identity()[0])
+                self.io16list.addIO(self.io[-1],temp_uid,16)
+                self.io[-1].set_debounce_period(100)
+                if tifo_config.IO16.get(temp_uid) <> None:
+                    self.io[-1].set_port_interrupt('a', tifo_config.IO16.get(temp_uid)[0])
+                    self.io[-1].set_port_interrupt('b', tifo_config.IO16.get(temp_uid)[1])
+                    self.io[-1].set_port_configuration('a', tifo_config.IO16.get(temp_uid)[0],'i',True)
+                    self.io[-1].set_port_configuration('b', tifo_config.IO16.get(temp_uid)[1],'i',True)                    
+                    self.io[-1].set_port_configuration('a', tifo_config.IO16.get(temp_uid)[2],'o',False)
+                    self.io[-1].set_port_configuration('b', tifo_config.IO16.get(temp_uid)[3],'o',False)
+                    self.io[-1].set_port_monoflop('a', tifo_config.IO16.get(temp_uid)[4],0,tifo_config.IO16.get(temp_uid)[6])
+                    self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
+                    self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1] ))
              
             if device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                 self.al.append(AmbientLight(uid, self.ipcon))
@@ -90,7 +169,7 @@ class tiFo:
                 #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE, self.cb_ambLight)
                 #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE_REACHED, self.cb_ambLight)
                 args = self.al[-1]
-                self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, lambda event, args=args: self.cb_ambLight(event,args))
+                self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, lambda event1, event2, event3, args=args: self.cb_ambLight(event1, event2, event3, args))
                 
             if device_identifier == Moisture.DEVICE_IDENTIFIER:
                 self.moist = Moisture(uid, self.ipcon)
@@ -118,7 +197,7 @@ class volt_cur:
                                      self.cb_connected)
 
         # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(HOST, PORT) 
+        self.ipcon.connect(constants.ownIP, PORT) 
         #self.ipcon.enumerate()                 
        
     
@@ -127,14 +206,14 @@ class volt_cur:
         dicti = {}
         dicti['value'] = str(voltage)
         dicti['name'] = 'Voltage'
-        mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
-        mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT)) 
+        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort)) 
+        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort)) 
         current = self.vc.get_current()
         dicti = {}
         dicti['value'] = str(current)
         dicti['name'] = 'Current'
-        mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
-        mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT))         
+        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort)) 
+        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort))         
         thread_cb_reached = Timer(60, self.cb_reached_vc, [])
         thread_cb_reached.start()        
        
@@ -172,7 +251,7 @@ class dist_us:
                                      self.cb_connected)
 
         # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(HOST, PORT) 
+        self.ipcon.connect(constants.ownIP, PORT) 
         #self.ipcon.enumerate()                 
        
     
@@ -180,8 +259,8 @@ class dist_us:
         dicti = {}
         dicti['value'] = str(distance)
         dicti['name'] = str(self.dus.get_identity()[0]) + "_" + str(self.dus.get_identity()[5])
-        mySocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
-        mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT)) 
+        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort)) 
+        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort)) 
        
     
     # Callback handles device connections and configures possibly lost 

@@ -5,12 +5,14 @@ import socket
 import time
 #import urllib2, os
 #import tf_class
+import constants
+
 
 SERVER_IP_1   = '192.168.192.10'
 SERVER_IP_2   = '192.168.192.33'
 OUTPUTS_PORT = 5000
 
-PORT_NUMBER = 5010
+PORT_NUMBER = 5005
 mySocket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 mySocket.bind( ('', PORT_NUMBER) )
@@ -21,7 +23,7 @@ def send_heartbeat():
     while True:
         dicti = {}
         dicti['value'] = str(1)
-        dicti['name'] = 'Hrtbt_BueroPi'
+        dicti['name'] = 'Hrtbt_' + constants.name
         hbtsocket.sendto(str(dicti),(SERVER_IP_1,OUTPUTS_PORT)) 
         #mySocket.sendto(str(dicti),(SERVER_IP_2,OUTPUTS_PORT))  
         time.sleep(60)
