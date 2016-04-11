@@ -11,7 +11,7 @@ import time
 import sys
 from time import localtime,strftime
 from socket import socket, AF_INET, SOCK_DGRAM
-#from szenen import set_szene
+from cmd_szenen import szenen
 from alarmevents import alarm_event
 from cmd_xs1 import myezcontrol
 
@@ -21,6 +21,7 @@ aes = alarm_event()
 conn = pycurl.Curl()
 last_data = ""
 ezcontrol = myezcontrol(constants.xs1_.IP) 
+scenes = szenen()
 
 def last_data_reset():
     last_data = ""
@@ -57,6 +58,9 @@ def on_receive(data):
         heartbeat.start()   
         ezcontrol.SetSwitchFunction("heartbeat", "1") 
     szns = inputs(name,value)
+    for szene in szns:
+        if szene <> None:
+            scenes.execute(szene, check_bedingung=False, wert = value)
     last_data = data
     
 def heartbeat_sup():

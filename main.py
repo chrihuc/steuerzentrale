@@ -12,7 +12,7 @@ from alarmevents import alarm_event
 import sqlsync
 
 #delay for changeover
-time.sleep(10)
+#time.sleep(10)
 
 aes = alarm_event()
 #ssync = sqlsync.sync()
