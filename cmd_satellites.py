@@ -20,7 +20,7 @@ class sql_object:
         self.typ = typ
         self.columns = columns
 
-table = sql_object("set_satellites", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("IP","VARCHAR(45)"),("PORT","INT(11)"),("Type","VARCHAR(45)"),("USER","VARCHAR(45)"),("PASS","VARCHAR(45)"),("command_set","VARCHAR(45)")))
+table = sql_object("set_satellites", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)",'Name_UNIQUE'),("IP","VARCHAR(45)"),("PORT","INT(11)"),("Type","VARCHAR(45)"),("USER","VARCHAR(45)"),("PASS","VARCHAR(45)"),("command_set","VARCHAR(45)")))
 
 def  get_satellites():
     list = mdb_get_table(constants.sql_tables.satellites.name)
@@ -45,9 +45,9 @@ def  get_satellite(name):
 def main():
     sats = satelliten()
     #print sats.list_devices()
-    #print sats.list_commands("Sideb_links")
-    #print sats.set_device('LightstripSchlafzi','Hell')
-    print sats.listCommandTable(device="forSave", nameReturn = False)
+    print sats.list_commands("Vm1ZIM1SCA1DO01")
+    print sats.set_device('Vm1ZIM1SCA1DO01','scan1')
+    #print sats.listCommandTable(device="forSave", nameReturn = False)
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

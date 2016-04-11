@@ -51,7 +51,7 @@ def init_cfg():
             config.set('HUE', cfg, value)            
     
     # Writing our configuration file to 'main.cfg'
-    with open('main.cfg', 'wb') as configfile:
+    with open('./main.cfg', 'wb') as configfile:
         config.write(configfile)
 
 
@@ -60,7 +60,7 @@ for i in range(0,3):
     while True:
         try:
             run = True
-            config.readfp(open('main.cfg'))
+            config.readfp(open('./main.cfg'))
             eigene_IP = config.get('Main', 'eigene_IP')
             name = config.get('Main', 'name')
             
