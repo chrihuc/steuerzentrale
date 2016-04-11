@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import settings_r, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId
+from mysql_con import settings_r, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
 
 import easygui
 
@@ -51,7 +51,7 @@ tvs_cmds = tv.dict_commands()
 sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 cmd_lsts = ['out_hue','out_Sonos']
-cmd_lsts += sat.listCommandTable('alle')
+cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
 szn = szenen()
@@ -64,6 +64,7 @@ szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 # Todo:
 #   all list to be updated (no need to use dicts)
 #   gehe zu szenen
+#   codes mit listen ersetzen
 #==============================================================================
 
 
@@ -606,7 +607,7 @@ class InputsTree():
                 if self.isInputs:             
                     title = aktuator.get('Description')
                 else:
-                    title = aktuator.get('Name')
+                    title = str(aktuator.get('Id'))
                 akt_dict = {'name': str(aktuator.get('Id')), 'title':title , 'type': 'group', 'expanded': False}
                 if self.expand == aktuator.get('Name'):
                     akt_dict['expanded']= True                
@@ -627,7 +628,7 @@ class InputsTree():
                         kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
                     elif sub in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
                         kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst}) 
-                    elif sub in ['Name', 'Id']:
+                    elif sub in ['Id']:
                         pass
                     else:
                         kinder2.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
@@ -699,6 +700,10 @@ def update():
     for szne in szn_lst:
         comboBox.addItem(szne)    
     inp.p.sigTreeStateChanged.connect(change)
+    
+def neuTrig():
+    vals = mdb_read_table_entry(db="cmd_inputs",entry=comboBox3.currentText(),column='Description')
+    mdb_add_table_entry("cmd_inputs",vals)
     
 def showInputs(eingang):
     global inp, t2   
@@ -789,13 +794,25 @@ for cmdLst in cmd_lsts:
     comboBox2.addItem(cmdLst)
 comboBox2.activated[str].connect(slctCmdLst)
 
+comboBox3 = QtGui.QComboBox(win)
+inpts = mdb_read_table_column(db="cmd_inputs", column = 'Description')
+for inpt in inpts:
+    if inpt <> "":
+        comboBox3.addItem(inpt)
+
 buttn = QtGui.QPushButton(win)
 buttn.setText('Update')
 buttn.clicked.connect(update)
 
+adinbttn = QtGui.QPushButton(win)
+adinbttn.setText('Neuer Trigger')
+adinbttn.clicked.connect(neuTrig)
+
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
 layout.addWidget(buttn, 1, 0, 1, 1)
 layout.addWidget(t2, 2, 0, 1, 1)
+layout.addWidget(comboBox3, 3, 0, 1, 1)
+layout.addWidget(adinbttn, 4, 0, 1, 1)
 layout.addWidget(comboBox, 1, 1, 1, 1)
 layout.addWidget(t, 2, 1, 1, 1)
 layout.addWidget(comboBox2, 1, 2, 1, 1)

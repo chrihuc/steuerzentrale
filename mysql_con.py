@@ -21,7 +21,7 @@ def main():
     #print re_calc(['lin_calc',[1,'temp',1]])
     #print re_calc(['sett','Temperatur_Wohnzi'])
     #print getSzenenSources('Webcam_aus')
-    print maxSzenenId()-maxSzenenId()%10 +10
+    #print maxSzenenId()-maxSzenenId()%10 +10
     #print re_calc(10)
     #set_automode(device="Stehlampe", mode="auto")
     #print mdb_szene_r("Device_Typ")
@@ -37,7 +37,8 @@ def main():
         #if typ_dict.get(device) == "Hue":
             #hue_devices.append(device)            
     #print hue_devices
-
+    #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
+    mdb_add_table_entry("test",values)
 
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
@@ -129,13 +130,13 @@ def set_val_in_szenen(device, szene, value):
     con.close()                   
 
 ## alle mit dicti:
-def mdb_read_table_entry(db, entry):
+def mdb_read_table_entry(db, entry, column = 'Name'):
     cmds = teg_raw_cmds(db)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     with con:
         cur = con.cursor()
-        sql = 'SELECT * FROM ' + db + ' WHERE Name = "' + str(entry) +'"'
+        sql = 'SELECT * FROM ' + db + ' WHERE '+column+' = "' + str(entry) +'"'
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
@@ -178,6 +179,27 @@ def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc"):
                 rlist.append(eval(str(row[0])))
     con.close()    
     return rlist 
+
+def mdb_add_table_entry(table, values, primary = 'Id'):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    listNames = []
+    listValues = []
+    strin = 'INSERT INTO '+constants.sql_tables.inputs.name+' ('
+    for val in values:
+        if val <> primary:
+            strin += val + ', '
+            listNames.append(val)
+            listValues.append(values.get(val))
+    strin = strin[0:-2] +') VALUES ('
+    for val in values:
+        if val <> primary:
+            strin += '"'+str(values.get(val)) + '", '    
+    strin = strin[0:-2] + ')'
+    print strin
+    with con:
+        cur = con.cursor()  
+        cur.execute(strin) 
+    con.close() 
 
 def get_raw_cmds(db):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)

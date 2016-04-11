@@ -44,10 +44,10 @@ def  get_satellite(name):
 
 def main():
     sats = satelliten()
-    #print sats.list_devices()
+    print sats.list_devices()
     print sats.list_commands("Vm1ZIM1SCA1DO01")
-    print sats.set_device('Vm1ZIM1SCA1DO01','scan1')
-    #print sats.listCommandTable(device="forSave", nameReturn = False)
+    #print sats.set_device('Vm1ZIM1SCA1DO01','scan1')
+    print sats.listCommandTable(nameReturn = False)
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
