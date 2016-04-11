@@ -14,9 +14,9 @@ def main():
     #crn.new_event('Test','20:15')
     #print crn.get_now(2, '5:40' ,'Wecker')
     crn.calculate()
-    #next_i = crn.get_next(2, '5:40' ,'Wecker')
-    #if next_i: print next_i[0].get("delta")
-    #print next_i
+    next_i = crn.get_next(2, '5:40')
+    if next_i: print next_i[0].get("delta")
+    print next_i
 
 neuenh = ephem.Observer()
 neuenh.lon  = str(9.036199)
@@ -27,14 +27,14 @@ class cron:
     def __init__(self):
         pass
         
-    def get_now(self, tag, Zeit, db):
+    def get_now(self, tag, Zeit, db=constants.sql_tables.cron.name):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         dicti = {}
         tage = {1:"Mo",2:"Tu",3:"Wed",4:"Th",5:"Fr",6:"Sa",0:"Su"}
         liste = []    
         with con:
             cur = con.cursor()
-            sql = 'SELECT * FROM XS1DB.'+db+' WHERE ' + tage.get(tag) + '=1 AND Time = "' + str(Zeit) + '" AND Enabled = 1'
+            sql = 'SELECT * FROM '+db+' WHERE ' + tage.get(tag) + '=True AND Time = "' + str(Zeit) + '" AND Enabled =True'
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -50,13 +50,13 @@ class cron:
         con.close
         return liste 
     
-    def get_all(self, db):
+    def get_all(self, db=constants.sql_tables.cron.name):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         dicti = {}
         liste = []    
         with con:
             cur = con.cursor()
-            sql = 'SELECT * FROM XS1DB.'+db
+            sql = 'SELECT * FROM '+db
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -72,7 +72,7 @@ class cron:
         con.close
         return liste    
 
-    def get_next(self, tag, Zeit, db):
+    def get_next(self, tag, Zeit, db=constants.sql_tables.cron.name):
         liste = self.get_all(db)
         ret_item = {}
         ret_liste = []
@@ -83,12 +83,12 @@ class cron:
         morgen = tag + 1
         if morgen == 7: morgen = 0
         for eintrag in liste:
-            if str(eintrag.get("Enabled")) <> "1" : continue
+            if str(eintrag.get("Enabled")) <> "True" : continue
             if db == "Wecker":
                 time = eintrag.get("Time") - eintrag.get("Offset")
             else:
                 time = eintrag.get("Time")                        
-            if (str(eintrag.get(tage.get(tag))) == "1"):
+            if (str(eintrag.get(tage.get(tag))) == "True"):
                 if ((time - Zeit) ==  next_one) and (time - Zeit) >= nulltime : 
                     ret_item = eintrag
                     next_one = (time - Zeit)
@@ -100,7 +100,7 @@ class cron:
                     next_one = (time - Zeit)
                     ret_item["delta"] = next_one
                     ret_liste.append(ret_item)                    
-            if (str(eintrag.get(tage.get(morgen))) == "1"): 
+            if (str(eintrag.get(tage.get(morgen))) == "True"): 
                 deltati = (time - Zeit) + datetime.timedelta(hours=24, minutes=0, seconds=0)
                 if deltati == next_one: 
                     ret_item = eintrag
@@ -115,7 +115,7 @@ class cron:
                     ret_liste.append(ret_item)                    
         return ret_liste
 
-    def get_now2(self, tag, Zeit, db):
+    def get_now2(self, tag, Zeit, db=constants.sql_tables.cron.name):
         liste = self.get_next(tag, Zeit, db)
         if liste:
             if liste[0].get("delta") < datetime.timedelta(hours=0, minutes=1, seconds=0):
@@ -126,7 +126,7 @@ class cron:
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
-            sql = 'DELETE FROM XS1DB.cron WHERE id = '+ str(Id) 
+            sql = 'DELETE FROM '+constants.sql_tables.cron.name+' WHERE id = '+ str(Id) 
             cur.execute(sql)
         con.close()
 
@@ -135,7 +135,7 @@ class cron:
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
-            insertstatement = 'INSERT INTO XS1DB.cron(Szene, Time, Bedingung, permanent) VALUES("' + str(Szene) + '", "' + str(Time) + '", "' + str(Bedingung) + '", "' + str(permanent) + '")'
+            insertstatement = 'INSERT INTO '+constants.sql_tables.cron.name+'(Szene, Time, Bedingung, permanent) VALUES("' + str(Szene) + '", "' + str(Time) + '", "' + str(Bedingung) + '", "' + str(permanent) + '")'
             cur.execute(insertstatement)
         con.close
      
@@ -146,7 +146,7 @@ class cron:
         liste = []    
         with con:
             cur = con.cursor()
-            sql = 'SELECT * FROM XS1DB.cron'
+            sql = 'SELECT * FROM '+constants.sql_tables.cron.name
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -186,7 +186,7 @@ class cron:
                 with con:
                     #time = time - datetime.timedelta(seconds=int(str(time)[6:]))
                     cur = con.cursor()
-                    sql = 'UPDATE XS1DB.cron SET Time = "' + str(time) + '" WHERE Id = "'+ str(eintrag.get("Id")) + '"'
+                    sql = 'UPDATE '+constants.sql_tables.cron.name+' SET Time = "' + str(time) + '" WHERE Id = "'+ str(eintrag.get("Id")) + '"'
                     cur.execute(sql)
                 con.close 
                 

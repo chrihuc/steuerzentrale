@@ -2,22 +2,21 @@
 
 import constants
 
-import sensor_health
-from classes import ping
+#import sensor_health
 from alarmevents import alarm_event
 import time
 from threading import Timer
 import threading
 #from checkraid import checkraid
 from time import localtime,strftime
-from mysql_con import mdb_fern_r, setting_r, setting_s, settings_r
+#from mysql_con import  setting_r
 from cron import cron
-from datetime import date
-import os
-from dateutil.relativedelta import relativedelta
-import shutil, glob
+#from datetime import date
+#import os
+#from dateutil.relativedelta import relativedelta
+#import shutil, glob
 from messaging import messaging
-from webcammov import mail_webc_pics
+#from webcammov import mail_webc_pics
 from anwesenheit import anwesenheit
 #from plexapi.server import PlexServer
 from szenen import set_szene
@@ -44,44 +43,12 @@ def main():
 def every_min(tag, zeit, db):
     liste = crn.get_now2(tag, zeit, db)
     for szene in liste:
-        bedingungen = {}
-        erfuellt = True
-        if str(szene.get("Bedingung")) <> "None":
-            bedingungen = eval(szene.get("Bedingung"))    
-            erfuellt = True
-        settings = settings_r()
-        for bedingung in bedingungen:
-            try:
-                groesser = bedingungen.get(bedingung).find('>')
-                kleiner = bedingungen.get(bedingung).find('<')
-                if groesser >-1 and kleiner >-1:
-                    schwelle_u = float(bedingungen.get(bedingung)[groesser+1:kleiner])
-                    if float(settings.get(bedingung)) <= schwelle_u:
-                        erfuellt = False
-                    schwelle_o = float(bedingungen.get(bedingung)[kleiner+1:len(bedingungen.get(bedingung))])
-                    if float(settings.get(bedingung)) >= schwelle_o:
-                        erfuellt = False    
-                elif groesser >-1:
-                    schwelle = float(bedingungen.get(bedingung)[groesser+1:len(bedingungen.get(bedingung))])
-                    if float(settings.get(bedingung)) <= schwelle:
-                        erfuellt = False                     
-                elif kleiner >-1:
-                    schwelle = float(bedingungen.get(bedingung)[kleiner+1:len(bedingungen.get(bedingung))])
-                    if float(settings.get(bedingung)) >= schwelle:
-                        erfuellt = False        
-                else:
-                    if not(str(settings.get(bedingung)) in bedingungen.get(bedingung)):
-                        erfuellt = False
-            except Exception as e:
-                if not(str(settings.get(bedingung)) in bedingungen.get(bedingung)):
-                    erfuellt = False             
-        if erfuellt:
-            if str(szene.get('Szene')) <> "None":
-                print str(szene.get('Szene'))
-                lt = localtime()
-                sekunde = int(strftime("%S", lt))                     
-                task = Timer(float(60-sekunde), set_szene, [str(szene.get('Szene'))])              
-                task.start()
+        if str(szene.get('Szene')) <> "None":
+            print str(szene.get('Szene'))
+            lt = localtime()
+            sekunde = int(strftime("%S", lt))                     
+            task = Timer(float(60-sekunde), set_szene, [str(szene.get('Szene'))])              
+            task.start()
         if str(szene.get('Permanent')) <> "1":
             crn.delete(szene.get('Id'))  
     #if str(setting_r("Kino_Beleuchtung_Auto")) == "Ein":
@@ -93,64 +60,67 @@ def every_min(tag, zeit, db):
                 #set_szene("Kino_BeleuchtungSet")
 
 def every_2_min():
-    akt_status = status.check_all()
-    if (akt_status.get("Anwesenheit") == 0) and  not (str(setting_r("Status")) in ["Besuch", "Abwesend", "Gegangen"]):
-        aes.new_event(description="Neue Anwesenheit regel: Abwesend", prio=0)
-        set_szene("Alles_aus_4")
-    if (akt_status.get("Anwesenheit") < 0) and  not (str(setting_r("Status")) in ["Besuch", "Urlaub"]):
-        aes.new_event(description="Neue Anwesenheit regel: Urlaub", prio=0)
+    pass
+#    akt_status = status.check_all()
+#    if (akt_status.get("Anwesenheit") == 0) and  not (str(setting_r("Status")) in ["Besuch", "Abwesend", "Gegangen"]):
+#        aes.new_event(description="Neue Anwesenheit regel: Abwesend", prio=0)
+#        set_szene("Alles_aus_4")
+#    if (akt_status.get("Anwesenheit") < 0) and  not (str(setting_r("Status")) in ["Besuch", "Urlaub"]):
+#        aes.new_event(description="Neue Anwesenheit regel: Urlaub", prio=0)
 
 def every_10_min():
-    for sat in sats:
-        if sat.Type == "sat":
-            no_hbts = sensor_health.check_sat_health(sat.name,30)
-            if no_hbts <= sat.no_of_lb and no_hbts < 4:
-                sat.reboot()             
-            elif no_hbts <= sat.no_of_lb and no_hbts < 25:
-                sat.kill_python()
-            sat.no_of_lb = no_hbts
+    pass
+#    for sat in sats:
+#        if sat.Type == "sat":
+#            no_hbts = sensor_health.check_sat_health(sat.name,30)
+#            if no_hbts <= sat.no_of_lb and no_hbts < 4:
+#                sat.reboot()             
+#            elif no_hbts <= sat.no_of_lb and no_hbts < 25:
+#                sat.kill_python()
+#            sat.no_of_lb = no_hbts
         
         
 def every_30_min():
-    if (str(setting_r("Status")) in ["Schlafen", "Abwesend", "Urlaub"]): mail_webc_pics()
-    sensor_health.check_sensor_health() 
+    pass
+#    if (str(setting_r("Status")) in ["Schlafen", "Abwesend", "Urlaub"]): mail_webc_pics()
+#    sensor_health.check_sensor_health() 
 
 def every_60_min():
     pass
     
 def every_24_hrs():
         crn.calculate()
-        if constants.automatic_backup:
-            source = '/home/chris/homecontrol'
-            datum = date.today()
-            delete = date.today() - relativedelta(days=7)
-            destin = '/mnt/array1/MIsc/MySQL/'
-            fname = destin + str(datum)
-            if not os.path.exists(fname):
-                    os.makedirs(fname)    
-            datei = fname  + '/xs1db.sql'
-            #cmd = '/usr/bin/mysqldump -u root -p XS1DB > ' + datei
-            #os.system(cmd)
-            #datei = fname  + '/Gesundheit.sql'
-            #cmd = '/usr/bin/mysqldump -u root -p Gesundheit > ' + datei
-            #os.system(cmd)    
-            for filename in glob.glob(os.path.join(source, '*.py')):
-                    shutil.copy(filename, fname)
-            shutil.rmtree(destin + str(delete))
-            aes.new_event("Raidcheck: " + checkraid(), prio=0) 
-
-            source = '/mnt/array1/photos/SP3_pictures/'
-            destin = '/mnt/array1/photos/Database/'
-            datum = date.today()
-            delete = date.today() - relativedelta(days=31)  
-            photo_db = source + 'digikam4.db'
-            photo_db_newname = destin + 'digikam4_' + str(datum) + '.db'
-            shutil.copy(photo_db, photo_db_newname) 
-            photo_db_delete = destin + 'digikam4_' + str(delete) + '.db'
-            try:
-                    os.remove(photo_db_delete)
-            except:
-                    pass
+#        if constants.automatic_backup:
+#            source = '/home/chris/homecontrol'
+#            datum = date.today()
+#            delete = date.today() - relativedelta(days=7)
+#            destin = '/mnt/array1/MIsc/MySQL/'
+#            fname = destin + str(datum)
+#            if not os.path.exists(fname):
+#                    os.makedirs(fname)    
+#            datei = fname  + '/xs1db.sql'
+#            #cmd = '/usr/bin/mysqldump -u root -p XS1DB > ' + datei
+#            #os.system(cmd)
+#            #datei = fname  + '/Gesundheit.sql'
+#            #cmd = '/usr/bin/mysqldump -u root -p Gesundheit > ' + datei
+#            #os.system(cmd)    
+#            for filename in glob.glob(os.path.join(source, '*.py')):
+#                    shutil.copy(filename, fname)
+#            shutil.rmtree(destin + str(delete))
+#            aes.new_event("Raidcheck: " + checkraid(), prio=0) 
+#
+#            source = '/mnt/array1/photos/SP3_pictures/'
+#            destin = '/mnt/array1/photos/Database/'
+#            datum = date.today()
+#            delete = date.today() - relativedelta(days=31)  
+#            photo_db = source + 'digikam4.db'
+#            photo_db_newname = destin + 'digikam4_' + str(datum) + '.db'
+#            shutil.copy(photo_db, photo_db_newname) 
+#            photo_db_delete = destin + 'digikam4_' + str(delete) + '.db'
+#            try:
+#                    os.remove(photo_db_delete)
+#            except:
+#                    pass
     
 def periodic_supervision():
     while constants.run:
@@ -203,8 +173,8 @@ def periodic_supervision():
                         tag = 0 
                     t = threading.Thread(target=every_min, args=[tag,zeit,"cron"])
                     t.start() 
-                    t = threading.Thread(target=every_min, args=[tag,zeit,"Wecker"])
-                    t.start()                    
+#                    t = threading.Thread(target=every_min, args=[tag,zeit,"Wecker"])
+#                    t.start()                    
                     lt = localtime()
                     sekunde = int(strftime("%S", lt))                    
                     time.sleep(60-sekunde)
