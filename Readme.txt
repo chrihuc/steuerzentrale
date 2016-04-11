@@ -26,6 +26,7 @@ sudo nano /etc/service/steuerzentrale/run
 
 #!/bin/sh
 exec 2>&1
+cd /home/pi/steuerzentrale/
 exec setuidgid root sh -c '
   exec /usr/bin/python /home/pi/steuerzentrale/main.py
 '

@@ -384,7 +384,9 @@ def inputs(device, value):
                         single = False
                 if single: szenen.append(dicti.get(setting_r("Status")))         
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Name = "' + str(device) +'"'
-            cur.execute(sql + sql2)          
+            cur.execute(sql)   
+            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
+            cur.execute(sql + sql2)             
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)            
