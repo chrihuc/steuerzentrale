@@ -1,3 +1,3 @@
 git add .
 git commit -m "devel"
-git push origin Version1
+git push origin master
