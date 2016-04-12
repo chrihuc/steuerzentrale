@@ -14,6 +14,7 @@ def main():
     #crn.new_event('Test','20:15')
     #print crn.get_now(2, '5:40' ,'Wecker')
     crn.calculate()
+    print crn.get_all(wecker = True)
     next_i = crn.get_next(2, '5:40')
     if next_i: print next_i[0].get("delta")
     print next_i
@@ -30,11 +31,11 @@ class cron:
     def get_now(self, tag, Zeit, db=constants.sql_tables.cron.name):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         dicti = {}
-        tage = {1:"Mo",2:"Tu",3:"Wed",4:"Th",5:"Fr",6:"Sa",0:"Su"}
+        tage = {1:"Mo",2:"Di",3:"Mi",4:"Do",5:"Fr",6:"Sa",0:"So"}
         liste = []    
         with con:
             cur = con.cursor()
-            sql = 'SELECT * FROM '+db+' WHERE ' + tage.get(tag) + '=True AND Time = "' + str(Zeit) + '" AND Enabled =True'
+            sql = 'SELECT * FROM '+db+' WHERE ' + tage.get(tag) + '=True AND Time = "' + str(Zeit) + '" AND Eingeschaltet =True'
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -50,13 +51,15 @@ class cron:
         con.close
         return liste 
     
-    def get_all(self, db=constants.sql_tables.cron.name):
+    def get_all(self, db=constants.sql_tables.cron.name, wecker=False):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         dicti = {}
         liste = []    
         with con:
             cur = con.cursor()
             sql = 'SELECT * FROM '+db
+            if wecker:
+                sql = 'SELECT * FROM '+db+ ' WHERE Wecker ="True"'
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -76,14 +79,14 @@ class cron:
         liste = self.get_all(db)
         ret_item = {}
         ret_liste = []
-        tage = {1:"Mo",2:"Tu",3:"Wed",4:"Th",5:"Fr",6:"Sa",0:"Su"}
+        tage = {1:"Mo",2:"Di",3:"Mi",4:"Do",5:"Fr",6:"Sa",0:"So"}
         Zeit = datetime.timedelta(hours=int(Zeit[:Zeit.find(":")]), minutes=int(Zeit[Zeit.find(":")+1:]), seconds=0)
         next_one = datetime.timedelta(hours=12, minutes=0, seconds=0)
         nulltime = datetime.timedelta(hours=0, minutes=0, seconds=0)
         morgen = tag + 1
         if morgen == 7: morgen = 0
         for eintrag in liste:
-            if str(eintrag.get("Enabled")) <> "True" : continue
+            if str(eintrag.get("Eingeschaltet")) <> "True" : continue
             if db == "Wecker":
                 time = eintrag.get("Time") - eintrag.get("Offset")
             else:
@@ -142,7 +145,7 @@ class cron:
     def calculate(self):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         dicti = {}
-        tage = {1:"Mo",2:"Tu",3:"Wed",4:"Th",5:"Fr",6:"Sa",0:"Su"}
+        tage = {1:"Mo",2:"Di",3:"Mi",4:"Do",5:"Fr",6:"Sa",0:"So"}
         liste = []    
         with con:
             cur = con.cursor()

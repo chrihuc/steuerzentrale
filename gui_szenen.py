@@ -413,7 +413,7 @@ class Szenen_tree():
     def add_bedingung(self):
         global p
         self.p.param(self.name, 'Bedingung').addChild({'name': 'Bedingung ','type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': ''},
-                        {'name': 'Operand', 'type': 'str', 'value': ''},{'name': 'Bedingung', 'type': 'str', 'value': ''}]}, autoIncrementName=True)
+                        {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': ''},{'name': 'Bedingung', 'type': 'str', 'value': ''}]}, autoIncrementName=True)
 
     def add_task(self):
         global p

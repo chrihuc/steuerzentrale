@@ -9,9 +9,10 @@ from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
+from cron import cron
 #from gui_szenen import Szenen_tree
 
-from mysql_con import mdb_read_table_entry, settings_r, mdb_read_table_column_filt
+from mysql_con import mdb_read_table_entry, settings_r, mdb_read_table_column_filt,mdb_set_table
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import *
@@ -32,6 +33,7 @@ sn = sonos()
 tv = TV()
 sat = satelliten()
 scenes = szenen()
+crons = cron()
 xs1_devs = xs1.list_devices()
 hue_devs = hue.list_devices()
 sns_devs = sn.list_devices()
@@ -229,13 +231,13 @@ class Main(QtGui.QMainWindow):
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout3)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)  
         
-        for i in range(1,10):
-            self.scrollLayout3.addRow(weckerRow(i))
+        #self.add_wecker()
         self.pushButton_9 = QtGui.QPushButton(self.tab_5)
         self.pushButton_9.setGeometry(QtCore.QRect(300, 380, 91, 50))
         self.pushButton_9.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_9.setText('Speichere')
-        self.pushButton_9.clicked.connect(self.makeSaveWecker(self))         
+        self.pushButton_9.clicked.connect(self.makeSaveWecker(self))  
+        self.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -251,6 +253,26 @@ class Main(QtGui.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         refresh = Timer(5, self.update_values, [])
         refresh.start()
+
+    def add_wecker(self):
+        global weckerButtons
+        self.clearLayout(self.scrollLayout3)
+        weckerButtons = []
+        wecker = crons.get_all(wecker=True)
+        for i in wecker:
+            self.scrollLayout3.addRow(weckerRow(i))        
+
+    def update(self):
+        self.add_wecker()
+        try:
+            settings = settings_r()
+            for btn in self.buttons:
+                name = btn.objectName()
+                if str(name) in settings:
+                    btn.setText(settings.get(str(name)))
+            QApplication.processEvents()
+        except:
+            pass        
 
     def close_clicked(self):
         QtCore.QCoreApplication.instance().quit()
@@ -362,12 +384,15 @@ class Main(QtGui.QMainWindow):
         return set_tree_popup
 
     def update_values(self):
-        settings = settings_r()
-        for btn in self.buttons:
-            name = btn.objectName()
-            if str(name) in settings:
-                btn.setText(settings.get(str(name)))
-        QApplication.processEvents()
+        try:
+            settings = settings_r()
+            for btn in self.buttons:
+                name = btn.objectName()
+                if str(name) in settings:
+                    btn.setText(settings.get(str(name)))
+            QApplication.processEvents()
+        except:
+            pass
         refresh = Timer(5, self.update_values, [])
         if running: 
             refresh.start()        
@@ -375,17 +400,34 @@ class Main(QtGui.QMainWindow):
 
     def makeSaveWecker(self,parent=None):
         def saveWecker(self):
+            parent = {}
             for ii in weckerButtons:
-                if "timeEdit" in ii.objectName():
-                    print ii.objectName(), ii.time()
-                elif "comboBox" in ii.objectName():
-                    print ii.objectName(), ii.currentText()
+                print ii.objectName()
+                name = ii.objectName().split('.')[0]
+                if name in parent:
+                    child = parent.get(name)
                 else:
-                    print ii.objectName(), ii.checkState()                    
+                    parent[name] = {}
+                    child = {'Name':name}
+                if "timeEdit" in ii.objectName():
+                    child['Time'] = ii.time().toString('HH:mm')
+                elif "comboBox" in ii.objectName():
+                    child['Szene'] = ii.currentText()
+                else:   
+                    if ii.checkState()  == 2:
+                        child[ii.objectName().split('.')[1]] = True
+                    else:
+                        child[ii.objectName().split('.')[1]] = False
+                parent[name] = child
+            liste = []
+            for wecker in parent:
+                liste.append(parent.get(wecker))
+                mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
+            print liste
         return saveWecker     
         
 class weckerRow(QtGui.QWidget):
-    def __init__( self ,name=None):
+    def __init__( self ,weckerList):
         global weckerButtons
         super(weckerRow, self).__init__(None)
         #horizontalLayoutWidget = QtGui.QWidget(self.scrollAreaWidgetContents)
@@ -394,17 +436,25 @@ class weckerRow(QtGui.QWidget):
         horizontalLayoutWidget = QtGui.QHBoxLayout()
         #horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.timeEdit = QtGui.QTimeEdit()
+        name = weckerList.get('Name')
         self.timeEdit.setObjectName(_fromUtf8(str(name)+".timeEdit"))
+        self.timeEdit.setTime((datetime.datetime.min+weckerList.get('Time')).time())
+        self.timeEdit.setDisplayFormat("HH:mm")
         horizontalLayoutWidget.addWidget(self.timeEdit)
         weckerButtons.append(self.timeEdit)
         for tag in ['Mo','Di','Mi','Do','Fr','Sa','So','Eingeschaltet']:
             self.checkBox = QtGui.QCheckBox(tag)
             self.checkBox.setObjectName(_fromUtf8(str(name)+"."+tag))
+            self.checkBox.setChecked(bool(weckerList.get(tag)))
             horizontalLayoutWidget.addWidget(self.checkBox)
             weckerButtons.append(self.checkBox)
         self.comboBox = QtGui.QComboBox()
-        for szne in ['Wecker 1', 'Wecker 2']:
-            self.comboBox.addItem(szne)        
+        weckerSzenen = scenes.list_commands("Wecker")
+        for szne in weckerSzenen:
+            self.comboBox.addItem(szne)    
+        index = self.comboBox.findText(weckerList.get('Szene'), QtCore.Qt.MatchFixedString)
+        if index >= 0:
+            self.comboBox.setCurrentIndex(index)
         self.comboBox.setObjectName(_fromUtf8(str(name)+".comboBox"))
         weckerButtons.append(self.comboBox)
         horizontalLayoutWidget.addWidget(self.comboBox)

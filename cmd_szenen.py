@@ -45,7 +45,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.list_commands("alle")
+    print scenes.list_commands("Wecker")
     
 class szenen:    
     
