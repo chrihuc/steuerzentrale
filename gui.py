@@ -402,7 +402,6 @@ class Main(QtGui.QMainWindow):
         def saveWecker(self):
             parent = {}
             for ii in weckerButtons:
-                print ii.objectName()
                 name = ii.objectName().split('.')[0]
                 if name in parent:
                     child = parent.get(name)
@@ -423,7 +422,6 @@ class Main(QtGui.QMainWindow):
             for wecker in parent:
                 liste.append(parent.get(wecker))
                 mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
-            print liste
         return saveWecker     
         
 class weckerRow(QtGui.QWidget):

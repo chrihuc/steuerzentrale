@@ -3,7 +3,7 @@
 import constants
 
 #import sensor_health
-from alarmevents import alarm_event
+#from alarmevents import alarm_event
 import time
 from threading import Timer
 import threading
@@ -15,21 +15,22 @@ from cron import cron
 #import os
 #from dateutil.relativedelta import relativedelta
 #import shutil, glob
-from messaging import messaging
+#from messaging import messaging
 #from webcammov import mail_webc_pics
-from anwesenheit import anwesenheit
+#from anwesenheit import anwesenheit
 #from plexapi.server import PlexServer
-from szenen import set_szene
-import satellites
+from cmd_szenen import szenen
+#import satellites
 
 
-aes = alarm_event()
+#aes = alarm_event()
 crn = cron()
-mes = messaging()
-status = anwesenheit()
+scenes = szenen()
+#mes = messaging()
+#status = anwesenheit()
 #plex = PlexServer()
 tv_con_check_old = 0
-sats = satellites.get_satellites()
+#sats = satellites.get_satellites()
 
 def main():
     periodic_supervision()
@@ -40,16 +41,17 @@ def main():
     #every_10_min()
                 
     
-def every_min(tag, zeit, db):
-    liste = crn.get_now2(tag, zeit, db)
+def every_min(tag, zeit):
+    print tag, zeit
+    liste = crn.get_now2(tag, zeit)
     for szene in liste:
         if str(szene.get('Szene')) <> "None":
             print str(szene.get('Szene'))
             lt = localtime()
             sekunde = int(strftime("%S", lt))                     
-            task = Timer(float(60-sekunde), set_szene, [str(szene.get('Szene'))])              
+            task = Timer(float(60-sekunde), scenes.execute, [str(szene.get('Szene'))])              
             task.start()
-        if str(szene.get('Permanent')) <> "1":
+        if str(szene.get('Permanent')) == "False":
             crn.delete(szene.get('Id'))  
     #if str(setting_r("Kino_Beleuchtung_Auto")) == "Ein":
         #if plex.sessions() == []:
@@ -171,7 +173,7 @@ def periodic_supervision():
                         zeit = str(k) + ":" + str(j*30+i+1)
                     if tag == 7:
                         tag = 0 
-                    t = threading.Thread(target=every_min, args=[tag,zeit,"cron"])
+                    t = threading.Thread(target=every_min, args=[tag,zeit])
                     t.start() 
 #                    t = threading.Thread(target=every_min, args=[tag,zeit,"Wecker"])
 #                    t.start()                    

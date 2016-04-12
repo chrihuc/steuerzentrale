@@ -15,7 +15,7 @@ def main():
     #print crn.get_now(2, '5:40' ,'Wecker')
     crn.calculate()
     print crn.get_all(wecker = True)
-    next_i = crn.get_next(2, '5:40')
+    next_i = crn.get_next(2, '23:21')
     if next_i: print next_i[0].get("delta")
     print next_i
 

@@ -682,6 +682,51 @@ class InputsTree():
                 for item in some_object: 
                     self.itera(some_object.get(item))
 
+sets = mdb_get_table(constants.sql_tables.settings.name)
+
+
+class SettingsTree():
+    def __init__(self, isInputs = True, cmdTable = None):
+        self.p = None
+        self.name = None
+        self.set_paratree()
+        
+    def __return_enum__(self,eingabe):
+        if (type(eingabe) == str):
+            try:
+                if type(eval(eingabe)) == list or type(eval(eingabe)) == dict or type(eval(eingabe)) == tuple:
+                    kommandos = eval(eingabe)
+                else:
+                    kommandos = [eingabe]
+            except (NameError, SyntaxError) as e:
+                kommandos = [eingabe]
+        elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
+            return eingabe
+        else:
+            kommandos = [eingabe]    
+        return kommandos        
+        
+    def set_paratree(self):
+        global p, name
+        params = []
+        dicti = {'name': u'Settings', 'type': 'group', 'expanded': True}
+        kinder = []
+        for seti in sets:  
+            kind = {'name':seti.get('Name')}
+            if seti.get('Typ') == None:
+                kind['type'] = 'str'
+                kind['value'] = seti.get('Value')
+            elif '[' in seti.get('Typ'):
+                kind['type'] = 'list'
+                kind['values']=self.__return_enum__(seti.get('Typ'))
+                kind['value']  = seti.get('Value')
+            else:                    
+                kind['type'] =seti.get('Typ')
+                kind['value']  = eval(seti.get('Value'))
+            kinder.append(kind)
+        dicti['children'] = kinder
+        params.append(dicti)
+        self.p = Parameter.create(name='params', type='group', children=params)
 
 def selected(text):
     global sz, t, lastSelected
@@ -777,6 +822,10 @@ t2.setParameters(inp.p, showTop=False)
 t3 = ParameterTree()
 t3.setParameters(cmds.p, showTop=False)
 
+t4 = ParameterTree()
+seTre = SettingsTree()
+t4.setParameters(seTre.p, showTop=False)
+
 sz.p.sigTreeStateChanged.connect(change_sz)
 inp.p.sigTreeStateChanged.connect(change)
 
@@ -817,10 +866,11 @@ layout.addWidget(comboBox, 1, 1, 1, 1)
 layout.addWidget(t, 2, 1, 1, 1)
 layout.addWidget(comboBox2, 1, 2, 1, 1)
 layout.addWidget(t3, 2, 2, 1, 1)
+layout.addWidget(t4, 2, 3, 1, 1)
 
 
 win.show()
-win.resize(1200,1200)
+win.resize(1400,1200)
 
 #==============================================================================
 # till here

@@ -119,7 +119,8 @@ class sql_tables:
     
     #move to cron
     cron            = sql_object("cmd_cron", "Commands", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Szene","VARCHAR(45)"),("Time","TIME"),("Permanent","VARCHAR(6)"),("Mo","VARCHAR(6)"),("Tu","VARCHAR(6)"),("Wed","VARCHAR(6)"),("Th","VARCHAR(6)"),("Fr","VARCHAR(6)"),("Sa","VARCHAR(6)"),("Su","VARCHAR(6)"),("Enabled","VARCHAR(6)"),("Sonne","varchar(45)"),("offset","varchar(45)"),("Zufall","varchar(45)"),("Rohtime","TIME"),("Wecker","varchar(45)")))
-    wecker          = sql_object("cmd_wecker", "Commands", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Enabled","tinyint(1)"),("Mo","tinyint(1)"),("Tu","tinyint(1)"),("Wed","tinyint(1)"),("Th","tinyint(1)"),("Fr","tinyint(1)"),("Sa","tinyint(1)"),("Su","tinyint(1)"),("offset","varchar(45)"),("Szene","VARCHAR(45)"),("Time","TIME"),("Bedingung","varchar(45)"),("Permanent","tinyint(4)")))
+    #deprecated:
+    #wecker          = sql_object("cmd_wecker", "Commands", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Enabled","tinyint(1)"),("Mo","tinyint(1)"),("Tu","tinyint(1)"),("Wed","tinyint(1)"),("Th","tinyint(1)"),("Fr","tinyint(1)"),("Sa","tinyint(1)"),("Su","tinyint(1)"),("offset","varchar(45)"),("Szene","VARCHAR(45)"),("Time","TIME"),("Bedingung","varchar(45)"),("Permanent","tinyint(4)")))
     ##tables with settings
     #hue_autolight   = sql_object("set_hue_autolicht", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("offset","INT(11)"),("min","INT(11)"),("max","INT(11)")))
     
@@ -141,7 +142,7 @@ class sql_tables:
     Bewohner        = sql_object("sst_Bewohner", "SensData",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Handy_IP","VARCHAR(20)"),("Handy_State","INT(11)"),("USB_ID","VARCHAR(45)"),("USB_State","INT(4)"),("prod","VARCHAR(45)"),("gcm_regid","VARCHAR(255)"),("gcm_name","VARCHAR(50)"))) 
     
     
-    tables = [his_inputs,inputs,cron,wecker,settings,szenen,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner]
+    tables = [his_inputs,inputs,cron,settings,szenen,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner]
     HUE = sql_object("HUE", "HUE",('BettChris', 'Stablampe_1', 'Stablampe_2', 'Lightstrip_Eingang', 'Lightstrip_Kueche', 'Balkonlampe', 'Stehlampe', 'BettSabina', 'Buero', 'Bad', 'Monaco_Lampe'))
     SATELLITE = sql_object("SATELLITE", "SATELLITE",('Sideb_links', 'LightstripSchlafzi', 'Sideb_mitte', 'Sideb_rechts', 'Marantz', 'Sideb_oben', 'TuerSPi','Scanner'))
     XS1 = sql_object("XS1", "XS1",('Sideboard', 'Kueche', 'Diele', 'Video_Audio', 'Lattenrost', 'Wohnzimmer_Decke', 'Schlafzimmer', 'Webcams', 'Elchlampe', 'Adventslichter', 'Reduit', 'Pflanzen', 'Saugstauber', 'PC_Peripherie', 'Weihnachtsbaum', 'Esszimmer','Rauchmelder'))
