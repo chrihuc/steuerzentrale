@@ -21,6 +21,7 @@ import git
 import pyqtgraph as pg
 import numpy as np
 from threading import Timer
+import datetime
 
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from pyqtgraph.parametertree import Parameter, ParameterTree
@@ -443,9 +444,9 @@ class weckerRow(QtGui.QWidget):
         for tag in ['Mo','Di','Mi','Do','Fr','Sa','So','Eingeschaltet']:
             self.checkBox = QtGui.QCheckBox(tag)
             self.checkBox.setObjectName(_fromUtf8(str(name)+"."+tag))
-            self.checkBox.setChecked(bool(weckerList.get(tag)))
             horizontalLayoutWidget.addWidget(self.checkBox)
             weckerButtons.append(self.checkBox)
+            self.checkBox.setChecked(eval(weckerList.get(tag)))
         self.comboBox = QtGui.QComboBox()
         weckerSzenen = scenes.list_commands("Wecker")
         for szne in weckerSzenen:

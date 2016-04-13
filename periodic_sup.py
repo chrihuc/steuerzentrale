@@ -46,7 +46,6 @@ def every_min(tag, zeit):
     liste = crn.get_now2(tag, zeit)
     for szene in liste:
         if str(szene.get('Szene')) <> "None":
-            print str(szene.get('Szene'))
             lt = localtime()
             sekunde = int(strftime("%S", lt))                     
             task = Timer(float(60-sekunde), scenes.execute, [str(szene.get('Szene'))])              

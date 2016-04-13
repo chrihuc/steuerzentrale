@@ -45,7 +45,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.list_commands("Wecker")
+    print scenes.threadExecute("Wecker")
     
 class szenen:    
     
@@ -283,7 +283,7 @@ class szenen:
                     elif ex_re == 1:
                         self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
                     elif ex_re == 2:
-                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)                    
+                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)  
 #==============================================================================
 # Check for timeout
 #==============================================================================

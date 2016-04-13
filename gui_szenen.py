@@ -54,6 +54,8 @@ cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
+szn_typs = ['','Intern','Scanner','Wecker']
+
 szn = szenen()
 szn_lst = sorted(szn.list_commands('alle'))
 
@@ -334,8 +336,8 @@ class Szenen_tree():
                             else:
                                 depErfolg = kind[4]                            
                             szn_d_child_l.append({'name': 'Szene %d' % (len(szn_d_child_l)+1), 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': kind[0], 'values':szn_lst},
-                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': u'Verlängerbar', 'type': 'list', 'values':{u'Verlängerbar':0,'nur exact':1,'fest':2}, 'value': kind[2]},{'name': u'Abhänging Bedingung', 'type': 'bool', 'value': immer}
-                        ,{'name': u'Abhänging Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': depErfolg}]})  
+                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': 'Verlaengerbar', 'type': 'list', 'values':{'Verlaengerbar':0,'nur exact':1,'fest':2}, 'value': kind[2]},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': immer}
+                        ,{'name': 'Abhaengig Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': depErfolg}]})  
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child) 
                 elif str(item) in ['AutoMode']: 
@@ -355,7 +357,14 @@ class Szenen_tree():
                         if str(szene.get(item)) <> "None":
                             szn_d_child['value'] = float(szene.get(item))
                         else:
-                            szn_d_child['value'] = None                      
+                            szn_d_child['value'] = None
+                    elif str(item) in ['Gruppe']:
+                        szn_d_child['type'] ='list'
+                        szn_d_child['values'] = szn_typs
+                        if str(szene.get(item)) <> "None":
+                            szn_d_child['value'] = str(szene.get(item))
+                        else:
+                            szn_d_child['value'] = ''                          
                     else:
                         szn_d_child['type'] = 'str'
                         if str(szene.get(item)) <> "None":
@@ -423,8 +432,8 @@ class Szenen_tree():
     def addSzene(self):
         global p
         self.p.param(self.name, 'Szene folgt').addChild({'name': 'Befehl ', 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': '', 'values':szn_lst},
-                        {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': u'Verlängerbar', 'type': 'int', 'value': 2},{'name': u'Abhängig Bedingung', 'type': 'bool', 'value': True}
-                        ,{'name': u'Abhängig Erfolg', 'type': 'int', 'value': 0}]}, autoIncrementName=True)
+                        {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': 'Verlaengerbar', 'type': 'int', 'value': 2},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': True}
+                        ,{'name': 'Abhaengig Erfolg', 'type': 'int', 'value': 0}]}, autoIncrementName=True)
 
     def linkSzene(self):
         for kind in self.p.param(self.name, 'Szene folgt').children():
@@ -513,8 +522,9 @@ class Szenen_tree():
                             for child in some_object.get('children'):
                                 szn_tuple = some_object.get('children').get(child).get('children')
                                 if szn_tuple.get('Szene').get('value') <> '':
-                                    set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get(u'Verlängerbar').get('value'),
-                                                    szn_tuple.get(u'Abhänging Bedingung').get('value'),szn_tuple.get(u'Abhänging Erfolg').get('value')])
+                                    print szn_tuple.get('Verlaengerbar')
+                                    set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get('Verlaengerbar').get('value'),
+                                                    szn_tuple.get('Abhaengig Bedingung').get('value'),szn_tuple.get('Abhaengig Erfolg').get('value')])
                             dicti['Follows'] = set_lst                             
                         else:
                             #strucutre group only if name not ambivalent
