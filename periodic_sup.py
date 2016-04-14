@@ -42,7 +42,6 @@ def main():
                 
     
 def every_min(tag, zeit):
-    print tag, zeit
     liste = crn.get_now2(tag, zeit)
     for szene in liste:
         if str(szene.get('Szene')) <> "None":
