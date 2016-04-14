@@ -123,7 +123,6 @@ class Main(QtGui.QMainWindow):
         self.tab_1 = QtGui.QWidget()
         self.tab_1.setStyleSheet("QWidget {background-image:url(./OG.png)}")
         self.tab_1.setObjectName(_fromUtf8("1_Stock"))   
-        self.buttons = []
         for btn in og_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab_1))
             self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 50, 50))
@@ -265,15 +264,14 @@ class Main(QtGui.QMainWindow):
 
     def update(self):
         self.add_wecker()
-        try:
-            settings = settings_r()
-            for btn in self.buttons:
-                name = btn.objectName()
-                if str(name) in settings:
-                    btn.setText(settings.get(str(name)))
-            QApplication.processEvents()
-        except:
-            pass        
+        settings = settings_r()
+        for btn in self.buttons:
+            name = btn.objectName()
+            if str(name) in settings:
+                print name, settings.get(str(name))
+                btn.setText(settings.get(str(name)))
+        QApplication.processEvents()
+      
 
     def close_clicked(self):
         QtCore.QCoreApplication.instance().quit()

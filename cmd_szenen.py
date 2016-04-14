@@ -260,7 +260,8 @@ class szenen:
                 kommandos = self.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
                     print kommando, kommandos.get(kommando)
-                    set_del = Timer(1, setting_s, [str(kommando), str(kommandos.get(kommando))])
+                    set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
+                    #timer set to 0 for following actions
                     set_del.start()  
 #==============================================================================
 # start timer with following actions                               

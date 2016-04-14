@@ -28,7 +28,7 @@ except:
 
 def main():
     hue_l = hue_lights()
-    hue_l.set_device("Stablampe_2", "Rot")
+    hue_l.set_device("V01BAD1RUM1LI02", "Umschalten")
     #print hue_l.list_devices()
     
 class hue_lights():

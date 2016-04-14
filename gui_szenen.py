@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import settings_r, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
+from mysql_con import settings_r, setting_s, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
 
 import easygui
 
@@ -40,6 +40,7 @@ hue = hue_lights()
 sn = sonos()
 tv = TV()
 sat = satelliten()
+szn = szenen()
 xs1_devs = xs1.list_devices()
 xs1_cmds = xs1.dict_commands()
 hue_devs = hue.list_devices()
@@ -50,14 +51,13 @@ tvs_devs = tv.list_devices()
 tvs_cmds = tv.dict_commands()
 sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
+cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
+szn_lst = sorted(szn.list_commands('alle'))
+
 cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
-cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
 szn_typs = ['','Intern','Scanner','Wecker']
-
-szn = szenen()
-szn_lst = sorted(szn.list_commands('alle'))
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 
@@ -577,7 +577,7 @@ class Szenen_tree():
             #easygui.msgbox("Szene ausgeführt", title="Execute")
         else:
             easygui.msgbox("Szene wurde NICHT ausgeführt", title="Execute")
-        constants.redundancy_.master = False            
+        #constants.redundancy_.master = False            
 
     def newSzene(self):
         global szenen
@@ -652,9 +652,16 @@ class InputsTree():
                     {'name': 'Speichere Inputs', 'type': 'action'}
                 ]}   
             params.append(inp_dict)
+        else:
+            inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
+                    {'name': 'Speichere', 'type': 'action'}
+                ]}   
+            params.append(inp_dict)            
         self.p = Parameter.create(name='params', type='group', children=params)
         if self.isInputs:
             self.p.param('Aktionen', 'Speichere Inputs').sigActivated.connect(self.save)
+        else:
+            self.p.param('Aktionen', 'Speichere').sigActivated.connect(self.save)
 
     def save(self):
         global state
@@ -686,6 +693,8 @@ class InputsTree():
                                     dicti[kind] = wert
                             if self.isInputs:
                                 mdb_set_table(table='cmd_inputs', device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
+                            else:
+                                mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                 else:
                     self.itera(some_object.get('children'))
             else:
@@ -735,8 +744,48 @@ class SettingsTree():
                 kind['value']  = eval(seti.get('Value'))
             kinder.append(kind)
         dicti['children'] = kinder
+        inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
+                {'name': 'Speichern', 'type': 'action'}
+            ]}   
         params.append(dicti)
+        params.append(inp_dict)        
         self.p = Parameter.create(name='params', type='group', children=params)
+        self.p.param('Aktionen', 'Speichern').sigActivated.connect(self.save)
+
+    def save(self):
+        global state
+        self.state = self.p.saveState()
+        neu_szene = self.itera(self.state)
+
+    def check_iter(self,some_object):
+        try:
+            iter(some_object)
+            if type(some_object) <> str:  
+                return True
+            else:
+                return False
+        except TypeError, te:
+            return False
+
+    def itera(self,some_object, only_change = False):
+        dicti = {}
+        if self.check_iter(some_object):
+            if some_object.get('type') == 'group':
+                seting = some_object.get('name')
+                if seting <> None:
+                    for seti in sets:
+                        for kind in some_object.get('children').get('Settings').get('children'):
+                            wert = some_object.get('children').get('Settings').get('children').get(kind).get('value')
+                            if wert == '': wert = None
+                            dicti[kind] = wert
+                    print dicti
+                    for setting in dicti:
+                        setting_s(setting,dicti.get(setting))
+                else:
+                    self.itera(some_object.get('children'))
+            else:
+                for item in some_object: 
+                    self.itera(some_object.get(item))
 
 def selected(text):
     global sz, t, lastSelected
@@ -746,15 +795,34 @@ def selected(text):
     sz.p.sigTreeStateChanged.connect(change_sz)
 
 def update():
-    global inp, t2, comboBox, szn_lst
+    global inp,t,t2,t3,t4,sz,cmds,seTre, comboBox, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
     selected(lastSelected)  
+    sz=Szenen_tree("")
+    t.setParameters(sz.p, showTop=False)
     inp=InputsTree()
     t2.setParameters(inp.p, showTop=False)
+    cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
+    t3.setParameters(cmds.p, showTop=False) 
+    seTre = SettingsTree()
+    t4.setParameters(seTre.p, showTop=False)    
     comboBox.clear()
     szn_lst = sorted(szn.list_commands('alle'))
     for szne in szn_lst:
         comboBox.addItem(szne)    
     inp.p.sigTreeStateChanged.connect(change)
+    xs1_devs = xs1.list_devices()
+    xs1_cmds = xs1.dict_commands()
+    hue_devs = hue.list_devices()
+    hue_cmds = hue.dict_commands()
+    sns_devs = sn.list_devices()
+    sns_cmds = sn.dict_commands()
+    tvs_devs = tv.list_devices()
+    tvs_cmds = tv.dict_commands()
+    sat_devs = sat.list_devices()
+    sat_cmds = sat.dict_commands()
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
+    szn_lst = sorted(szn.list_commands('alle')) 
+    sz.p.sigTreeStateChanged.connect(change_sz)
     
 def neuTrig():
     vals = mdb_read_table_entry(db="cmd_inputs",entry=comboBox3.currentText(),column='Description')
@@ -822,21 +890,22 @@ def slctCmdLst(text):
 win = QtGui.QWidget()
 
 t = ParameterTree()
-sz=Szenen_tree("Alles_ein")
+#sz=Szenen_tree("Alles_ein")
 inp=InputsTree(isInputs = True, inputsGroup = 'V00')
-cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
-t.setParameters(sz.p, showTop=False)
-t.setWindowTitle('Szenen Setup:')
+
+#t.setParameters(sz.p, showTop=False)
+#t.setWindowTitle('Szenen Setup:')
 t2 = ParameterTree()
 t2.setParameters(inp.p, showTop=False)
 t3 = ParameterTree()
-t3.setParameters(cmds.p, showTop=False)
+cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
+#t3.setParameters(cmds.p, showTop=False)
 
 t4 = ParameterTree()
-seTre = SettingsTree()
-t4.setParameters(seTre.p, showTop=False)
+#seTre = SettingsTree()
+#t4.setParameters(seTre.p, showTop=False)
 
-sz.p.sigTreeStateChanged.connect(change_sz)
+
 inp.p.sigTreeStateChanged.connect(change)
 
 layout = QtGui.QGridLayout()
@@ -846,6 +915,9 @@ for szne in szn_lst:
     comboBox.addItem(szne)
 comboBox.setMaxVisibleItems(50)    
 lastSelected = ''
+
+update()
+
 comboBox.activated[str].connect(selected)
 
 comboBox2 = QtGui.QComboBox(win)
