@@ -7,7 +7,7 @@ import threading
 #from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import time, os, sys
 #import urllib2
-import inp_xs1#, udpinputs, redundancy, periodic_sup
+import inp_xs1, inp_cron #, udpinputs, redundancy, 
 from alarmevents import alarm_event
 import sqlsync
 
@@ -48,9 +48,9 @@ t.start()
 #threadliste.append(t)
 #t.start()
 #
-#t = threading.Thread(name="peri",target=periodic_sup.periodic_supervision, args = [])
-#threadliste.append(t)
-#t.start()
+t = threading.Thread(name="peri",target=inp_cron.periodic_supervision, args = [])
+threadliste.append(t)
+t.start()
 
 #print threadliste
 #add supervision of threads

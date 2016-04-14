@@ -10,7 +10,7 @@ import threading
 #from checkraid import checkraid
 from time import localtime,strftime
 #from mysql_con import  setting_r
-from cron import cron
+from cmd_cron import cron
 #from datetime import date
 #import os
 #from dateutil.relativedelta import relativedelta
