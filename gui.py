@@ -9,7 +9,7 @@ from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
-from cron import cron
+from cmd_cron import cron
 #from gui_szenen import Szenen_tree
 
 from mysql_con import mdb_read_table_entry, settings_r, mdb_read_table_column_filt,mdb_set_table

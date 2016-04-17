@@ -301,7 +301,7 @@ class Szenen_tree():
                     szn_d_child = ScalableGroup(name= item, children= szn_d_child_l, expanded = False) 
                     szn_l_child.append(szn_d_child) 
                 elif str(item) in ['Bedingung']: 
-                    szn_d_child = {'name': item, 'type': 'action', 'expanded': False} 
+                    szn_d_child = {'name': item, 'type': 'action', 'expanded': True} 
                     kinder = self.__return_enum__(szene.get(item))
                     for child in kinder:
                         if type(kinder) == dict:
@@ -314,7 +314,7 @@ class Szenen_tree():
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)                             
                 elif str(item) in ['setTask']: 
-                    szn_d_child = {'name': 'Befehl an Handys', 'type': 'action', 'expanded': False} 
+                    szn_d_child = {'name': 'Befehl an Handys', 'type': 'action', 'expanded': True} 
                     kinder = self.__return_enum__(szene.get(item))  
                     for kind in kinder:       
                         if kind <> None:
@@ -323,7 +323,7 @@ class Szenen_tree():
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)                             
                 elif str(item) in ['Follows']: 
-                    szn_d_child = {'name': 'Szene folgt', 'type': 'action', 'expanded': False} 
+                    szn_d_child = {'name': 'Szene folgt', 'type': 'action', 'expanded': True} 
                     kinder = self.__return_enum__(szene.get(item))  
                     for kind in kinder:       
                         if kind <> None:
@@ -701,8 +701,7 @@ class InputsTree():
                 for item in some_object: 
                     self.itera(some_object.get(item))
 
-sets = mdb_get_table(constants.sql_tables.settings.name)
-
+sets = []
 
 class SettingsTree():
     def __init__(self, isInputs = True, cmdTable = None):
@@ -795,7 +794,8 @@ def selected(text):
     sz.p.sigTreeStateChanged.connect(change_sz)
 
 def update():
-    global inp,t,t2,t3,t4,sz,cmds,seTre, comboBox, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
+    global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
+    sets = mdb_get_table(constants.sql_tables.settings.name)
     selected(lastSelected)  
     sz=Szenen_tree("")
     t.setParameters(sz.p, showTop=False)
