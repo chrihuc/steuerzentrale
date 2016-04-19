@@ -12,6 +12,7 @@ import constants
 import threading
 import socket
 import time
+import sys
 
 hostName = socket.gethostbyname( constants.eigene_IP )
 
@@ -64,7 +65,7 @@ def broadcast():
                 print data_ev
                 #szns = inputs(data_ev.get('Name'),data_ev.get('Value'))
 
-if __name__ == '__main__': 
+def main():
     constants.run = True
     threadliste = []
     
@@ -72,7 +73,7 @@ if __name__ == '__main__':
     threadliste.append(t)
     t.start()
     
-    t = threading.Thread(name="braodcast", target=broadcast, args = [])
+    t = threading.Thread(name="broadcast", target=broadcast, args = [])
     threadliste.append(t)
     t.start()    
     
@@ -87,3 +88,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         constants.run = False
         sys.exit()    
+
+if __name__ == '__main__': 
+    main()

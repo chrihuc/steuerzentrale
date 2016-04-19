@@ -7,7 +7,7 @@ import threading
 #from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import time, os, sys
 #import urllib2
-import inp_xs1, inp_cron #, udpinputs, redundancy, 
+import inp_xs1, inp_cron, inp_udp #redundancy, 
 from alarmevents import alarm_event
 import sqlsync
 
@@ -40,9 +40,9 @@ t = threading.Thread(name="xs1", target=inp_xs1.main, args = [])
 threadliste.append(t)
 t.start()
 
-#t = threading.Thread(name="udp",target=udpinputs.main, args = [])
-#threadliste.append(t)
-#t.start()
+t = threading.Thread(name="udp",target=inp_udp.main, args = [])
+threadliste.append(t)
+t.start()
 #
 #t = threading.Thread(name="redun",target=redundancy.main, args = [])
 #threadliste.append(t)
@@ -65,6 +65,6 @@ try:
         time.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
-    sys.exit() 
+sys.exit() 
  
     

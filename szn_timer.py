@@ -60,6 +60,8 @@ class szenen_timer:
         
     def start_timer(self, nr):
         self.liste[nr].get("timer").start()
+        self.liste[nr]['due'] = datetime.datetime.now() + datetime.timedelta(0,self.liste[nr].get("delay"))
+        self.store()
         
     def add_timer_start(self, parent, delay, child, exact, retrig):
         numm = self.add_timer(parent, delay, child, exact, retrig)
@@ -77,6 +79,7 @@ class szenen_timer:
                 if delay > 0:
                     t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
                     item["timer"] = t
+                    item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                     item.get("timer").start()
                 else:
                     self.liste.remove(item)
@@ -90,13 +93,17 @@ class szenen_timer:
     def zeige(self):
         print self.liste 
 
+    def store(self):
+        file_ = open('szn_timer.cfg', 'w')
+        file_.write(str(self.liste))
+        file_.close()        
         
     def entferne_eintrag(self, hash_id, child):
         for item in self.liste:
             if item.get("hash_id") == hash_id:
                 self.liste.remove(item)
         self.def_to_run(child)
-        #print self.liste
+        self.store()
       
 if __name__ == '__main__':
     main()  
