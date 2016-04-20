@@ -40,9 +40,9 @@ t = threading.Thread(name="xs1", target=inp_xs1.main, args = [])
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(name="udp",target=inp_udp.main, args = [])
-threadliste.append(t)
-t.start()
+#t = threading.Thread(name="udp",target=inp_udp.main, args = [])
+#threadliste.append(t)
+#t.start()
 #
 #t = threading.Thread(name="redun",target=redundancy.main, args = [])
 #threadliste.append(t)

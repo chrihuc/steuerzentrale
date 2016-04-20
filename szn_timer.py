@@ -60,7 +60,8 @@ class szenen_timer:
         
     def start_timer(self, nr):
         self.liste[nr].get("timer").start()
-        self.liste[nr]['due'] = datetime.datetime.now() + datetime.timedelta(0,self.liste[nr].get("delay"))
+        item = self.liste[nr]
+        item['due'] = datetime.datetime.now() + datetime.timedelta(0,self.liste[nr].get("delay"))
         self.store()
         
     def add_timer_start(self, parent, delay, child, exact, retrig):
@@ -94,7 +95,7 @@ class szenen_timer:
         print self.liste 
 
     def store(self):
-        file_ = open('szn_timer.cfg', 'w')
+        file_ = open('szn_timer.tmp', 'w')
         file_.write(str(self.liste))
         file_.close()        
         
