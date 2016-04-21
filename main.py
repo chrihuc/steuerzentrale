@@ -43,6 +43,14 @@ t.start()
 #t = threading.Thread(name="udp",target=inp_udp.main, args = [])
 #threadliste.append(t)
 #t.start()
+
+t = threading.Thread(name="udp.bidirekt", target=inp_udp.bidirekt, args = [])
+threadliste.append(t)
+t.start()
+
+t = threading.Thread(name="udp.broadcast", target=inp_udp.broadcast, args = [])
+threadliste.append(t)
+t.start()
 #
 #t = threading.Thread(name="redun",target=redundancy.main, args = [])
 #threadliste.append(t)
