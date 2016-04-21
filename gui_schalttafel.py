@@ -654,7 +654,8 @@ class InputsTree():
             params.append(inp_dict)
         else:
             inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
-                    {'name': 'Speichere', 'type': 'action'}
+                    {'name': 'Speichere', 'type': 'action'},
+                    {'name': 'Neues Kommando', 'type': 'action'}
                 ]}   
             params.append(inp_dict)            
         self.p = Parameter.create(name='params', type='group', children=params)
@@ -662,11 +663,16 @@ class InputsTree():
             self.p.param('Aktionen', 'Speichere Inputs').sigActivated.connect(self.save)
         else:
             self.p.param('Aktionen', 'Speichere').sigActivated.connect(self.save)
+            self.p.param('Aktionen', 'Neues Kommando').sigActivated.connect(self.newCommand)
 
     def save(self):
         global state
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
+
+    def newCommand(self):
+        mdb_add_table_entry(table=self.cmdTable, values={'Name':'Neuer Befehl'})     
+        self.set_paratree()
 
     def check_iter(self,some_object):
         try:
@@ -692,7 +698,7 @@ class InputsTree():
                                 if wert <> aktuator.get(kind):
                                     dicti[kind] = wert
                             if self.isInputs:
-                                mdb_set_table(table='cmd_inputs', device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
+                                mdb_set_table(table=constants.sql_tables.inputs.name, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                             else:
                                 mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                 else:

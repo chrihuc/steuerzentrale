@@ -184,7 +184,7 @@ def mdb_add_table_entry(table, values, primary = 'Id'):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     listNames = []
     listValues = []
-    strin = 'INSERT INTO '+constants.sql_tables.inputs.name+' ('
+    strin = 'INSERT INTO '+table+' ('
     for val in values:
         if val <> primary:
             strin += val + ', '
@@ -271,6 +271,7 @@ def mdb_set_table(table, device, commands, primary = 'Name'):
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             if commando <> primary:
+                print sql
                 cur.execute(sql)       
     con.close() 
 
