@@ -11,4 +11,5 @@ import git
 def git_update():
     g = git.cmd.Git()
     g.pull()
+    print "Update done, exiting"
     constants.run = False
