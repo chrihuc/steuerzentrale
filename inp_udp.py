@@ -7,7 +7,8 @@ Created on Mon Feb 22 18:43:14 2016
 
 import constants
 
-#from mysql_con import inputs
+from mysql_con import inputs
+from cmd_szenen import szenen
 
 import threading
 import socket
@@ -23,8 +24,18 @@ biSocket.listen(5)
 PORT_NUMBER = constants.udp_.PORT
 broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 broadSocket.bind( (hostName, constants.udp_.broadPORT) )
+scenes = szenen()
 
 SIZE = 1024
+
+def exec_data(data_ev):
+    if ('Name' in data_ev) and ('Value' in data_ev):
+        name = data_ev.get('Name')
+        value = data_ev.get('Value')
+        szns = inputs(name,value)
+        for szene in szns:
+            if szene <> None:
+                scenes.threadExecute(szene, check_bedingung=False, wert = value)    
 
 def bidirekt():
     while constants.run:
@@ -43,9 +54,7 @@ def bidirekt():
         conn.send(data)
         conn.close()  
         if isdict:
-            if ('Name' in data_ev) and ('Value' in data_ev):
-                print data_ev
-                #szns = inputs(data_ev.get('Name'),data_ev.get('Value'))
+            exec_data(data_ev)
 
 def broadcast():
     while constants.run:
@@ -61,9 +70,7 @@ def broadcast():
         except Exception as serr:
             isdict = False  
         if isdict:
-            if ('Name' in data_ev) and ('Value' in data_ev):
-                print data_ev
-                #szns = inputs(data_ev.get('Name'),data_ev.get('Value'))
+            exec_data(data_ev)
 
 def main():
     constants.run = True
