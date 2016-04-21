@@ -9,6 +9,7 @@ import constants
 
 from mysql_con import inputs
 from cmd_szenen import szenen
+import cmd_internal
 
 import threading
 import socket
@@ -35,7 +36,9 @@ def exec_data(data_ev):
         szns = inputs(name,value)
         for szene in szns:
             if szene <> None:
-                scenes.threadExecute(szene, check_bedingung=False, wert = value)    
+                scenes.threadExecute(szene, check_bedingung=False, wert = value)  
+    elif data_ev.get('Command')=='Update':
+        cmd_internal.git_update()                
 
 def bidirekt():
     while constants.run:
