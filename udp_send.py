@@ -7,7 +7,7 @@ Created on Wed Mar 30 15:35:24 2016
 
 import socket
 
-HOST = '192.168.192.10'   # Symbolic name meaning the local host
+HOST = '192.168.192.11'   # Symbolic name meaning the local host
 PORT = 5005    # Arbitrary non-privileged port
 if False:
     while True:
@@ -28,14 +28,14 @@ if False:
             print reply
         s.close()
         
-if False:
+if True:
     dicti = {}
-    dicti['Value'] = 'Test'
-    dicti['Name'] = 0
+    #dicti['Value'] = 'Test'
+    dicti['Hinweis'] = 'Test'
     hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     hbtsocket.sendto(str(dicti),(HOST,5000))     
     
-if True:
+if False:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     command = {'Command':'Update'}
     s.connect((HOST,PORT))

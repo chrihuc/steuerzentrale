@@ -10,6 +10,7 @@ import constants
 from mysql_con import inputs
 from cmd_szenen import szenen
 import cmd_internal
+from alarmevents import alarm_event
 
 import threading
 import socket
@@ -26,6 +27,7 @@ PORT_NUMBER = constants.udp_.PORT
 broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 broadSocket.bind( (hostName, constants.udp_.broadPORT) )
 scenes = szenen()
+aes = alarm_event()
 
 SIZE = 1024
 
@@ -38,6 +40,7 @@ def exec_data(data_ev):
             if szene <> None:
                 scenes.threadExecute(szene, check_bedingung=False, wert = value)  
     elif data_ev.get('Command')=='Update':
+        aes.new_event(description="System update", prio=0)
         cmd_internal.git_update()                
 
 def bidirekt():

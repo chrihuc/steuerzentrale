@@ -16,6 +16,7 @@ sudo pip install tinkerforge
 sudo pip install gitpython
 sudo pip install pyqtgraph
 sudo pip install easygui
+sudo pip install gitpython
 
 ##################################
 setup of daemon tools
