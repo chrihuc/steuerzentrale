@@ -16,6 +16,7 @@ from cmd_xs1 import myezcontrol
 from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
+from cmd_internal import internal
 from alarmevents import alarm_event
 from szn_timer import szenen_timer
 from messaging import messaging
@@ -31,6 +32,7 @@ hue = hue_lights()
 sn = sonos()
 tv = TV()
 sat = satelliten()
+interna = internal()
 xs1_devs = xs1.list_devices()
 hue_devs = hue.list_devices()
 sns_devs = sn.list_devices()
@@ -251,7 +253,18 @@ class szenen:
                                 t_list.append([key,kommando])
                                 self.kommando_dict[szn_id] = t_list
                             t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, key, kommando])
-                            t.start()                         
+                            t.start()  
+#==============================================================================
+# Internal                               
+#==============================================================================
+            key = "Internal"
+            if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") ):#and (str(interlocks.get(key)) in ["None", "auto"])):
+                kommandos = self.__return_enum__(szene_dict.get(key))
+                for kommando in kommandos:
+                    #print kommando, kommandos.get(kommando)
+                    set_del = Timer(0, interna.execute, [str(kommandos.get(kommando))])
+                    #timer set to 0 for following actions
+                    set_del.start()                              
 #==============================================================================
 # change settings table                                
 #==============================================================================
@@ -259,7 +272,7 @@ class szenen:
             if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = self.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
-                    print kommando, kommandos.get(kommando)
+                    #print kommando, kommandos.get(kommando)
                     set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
                     #timer set to 0 for following actions
                     set_del.start()  

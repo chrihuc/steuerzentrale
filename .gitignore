@@ -5,6 +5,6 @@
 #!/foo/bar 
 *.pyc
 *.cfg
-#.tmp
+*.tmp
 /log/*
 #constants.py

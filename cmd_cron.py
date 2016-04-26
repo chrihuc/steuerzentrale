@@ -57,9 +57,9 @@ class cron:
         liste = []    
         with con:
             cur = con.cursor()
-            sql = 'SELECT * FROM '+db
+            sql = 'SELECT * FROM '+constants.sql_tables.cron.name
             if wecker:
-                sql = 'SELECT * FROM '+db+ ' WHERE Wecker ="True"'
+                sql = 'SELECT * FROM '+constants.sql_tables.cron.name+ ' WHERE Wecker ="True"'
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -75,8 +75,8 @@ class cron:
         con.close
         return liste    
 
-    def get_next(self, tag, Zeit, db=constants.sql_tables.cron.name):
-        liste = self.get_all(db)
+    def get_next(self, tag, Zeit, db=constants.sql_tables.cron.name, wecker = False):
+        liste = self.get_all(wecker=wecker)
         ret_item = {}
         ret_liste = []
         tage = {1:"Mo",2:"Di",3:"Mi",4:"Do",5:"Fr",6:"Sa",0:"So"}
@@ -197,8 +197,7 @@ class cron:
         lt = localtime()
         Zeit = strftime("%H:%M", lt)
         tag = int(strftime("%w", lt))
-        db = "Wecker"
-        liste = self.get_next(tag, Zeit, db)
+        liste = self.get_next(tag, Zeit, wecker = True)
         if liste == []:
             text = "Kein Wecker fuer " + str(horizont) + " Stunden."
         else:

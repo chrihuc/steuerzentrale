@@ -9,7 +9,7 @@ import time, os, sys
 #import urllib2
 import inp_xs1, inp_cron, inp_udp #redundancy, 
 from alarmevents import alarm_event
-import sqlsync
+#import sqlsync
 
 #delay for changeover
 #time.sleep(10)

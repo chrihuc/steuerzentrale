@@ -39,9 +39,16 @@ def exec_data(data_ev):
         for szene in szns:
             if szene <> None:
                 scenes.threadExecute(szene, check_bedingung=False, wert = value)  
-    elif data_ev.get('Command')=='Update':
-        aes.new_event(description="System update", prio=0)
-        cmd_internal.git_update()                
+#    elif data_ev.get('Command')=='Update':
+#        aes.new_event(description="System update", prio=0)
+#        cmd_internal.git_update() 
+    elif ('Command' in data_ev):   
+        name = data_ev.get('Command') 
+        value = 1
+        szns = inputs(name,value)
+        for szene in szns:
+            if szene <> None:
+                scenes.threadExecute(szene, check_bedingung=False, wert = value) 
 
 def bidirekt():
     while constants.run:

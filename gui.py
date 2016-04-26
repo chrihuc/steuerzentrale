@@ -233,10 +233,17 @@ class Main(QtGui.QMainWindow):
         
         #self.add_wecker()
         self.pushButton_9 = QtGui.QPushButton(self.tab_5)
-        self.pushButton_9.setGeometry(QtCore.QRect(300, 380, 91, 50))
+        self.pushButton_9.setGeometry(QtCore.QRect(280, 380, 91, 50))
         self.pushButton_9.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_9.setText('Speichere')
-        self.pushButton_9.clicked.connect(self.makeSaveWecker(self))  
+        self.pushButton_9.clicked.connect(self.makeSaveWecker(self)) 
+
+        self.pushButton_10 = QtGui.QPushButton(self.tab_5)
+        self.pushButton_10.setGeometry(QtCore.QRect(320, 380, 91, 50))
+        self.pushButton_10.setObjectName(_fromUtf8("chekAlarm"))
+        self.pushButton_10.setText('Check')
+        self.pushButton_10.clicked.connect(self.checkWecker) 
+        
         self.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -421,7 +428,11 @@ class Main(QtGui.QMainWindow):
             for wecker in parent:
                 liste.append(parent.get(wecker))
                 mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
-        return saveWecker     
+        return saveWecker 
+        
+    def checkWecker(self):
+        next_i = crn.next_wecker_heute_morgen()
+        print next_i
         
 class weckerRow(QtGui.QWidget):
     def __init__( self ,weckerList):
@@ -568,23 +579,30 @@ class MyPopup(QtGui.QMainWindow):
 
 class MyGraphPopup(QtGui.QMainWindow):
     def __init__(self, parent, item):
-        #super(MyGraphPopup, self).__init__(parent)
-        #global System
-        #QtGui.QWidget.__init__(self)
+            #super(MyGraphPopup, self).__init__(parent)
+            #global System
+            #QtGui.QWidget.__init__(self)
         
         self.win = pg.GraphicsWindow(title="Basic plotting examples")
-        #win.resize(1000,600)
+            #win.resize(1000,600)
         self.win.setWindowTitle('Homecontrol Graph')
         self.win.showMaximized()#showFullScreen()
         
         self.axis = TimeAxisItem('bottom')
         
-        graph = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Value', filt=item, amount=1000, order="desc"))
-        time = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1000, order="desc"))
-        #graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
-        #time = np.array([0,1,2,3,4,3,2,1])
+        graph = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Value', filt=item, amount=5000, order="desc"))
+        time = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=5000, order="desc"))
+            #graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
+            #time = np.array([0,1,2,3,4,3,2,1])
         self.win.addPlot(title="Whatever",axisItems={'bottom':self.axis},x=time, y=graph)  
-        #curve = p1.plot()
+        if 'A00' in item:
+            self.win.setYRange(-10,40)
+        else:
+            self.win.setYRange(15,30)
+#        jetzt = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1, order="desc")
+#        fruher = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1000, order="desc")[999]
+#        self.win.setXRange(fruher,jetzt)
+            #curve = p1.plot()
 
 class MySZTreePopup(QtGui.QMainWindow):
     def __init__(self, parent, item):
