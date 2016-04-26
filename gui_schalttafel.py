@@ -612,12 +612,12 @@ class InputsTree():
         else:
             inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
         inp_kinder = []
-        for aktuator in self.inputs:   
+        for aktuator in sorted(self.inputs):   
             if (aktuator.get('Description') <> None and self.inputsGroup in aktuator.get('Name') and self.isInputs) or (not self.isInputs and not aktuator.get('Name') in ['Name']):
                 if self.isInputs:             
                     title = aktuator.get('Description')
                 else:
-                    title = str(aktuator.get('Id'))
+                    title = str(aktuator.get('Name'))
                 akt_dict = {'name': str(aktuator.get('Id')), 'title':title , 'type': 'group', 'expanded': False}
                 if self.expand == aktuator.get('Name'):
                     akt_dict['expanded']= True                
@@ -700,7 +700,7 @@ class InputsTree():
                             if self.isInputs:
                                 mdb_set_table(table=constants.sql_tables.inputs.name, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                             else:
-                                mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
+                                mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id', translate = False)
                 else:
                     self.itera(some_object.get('children'))
             else:

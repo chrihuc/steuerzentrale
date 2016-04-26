@@ -59,10 +59,11 @@ class szenen_timer:
         return len(self.liste) - 1
         
     def start_timer(self, nr):
-        self.liste[nr].get("timer").start()
+        #print self.liste, nr
         item = self.liste[nr]
         item['due'] = datetime.datetime.now() + datetime.timedelta(0,self.liste[nr].get("delay"))
         self.store()
+        self.liste[nr].get("timer").start()
         
     def add_timer_start(self, parent, delay, child, exact, retrig):
         numm = self.add_timer(parent, delay, child, exact, retrig)
@@ -88,6 +89,7 @@ class szenen_timer:
         return found   
     
     def retrigger_add(self, parent, delay, child, exact = False, retrig = True):
+        #print parent, delay, child, exact, retrig
         if not self.retrigger(parent, delay, child, exact, retrig):
             self.add_timer_start(parent, delay, child, exact, retrig)
 

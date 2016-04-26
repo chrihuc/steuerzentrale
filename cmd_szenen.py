@@ -257,7 +257,7 @@ class szenen:
 #==============================================================================
 # Internal                               
 #==============================================================================
-            key = "Internal"
+            key = "intCmd"
             if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") ):#and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = self.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:

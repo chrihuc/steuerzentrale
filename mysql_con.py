@@ -251,7 +251,7 @@ def mdb_get_table(db):
     con.close()    
     return rlist  
 
-def mdb_set_table(table, device, commands, primary = 'Name'):
+def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     cmds = get_raw_cmds(table)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
@@ -261,7 +261,7 @@ def mdb_set_table(table, device, commands, primary = 'Name'):
             sql = 'INSERT INTO '+table+' ('+primary+') VALUES ("'+ str(device) + '")'     
             cur.execute(sql)   
         for cmd in commands:
-            if len(cmds) == 0:
+            if (len(cmds) == 0) or not translate:
                 commando = cmd
             else:
                 commando = cmds.get(cmd)
@@ -271,7 +271,6 @@ def mdb_set_table(table, device, commands, primary = 'Name'):
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             if commando <> primary:
-                print sql
                 cur.execute(sql)       
     con.close() 
 

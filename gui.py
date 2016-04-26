@@ -431,7 +431,7 @@ class Main(QtGui.QMainWindow):
         return saveWecker 
         
     def checkWecker(self):
-        next_i = crn.next_wecker_heute_morgen()
+        next_i = crons.next_wecker_heute_morgen()
         print next_i
         
 class weckerRow(QtGui.QWidget):
