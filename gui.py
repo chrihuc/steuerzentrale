@@ -588,17 +588,20 @@ class MyGraphPopup(QtGui.QMainWindow):
         self.win.setWindowTitle('Homecontrol Graph')
         self.win.showMaximized()#showFullScreen()
         
-        self.axis = TimeAxisItem('bottom')
+        self.xaxis = TimeAxisItem('bottom')
+        self.yaxis = pg.AxisItem('right')
+
+        if 'A00' in item:
+            self.yaxis.setRange(-10,40)
+        else:
+            self.yaxis.setRange(15,30)
         
         graph = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Value', filt=item, amount=5000, order="desc"))
         time = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=5000, order="desc"))
             #graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
             #time = np.array([0,1,2,3,4,3,2,1])
-        self.win.addPlot(title="Whatever",axisItems={'bottom':self.axis},x=time, y=graph)  
-        if 'A00' in item:
-            self.win.setYRange(-10,40)
-        else:
-            self.win.setYRange(15,30)
+        self.win.addPlot(title="Whatever",axisItems={'bottom':self.xaxis,'right':self.yaxis},x=time, y=graph)  
+        self.win.setXRange(15,30)
 #        jetzt = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1, order="desc")
 #        fruher = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1000, order="desc")[999]
 #        self.win.setXRange(fruher,jetzt)
