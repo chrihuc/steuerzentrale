@@ -44,10 +44,10 @@ def  get_satellite(name):
 
 def main():
     sats = satelliten()
-    print sats.list_devices()
-    print sats.list_commands("Vm1ZIM1SCA1DO01")
-    #print sats.set_device('Vm1ZIM1SCA1DO01','scan1')
-    print sats.listCommandTable(nameReturn = False)
+    #print sats.list_devices()
+    print sats.list_commands("V00WOH1SRA1LI02")
+    print sats.set_device('V00WOH1SRA1LI03','Hell')
+    #print sats.listCommandTable(nameReturn = False)
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -166,6 +166,7 @@ class satelliten:
         satellit=mdb_read_table_entry(table.name,device)
         command = mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
+        print command
         data = ""
         try:
             satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))

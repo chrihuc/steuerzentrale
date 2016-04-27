@@ -35,9 +35,14 @@ if True:
     hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     hbtsocket.sendto(str(dicti),(HOST,5005))     
     
-if False:
+if True:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    command = {'Command':'Update'}
+    #command = {'Command':'Update'}
+    data_ev = {}
+    data_ev['Device'] = 'V00WOH1SRA1LI03'
+    data_ev['red'] = 0L
+    data_ev['green'] = 0
+    data_ev['blue'] = 0
     s.connect((HOST,PORT))
 #    if command.split(' ',1)[0]=='STORE':
 #        while True:
@@ -45,7 +50,7 @@ if False:
 #            command = command+'\n'+additional_text
 #            if additional_text=='.':
 #                break
-    s.send(str(command))
+    s.send(str(data_ev))
     reply = s.recv(1024)
     if reply==command:
         print "Success"

@@ -60,7 +60,7 @@ cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 szn_typs = ['','Intern','Scanner','Wecker']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
-
+constants.redundancy_.master = True
 
 #==============================================================================
 # Todo:
