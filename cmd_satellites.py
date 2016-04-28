@@ -146,9 +146,8 @@ class satelliten:
         return liste
 
     def dict_commands(self,device='alle'):
-        liste = {}
-        itera = 1
-        liste[''] = itera
+        liste = {'':1,'man':2,'auto':3}
+        itera = 3
         list_cmds_of = []
         if device == 'alle':
             list_cmds_of = self.list_devices()
