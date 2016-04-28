@@ -626,7 +626,7 @@ class InputsTree():
                 kinder2 = []
                 kinder3, kinder4 = [], []
                 for sub in sorted(aktuator):
-                    if sub in ['Logging','Setting']:
+                    if sub in ['Logging','Setting','Doppelklick']:
                         if aktuator.get(sub) == '1':
                             kinder1.append({'name': sub, 'type': 'bool', 'value':True})
                         elif aktuator.get(sub) in ['0', None]:

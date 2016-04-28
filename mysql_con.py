@@ -39,7 +39,7 @@ def main():
     #print hue_devices
     #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
     #mdb_add_table_entry("test",values)
-    print inputs('V00WOH1SRA1DI02','0.95')
+    print inputs('V00WOH1RUM1HE01','6')
 
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
@@ -390,6 +390,7 @@ def inputs(device, value):
             sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
             sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
             sql2 = sql2 + ');' 
+            print sql + sql2
             cur.execute(sql + sql2)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -397,7 +398,8 @@ def inputs(device, value):
             for row in results:
                 single = True
                 for i in range (0,len(row)):
-                    dicti[field_names[i]] = row[i]                     
+                    dicti[field_names[i]] = row[i]  
+                doppelklick = dicti.get("Doppelklick")
                 if str(dicti.get("last2")) <> "None":             
                     if lt - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                         szenen.append(dicti.get("Dreifach")) 
@@ -405,6 +407,7 @@ def inputs(device, value):
                     elif lt - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
                         szenen.append(dicti.get("Doppel"))     
                         single = False
+                if str(doppelklick) <> "True": single = True
                 if single: szenen.append(dicti.get(setting_r("Status")))         
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)               

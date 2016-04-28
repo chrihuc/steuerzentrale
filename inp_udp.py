@@ -73,7 +73,6 @@ def bidirekt():
 def broadcast():
     while constants.run:
         (data,addr) = broadSocket.recvfrom(SIZE)
-        print data
         if not data:
             break
         isdict = False
@@ -84,7 +83,6 @@ def broadcast():
         except Exception as serr:
             isdict = False  
         if isdict:
-            print "isdict"
             exec_data(data_ev)
 
 def main():
