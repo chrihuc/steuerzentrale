@@ -36,10 +36,8 @@ def exec_data(data_ev):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
         szns = inputs(name,value)
-        print szns
         for szene in szns:
             if szene <> None:
-                print szene
                 scenes.threadExecute(szene, check_bedingung=False, wert = value)  
 #    elif data_ev.get('Command')=='Update':
 #        aes.new_event(description="System update", prio=0)

@@ -390,7 +390,6 @@ def inputs(device, value):
             sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
             sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
             sql2 = sql2 + ');' 
-            print sql + sql2
             cur.execute(sql + sql2)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
