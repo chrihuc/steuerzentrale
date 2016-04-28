@@ -2,7 +2,7 @@
 
 import constants
 
-from mysql_con import mdb_get_table, mdb_read_table_entry, mdb_read_table_column
+from mysql_con import mdb_get_table, mdb_read_table_entry, mdb_read_table_column, set_val_in_szenen
 import socket
 from socket import error as socket_error
 from alarmevents import alarm_event
@@ -165,6 +165,9 @@ class satelliten:
 
 
     def set_device(self, device, commd): 
+        if commd in ["man", "auto"]:
+            set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
+            return True      
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         satellit=mdb_read_table_entry(table.name,device)
         command = mdb_read_table_entry(satellit.get('command_set'),commd)
