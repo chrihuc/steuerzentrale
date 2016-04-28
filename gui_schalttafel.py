@@ -58,7 +58,7 @@ cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
-szn_typs = ['','Intern','Scanner','Wecker']
+szn_typs = ['','Intern','Scanner','Wecker','Lichter']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
@@ -894,6 +894,13 @@ def slctCmdLst(text):
     cmds=InputsTree(isInputs = False, cmdTable = text)
     t3.setParameters(cmds.p, showTop=False)
 
+def updt_sznlst():
+    global comboBox
+    comboBox.clear()
+    szn_lst = sorted(szn.list_commands(comboBox4.currentText()))
+    for szne in szn_lst:
+        comboBox.addItem(szne)    
+
 win = QtGui.QWidget()
 
 t = ParameterTree()
@@ -938,6 +945,11 @@ for inpt in inpts:
     if inpt <> "":
         comboBox3.addItem(inpt)
 
+comboBox4 = QtGui.QComboBox(win)
+for itm in szn_typs:
+    comboBox4.addItem(itm)
+comboBox4.activated[str].connect(updt_sznlst)    
+
 buttn = QtGui.QPushButton(win)
 buttn.setText('Update')
 buttn.clicked.connect(update)
@@ -947,15 +959,18 @@ adinbttn.setText('Neuer Trigger')
 adinbttn.clicked.connect(neuTrig)
 
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
-layout.addWidget(buttn, 1, 0, 1, 1)
-layout.addWidget(t2, 2, 0, 1, 1)
-layout.addWidget(comboBox3, 3, 0, 1, 1)
-layout.addWidget(adinbttn, 4, 0, 1, 1)
-layout.addWidget(comboBox, 1, 1, 1, 1)
-layout.addWidget(t, 2, 1, 1, 1)
-layout.addWidget(comboBox2, 1, 2, 1, 1)
-layout.addWidget(t3, 2, 2, 1, 1)
-layout.addWidget(t4, 2, 3, 1, 1)
+#szene preselection
+layout.addWidget(comboBox4, 1, 1, 1, 1)
+
+layout.addWidget(buttn, 2, 0, 1, 1)
+layout.addWidget(t2, 3, 0, 1, 1)
+layout.addWidget(comboBox3, 4, 0, 1, 1)
+layout.addWidget(adinbttn, 5, 0, 1, 1)
+layout.addWidget(comboBox, 2, 1, 1, 1)
+layout.addWidget(t, 3, 1, 1, 1)
+layout.addWidget(comboBox2, 2, 2, 1, 1)
+layout.addWidget(t3, 3, 2, 1, 1)
+layout.addWidget(t4, 3, 3, 1, 1)
 
 
 win.show()

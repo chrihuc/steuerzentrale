@@ -67,7 +67,7 @@ class szenen:
                         liste[szene.get("Name")] = szene.get("Beschreibung")
                     else:
                         liste[szene.get("Name")] = szene.get("Name")
-        elif gruppe == "alle":
+        elif gruppe == "alle" or gruppe == "":
             for szene in table:
                 if int(szene.get("Id")) > 19:
                     if str(szene.get("Beschreibung")) <> "None":

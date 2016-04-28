@@ -21,6 +21,7 @@ import git
 import pyqtgraph as pg
 import numpy as np
 from threading import Timer
+import time
 import datetime
 
 import pyqtgraph.parametertree.parameterTypes as pTypes
@@ -230,19 +231,22 @@ class Main(QtGui.QMainWindow):
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout3)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)  
+        self.lbl = QtGui.QLabel(self.tab_5)
+        self.lbl.setText(self.checkWecker())
+        self.lbl.setGeometry(QtCore.QRect(120, 380, 500, 50))
         
         #self.add_wecker()
         self.pushButton_9 = QtGui.QPushButton(self.tab_5)
-        self.pushButton_9.setGeometry(QtCore.QRect(280, 380, 91, 50))
+        self.pushButton_9.setGeometry(QtCore.QRect(10, 380, 91, 50))
         self.pushButton_9.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_9.setText('Speichere')
         self.pushButton_9.clicked.connect(self.makeSaveWecker(self)) 
 
-        self.pushButton_10 = QtGui.QPushButton(self.tab_5)
-        self.pushButton_10.setGeometry(QtCore.QRect(320, 380, 91, 50))
-        self.pushButton_10.setObjectName(_fromUtf8("chekAlarm"))
-        self.pushButton_10.setText('Check')
-        self.pushButton_10.clicked.connect(self.checkWecker) 
+#        self.pushButton_10 = QtGui.QPushButton(self.tab_5)
+#        self.pushButton_10.setGeometry(QtCore.QRect(320, 380, 91, 50))
+#        self.pushButton_10.setObjectName(_fromUtf8("chekAlarm"))
+#        self.pushButton_10.setText('Check')
+#        self.pushButton_10.clicked.connect(self.checkWecker) 
         
         self.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
         
@@ -392,6 +396,7 @@ class Main(QtGui.QMainWindow):
     def update_values(self):
         try:
             settings = settings_r()
+            self.lbl.setText(self.checkWecker())
             for btn in self.buttons:
                 name = btn.objectName()
                 if str(name) in settings:
@@ -428,11 +433,14 @@ class Main(QtGui.QMainWindow):
             for wecker in parent:
                 liste.append(parent.get(wecker))
                 mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
+        time.sleep(1)
+        self.lbl.setText(self.checkWecker())
+        QApplication.processEvents()
         return saveWecker 
         
     def checkWecker(self):
         next_i = crons.next_wecker_heute_morgen()
-        print next_i
+        return next_i
         
 class weckerRow(QtGui.QWidget):
     def __init__( self ,weckerList):
@@ -590,18 +598,18 @@ class MyGraphPopup(QtGui.QMainWindow):
         
         self.xaxis = TimeAxisItem('bottom')
         self.yaxis = pg.AxisItem('right')
-
-        if 'A00' in item:
-            self.yaxis.setRange(-10,40)
-        else:
-            self.yaxis.setRange(15,30)
         
         graph = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Value', filt=item, amount=5000, order="desc"))
-        time = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=5000, order="desc"))
+        timerange = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=5000, order="desc")
+        time = np.array(timerange)
             #graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
             #time = np.array([0,1,2,3,4,3,2,1])
-        self.win.addPlot(title="Whatever",axisItems={'bottom':self.xaxis,'right':self.yaxis},x=time, y=graph)  
-        self.win.setXRange(15,30)
+        plot = self.win.addPlot(title="Whatever",axisItems={'bottom':self.xaxis,'right':self.yaxis},x=time, y=graph)  
+        plot.setXRange(timerange[0], timerange[-3000], padding=0)
+        if 'A00' in item:
+            plot.setYRange(-10,40)
+        else:
+            plot.setYRange(15,30)        
 #        jetzt = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1, order="desc")
 #        fruher = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1000, order="desc")[999]
 #        self.win.setXRange(fruher,jetzt)
