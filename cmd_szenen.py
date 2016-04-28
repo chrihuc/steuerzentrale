@@ -214,7 +214,6 @@ class szenen:
         t.start()         
 
     def execute(self, szene, check_bedingung=False, wert = 0):
-        print szene
         szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung

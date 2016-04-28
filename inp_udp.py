@@ -48,13 +48,13 @@ def exec_data(data_ev):
         szns = inputs(name,value)
         for szene in szns:
             if szene <> None:
+                print szene
                 scenes.threadExecute(szene, check_bedingung=False, wert = value) 
 
 def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
         data = conn.recv(1024)
-        print data
         if not data:
             break
         isdict = False
