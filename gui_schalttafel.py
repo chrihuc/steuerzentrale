@@ -56,6 +56,7 @@ szn_lst = sorted(szn.list_commands('alle'))
 
 cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
+cmd_lsts = list(set(cmd_lsts))
 
 szn_typs = ['','Intern','Scanner','Wecker']
 
@@ -221,7 +222,7 @@ class Szenen_tree():
         if device in hue_devs: values = hue_cmds
         if device in sns_devs: values = sns_cmds
         if device in tvs_devs: values = tvs_cmds
-        if device in sat_devs: values = sat_cmds
+        if device in sat_devs: values = sat.dict_commands(device)
         return values
 
     def dict_constructor_(self,device, cmmds):

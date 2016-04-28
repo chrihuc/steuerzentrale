@@ -46,6 +46,8 @@ def main():
     sats = satelliten()
     #print sats.list_devices()
     print sats.list_commands("V00WOH1SRA1LI02")
+    print sats.set_device('V00WOH1SRA1LI01','Hell')
+    print sats.set_device('V00WOH1SRA1LI02','Hell')
     print sats.set_device('V00WOH1SRA1LI03','Hell')
     #print sats.listCommandTable(nameReturn = False)
 
@@ -162,24 +164,26 @@ class satelliten:
         return liste        
 
 
-    def set_device(self, device, commd):   
+    def set_device(self, device, commd): 
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         satellit=mdb_read_table_entry(table.name,device)
         command = mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
-        print command
         data = ""
-        try:
-            satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
-        except:
-            pass
-        try:
-            satelliten.mysocket.settimeout(10)
-            satelliten.mysocket.connect((satellit.get('IP'),satellit.get('PORT')))
-            satelliten.mysocket.send(str(command))
-            data=satelliten.mysocket.recv(1024)
-            satelliten.mysocket.close()
-        except:
-            satelliten.mysocket.close()
+        if str(satellit.get('PORT')) <> 'None':
+            try:
+                satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
+            except:
+                pass
+        if str(satellit.get('BiPORT')) <> 'None':
+            try:
+                satelliten.mysocket.settimeout(10)
+                s.connect((satellit.get('IP'),satellit.get('BiPORT')))
+                s.send(str(command))
+                data=s.recv(1024)
+                s.close()
+            except:
+                s.close()
         if data  == "True":
             return True
         else:

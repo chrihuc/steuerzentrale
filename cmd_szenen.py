@@ -47,7 +47,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.threadExecute("Ambience")
+    print scenes.execute("Ambience")
     
 class szenen:    
     
