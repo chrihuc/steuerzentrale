@@ -58,7 +58,7 @@ cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
-szn_typs = ['','Intern','Scanner','Wecker','Lichter']
+szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True

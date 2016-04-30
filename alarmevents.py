@@ -50,7 +50,7 @@ def main():
     
     #print alarm_events_read()
     
-    aes.check_liste()
+    #aes.check_liste()
 
 class sql_object:
     def __init__(self,name,typ,columns):
