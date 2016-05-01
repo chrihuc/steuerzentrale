@@ -47,7 +47,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("Ambience")
+    print scenes.execute("Update")
     
 class szenen:    
     
@@ -262,7 +262,7 @@ class szenen:
                 kommandos = self.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
                     #print kommando, kommandos.get(kommando)
-                    set_del = Timer(0, interna.execute, [str(kommandos.get(kommando))])
+                    set_del = Timer(0, interna.execute, [kommando])
                     #timer set to 0 for following actions
                     set_del.start()                              
 #==============================================================================
