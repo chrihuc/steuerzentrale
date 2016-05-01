@@ -257,7 +257,7 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
-        sql = "SELECT COUNT(*) FROM "+datab+"."+table+" WHERE "+primary+" = '"+device+"'"
+        sql = 'SELECT COUNT(*) FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
         print sql
         cur.execute(sql)
         if cur.fetchone()[0] == 0:
