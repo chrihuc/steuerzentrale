@@ -309,7 +309,7 @@ class szenen:
                 break
         t_list = self.kommando_dict.get(szn_id)
         for item in t_list:
-            aes.new_event(description="CMD Timeout: " + str(item), prio=0, karenz = 0.03)
+            aes.new_event(description="CMD Timeout: " + str(item), prio=1, karenz = 0.03)
         del self.kommando_dict[szn_id]
 #==============================================================================
 # start timer with following actions nur wenn erfolg oder nicht erfolg                              

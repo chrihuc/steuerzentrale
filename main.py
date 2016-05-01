@@ -60,6 +60,7 @@ t = threading.Thread(name="peri",target=inp_cron.periodic_supervision, args = []
 threadliste.append(t)
 t.start()
 
+aes.new_event(description="All Threads started", prio=1)
 #print threadliste
 #add supervision of threads
 
@@ -67,7 +68,7 @@ try:
     while constants.run:
         for t in threadliste:
             if not t in threading.enumerate():
-                print t.name
+                aes.new_event(description="Thread stopped: "+t.name, prio=1)
                 constants.run = False
                 sys.exit() 
         time.sleep(10)
