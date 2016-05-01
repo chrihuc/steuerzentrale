@@ -468,6 +468,9 @@ class weckerRow(QtGui.QWidget):
         self.timeEdit.setTime((datetime.datetime.min+weckerList.get('Time')).time())
         self.timeEdit.setDisplayFormat("HH:mm")
         self.timeEdit.setMinimumSize(100,50)
+        self.timeEdit.setStyleSheet("""
+        QTimeEdit::up-button { subcontrol-position: left; width: 40px; height: 40px;}
+        QTimeEdit::down-button { subcontrol-position: right; width: 40px; height: 40px;} """)
         self.timeEdit.setFont(self.font)
         horizontalLayoutWidget.addWidget(self.timeEdit)
         weckerButtons.append(self.timeEdit)

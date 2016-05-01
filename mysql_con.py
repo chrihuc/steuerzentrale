@@ -257,8 +257,8 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
-        print "SELECT COUNT(*) FROM "+datab+"."+table+" WHERE "+primary+" = '"+device+"'"
-        cur.execute("SELECT COUNT(*) FROM "+datab+"."+table+" WHERE "+primary+" = '"+device+"'")
+        #print "SELECT COUNT(*) FROM "+datab+"."+table+" WHERE "+primary+" = '"+device+"'"
+        cur.execute("SELECT COUNT(*) FROM "+table+" WHERE "+primary+" = '"+device+"'")
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+table+' ('+primary+') VALUES ("'+ str(device) + '")'     
             cur.execute(sql)   
@@ -273,7 +273,7 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             if commando <> primary:
-                print sql
+                #print sql
                 cur.execute(sql)       
     con.close() 
 
