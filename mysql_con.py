@@ -257,6 +257,7 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
+        print "SELECT COUNT(*) FROM "+datab+"."+table+" WHERE "+primary+" = '"+device+"'"
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+table+" WHERE "+primary+" = '"+device+"'")
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+table+' ('+primary+') VALUES ("'+ str(device) + '")'     
