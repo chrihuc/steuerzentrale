@@ -15,7 +15,7 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    #print mdb_get_table(db='set_Szenen')
+    print mdb_set_table(table=constants.sql_tables.cron.name, device='Wochentags1', commands={u'Do': True, u'Fr': True, 'Name': u'Wochentags1', u'Di': True, u'Eingeschaltet': True, u'Mo': True, u'Mi': True, u'So': False, 'Time': u'06:40', u'Sa': False, 'Szene': u'Wecker'}, primary = 'Name')
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
@@ -39,7 +39,7 @@ def main():
     #print hue_devices
     #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
     #mdb_add_table_entry("test",values)
-    print inputs('V00WOH1RUM1HE01','6')
+    #print inputs('V00WOH1RUM1HE01','6')
 
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
