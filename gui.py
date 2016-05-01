@@ -24,6 +24,7 @@ import numpy as np
 from threading import Timer
 import time
 import datetime
+import os
 
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from pyqtgraph.parametertree import Parameter, ParameterTree
@@ -743,6 +744,11 @@ class TimeAxisItem(pg.AxisItem):
 
 
 running = True
+if constants.KS:
+    exectext = "xset -dpms"
+    os.system(exectext)    
+    exectext = "xset s 10"
+    os.system(exectext)       
 app = QtGui.QApplication(sys.argv)
 myWidget = Main()
 myWidget.setGeometry(QRect(0, 0, 800, 500))
