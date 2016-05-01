@@ -175,6 +175,7 @@ class satelliten:
         if str(satellit.get('PORT')) <> 'None':
             try:
                 satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
+                return True
             except:
                 pass
         if str(satellit.get('BiPORT')) <> 'None':
