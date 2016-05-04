@@ -7,6 +7,9 @@ Created on Tue Apr 19 13:58:42 2016
 
 import constants
 import git
+from alarmevents import alarm_event
+
+aes = alarm_event()
 
 class internal:
     
@@ -24,4 +27,5 @@ class internal:
         g = git.cmd.Git()
         g.pull()
         print "Update done, exiting"
+        aes.new_event(description="Update performed, restarting", prio=1)
         constants.run = False

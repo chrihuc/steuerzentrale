@@ -10,7 +10,7 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
         'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
-        'tts':'False','heartbt':'125'}
+        'tts':'False','heartbt':'125', 'KommandoStation':'False'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
@@ -74,6 +74,7 @@ for i in range(0,3):
             automatic_backup = config.getboolean('Main', 'automatic_backup')
             webcam_supervision = config.getboolean('Main', 'webcam_supervision')
             tts = config.getboolean('Main', 'tts')
+            KS = config.getboolean('Main', 'KommandoStation')
         
             #timeout for connection in seconds
             heartbt = config.getint('Main', 'heartbt')

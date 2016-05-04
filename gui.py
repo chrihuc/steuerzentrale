@@ -10,6 +10,7 @@ from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
 from cmd_cron import cron
+from alarmevents import alarm_event
 #from gui_szenen import Szenen_tree
 
 from mysql_con import mdb_read_table_entry, settings_r, mdb_read_table_column_filt,mdb_set_table
@@ -23,11 +24,14 @@ import numpy as np
 from threading import Timer
 import time
 import datetime
+import os
 
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from pyqtgraph.parametertree import Parameter, ParameterTree
 
 descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
+
+aes = alarm_event()
 
 xs1 = myezcontrol(constants.xs1_.IP)
 hue = hue_lights()
@@ -212,9 +216,9 @@ class Main(QtGui.QMainWindow):
         self.pushButton_7.clicked.connect(self.update_values)     
         self.pushButton_8 = QtGui.QPushButton(self.tab_4)
         self.pushButton_8.setGeometry(QtCore.QRect(0, 80, 91, 24))
-        self.pushButton_8.setObjectName(_fromUtf8("gitupdate"))
-        self.pushButton_8.setText('Tree test')
-        #self.pushButton_8.clicked.connect(self.make_set_tree_popup("Name"))          
+        self.pushButton_8.setObjectName(_fromUtf8("AEs"))
+        self.pushButton_8.setText('AlarmEvents')
+        self.pushButton_8.clicked.connect(self.showAlarmEvents)          
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
 
         #Wecker
@@ -271,7 +275,7 @@ class Main(QtGui.QMainWindow):
         weckerButtons = []
         wecker = crons.get_all(wecker=True)
         for i in wecker:
-            self.scrollLayout3.addRow(weckerRow(i))        
+            self.scrollLayout3.addRow(weckerRow(i))
 
     def update(self):
         self.add_wecker()
@@ -441,6 +445,12 @@ class Main(QtGui.QMainWindow):
     def checkWecker(self):
         next_i = crons.next_wecker_heute_morgen()
         return next_i
+
+    def showAlarmEvents(self): 
+        self.w = AEPopup(self)
+        self.w.setGeometry(QRect(500, 100, 200, 400))
+        self.w.show() 
+        return True        
         
 class weckerRow(QtGui.QWidget):
     def __init__( self ,weckerList):
@@ -451,11 +461,18 @@ class weckerRow(QtGui.QWidget):
         #horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
         horizontalLayoutWidget = QtGui.QHBoxLayout()
         #horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.font = QtGui.QFont()
+        self.font.setPixelSize(20)
         self.timeEdit = QtGui.QTimeEdit()
         name = weckerList.get('Name')
         self.timeEdit.setObjectName(_fromUtf8(str(name)+".timeEdit"))
         self.timeEdit.setTime((datetime.datetime.min+weckerList.get('Time')).time())
         self.timeEdit.setDisplayFormat("HH:mm")
+        self.timeEdit.setMinimumSize(100,50)
+        self.timeEdit.setStyleSheet("""
+        QTimeEdit::up-button { subcontrol-position: left; width: 40px; height: 40px;}
+        QTimeEdit::down-button { subcontrol-position: right; width: 40px; height: 40px;} """)
+        self.timeEdit.setFont(self.font)
         horizontalLayoutWidget.addWidget(self.timeEdit)
         weckerButtons.append(self.timeEdit)
         for tag in ['Mo','Di','Mi','Do','Fr','Sa','So','Eingeschaltet']:
@@ -585,6 +602,89 @@ class MyPopup(QtGui.QMainWindow):
         #dc.drawLine(0, 0, 100, 100)
         #dc.drawLine(100, 0, 0, 100)
 
+class AEPopup(QtGui.QMainWindow):
+    def __init__(self, parent=None, Text="Alarm & Events"):
+        super(AEPopup, self).__init__(parent)
+        #self.parent = parent
+        QtGui.QWidget.__init__(self)
+        self.showMaximized()
+        self.setWindowTitle(Text)
+        # scroll area widget contents - layout
+        self.scrollLayout = QtGui.QFormLayout()
+
+        # scroll area widget contents
+        self.scrollWidget = QtGui.QWidget()
+        self.scrollWidget.setLayout(self.scrollLayout)
+
+        # scroll area
+        self.scrollArea = QtGui.QScrollArea()
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setWidget(self.scrollWidget)
+
+        # main layout
+        self.mainLayout = QtGui.QVBoxLayout()
+
+        # add all main to the main vLayout
+        self.mainLayout.addWidget(self.scrollArea) 
+        
+        # central widget
+        self.centralWidget = QtGui.QWidget()
+        self.centralWidget.setLayout(self.mainLayout)
+
+        # set central widget
+        self.setCentralWidget(self.centralWidget)  
+        
+        self.pushButton = QtGui.QPushButton()
+        self.pushButton.setGeometry(QtCore.QRect(200, 10, 91, 24))
+        self.pushButton.setObjectName("AESUpButton")
+        self.pushButton.clicked.connect(self.AESrefresh)  
+        self.mainLayout.addWidget(self.pushButton) 
+        
+        AEs = aes.alarm_events_read(unacknowledged=False, prio=0, time=24*60)
+        for Event in AEs:
+            self.scrollLayout.addRow(AESText(self,Event)) 
+        self.newestEvent = AEs[0].get('Date')            
+
+    def startAutoUpdate(self):
+        while True:
+            self.AESrefresh()
+            time.sleep(5)
+
+    def AESrefresh(self):
+        global newestEvent
+        AEs = aes.alarm_events_read(unacknowledged=False, prio=0, time=2*60)
+        for Event in reversed(AEs):
+            #print Event.get('Date') , self.newestEvent
+            if Event.get('Date') > self.newestEvent:
+                #currentRowCount = self.scrollLayout.rowCount()
+                self.scrollLayout.insertRow(0,AESText(self,Event))
+        self.newestEvent = AEs[0].get('Date')            
+#        AESrefreshT = Timer(5, self.AESrefresh, [])
+#        AESrefreshT.start()                  
+
+class AESText(QtGui.QWidget):
+    def __init__( self ,parent, Event):
+      super(AESText, self).__init__(parent)
+      colorcode = {0:"palegreen",1:"orange",2:"orange",3:"orange",4:"red",5:"red",6:"red"}
+      #self.parent = parent
+      self.lbldate = QtGui.QLabel()
+      self.lbldate.setText(str(Event.get('Date')))
+      self.lbldate.setGeometry(QtCore.QRect(0, 0, self.lbldate.width(), 10))
+      self.lbl = QtGui.QLabel()
+      self.lbl.setText(Event.get('Description'))
+      self.lbl.setGeometry(QtCore.QRect(1, 0, self.lbl.width(), 60))      
+      self.lblAck = QtGui.QLabel()
+      self.lblAck.setText(str(Event.get('Acknowledged')))
+      self.lblAck.setGeometry(QtCore.QRect(2, 0, 50, 50))       
+      layout = QtGui.QHBoxLayout()
+      layout.addWidget(self.lbldate)        
+      layout.addWidget(self.lbl) 
+      layout.addWidget(self.lblAck) 
+      layout.addStretch()
+      layout.setStretchFactor(self.lbl, 99)
+      self.setStyleSheet(str("background: "+colorcode.get(int(Event.get("Prio")))))
+      self.setLayout(layout)
+
 class MyGraphPopup(QtGui.QMainWindow):
     def __init__(self, parent, item):
             #super(MyGraphPopup, self).__init__(parent)
@@ -644,6 +744,11 @@ class TimeAxisItem(pg.AxisItem):
 
 
 running = True
+if constants.KS:
+    exectext = "xset -dpms"
+    os.system(exectext)    
+    exectext = "xset s 10"
+    os.system(exectext)       
 app = QtGui.QApplication(sys.argv)
 myWidget = Main()
 myWidget.setGeometry(QRect(0, 0, 800, 500))

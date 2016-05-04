@@ -38,8 +38,8 @@ import time
 def main():
     aes = alarm_event()
     
-    aes.new_event(description="anderer Alarm", prio=0)
-    
+    #aes.new_event(description="anderer Alarm", prio=0)
+    print aes.alarm_events_read(unacknowledged=False, prio=0, time=24*60)
     #acknowledge_alarm(alarm_id=1)
     
     #acknowledge_all()
@@ -50,7 +50,7 @@ def main():
     
     #print alarm_events_read()
     
-    aes.check_liste()
+    #aes.check_liste()
 
 class sql_object:
     def __init__(self,name,typ,columns):
@@ -123,16 +123,18 @@ class alarm_event:
             if prio == 0:
                 pass
             elif prio == 1:
-                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)
+                pass            
             elif prio == 2:
-                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)                
-            elif prio > 2 and prio < 3:
-                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)              
+                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio == 3:
-                self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)
+                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)                
             elif prio > 3 and prio < 4:
+                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)              
+            elif prio == 4:
+                self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)
+            elif prio > 4 and prio < 5:
                 self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)                  
-            elif prio >= 4 and prio < 5:
+            elif prio >= 5 and prio < 6:
                 self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description)
                 msg = MIMEText(description)
                 msg["From"] = constants.mail_.receiver
@@ -140,7 +142,7 @@ class alarm_event:
                 msg["Subject"] = "Alarm"
                 p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
                 p.communicate(msg.as_string())                 
-            elif prio >= 5 and prio < 6:
+            elif prio >= 6 and prio < 7:
                 self.mes.send_direkt(to=self.mes.chris, titel="Alarm", text=description)                    
                 
     def alarm_resolved(self, description, resolv_desc):

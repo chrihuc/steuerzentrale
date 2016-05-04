@@ -45,10 +45,10 @@ def  get_satellite(name):
 def main():
     sats = satelliten()
     #print sats.list_devices()
-    print sats.list_commands("V00WOH1SRA1LI02")
-    print sats.set_device('V00WOH1SRA1LI01','Hell')
-    print sats.set_device('V00WOH1SRA1LI02','Hell')
-    print sats.set_device('V00WOH1SRA1LI03','Hell')
+    #print sats.list_commands("V00WOH1SRA1LI02")
+    print sats.set_device('Vm1ZIM1RUM1PC01','Update')
+    #print sats.set_device('V00WOH1SRA1LI02','Hell')
+    #print sats.set_device('V00WOH1SRA1LI03','Hell')
     #print sats.listCommandTable(nameReturn = False)
 
 class satelliten:
@@ -175,6 +175,7 @@ class satelliten:
         if str(satellit.get('PORT')) <> 'None':
             try:
                 satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
+                return True
             except:
                 pass
         if str(satellit.get('BiPORT')) <> 'None':

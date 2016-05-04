@@ -58,7 +58,7 @@ cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
-szn_typs = ['','Intern','Scanner','Wecker','Lichter']
+szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
@@ -433,8 +433,8 @@ class Szenen_tree():
     def addSzene(self):
         global p
         self.p.param(self.name, 'Szene folgt').addChild({'name': 'Befehl ', 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': '', 'values':szn_lst},
-                        {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': 'Verlaengerbar', 'type': 'int', 'value': 2},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': True}
-                        ,{'name': 'Abhaengig Erfolg', 'type': 'int', 'value': 0}]}, autoIncrementName=True)
+                        {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': 'Verlaengerbar', 'type': 'list', 'values':{'Verlaengerbar':0,'nur exact':1,'fest':2}, 'value': 0},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': True}
+                        ,{'name': 'Abhaengig Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': 0}]}, autoIncrementName=True)
 
     def linkSzene(self):
         for kind in self.p.param(self.name, 'Szene folgt').children():
@@ -977,7 +977,7 @@ layout.addWidget(comboBox2, 2, 2, 1, 1)
 layout.addWidget(t3, 3, 2, 1, 1)
 layout.addWidget(t4, 3, 3, 1, 1)
 
-
+win.setWindowTitle('Schalttafel')
 win.show()
 win.resize(1400,1200)
 
