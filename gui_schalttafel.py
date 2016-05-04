@@ -801,7 +801,7 @@ def selected(text):
     sz.p.sigTreeStateChanged.connect(change_sz)
 
 def update():
-    global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
+    global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
     sets = mdb_get_table(constants.sql_tables.settings.name)
     selected(lastSelected)  
     sz=Szenen_tree("")
@@ -815,7 +815,12 @@ def update():
     comboBox.clear()
     szn_lst = sorted(szn.list_commands('alle'))
     for szne in szn_lst:
-        comboBox.addItem(szne)    
+        comboBox.addItem(szne) 
+    comboBox3.clear()
+    inpts = mdb_read_table_column(db="cmd_inputs", column = 'Description')
+    for inpt in inpts:
+        if inpt <> "":
+            comboBox3.addItem(inpt)        
     inp.p.sigTreeStateChanged.connect(change)
     xs1_devs = xs1.list_devices()
     xs1_cmds = xs1.dict_commands()
@@ -930,7 +935,7 @@ for szne in szn_lst:
 comboBox.setMaxVisibleItems(50)    
 lastSelected = ''
 
-update()
+
 
 comboBox.activated[str].connect(selected)
 
@@ -944,7 +949,7 @@ inpts = mdb_read_table_column(db="cmd_inputs", column = 'Description')
 for inpt in inpts:
     if inpt <> "":
         comboBox3.addItem(inpt)
-
+update()
 comboBox4 = QtGui.QComboBox(win)
 for itm in szn_typs:
     comboBox4.addItem(itm)
