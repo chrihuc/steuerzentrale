@@ -54,6 +54,7 @@ class messaging:
             if user.get('Name') <> None:
                 if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "True") and constants.redundancy_.master:
                     response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
+                    print response
                     if response <> {}:
                         success = False
         return success

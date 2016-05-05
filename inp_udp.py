@@ -49,6 +49,8 @@ def exec_data(data_ev):
         for szene in szns:
             if szene <> None:
                 scenes.threadExecute(szene, check_bedingung=False, wert = value) 
+    elif ('GCM-Client' in data_ev):
+        aes.new_event('GCM Client: ' + data_ev.get('GCM-Client'))                
 
 def bidirekt():
     while constants.run:
@@ -71,6 +73,7 @@ def bidirekt():
 def broadcast():
     while constants.run:
         (data,addr) = broadSocket.recvfrom(SIZE)
+        print data
         if not data:
             break
         isdict = False

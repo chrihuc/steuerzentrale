@@ -100,6 +100,8 @@ class Main(QtGui.QMainWindow):
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
         self.tabWidget.setGeometry(QtCore.QRect(0, 0, 800, 500))
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
+        self.tabWidget.setStyleSheet("QTabBar::tab { height: 50px;}")
+        
         
         # Keller
         self.tab_0 = QtGui.QWidget()
