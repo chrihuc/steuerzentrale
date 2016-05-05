@@ -35,6 +35,7 @@ def exec_data(data_ev):
     if ('Name' in data_ev) and ('Value' in data_ev):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
+        print name, value
         szns = inputs(name,value)
         for szene in szns:
             if szene <> None:
@@ -84,6 +85,7 @@ def broadcast():
         except Exception as serr:
             isdict = False  
         if isdict:
+            print data_ev
             exec_data(data_ev)
 
 def main():

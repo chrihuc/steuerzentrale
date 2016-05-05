@@ -422,7 +422,7 @@ class Szenen_tree():
 
     def add_bedingung(self):
         global p
-        self.p.param(self.name, 'Bedingung').addChild({'name': 'Bedingung ','type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': ''},
+        self.p.param(self.name, 'Bedingung').addChild({'name': 'Bedingung ','type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':sorted(settings_r()), 'value': ''},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': ''},{'name': 'Bedingung', 'type': 'str', 'value': ''}]}, autoIncrementName=True)
 
     def add_task(self):
@@ -801,7 +801,7 @@ def selected(text):
     sz.p.sigTreeStateChanged.connect(change_sz)
 
 def update():
-    global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
+    global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox2, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
     sets = mdb_get_table(constants.sql_tables.settings.name)
     selected(lastSelected)  
     sz=Szenen_tree("")
@@ -815,7 +815,16 @@ def update():
     comboBox.clear()
     szn_lst = sorted(szn.list_commands('alle'))
     for szne in szn_lst:
-        comboBox.addItem(szne)    
+        comboBox.addItem(szne) 
+    comboBox2.clear()
+    for cmdLst in cmd_lsts:
+        comboBox2.addItem(cmdLst)
+    comboBox2.activated[str].connect(slctCmdLst)        
+    comboBox3.clear()
+    inpts = sorted(mdb_read_table_column(db="cmd_inputs", column = 'Description'))
+    for inpt in inpts:
+        if str(inpt) <> "":
+            comboBox3.addItem(inpt)        
     inp.p.sigTreeStateChanged.connect(change)
     xs1_devs = xs1.list_devices()
     xs1_cmds = xs1.dict_commands()
@@ -925,26 +934,15 @@ inp.p.sigTreeStateChanged.connect(change)
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
 comboBox = QtGui.QComboBox(win)
-for szne in szn_lst:
-    comboBox.addItem(szne)
 comboBox.setMaxVisibleItems(50)    
 lastSelected = ''
-
-update()
 
 comboBox.activated[str].connect(selected)
 
 comboBox2 = QtGui.QComboBox(win)
-for cmdLst in cmd_lsts:
-    comboBox2.addItem(cmdLst)
-comboBox2.activated[str].connect(slctCmdLst)
-
 comboBox3 = QtGui.QComboBox(win)
-inpts = mdb_read_table_column(db="cmd_inputs", column = 'Description')
-for inpt in inpts:
-    if inpt <> "":
-        comboBox3.addItem(inpt)
 
+update()
 comboBox4 = QtGui.QComboBox(win)
 for itm in szn_typs:
     comboBox4.addItem(itm)

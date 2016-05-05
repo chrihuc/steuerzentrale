@@ -46,7 +46,7 @@ def main():
     sats = satelliten()
     #print sats.list_devices()
     #print sats.list_commands("V00WOH1SRA1LI02")
-    print sats.set_device('Vm1ZIM1RUM1PC01','Update')
+    print sats.set_device('V00WOH1SRA1LI11','An')
     #print sats.set_device('V00WOH1SRA1LI02','Hell')
     #print sats.set_device('V00WOH1SRA1LI03','Hell')
     #print sats.listCommandTable(nameReturn = False)
@@ -182,6 +182,7 @@ class satelliten:
             try:
                 satelliten.mysocket.settimeout(10)
                 s.connect((satellit.get('IP'),satellit.get('BiPORT')))
+                print command
                 s.send(str(command))
                 data=s.recv(1024)
                 s.close()
