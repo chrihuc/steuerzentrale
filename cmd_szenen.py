@@ -47,7 +47,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("Update")
+    print scenes.execute("Ambience")
     
 class szenen:    
     
@@ -288,7 +288,7 @@ class szenen:
                 immer = False
                 depErfolg = 0
                 if len(kommando) > 3:
-                    immer = kommando[3]
+                    immer = not kommando[3]
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
