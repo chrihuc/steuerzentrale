@@ -51,9 +51,9 @@ System = None
 Device = None
 constants.redundancy_.master = True
 
-eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':300},
-              {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':20,'pos_y':150},
-              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':75}]
+eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':310},
+              {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
+              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20}]
               
 og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
               {'Name':'V01BAD1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':550,'pos_y':120},
@@ -111,19 +111,20 @@ class Main(QtGui.QMainWindow):
         
         #Erdgeschoss
         self.tab = QtGui.QWidget()
-        self.tab.setStyleSheet("QWidget {background-image:url(./EG.png)}")
+        self.tab.setStyleSheet("background-image:url(./EG.png)")
         self.tab.setObjectName(_fromUtf8("Erdgeschoss")) 
         self.buttons = []
         for btn in eg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab))
             self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 50, 50))
             self.buttons[-1].setObjectName(btn.get('Name'))
+            self.buttons[-1].setStyleSheet("background-image:url(./EG3.png);background-color: rgb(255,255,255);border: 2px solid #222222")
             if btn.get('type') == 'dev':
                 self.buttons[-1].clicked.connect(self.make_set_popup(btn.get('Name')))
                 self.buttons[-1].setText(_fromUtf8(btn.get('desc')))
             elif btn.get('type') == 'sens':
                 self.buttons[-1].clicked.connect(self.make_set_g_popup(btn.get('Name')))
-                self.buttons[-1].setText(settings.get(btn.get('Name')))           
+                self.buttons[-1].setText(settings.get(btn.get('Name'))) 
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         
         #1. Stock
