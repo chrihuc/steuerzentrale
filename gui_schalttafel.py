@@ -59,7 +59,7 @@ cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
 szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter']
-stockwerke = ['Vm1','V00','V01','V02']
+stockwerke = ['Vm1','V00','V01','V02','']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
@@ -962,6 +962,7 @@ comboBox4.activated[str].connect(updt_sznlst)
 comboBox5 = QtGui.QComboBox(win)
 for itm in stockwerke:
     comboBox5.addItem(itm)
+comboBox5.setCurrentIndex(1)
 comboBox5.activated[str].connect(updInputs)  
 
 update()
