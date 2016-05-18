@@ -53,6 +53,7 @@ constants.redundancy_.master = True
 
 eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':310},
               {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
+              {'Name':'V00WOH1RUM1CO01','desc':'CO2','type':'sens','pos_x':150,'pos_y':150},
               {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20}]
               
 og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
@@ -209,19 +210,24 @@ class Main(QtGui.QMainWindow):
         self.tab_4 = QtGui.QWidget()
         self.tab_4.setObjectName(_fromUtf8("tab_4"))
         self.pushButton_6 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_6.setGeometry(QtCore.QRect(0, 10, 91, 24))
+        self.pushButton_6.setGeometry(QtCore.QRect(0, 10, 100, 50))
         self.pushButton_6.setObjectName(_fromUtf8("gitupdate"))
         self.pushButton_6.clicked.connect(self.git_update)    
         self.pushButton_7 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_7.setGeometry(QtCore.QRect(0, 40, 91, 24))
+        self.pushButton_7.setGeometry(QtCore.QRect(0, 110, 100, 50))
         self.pushButton_7.setObjectName(_fromUtf8("gitupdate"))
         self.pushButton_7.setText('Update')
         self.pushButton_7.clicked.connect(self.update_values)     
         self.pushButton_8 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_8.setGeometry(QtCore.QRect(0, 80, 91, 24))
+        self.pushButton_8.setGeometry(QtCore.QRect(160, 10, 100, 50))
         self.pushButton_8.setObjectName(_fromUtf8("AEs"))
         self.pushButton_8.setText('AlarmEvents')
-        self.pushButton_8.clicked.connect(self.showAlarmEvents)          
+        self.pushButton_8.clicked.connect(self.showAlarmEvents)   
+        self.pushButton_9 = QtGui.QPushButton(self.tab_4)
+        self.pushButton_9.setGeometry(QtCore.QRect(160, 110, 100, 50))
+        self.pushButton_9.setObjectName(_fromUtf8("Close"))
+        self.pushButton_9.setText('Close')
+        self.pushButton_9.clicked.connect(self.close)         
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
 
         #Wecker
@@ -298,6 +304,9 @@ class Main(QtGui.QMainWindow):
         g = git.cmd.Git()
         g.pull()
         QtCore.QCoreApplication.instance().quit()
+
+    def close(self):
+        QtCore.QCoreApplication.instance().quit()        
 
     def xs1_clicked(self):
         global System
