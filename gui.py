@@ -261,7 +261,7 @@ class Main(QtGui.QMainWindow):
 #        self.pushButton_10.setText('Check')
 #        self.pushButton_10.clicked.connect(self.checkWecker) 
         
-        self.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
+        self.tab_5.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -287,14 +287,15 @@ class Main(QtGui.QMainWindow):
             self.scrollLayout3.addRow(weckerRow(i))
 
     def update(self):
-        self.add_wecker()
-        settings = settings_r()
-        for btn in self.buttons:
-            name = btn.objectName()
-            if str(name) in settings:
-                print name, settings.get(str(name))
-                btn.setText(settings.get(str(name)))
-        QApplication.processEvents()
+        if self.tabWidget.currentIndex() ==6:
+            self.add_wecker()
+            settings = settings_r()
+            for btn in self.buttons:
+                name = btn.objectName()
+                if str(name) in settings:
+                    print name, settings.get(str(name))
+                    btn.setText(settings.get(str(name)))
+            QApplication.processEvents()
       
 
     def close_clicked(self):
@@ -720,7 +721,7 @@ class MyGraphPopup(QtGui.QMainWindow):
         plot.setXRange(timerange[0], timerange[-3000], padding=0)
         if 'A00' in item:
             plot.setYRange(-10,40)
-        else:
+        elif 'TE' in item:
             plot.setYRange(15,30)        
 #        jetzt = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1, order="desc")
 #        fruher = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1000, order="desc")[999]
