@@ -35,7 +35,7 @@ def exec_data(data_ev):
     if ('Name' in data_ev) and ('Value' in data_ev):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
-        print name, value
+        #print name, value
         szns = inputs(name,value)
         for szene in szns:
             if szene <> None:
@@ -74,7 +74,7 @@ def bidirekt():
 def broadcast():
     while constants.run:
         (data,addr) = broadSocket.recvfrom(SIZE)
-        print data
+        #print data
         if not data:
             break
         isdict = False
@@ -85,7 +85,7 @@ def broadcast():
         except Exception as serr:
             isdict = False  
         if isdict:
-            print data_ev
+            #print data_ev
             exec_data(data_ev)
 
 def main():

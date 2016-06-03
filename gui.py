@@ -188,7 +188,7 @@ class Main(QtGui.QMainWindow):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 360))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 0, 360))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -518,8 +518,9 @@ class Buttn(QtGui.QWidget):
       else:
         desc= Name
       self.pushButton = QtGui.QPushButton(desc)
-      self.pushButton.setGeometry(QtCore.QRect(0, 0, 50, 50))
+      self.pushButton.setGeometry(QtCore.QRect(0, 0, 150, 150))
       layout = QtGui.QHBoxLayout()
+      layout.setGeometry(QtCore.QRect(0, 0, 150, 150))
       layout.addWidget(self.pushButton)
       if Type=="Device":
         self.pushButton.clicked.connect(lambda: self.set_popup(Name)) 

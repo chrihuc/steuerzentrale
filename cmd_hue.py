@@ -86,6 +86,7 @@ class hue_lights():
     def set_device(self, device, commd):
         keys = ['bri', 'hue', 'sat', 'transitiontime']
         szene = mdb_read_table_entry(table.name,commd)
+        print commd
         if szene.get('bri')<=0:
             szene['bri'] = 0
             szene['on'] = False
