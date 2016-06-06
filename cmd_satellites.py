@@ -179,15 +179,17 @@ class satelliten:
             except:
                 pass
         if str(satellit.get('BiPORT')) <> 'None':
-            try:
-                satelliten.mysocket.settimeout(10)
-                s.connect((satellit.get('IP'),satellit.get('BiPORT')))
-                print command
-                s.send(str(command))
-                data=s.recv(1024)
-                s.close()
-            except:
-                s.close()
+            for i in range(0,3):
+                try:
+                    satelliten.mysocket.settimeout(10)
+                    s.connect((satellit.get('IP'),satellit.get('BiPORT')))
+                    s.send(str(command))
+                    data=s.recv(1024)
+                    s.close()
+                except:
+                    s.close()
+                if data  == "True":
+                    break
         if data  == "True":
             return True
         else:

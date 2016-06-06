@@ -71,7 +71,10 @@ def main():
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPause(sn.Kueche)
-    print sn.list_commands()
+    print sn.set_device('V01SCH1RUM1AV11','Durchsage Klingel')
+#    print sn.set_device('V01SCH1RUM1AV11','Nachricht')
+#    time.sleep(3)
+#    print sn.set_device('V01SCH1RUM1AV11','Return')
     #print sn.list_devices()
 
 class sonos:
@@ -482,6 +485,7 @@ class sonos:
         
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
+        print player, sonos_szene
         if str(sonos_szene.get('Volume')) <> 'None':
             self.SetVolume(player, sonos_szene.get('Volume'))
         zone = sonos_szene.get('MasterZone')
@@ -504,10 +508,11 @@ class sonos:
             elif sonos_szene.get('Pause') == 0:
                 self.SetPlay(player)
         
-    def set_device(self, player, command):
+    def set_device(self, player_o, command):
         if command in ["man", "auto"]:
             set_val_in_szenen(device=player, szene="Auto_Mode", value=command)   
-        player = self.Devices.get(str(player))
+        player = self.Devices.get(str(player_o))
+        playerName = self.Names.get(player)
         if str(command) == "Pause":
             self.SetPause(player)
         elif str(command) == "Play":
@@ -524,19 +529,19 @@ class sonos:
                 laenge = downloadAudioFile(text)
                 self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
                 time.sleep(laenge + 1)            
-                self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))))
+                self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName))
         elif str(command) == "Durchsage":
             self.sonos_write_szene(player)   
             text = setting_r("Durchsage")        
             laenge = downloadAudioFile(text)
             self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
             time.sleep(laenge + 1)            
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))))            
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName))            
         elif str(command) == "Return":
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))), hergestellt = True)          
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName), hergestellt = False)          
         elif ((str(command) == "resume") ):
             time.sleep(60)
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,sonos_szenen.get(str(player))))            
+            self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName))            
         elif (str(command) == "lauter"):
             ActVol = self.GetVolume(player)
             increment = 8
@@ -572,14 +577,24 @@ class sonos:
             self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
             time.sleep(laenge + 1)  
             self.SetPause(player)
+        elif (str(command) == "Durchsage Nachricht"):
+            self.set_device(player_o,'Save')
+            self.set_device(player_o,'Nachricht')
+            time.sleep(3)
+            self.set_device(player_o,'Return')    
+        elif (str(command) == "Durchsage Klingel"):
+            self.set_device(player_o,'Save')
+            self.set_device(player_o,'Klingel')
+            time.sleep(3)
+            self.set_device(player_o,'Return')             
         elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
             sonos_szene = mdb_read_table_entry(table.name,command)
-            self.sonos_read_szene(player, sonos_szene)                                      
+            self.sonos_read_szene(player, sonos_szene)                                 
         return True
 
     def list_commands(self):
         comands = mdb_get_table(table.name)
-        liste = ["Pause","Play","Save","Announce_Time","Durchsage","Return","resume","lauter","leiser","inc_leiser","inc_lauter","WeckerAnsage"]
+        liste = ["Pause","Play","Save","Announce_Time","Durchsage","Return","resume","lauter","leiser","inc_leiser","inc_lauter","WeckerAnsage",'Durchsage Nachricht','Durchsage Klingel']
         for comand in comands:
             liste.append(comand.get("Name"))
         #liste.remove("Name")

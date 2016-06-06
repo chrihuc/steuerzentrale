@@ -51,9 +51,10 @@ System = None
 Device = None
 constants.redundancy_.master = True
 
-eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':300},
-              {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':20,'pos_y':150},
-              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':75}]
+eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':310},
+              {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
+              {'Name':'V00WOH1RUM1CO01','desc':'CO2','type':'sens','pos_x':150,'pos_y':150},
+              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20}]
               
 og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
               {'Name':'V01BAD1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':550,'pos_y':120},
@@ -111,19 +112,20 @@ class Main(QtGui.QMainWindow):
         
         #Erdgeschoss
         self.tab = QtGui.QWidget()
-        self.tab.setStyleSheet("QWidget {background-image:url(./EG.png)}")
+        self.tab.setStyleSheet("background-image:url(./EG.png)")
         self.tab.setObjectName(_fromUtf8("Erdgeschoss")) 
         self.buttons = []
         for btn in eg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab))
             self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 50, 50))
             self.buttons[-1].setObjectName(btn.get('Name'))
+            self.buttons[-1].setStyleSheet("background-image:url(./EG3.png);background-color: rgb(255,255,255);border: 2px solid #222222")
             if btn.get('type') == 'dev':
                 self.buttons[-1].clicked.connect(self.make_set_popup(btn.get('Name')))
                 self.buttons[-1].setText(_fromUtf8(btn.get('desc')))
             elif btn.get('type') == 'sens':
                 self.buttons[-1].clicked.connect(self.make_set_g_popup(btn.get('Name')))
-                self.buttons[-1].setText(settings.get(btn.get('Name')))           
+                self.buttons[-1].setText(settings.get(btn.get('Name'))) 
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         
         #1. Stock
@@ -186,7 +188,7 @@ class Main(QtGui.QMainWindow):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 360))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 0, 360))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -208,19 +210,24 @@ class Main(QtGui.QMainWindow):
         self.tab_4 = QtGui.QWidget()
         self.tab_4.setObjectName(_fromUtf8("tab_4"))
         self.pushButton_6 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_6.setGeometry(QtCore.QRect(0, 10, 91, 24))
+        self.pushButton_6.setGeometry(QtCore.QRect(0, 10, 100, 50))
         self.pushButton_6.setObjectName(_fromUtf8("gitupdate"))
         self.pushButton_6.clicked.connect(self.git_update)    
         self.pushButton_7 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_7.setGeometry(QtCore.QRect(0, 40, 91, 24))
+        self.pushButton_7.setGeometry(QtCore.QRect(0, 110, 100, 50))
         self.pushButton_7.setObjectName(_fromUtf8("gitupdate"))
         self.pushButton_7.setText('Update')
         self.pushButton_7.clicked.connect(self.update_values)     
         self.pushButton_8 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_8.setGeometry(QtCore.QRect(0, 80, 91, 24))
+        self.pushButton_8.setGeometry(QtCore.QRect(160, 10, 100, 50))
         self.pushButton_8.setObjectName(_fromUtf8("AEs"))
         self.pushButton_8.setText('AlarmEvents')
-        self.pushButton_8.clicked.connect(self.showAlarmEvents)          
+        self.pushButton_8.clicked.connect(self.showAlarmEvents)   
+        self.pushButton_9 = QtGui.QPushButton(self.tab_4)
+        self.pushButton_9.setGeometry(QtCore.QRect(160, 110, 100, 50))
+        self.pushButton_9.setObjectName(_fromUtf8("Close"))
+        self.pushButton_9.setText('Close')
+        self.pushButton_9.clicked.connect(self.close)         
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
 
         #Wecker
@@ -254,7 +261,7 @@ class Main(QtGui.QMainWindow):
 #        self.pushButton_10.setText('Check')
 #        self.pushButton_10.clicked.connect(self.checkWecker) 
         
-        self.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
+        self.tab_5.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -280,14 +287,15 @@ class Main(QtGui.QMainWindow):
             self.scrollLayout3.addRow(weckerRow(i))
 
     def update(self):
-        self.add_wecker()
-        settings = settings_r()
-        for btn in self.buttons:
-            name = btn.objectName()
-            if str(name) in settings:
-                print name, settings.get(str(name))
-                btn.setText(settings.get(str(name)))
-        QApplication.processEvents()
+        if self.tabWidget.currentIndex() ==6:
+            self.add_wecker()
+            settings = settings_r()
+            for btn in self.buttons:
+                name = btn.objectName()
+                if str(name) in settings:
+                    print name, settings.get(str(name))
+                    btn.setText(settings.get(str(name)))
+            QApplication.processEvents()
       
 
     def close_clicked(self):
@@ -297,6 +305,9 @@ class Main(QtGui.QMainWindow):
         g = git.cmd.Git()
         g.pull()
         QtCore.QCoreApplication.instance().quit()
+
+    def close(self):
+        QtCore.QCoreApplication.instance().quit()        
 
     def xs1_clicked(self):
         global System
@@ -507,8 +518,9 @@ class Buttn(QtGui.QWidget):
       else:
         desc= Name
       self.pushButton = QtGui.QPushButton(desc)
-      self.pushButton.setGeometry(QtCore.QRect(0, 0, 50, 50))
+      self.pushButton.setGeometry(QtCore.QRect(0, 0, 150, 150))
       layout = QtGui.QHBoxLayout()
+      layout.setGeometry(QtCore.QRect(0, 0, 150, 150))
       layout.addWidget(self.pushButton)
       if Type=="Device":
         self.pushButton.clicked.connect(lambda: self.set_popup(Name)) 

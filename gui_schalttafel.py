@@ -59,6 +59,7 @@ cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
 szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter']
+stockwerke = ['Vm1','V00','V01','V02','']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
@@ -352,13 +353,19 @@ class Szenen_tree():
                     szn_l_child.append(szn_d_child)                     
                 else:
                     szn_d_child['name'] = str(item)
-                    if str(item) in ['Prio','Delay']:
+                    if str(item) in ['Delay']:
                         szn_d_child['type'] = 'float'
                         szn_d_child['step'] = 0.1
                         if str(szene.get(item)) <> "None":
                             szn_d_child['value'] = float(szene.get(item))
                         else:
                             szn_d_child['value'] = None
+                    elif str(item) in ['Prio']:
+                        szn_d_child['type'] ='list'
+                        szn_d_child['values'] = {'Kein Event':-1,'Normales Event':0,'Problem ohne Hinweis':1,'Hinweis wenn zuhause':2,'immer Hinweis':3,'Hinweis wenn wach':4,
+                                                 'Achtung wenn wach':5,'Alarm':6}
+                        if str(szene.get(item)) <> "None":
+                            szn_d_child['value'] = float(szene.get(item))                          
                     elif str(item) in ['Gruppe']:
                         szn_d_child['type'] ='list'
                         szn_d_child['values'] = szn_typs
@@ -806,7 +813,7 @@ def update():
     selected(lastSelected)  
     sz=Szenen_tree("")
     t.setParameters(sz.p, showTop=False)
-    inp=InputsTree()
+    inp=InputsTree(isInputs = True, inputsGroup = comboBox5.currentText())
     t2.setParameters(inp.p, showTop=False)
     cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
     t3.setParameters(cmds.p, showTop=False) 
@@ -844,6 +851,11 @@ def neuTrig():
     vals = mdb_read_table_entry(db="cmd_inputs",entry=comboBox3.currentText(),column='Description')
     mdb_add_table_entry("cmd_inputs",vals)
     
+def updInputs():
+    global inp, t2
+    inp=InputsTree(isInputs = True, inputsGroup = comboBox5.currentText())
+    t2.setParameters(inp.p, showTop=False)    
+
 def showInputs(eingang):
     global inp, t2   
     inp=InputsTree(expand = eingang)
@@ -942,11 +954,18 @@ comboBox.activated[str].connect(selected)
 comboBox2 = QtGui.QComboBox(win)
 comboBox3 = QtGui.QComboBox(win)
 
-update()
 comboBox4 = QtGui.QComboBox(win)
 for itm in szn_typs:
     comboBox4.addItem(itm)
 comboBox4.activated[str].connect(updt_sznlst)    
+
+comboBox5 = QtGui.QComboBox(win)
+for itm in stockwerke:
+    comboBox5.addItem(itm)
+comboBox5.setCurrentIndex(1)
+comboBox5.activated[str].connect(updInputs)  
+
+update()
 
 buttn = QtGui.QPushButton(win)
 buttn.setText('Update')
@@ -960,7 +979,8 @@ layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
 #szene preselection
 layout.addWidget(comboBox4, 1, 1, 1, 1)
 
-layout.addWidget(buttn, 2, 0, 1, 1)
+layout.addWidget(buttn, 1, 0, 1, 1)
+layout.addWidget(comboBox5, 2, 0, 1, 1)
 layout.addWidget(t2, 3, 0, 1, 1)
 layout.addWidget(comboBox3, 4, 0, 1, 1)
 layout.addWidget(adinbttn, 5, 0, 1, 1)

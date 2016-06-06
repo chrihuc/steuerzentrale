@@ -28,7 +28,7 @@ except:
 
 def main():
     hue_l = hue_lights()
-    hue_l.set_device("V01BAD1RUM1LI02", "Umschalten")
+    hue_l.set_device("V00WOH1RUM1LI13", "Ambience")
     #print hue_l.list_devices()
     
 class hue_lights():
@@ -86,6 +86,7 @@ class hue_lights():
     def set_device(self, device, commd):
         keys = ['bri', 'hue', 'sat', 'transitiontime']
         szene = mdb_read_table_entry(table.name,commd)
+        print commd
         if szene.get('bri')<=0:
             szene['bri'] = 0
             szene['on'] = False
@@ -113,8 +114,12 @@ class hue_lights():
                 commd="SZ_Aus"
             else:
                 szene['on'] = True
-        if szene.get('bri') <> None:
-            szene['bri'] = int(szene.get('bri'))
+        bright = szene.get('bri')
+        print bright
+        if bright <> None and bright>0:
+            szene['bri'] = int(bright)
+        if bright <> None and bright<=0:
+            pass            
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
             hbridge.set_light(device, {'on':True}) 
             #time.sleep(0.5)
