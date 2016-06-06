@@ -710,7 +710,7 @@ class MyGraphPopup(QtGui.QMainWindow):
         plot.setXRange(timerange[0], timerange[-3000], padding=0)
         if 'A00' in item:
             plot.setYRange(-10,40)
-        else:
+        elif 'TE' in item:
             plot.setYRange(15,30)        
 #        jetzt = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1, order="desc")
 #        fruher = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=1000, order="desc")[999]
