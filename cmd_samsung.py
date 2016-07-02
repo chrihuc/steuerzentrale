@@ -13,7 +13,7 @@ def main():
     rem = TV()
     print rem.list_commands()
     print rem.list_devices()
-    print rem.set_device("TV","KEY_VOLUP")
+    #print rem.set_device("TV","KEY_VOLUP")
     #tv_remote.authenti()
     #tv_remote_lan.authenti()
 

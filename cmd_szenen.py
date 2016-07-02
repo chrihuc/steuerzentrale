@@ -47,7 +47,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("Ambience")
+    print scenes.execute("AVaus")
     
 class szenen:    
     
@@ -196,8 +196,8 @@ class szenen:
 #                hue_del.start()
 #                hue_count += 1
         elif device in sat_devs:
-            executed = sat.set_device(device, commando)                            
-        elif device == tvs_devs:
+            executed = sat.set_device(device, commando)                          
+        elif device in tvs_devs:
             executed = tv.set_device(device, commando)                                                          
 #                        elif key == "Interner_Befehl":
 #                            for kommando in kommandos:
