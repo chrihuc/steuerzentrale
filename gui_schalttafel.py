@@ -311,7 +311,7 @@ class Szenen_tree():
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
                         else:
                             if child <> None:
-                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':sorted(settings_r()), 'value': child[0]},
+                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(settings_r()), 'value': child[0]},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'],'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)                             
@@ -342,6 +342,14 @@ class Szenen_tree():
                         ,{'name': 'Abhaengig Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': depErfolg}]})  
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child) 
+                elif str(item) in ['Cancels']: 
+                    szn_d_child = {'name': 'Folgende stoppen', 'type': 'action', 'expanded': True} 
+                    kinder = self.__return_enum__(szene.get(item))  
+                    for kind in kinder:       
+                        if kind <> None:
+                            szn_d_child_l.append({'name': 'Stops %d' % (len(szn_d_child_l)+1), 'type': 'list','value': kind, 'values':szn_lst})
+                    szn_d_child['children']= szn_d_child_l
+                    szn_l_child.append(szn_d_child)                     
                 elif str(item) in ['AutoMode']: 
                     szn_d_child['name'] = str(item)
                     szn_d_child['type'] = 'bool'
@@ -418,6 +426,7 @@ class Szenen_tree():
             self.p.param(self.name, 'Befehl an Handys').sigActivated.connect(self.add_task)
             self.p.param(self.name, 'Bedingung').sigActivated.connect(self.add_bedingung)
             self.p.param(self.name, 'Szene folgt').sigActivated.connect(self.addSzene)
+            self.p.param(self.name, 'Folgende stoppen').sigActivated.connect(self.addCancels)
             self.linkSzene()
         except:
             pass
@@ -442,6 +451,10 @@ class Szenen_tree():
         self.p.param(self.name, 'Szene folgt').addChild({'name': 'Befehl ', 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': '', 'values':szn_lst},
                         {'name': 'nach [s]', 'type': 'float', 'value': 0},{'name': 'Verlaengerbar', 'type': 'list', 'values':{'Verlaengerbar':0,'nur exact':1,'fest':2}, 'value': 0},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': True}
                         ,{'name': 'Abhaengig Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': 0}]}, autoIncrementName=True)
+
+    def addCancels(self):
+        global p
+        self.p.param(self.name, 'Folgende stoppen').addChild({'name': 'Szene', 'type': 'list','value': '', 'values':szn_lst}, autoIncrementName=True)
 
     def linkSzene(self):
         for kind in self.p.param(self.name, 'Szene folgt').children():
@@ -533,7 +546,14 @@ class Szenen_tree():
                                     print szn_tuple.get('Verlaengerbar')
                                     set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get('Verlaengerbar').get('value'),
                                                     szn_tuple.get('Abhaengig Bedingung').get('value'),szn_tuple.get('Abhaengig Erfolg').get('value')])
-                            dicti['Follows'] = set_lst                             
+                            dicti['Follows'] = set_lst     
+                        elif device == 'Folgende stoppen':
+                            set_lst = []
+                            for child in some_object.get('children'):
+                                if some_object.get('children').get(child).get('value') <> '':
+                                    szen = some_object.get('children').get(child).get('value')
+                                    set_lst.append(szen)
+                            dicti['Cancels'] = set_lst                              
                         else:
                             #strucutre group only if name not ambivalent
                             dicti.update(self.itera(some_object.get('children')))
@@ -809,6 +829,18 @@ def selected(text):
 
 def update():
     global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox2, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
+    szn_lst = sorted(szn.list_commands('alle'))
+    xs1_devs = xs1.list_devices()
+    xs1_cmds = xs1.dict_commands()
+    hue_devs = hue.list_devices()
+    hue_cmds = hue.dict_commands()
+    sns_devs = sn.list_devices()
+    sns_cmds = sn.dict_commands()
+    tvs_devs = tv.list_devices()
+    tvs_cmds = tv.dict_commands()
+    sat_devs = sat.list_devices()
+    sat_cmds = sat.dict_commands()
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs     
     sets = mdb_get_table(constants.sql_tables.settings.name)
     selected(lastSelected)  
     sz=Szenen_tree("")
@@ -820,7 +852,6 @@ def update():
     seTre = SettingsTree()
     t4.setParameters(seTre.p, showTop=False)    
     comboBox.clear()
-    szn_lst = sorted(szn.list_commands('alle'))
     for szne in szn_lst:
         comboBox.addItem(szne) 
     comboBox2.clear()
@@ -833,18 +864,6 @@ def update():
         if str(inpt) <> "":
             comboBox3.addItem(inpt)        
     inp.p.sigTreeStateChanged.connect(change)
-    xs1_devs = xs1.list_devices()
-    xs1_cmds = xs1.dict_commands()
-    hue_devs = hue.list_devices()
-    hue_cmds = hue.dict_commands()
-    sns_devs = sn.list_devices()
-    sns_cmds = sn.dict_commands()
-    tvs_devs = tv.list_devices()
-    tvs_cmds = tv.dict_commands()
-    sat_devs = sat.list_devices()
-    sat_cmds = sat.dict_commands()
-    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
-    szn_lst = sorted(szn.list_commands('alle')) 
     sz.p.sigTreeStateChanged.connect(change_sz)
     
 def neuTrig():

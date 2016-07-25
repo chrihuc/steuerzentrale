@@ -23,8 +23,7 @@ liste = {}
 global start_t
 
 def print_it(it):
-    print datetime.datetime.now() - start_t
-    print it
+    print datetime.datetime.now() - start_t, it
 
 def main():
     global start_t
@@ -32,7 +31,7 @@ def main():
     sz_t = szenen_timer(def_to_run = print_it)
     sz_t.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True)
     time.sleep(5)
-    sz_t.retrigger_add(parent = "Bad_i",delay = 10, child = "Bad_aus")
+    sz_t.cancel_timer(parent = "Bad_i", child = "Bad_aus")
     sz_t.zeige()
     
 class szenen_timer:
@@ -70,7 +69,17 @@ class szenen_timer:
         self.start_timer(numm)
         
     def stop_timer(self, nr):
-        self.liste[nr].get("timer").cancel()        
+        self.liste[nr].get("timer").cancel() 
+        
+    def cancel_timer(self,parent,child):
+        found = False
+        for item in self.liste:
+            if (item.get("parent") == parent or (not(item.get("exact")))) and item.get("child") == child:       
+                item.get("timer").cancel()
+                self.liste.remove(item)
+                self.store()
+                found = True
+        return found
         
     def retrigger(self, parent, delay, child, exact, retrig):
         found = False
@@ -83,8 +92,10 @@ class szenen_timer:
                     item["timer"] = t
                     item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                     item.get("timer").start()
+                    self.store()
                 else:
                     self.liste.remove(item)
+                    self.store()
                 found = True
         return found   
     

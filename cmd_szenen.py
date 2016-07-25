@@ -47,7 +47,10 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("AVaus")
+    print scenes.execute("WohnziAnw0")
+    time.sleep(10)
+    print scenes.execute("WohnziAnw")
+    
     
 class szenen:    
     
@@ -276,6 +279,13 @@ class szenen:
                     set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
                     #timer set to 0 for following actions
                     set_del.start()  
+#==============================================================================
+# cacnel timers                              
+#==============================================================================     
+        if ((szene_dict.get("Cancels") <> "") and (str(szene_dict.get("Cancels")) <> "None")):
+            kommandos = self.__return_enum__(szene_dict.get("Cancels"))   
+            for kommando in kommandos:           
+                self.sz_t.cancel_timer(parent = szene, child = kommando)
 #==============================================================================
 # start timer with following actions                               
 #==============================================================================
