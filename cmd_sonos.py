@@ -587,7 +587,7 @@ class sonos:
             self.set_device(player,'Klingel')
             time.sleep(3)
             self.set_device(player,'Return')  
-        elif (str(command) == "EingagnWohnzi"):
+        elif (str(command) == "EingangWohnzi"):
             self.StreamInput(player, self.WohnZiZone)             
         elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
             sonos_szene = mdb_read_table_entry(table.name,command)
@@ -598,7 +598,7 @@ class sonos:
         comands = mdb_get_table(table.name)
         liste = ["Pause","Play","Save","Announce_Time","Durchsage","Return","resume","lauter",
                  "leiser","inc_leiser","inc_lauter","WeckerAnsage",'Durchsage Nachricht',
-                 "EingagnWohnzi", 'Durchsage Klingel']
+                 'Durchsage Klingel', "EingangWohnzi"]
         for comand in comands:
             liste.append(comand.get("Name"))
         #liste.remove("Name")
