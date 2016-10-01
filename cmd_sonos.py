@@ -71,7 +71,7 @@ def main():
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPause(sn.Kueche)
-    print sn.set_device('V01SCH1RUM1AV11','Durchsage Klingel')
+    print sn.set_device('V01SCH1RUM1AV11', "EingagnWohnzi")
 #    print sn.set_device('V01SCH1RUM1AV11','Nachricht')
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
@@ -578,15 +578,17 @@ class sonos:
             time.sleep(laenge + 1)  
             self.SetPause(player)
         elif (str(command) == "Durchsage Nachricht"):
-            self.set_device(player_o,'Save')
-            self.set_device(player_o,'Nachricht')
+            self.set_device(player,'Save')
+            self.set_device(player,'Nachricht')
             time.sleep(3)
-            self.set_device(player_o,'Return')    
+            self.set_device(player,'Return')    
         elif (str(command) == "Durchsage Klingel"):
-            self.set_device(player_o,'Save')
-            self.set_device(player_o,'Klingel')
+            self.set_device(player,'Save')
+            self.set_device(player,'Klingel')
             time.sleep(3)
-            self.set_device(player_o,'Return')             
+            self.set_device(player,'Return')  
+        elif (str(command) == "EingagnWohnzi"):
+            self.StreamInput(player, self.WohnZiZone)             
         elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
             sonos_szene = mdb_read_table_entry(table.name,command)
             self.sonos_read_szene(player, sonos_szene)                                 
@@ -594,7 +596,9 @@ class sonos:
 
     def list_commands(self):
         comands = mdb_get_table(table.name)
-        liste = ["Pause","Play","Save","Announce_Time","Durchsage","Return","resume","lauter","leiser","inc_leiser","inc_lauter","WeckerAnsage",'Durchsage Nachricht','Durchsage Klingel']
+        liste = ["Pause","Play","Save","Announce_Time","Durchsage","Return","resume","lauter",
+                 "leiser","inc_leiser","inc_lauter","WeckerAnsage",'Durchsage Nachricht',
+                 "EingagnWohnzi", 'Durchsage Klingel']
         for comand in comands:
             liste.append(comand.get("Name"))
         #liste.remove("Name")
