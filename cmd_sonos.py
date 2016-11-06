@@ -66,12 +66,12 @@ def send_command(self, player, endpoint, action, body):
 
 def main():
     sn = sonos()
-    #sn.ClearZones(sn.Bad)
-    #print sn.SaveList(sn.SchlafZi, "Bad", "34")
+#    sn.ClearZones(sn.Bad)
+#    print sn.SaveList(sn.SchlafZi, "Bad", "34")
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPause(sn.Kueche)
-    print sn.set_device('V01SCH1RUM1AV11', "EingagnWohnzi")
+    print sn.set_device(sn.SchlafZi, "Durchsage Klingel")
 #    print sn.set_device('V01SCH1RUM1AV11','Nachricht')
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
@@ -508,10 +508,11 @@ class sonos:
             elif sonos_szene.get('Pause') == 0:
                 self.SetPlay(player)
         
-    def set_device(self, player_o, command):
+    def set_device(self, player, command):
         if command in ["man", "auto"]:
-            set_val_in_szenen(device=player, szene="Auto_Mode", value=command)   
-        player = self.Devices.get(str(player_o))
+            set_val_in_szenen(device=player, szene="Auto_Mode", value=command) 
+        if player in self.Devices:
+            player = self.Devices.get(str(player))
         playerName = self.Names.get(player)
         if str(command) == "Pause":
             self.SetPause(player)

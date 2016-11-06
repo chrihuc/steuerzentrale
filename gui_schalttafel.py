@@ -58,7 +58,7 @@ cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
-szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter']
+szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter', 'Multimedia']
 stockwerke = ['Vm1','V00','V01','V02','']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
@@ -173,6 +173,10 @@ class KommandoGroup(pTypes.GroupParameter):
             return False            
 
 class Szenen_tree():
+    
+    szenen = []
+    neue_szene = False
+    
     def __init__(self, Szene_to_read):
         self.szene_to_read = Szene_to_read
         self.p = None
@@ -195,6 +199,11 @@ class Szenen_tree():
             kommandos = [eingabe]    
         return kommandos 
 
+    def update(self, neue_szene):
+        self.szene_to_read = neue_szene
+        self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read)]
+        self.set_paratree()        
+        
     def dict_constructor(self,name, values, value):
         if str(name) == "None": name = ''
         dicti = {'name':name, 'type':'list','values':values}
@@ -269,9 +278,10 @@ class Szenen_tree():
             zimmer.append(StockRaum(zim))            
         params = []
         for szene in self.szenen:
-            if szene.get('Name') == 'LeereVorlage':
+            if szene.get('Name') == 'LeereVorlage' or self.neue_szene:
                 szene['Name']= 'NeueSzene'
                 szene['Id'] = maxSzenenId()-maxSzenenId()%10 +10
+                self.neue_szene = False
             szn_dict = {}
             if str(szene.get('Beschreibung')) <> 'None':
                 self.name = szene.get('Beschreibung')
@@ -408,15 +418,16 @@ class Szenen_tree():
         szn_dict = {'name': 'Sources', 'type': 'group', 'children': [
                 {'name': 'Inputs', 'type': 'group', 'autoIncrementName':True, 'children':ichilds },
                 {'name': 'Szenen', 'type': 'group', 'autoIncrementName':True, 'children':schilds }    
-            ]}            
+            ]}       
         params.append(szn_dict)  
         szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
                 {'name': 'Speichere Szene', 'type': 'action'},
                 {'name': u'Prüfe Bedingung', 'type': 'action'},
                 {'name': 'Execute', 'type': 'action'},
-                {'name': 'Neue Szene', 'type': 'action'}                
+                {'name': 'Neue Szene', 'type': 'action'},
+                {'name': 'Dupliziere Szene', 'type': 'action'}                 
             ]}
-        params.append(szn_dict)   
+        params.append(szn_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
         try:
             self.p.param('Save/Restore functionality', 'Speichere Szene').sigActivated.connect(self.save)
@@ -429,7 +440,7 @@ class Szenen_tree():
             self.p.param(self.name, 'Folgende stoppen').sigActivated.connect(self.addCancels)
             self.linkSzene()
         except:
-            pass
+            print 'failed'
         return params
 
     def add_setting(self):
@@ -820,10 +831,13 @@ class SettingsTree():
                 for item in some_object: 
                     self.itera(some_object.get(item))
 
+sz=Szenen_tree('')                    
+                    
 def selected(text):
     global sz, t, lastSelected
     lastSelected = text
-    sz=Szenen_tree(text)
+    sz.update(lastSelected)
+    print 'selected'
     t.setParameters(sz.p, showTop=False)
     sz.p.sigTreeStateChanged.connect(change_sz)
 
@@ -840,12 +854,10 @@ def update():
     tvs_cmds = tv.dict_commands()
     sat_devs = sat.list_devices()
     sat_cmds = sat.dict_commands()
-    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs     
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs    
     sets = mdb_get_table(constants.sql_tables.settings.name)
-    selected(lastSelected)  
-    sz=Szenen_tree("")
-    t.setParameters(sz.p, showTop=False)
-    inp=InputsTree(isInputs = True, inputsGroup = comboBox5.currentText())
+    selected(lastSelected) 
+    inp=InputsTree(isInputs = True, inputsGroup = str(comboBox5.currentText()))
     t2.setParameters(inp.p, showTop=False)
     cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
     t3.setParameters(cmds.p, showTop=False) 
@@ -862,17 +874,17 @@ def update():
     inpts = sorted(mdb_read_table_column(db="cmd_inputs", column = 'Description'))
     for inpt in inpts:
         if str(inpt) <> "":
-            comboBox3.addItem(inpt)        
+            comboBox3.addItem(str(inpt))        
     inp.p.sigTreeStateChanged.connect(change)
     sz.p.sigTreeStateChanged.connect(change_sz)
     
 def neuTrig():
-    vals = mdb_read_table_entry(db="cmd_inputs",entry=comboBox3.currentText(),column='Description')
+    vals = mdb_read_table_entry(db="cmd_inputs",entry=str(comboBox3.currentText()),column='Description')
     mdb_add_table_entry("cmd_inputs",vals)
     
 def updInputs():
     global inp, t2
-    inp=InputsTree(isInputs = True, inputsGroup = comboBox5.currentText())
+    inp=InputsTree(isInputs = True, inputsGroup=str(comboBox5.currentText()))
     t2.setParameters(inp.p, showTop=False)    
 
 def showInputs(eingang):
@@ -927,7 +939,11 @@ def change_sz(param, changes):
                 showInputs(str(path[-1]))   
         if data <> '':
             if path[0] in ['Save/Restore functionality'] and path[1] == 'Neue Szene':
-                selected('LeereVorlage')              
+                selected('LeereVorlage')       
+            if path[0] in ['Save/Restore functionality'] and path[1] == 'Dupliziere Szene':
+                sz.neue_szene = True
+                selected(lastSelected)              
+                
 
 def slctCmdLst(text):
     global cmds, t3
@@ -937,7 +953,7 @@ def slctCmdLst(text):
 def updt_sznlst():
     global comboBox
     comboBox.clear()
-    szn_lst = sorted(szn.list_commands(comboBox4.currentText()))
+    szn_lst = sorted(szn.list_commands(str(comboBox4.currentText())))
     for szne in szn_lst:
         comboBox.addItem(szne)    
 
@@ -984,7 +1000,9 @@ for itm in stockwerke:
 comboBox5.setCurrentIndex(1)
 comboBox5.activated[str].connect(updInputs)  
 
+
 update()
+selected('Gehen')
 
 buttn = QtGui.QPushButton(win)
 buttn.setText('Update')

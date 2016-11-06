@@ -15,12 +15,13 @@ datab = constants.sql_.DB
 #rewrite defs at the end
 
 def main():
-    print mdb_set_table(table=constants.sql_tables.cron.name, device='Wochentags1', commands={u'Do': True, u'Fr': True, 'Name': u'Wochentags1', u'Di': True, u'Eingeschaltet': True, u'Mo': True, u'Mi': True, u'So': False, 'Time': u'06:40', u'Sa': False, 'Szene': u'Wecker'}, primary = 'Name')
+    #print mdb_set_table(table=constants.sql_tables.cron.name, device='Wochentags1', commands={u'Do': True, u'Fr': True, 'Name': u'Wochentags1', u'Di': True, u'Eingeschaltet': True, u'Mo': True, u'Mi': True, u'So': False, 'Time': u'06:40', u'Sa': False, 'Szene': u'Wecker'}, primary = 'Name')
     #print setting_r("Notify_Christoph")
     #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
     #print re_calc(['lin_calc',[1,'temp',1]])
     #print re_calc(['sett','Temperatur_Wohnzi'])
-    #print getSzenenSources('Webcam_aus')
+    print getSzenenSources('Webcam_aus')
+    print getSzenenSources('Webcam_aus')
     #print maxSzenenId()-maxSzenenId()%10 +10
     #print re_calc(10)
     #set_automode(device="Stehlampe", mode="auto")
@@ -138,6 +139,7 @@ def mdb_read_table_entry(db, entry, column = 'Name'):
     with con:
         cur = con.cursor()
         sql = 'SELECT * FROM ' + db + ' WHERE '+column+' = "' + str(entry) +'"'
+        sql = 'SELECT * FROM %s WHERE %s = "%s"' % (db, column, str(entry))
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
@@ -240,7 +242,7 @@ def mdb_get_table(db):
     rlist = []
     with con:
         cur = con.cursor()
-        sql = 'SELECT * FROM ' + db
+        sql = 'SELECT * FROM %s' % (db)
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
@@ -339,13 +341,20 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
 def getSzenenSources(szene):
     if szene in ['', None]:
         return [],[]
+    print szene, constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     ilist, slist = [], []
     with con:
+        print 'connecting'
         cur = con.cursor()
-        sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+'" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)'
+        sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+\
+              '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)'
+        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)' % (constants.sql_tables.inputs.name, szene)      
+        print 'executing', sql
         cur.execute(sql)
+        print 'executed 1'
         results = cur.fetchall()
+        print results
         field_names = [i[0] for i in cur.description]
         for row in results:
             dicti = {}
@@ -353,6 +362,9 @@ def getSzenenSources(szene):
                dicti[field_names[i]] = row[i]  
             ilist.append(dicti)
         sql = 'SELECT * FROM '+constants.sql_tables.szenen.name+' where Follows like "%'+szene+'%"'
+        szene = "%" + szene + "%"
+        sql = 'SELECT * FROM %s.%s where Follows like "%s"' % (datab, constants.sql_tables.szenen.name, szene)    
+        print 'executing 2' , sql
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
@@ -361,7 +373,8 @@ def getSzenenSources(szene):
             for i in range (0,len(row)):
                dicti[field_names[i]] = row[i]  
             slist.append(dicti)           
-    con.close()    
+    con.close()   
+    print ilist, slist
     return ilist, slist
     
 def maxSzenenId():
