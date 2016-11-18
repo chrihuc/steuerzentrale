@@ -10,3 +10,4 @@
 #constants.py
 *.log
 .spy*
+/old/*

@@ -5,8 +5,8 @@ needed packages
 git clone https://github.com/chrihuc/steuerzentrale.git sz
 cd sz
 git checkout Version1
-sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip
-sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui
+sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip python-pyaudio python3-pyaudio espeak
+sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui soco
 
 sudo pip install phue                   #??
 sudo pip install gcm                    #??

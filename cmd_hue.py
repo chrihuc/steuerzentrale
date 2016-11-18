@@ -3,7 +3,7 @@
 import constants
 
 from mysql_con import mdb_set_table, mdb_read_table_entry,set_val_in_szenen,mdb_get_table
-from phue import Bridge
+from phue import Bridge, Light
 
 import MySQLdb as mdb
 import time
@@ -22,6 +22,7 @@ table = sql_object("out_hue", "Outputs", (("Id","INT(11)","PRIMARY KEY","AUTO_IN
 
 try:
     hbridge = Bridge(constants.hue_.IP)
+    hbridge.connect()
 except:
     print "Hue not connecting, press button."
     easygui.msgbox("Hue not connecting", title="press button")
@@ -84,14 +85,16 @@ class hue_lights():
         return liste
 
     def set_device(self, device, commd):
+        h_dev = Light(hbridge, device)
         keys = ['bri', 'hue', 'sat', 'transitiontime']
         szene = mdb_read_table_entry(table.name,commd)
+        success = False
         if szene.get('bri')<=0:
             szene['bri'] = 0
             szene['on'] = False
         if commd in ["man", "auto"]:
             set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
-            return
+            return True
         elif commd == 'Save': 
             hue = hbridge.get_light(device, 'hue')
             bri = hbridge.get_light(device, 'bri')
@@ -100,7 +103,7 @@ class hue_lights():
             #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
             setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
             mdb_set_table(table.name,device, setting)
-            return
+            return True
         elif commd == 'Umschalten':
             an = hbridge.get_light(device, 'on') 
             if an:
@@ -119,18 +122,41 @@ class hue_lights():
         if bright <> None and bright<=0:
             pass            
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
-            hbridge.set_light(device, {'on':True}) 
+            success = False
+            while not success:
+                try:
+                    hbridge.set_light(device, {'on':True}) 
+                    success = True
+                except:
+                    time.sleep(1)
+                    success = False
             time.sleep(0.5)
         command = {}
         for key in keys:
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
                 command[key] = int(szene.get(key))
         if command <> {}:
-            hbridge.set_light(device, command)
+            success = False
+            while not success:
+                try:
+                    hbridge.set_light(device, command)
+                    success = True
+                except:
+                    time.sleep(1)
+                    success = False                    
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
-            hbridge.set_light(device, {'on':False})  
+            success = False
+            while not success:
+                try:
+                    hbridge.set_light(device, {'on':False})  
+                    success = True
+                except:
+                    time.sleep(1)
+                    success = False                    
         set_val_in_szenen(device=device, szene="Value", value=szene.get('on'))
-        return True
+        if not h_dev.reachable:
+            success = False
+        return success
 
 if __name__ == '__main__':
     main()  

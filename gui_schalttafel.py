@@ -181,8 +181,8 @@ class Szenen_tree():
         self.szene_to_read = Szene_to_read
         self.p = None
         self.name = None
-        self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read)]
-        self.set_paratree()
+        # self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read,recalc=False)]
+        # self.set_paratree()
         
     def __return_enum__(self,eingabe):
         if (type(eingabe) == str):
@@ -201,7 +201,7 @@ class Szenen_tree():
 
     def update(self, neue_szene):
         self.szene_to_read = neue_szene
-        self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read)]
+        self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read,recalc=False)]
         self.set_paratree()        
         
     def dict_constructor(self,name, values, value):
@@ -348,7 +348,7 @@ class Szenen_tree():
                             else:
                                 depErfolg = kind[4]                            
                             szn_d_child_l.append({'name': 'Szene %d' % (len(szn_d_child_l)+1), 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': kind[0], 'values':szn_lst},
-                        {'name': 'nach [s]', 'type': 'float', 'value': kind[1]},{'name': 'Verlaengerbar', 'type': 'list', 'values':{'Verlaengerbar':0,'nur exact':1,'fest':2}, 'value': kind[2]},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': immer}
+                        {'name': 'nach [s]', 'type': 'str', 'value': kind[1]},{'name': 'Verlaengerbar', 'type': 'list', 'values':{'Verlaengerbar':0,'nur exact':1,'fest':2}, 'value': kind[2]},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': immer}
                         ,{'name': 'Abhaengig Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': depErfolg}]})  
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child) 
@@ -440,7 +440,7 @@ class Szenen_tree():
             self.p.param(self.name, 'Folgende stoppen').sigActivated.connect(self.addCancels)
             self.linkSzene()
         except:
-            print 'failed'
+            pass
         return params
 
     def add_setting(self):
@@ -723,7 +723,7 @@ class InputsTree():
         except TypeError, te:
             return False
 
-    def itera(self,some_object, only_change = False):
+    def itera(self,some_object):
         dicti = {}
         if self.check_iter(some_object):
             if some_object.get('type') == 'group':
@@ -738,7 +738,7 @@ class InputsTree():
                                     dicti[kind] = wert
                             if self.isInputs:
                                 mdb_set_table(table=constants.sql_tables.inputs.name, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
-                            else:
+                            elif len(dicti) > 0:
                                 mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id', translate = False)
                 else:
                     self.itera(some_object.get('children'))
@@ -822,7 +822,6 @@ class SettingsTree():
                             wert = some_object.get('children').get('Settings').get('children').get(kind).get('value')
                             if wert == '': wert = None
                             dicti[kind] = wert
-                    print dicti
                     for setting in dicti:
                         setting_s(setting,dicti.get(setting))
                 else:
@@ -1002,7 +1001,7 @@ comboBox5.activated[str].connect(updInputs)
 
 
 update()
-selected('Gehen')
+#selected('Gehen')
 
 buttn = QtGui.QPushButton(win)
 buttn.setText('Update')

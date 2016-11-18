@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 import constants
+import soco
+import pyglet
+import pyaudio
+import wave
+import subprocess
 
 import httplib
 import requests
@@ -64,6 +69,33 @@ def send_command(self, player, endpoint, action, body):
     r = requests.post('http://' + player + ':1400' + endpoint, data=soap, headers=headers)
     return r.content
 
+def play_wav(input_para):
+    CHUNK = 1024
+    
+    if '.wav' in input_para:
+        wf = wave.open('media/' + input_para, 'rb')
+    else:
+        subprocess.call(["espeak", "-w media/texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
+        wf = wave.open('media/texttosonos.wav', 'rb')
+    
+    p = pyaudio.PyAudio()
+    
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True)
+    
+    data = wf.readframes(CHUNK)
+    
+    while data != '':
+        stream.write(data)
+        data = wf.readframes(CHUNK)
+    
+    stream.stop_stream()
+    stream.close()
+    
+    p.terminate()    
+    
 def main():
     sn = sonos()
 #    sn.ClearZones(sn.Bad)
@@ -71,28 +103,48 @@ def main():
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPause(sn.Kueche)
-    print sn.set_device(sn.SchlafZi, "Durchsage Klingel")
+#    print sn.set_device("Vm1ZIM1RUM1AV11", "SRF3")
 #    print sn.set_device('V01SCH1RUM1AV11','Nachricht')
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
-    #print sn.list_devices()
+#    print sn.list_devices()
+    players = list(soco.discover())
+#    for player in players:
+#        print player
+#        print sn.soco_get_status(player)
+#    for player in players:
+#        sn.soco_set_status(player)    
+    for player in players:  
+        sn.soco_get_status(player)
+    print sn.Status  
+
 
 class sonos:
+    
+    Status = {}
+    
     def __init__(self):
+        # deprecated
         self.WohnZi = "192.168.192.201"
         self.SchlafZi = "192.168.192.202"
         self.Bad = "192.168.192.203"
         self.Kueche = "192.168.192.204"        
+        self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche"}
+        self.Devices = {'V00WOH1RUM1AV11':self.WohnZi,'V00KUE1RUM1AV11':self.Kueche,'V01BAD1RUM1AV11':self.Bad,'V01SCH1RUM1AV11':self.SchlafZi}
+        
+        # deprecated
         self.SchlafZiZone = "RINCON_000E5830220001400"
         self.BadZone = "RINCON_000E583138BA01400"
         self.WohnZiZone = "RINCON_000E58232A2601400"
         self.KuecheZone = "RINCON_000E58CB9E3E01400"  
-        self.Zones = [self.SchlafZiZone, self.BadZone, self.WohnZiZone, self.KuecheZone]
-        self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche"}
-        self.Devices = {'V00WOH1RUM1AV11':self.WohnZi,'V00KUE1RUM1AV11':self.Kueche,'V01BAD1RUM1AV11':self.Bad,'V01SCH1RUM1AV11':self.SchlafZi}
+        self.Zones = [self.SchlafZiZone, self.BadZone, self.WohnZiZone, self.KuecheZone]        
         self.sonos_zonen = {str(self.WohnZi):self.WohnZiZone,str(self.Kueche):self.KuecheZone,str(self.Bad):self.BadZone,str(self.SchlafZi):self.SchlafZiZone}
+               
+        self.Devices_neu = {'V00WOH1RUM1AV11':'Wohnzimmer','V00KUE1RUM1AV11':u'K\xfcche','V01BAD1RUM1AV11':'Bad','V01SCH1RUM1AV11':'Schlafzimmer',
+                            'Vm1ZIM1RUM1AV11':'Hobbyraum','V01KID1RUM1AV11':'Kinderzimmer'}                            
         self.SERVER_PORT = 1400
         self.VOLUME = 0
+        self.PLAYLISTS = {}
         self.__init_table__()
 
     def __init_table__(self):
@@ -115,6 +167,15 @@ class sonos:
                 results = cur.fetchall()      
         con.close()
 
+    def get_addr(self,hks):
+        players = list(soco.discover())
+        p_name = self.Devices_neu[hks]
+        for player in players:
+            if player._player_name == p_name:
+                ip = player.ip_address
+                uid = player.uid
+                return ip, uid, p_name    
+        
     def Envelope(self, Player, body, SOAPAction):
         blen = len(body)
         requestor = httplib.HTTP(Player, self.SERVER_PORT)
@@ -483,6 +544,54 @@ class sonos:
         mdb_set_table(table.name,self.Names.get(player),dicti) 
         return True
         
+    def soco_get_status(self, player):   
+        dicti = {}
+        track_info = player.get_current_track_info()
+        transinfo = player.get_current_transport_info()
+        own_zone = player.uid
+        zone = player.group.uid.split(':')[0]
+        name = player.player_name
+        if player.is_coordinator:
+#        if zone == own_zone:
+            dicti['MasterZone'] = ''
+            dicti['Queue'] = player.get_queue()
+            self.PLAYLISTS[name] = player.get_queue()
+        else:
+            dicti['MasterZone'] = player.group.uid.split(':')[0]
+        dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'
+        dicti['Radio'] = not 'file' in track_info['uri']
+        dicti['Sender'] = track_info['uri']
+        dicti['TitelNr'] = track_info['playlist_position']
+        dicti['Time'] = track_info['position']
+        dicti['Name'] = name
+        dicti['Volume'] = player.volume
+        self.Status[name] = dicti
+        return dicti
+        
+    def soco_set_status(self,player):
+        dicti = self.Status[player.player_name]
+        player_ip = player.ip_address
+        self.SetVolume(player_ip, dicti.get('Volume'))
+        if dicti['MasterZone'] <> '':
+            self.CombineZones(player_ip, dicti['MasterZone'])
+        else:
+            self.ClearZones(player_ip)
+            player.unjoin()
+            player.clear_queue()
+            for track in dicti['Queue']:
+                player.add_to_queue(track)   
+            if dicti['Radio']:
+#                print dicti
+                self.setRadio(player_ip, dicti['Sender'])
+            else:
+                self.Seek(player_ip, "TRACK_NR", str(dicti['TitelNr']))
+                if str(dicti['Time']) <> 'None':
+                    self.Seek(player_ip, "REL_TIME", dicti['Time'])
+            if not dicti['Pause']:
+                player.play()
+                
+        
+        
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
         print player, sonos_szene
@@ -508,9 +617,47 @@ class sonos:
             elif sonos_szene.get('Pause') == 0:
                 self.SetPlay(player)
         
-    def set_device(self, player, command):
+    def durchsage(self,text):
+        self.Status = {}
+#        print self.Status
+        players = list(soco.discover())     
+        # save all zones
+        for player in players:  
+            self.soco_get_status(player)
+#            print self.Status
+#        time.sleep(15)
+#        print self.Status
+        # combine all zones
+        soco.SoCo('192.168.192.203').partymode()  
+#        time.sleep(2)
+        # source to PC
+        soco.SoCo('192.168.192.203').switch_to_line_in()
+#        time.sleep(2)
+        # play file or text on PC
+        play_wav(text)
+        # resume all playback  
+        for player in players:
+            player.unjoin()
+            self.soco_set_status(player) 
+        return True
+
+    def ansage(self,text,player_ip):
+        player = soco.SoCo(player_ip)
+        _, uid, _ = self.get_addr('Vm1ZIM1RUM1AV11')
+        # save zone
+        self.soco_get_status(player)
+        # source to PC
+        self.StreamInput(player_ip,uid)
+        # play file or text on PC
+        play_wav(text)
+        # resume all playback  
+        self.soco_set_status(player) 
+        return True             
+                
+    def set_device(self, player, command, text):
         if command in ["man", "auto"]:
             set_val_in_szenen(device=player, szene="Auto_Mode", value=command) 
+        player, p_uid, playerName = self.get_addr(player)            
         if player in self.Devices:
             player = self.Devices.get(str(player))
         playerName = self.Names.get(player)
@@ -532,12 +679,9 @@ class sonos:
                 time.sleep(laenge + 1)            
                 self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName))
         elif str(command) == "Durchsage":
-            self.sonos_write_szene(player)   
-            text = setting_r("Durchsage")        
-            laenge = downloadAudioFile(text)
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
-            time.sleep(laenge + 1)            
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName))            
+            self.durchsage(text)      
+        elif str(command) == "Ansage":
+            self.ansage(text,player)             
         elif str(command) == "Return":
             self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName), hergestellt = False)          
         elif ((str(command) == "resume") ):
@@ -577,17 +721,7 @@ class sonos:
             laenge = downloadAudioFile(text)
             self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
             time.sleep(laenge + 1)  
-            self.SetPause(player)
-        elif (str(command) == "Durchsage Nachricht"):
-            self.set_device(player,'Save')
-            self.set_device(player,'Nachricht')
-            time.sleep(3)
-            self.set_device(player,'Return')    
-        elif (str(command) == "Durchsage Klingel"):
-            self.set_device(player,'Save')
-            self.set_device(player,'Klingel')
-            time.sleep(3)
-            self.set_device(player,'Return')  
+            self.SetPause(player) 
         elif (str(command) == "EingangWohnzi"):
             self.StreamInput(player, self.WohnZiZone)             
         elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
@@ -597,9 +731,8 @@ class sonos:
 
     def list_commands(self):
         comands = mdb_get_table(table.name)
-        liste = ["Pause","Play","Save","Announce_Time","Durchsage","Return","resume","lauter",
-                 "leiser","inc_leiser","inc_lauter","WeckerAnsage",'Durchsage Nachricht',
-                 'Durchsage Klingel', "EingangWohnzi"]
+        liste = ["Pause","Play","Save","Announce_Time","Durchsage",'Ansage',"Return","resume","lauter",
+                 "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi"]
         for comand in comands:
             liste.append(comand.get("Name"))
         #liste.remove("Name")

@@ -47,10 +47,10 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("WohnziAnw0")
-    time.sleep(10)
-    print scenes.execute("WohnziAnw")
-    
+    print scenes.execute("Tuerklingel")
+#    time.sleep(10)
+#    print scenes.execute("WohnziAnw")
+#    
     
 class szenen:    
     
@@ -174,7 +174,7 @@ class szenen:
             kommandos = [eingabe]    
         return kommandos 
 
-    def __sub_cmds__(self, szn_id, device, commando):
+    def __sub_cmds__(self, szn_id, device, commando, text):
         global kommando_dict
         executed = False
         t_list = self.kommando_dict.get(szn_id)      
@@ -188,7 +188,7 @@ class szenen:
             else:
                 executed = mes.send_zuhause(to=str(commando[0]), titel="Setting", text=str(commando[1]))                 
         elif device in sns_devs:
-            executed = sn.set_device(device, commando)               
+            executed = sn.set_device(device, commando, text)               
         elif device in hue_devs:
             executed = hue.set_device(device, commando)  
 #            for kommando in kommandos:
@@ -255,7 +255,8 @@ class szenen:
                                 t_list = self.kommando_dict.get(szn_id)
                                 t_list.append([key,kommando])
                                 self.kommando_dict[szn_id] = t_list
-                            t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, key, kommando])
+                            text=szene_dict.get("Durchsage")
+                            t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, key, kommando, text])
                             t.start()  
 #==============================================================================
 # Internal                               
