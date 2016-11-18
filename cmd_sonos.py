@@ -2,7 +2,6 @@
 
 import constants
 import soco
-import pyglet
 import pyaudio
 import wave
 import subprocess
