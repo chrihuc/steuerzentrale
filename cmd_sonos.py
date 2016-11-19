@@ -72,9 +72,9 @@ def play_wav(input_para):
     CHUNK = 1024
     
     if '.wav' in input_para:
-        wf = wave.open('media/' + input_para, 'rb')
+        wf = wave.open(constants.installation_folder + '/media/' + input_para, 'rb')
     else:
-        subprocess.call(["espeak", "-w media/texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
+        subprocess.call(["espeak", "-w " + constants.installation_folder + "/media/texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
         wf = wave.open('media/texttosonos.wav', 'rb')
     
     p = pyaudio.PyAudio()
