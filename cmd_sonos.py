@@ -113,9 +113,9 @@ def main():
 #        print sn.soco_get_status(player)
 #    for player in players:
 #        sn.soco_set_status(player)    
-    for player in players:  
-        sn.soco_get_status(player)
-    print sn.Status  
+#    for player in players:  
+#        sn.soco_get_status(player)
+    print sn.get_zones() 
 
 
 class sonos:
@@ -174,6 +174,13 @@ class sonos:
                 ip = player.ip_address
                 uid = player.uid
                 return ip, uid, p_name    
+
+    def get_zones(self):
+        players = list(soco.discover())
+        zones = []
+        for player in players:
+            zones.append(player.uid)
+        return zones               
         
     def Envelope(self, Player, body, SOAPAction):
         blen = len(body)
@@ -548,7 +555,15 @@ class sonos:
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
         own_zone = player.uid
-        zone = player.group.uid.split(':')[0]
+        if False:
+            zone = player.group.uid.split(':')[0]
+        else:
+            player_ip = player.ip_address
+            posinfo = self.GetPositionInfo(player_ip)
+            zones = self.get_zones()
+            for _zone in zones:
+                if _zone in posinfo:
+                    zone = _zone
         name = player.player_name
         if player.is_coordinator:
 #        if zone == own_zone:
@@ -556,7 +571,7 @@ class sonos:
             dicti['Queue'] = player.get_queue()
             self.PLAYLISTS[name] = player.get_queue()
         else:
-            dicti['MasterZone'] = player.group.uid.split(':')[0]
+            dicti['MasterZone'] = zone
         dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'
         dicti['Radio'] = not 'file' in track_info['uri']
         dicti['Sender'] = track_info['uri']

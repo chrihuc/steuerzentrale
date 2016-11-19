@@ -43,7 +43,7 @@ class szenen_timer:
         #exact means parent needs to be the same
         #retrig means its possible to delay, or it is just a normal timer
         
-    def add_timer(self, parent, delay, child, exact, retrig):
+    def add_timer(self, parent, delay, child, exact, retrig,  start=False):
         dicti = {}
         dicti["parent"] = parent
         dicti["delay"] = delay
@@ -54,6 +54,7 @@ class szenen_timer:
         dicti["hash_id"] = hash_id     
         t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
         dicti["timer"] = t
+        if start: t.start()
         self.liste.append(dicti)
         return len(self.liste) - 1
         
@@ -65,8 +66,7 @@ class szenen_timer:
         self.liste[nr].get("timer").start()
         
     def add_timer_start(self, parent, delay, child, exact, retrig):
-        numm = self.add_timer(parent, delay, child, exact, retrig)
-        self.start_timer(numm)
+        numm = self.add_timer(parent, delay, child, exact, retrig, True)
         
     def stop_timer(self, nr):
         self.liste[nr].get("timer").cancel() 

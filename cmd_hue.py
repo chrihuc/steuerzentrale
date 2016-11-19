@@ -12,6 +12,8 @@ import easygui
 import logging
 logging.basicConfig()
 
+max_retry = 4
+
 class sql_object:
     def __init__(self,name,typ,columns):
         self.name = name
@@ -123,13 +125,15 @@ class hue_lights():
             pass            
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
             success = False
-            while not success:
+            retry = 1
+            while not success and retry < max_retry:
                 try:
                     hbridge.set_light(device, {'on':True}) 
                     success = True
                 except:
                     time.sleep(1)
                     success = False
+                    retry += 1
             time.sleep(0.5)
         command = {}
         for key in keys:
@@ -137,22 +141,26 @@ class hue_lights():
                 command[key] = int(szene.get(key))
         if command <> {}:
             success = False
-            while not success:
+            retry = 1
+            while not success and retry < max_retry:
                 try:
                     hbridge.set_light(device, command)
                     success = True
                 except:
                     time.sleep(1)
-                    success = False                    
+                    success = False 
+                    retry += 1
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
             success = False
-            while not success:
+            retry = 1
+            while not success and retry < max_retry:
                 try:
                     hbridge.set_light(device, {'on':False})  
                     success = True
                 except:
                     time.sleep(1)
-                    success = False                    
+                    success = False 
+                    retry += 1
         set_val_in_szenen(device=device, szene="Value", value=szene.get('on'))
         if not h_dev.reachable:
             success = False
