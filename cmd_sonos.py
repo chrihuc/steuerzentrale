@@ -5,6 +5,7 @@ import soco
 import pyaudio
 import wave
 import subprocess
+import pwd, os
 
 import httplib
 import requests
@@ -69,6 +70,8 @@ def send_command(self, player, endpoint, action, body):
     return r.content
 
 def play_wav(input_para):
+    uid = pwd.getpwnam('chris')[2]
+    os.setuid(uid)
     CHUNK = 1024
     location = constants.installation_folder + '/media/'
     
@@ -86,17 +89,15 @@ def play_wav(input_para):
                     channels=wf.getnchannels(),
                     rate=wf.getframerate(),
                     output=True)
-    print 'stream open'
+
     data = wf.readframes(CHUNK)
-    print 'read frames'
+
     while data != '':
         stream.write(data)
         data = wf.readframes(CHUNK)
     
     stream.stop_stream()
-    print 'stream stopped'
     stream.close()
-    print 'stream closed'
     p.terminate()    
     
 def main():
