@@ -75,6 +75,7 @@ def play_wav(input_para):
     if '.wav' in input_para:
         print location + input_para
         wf = wave.open(location + input_para, 'rb')
+        print 'wave.open'
     else:
         subprocess.call(["espeak", "-w " + location + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
         wf = wave.open(location + 'texttosonos.wav', 'rb')
