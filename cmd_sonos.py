@@ -81,21 +81,22 @@ def play_wav(input_para):
         wf = wave.open(location + 'texttosonos.wav', 'rb')
     
     p = pyaudio.PyAudio()
-    
+    print 'pyaudo loaded'
     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
                     channels=wf.getnchannels(),
                     rate=wf.getframerate(),
                     output=True)
-    
+    print 'stream open'
     data = wf.readframes(CHUNK)
-    
+    print 'read frames'
     while data != '':
         stream.write(data)
         data = wf.readframes(CHUNK)
     
     stream.stop_stream()
+    print 'stream stopped'
     stream.close()
-    
+    print 'stream closed'
     p.terminate()    
     
 def main():
