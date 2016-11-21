@@ -88,6 +88,8 @@ class hue_lights():
 
     def set_device(self, device, commd):
         h_dev = Light(hbridge, device)
+        if not h_dev.reachable:
+            return False
         keys = ['bri', 'hue', 'sat', 'transitiontime']
         szene = mdb_read_table_entry(table.name,commd)
         success = False
@@ -129,7 +131,7 @@ class hue_lights():
             while not success and retry < max_retry:
                 try:
                     hbridge.set_light(device, {'on':True}) 
-                    success = True
+                    success = h_dev.on
                 except:
                     time.sleep(1)
                     success = False
@@ -156,7 +158,7 @@ class hue_lights():
             while not success and retry < max_retry:
                 try:
                     hbridge.set_light(device, {'on':False})  
-                    success = True
+                    success = not h_dev.on
                 except:
                     time.sleep(1)
                     success = False 

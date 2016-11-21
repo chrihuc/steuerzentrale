@@ -70,12 +70,13 @@ def send_command(self, player, endpoint, action, body):
 
 def play_wav(input_para):
     CHUNK = 1024
-    
+    location = constants.installation_folder + '/media/'
+    print location
     if '.wav' in input_para:
-        wf = wave.open(constants.installation_folder + '/media/' + input_para, 'rb')
+        wf = wave.open(location + input_para, 'rb')
     else:
-        subprocess.call(["espeak", "-w " + constants.installation_folder + "/media/texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
-        wf = wave.open('media/texttosonos.wav', 'rb')
+        subprocess.call(["espeak", "-w " + location + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
+        wf = wave.open(location + 'texttosonos.wav', 'rb')
     
     p = pyaudio.PyAudio()
     
