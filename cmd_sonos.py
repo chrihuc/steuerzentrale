@@ -556,6 +556,7 @@ class sonos:
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
         own_zone = player.uid
+        zone = ''
         if False:
             zone = player.group.uid.split(':')[0]
         else:
