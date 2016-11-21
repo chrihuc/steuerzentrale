@@ -561,7 +561,7 @@ class sonos:
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
         own_zone = player.uid
-        zone = ''
+        zone = own_zone
         if False:
             zone = player.group.uid.split(':')[0]
         else:
@@ -572,8 +572,8 @@ class sonos:
                 if _zone in posinfo:
                     zone = _zone
         name = player.player_name
-        if player.is_coordinator:
-#        if zone == own_zone:
+#        if player.is_coordinator:
+        if zone == own_zone:
             dicti['MasterZone'] = ''
             dicti['Queue'] = player.get_queue()
             self.PLAYLISTS[name] = player.get_queue()
@@ -646,14 +646,14 @@ class sonos:
         for player in players:  
             self.soco_get_status(player)
 #            print self.Status
-#        time.sleep(15)
+        time.sleep(2)
 #        print self.Status
         # combine all zones
         soco.SoCo('192.168.192.203').partymode()  
 #        time.sleep(2)
         # source to PC
         soco.SoCo('192.168.192.203').switch_to_line_in()
-#        time.sleep(2)
+        time.sleep(2)
         # play file or text on PC
         play_wav(text)
         # resume all playback  
