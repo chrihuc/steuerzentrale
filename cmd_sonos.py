@@ -98,7 +98,9 @@ def play_wav(input_para):
     
     stream.stop_stream()
     stream.close()
-    p.terminate()    
+    p.terminate()   
+    uid = pwd.getpwnam('root')[2]
+    os.setuid(uid)
     
 def main():
 #    sn = sonos()
