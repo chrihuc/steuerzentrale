@@ -71,7 +71,7 @@ def send_command(self, player, endpoint, action, body):
 def play_wav(input_para):
     CHUNK = 1024
     location = constants.installation_folder + '/media/'
-    print location
+    
     if '.wav' in input_para:
         print location + input_para
         wf = wave.open(location + input_para, 'rb')
@@ -98,7 +98,7 @@ def play_wav(input_para):
     p.terminate()    
     
 def main():
-    sn = sonos()
+#    sn = sonos()
 #    sn.ClearZones(sn.Bad)
 #    print sn.SaveList(sn.SchlafZi, "Bad", "34")
     #print sn.Names.get(sn.Bad)
@@ -109,7 +109,7 @@ def main():
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
 #    print sn.list_devices()
-    players = list(soco.discover())
+#    players = list(soco.discover())
 #    for player in players:
 #        print player
 #        print sn.soco_get_status(player)
@@ -117,7 +117,8 @@ def main():
 #        sn.soco_set_status(player)    
 #    for player in players:  
 #        sn.soco_get_status(player)
-    print sn.get_zones() 
+#    print sn.get_zones() 
+    play_wav('klingel.wav')
 
 
 class sonos:
