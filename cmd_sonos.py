@@ -70,7 +70,7 @@ def send_command(self, player, endpoint, action, body):
     return r.content
 
 def play_wav(input_para):
-    uid = pwd.getpwnam('pulse')[2]
+    uid = pwd.getpwnam('chris')[2]
     os.setuid(uid)
     CHUNK = 1024
     location = constants.installation_folder + '/media/'
