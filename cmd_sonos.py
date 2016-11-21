@@ -69,9 +69,9 @@ def send_command(self, player, endpoint, action, body):
     r = requests.post('http://' + player + ':1400' + endpoint, data=soap, headers=headers)
     return r.content
 
-def play_wav(input_para):
-    uid = pwd.getpwnam('chris')[2]
-    os.setuid(uid)
+def play_wav_dep(input_para):
+#    uid = pwd.getpwnam('chris')[2]
+#    os.setuid(uid)
     CHUNK = 1024
     location = constants.installation_folder + '/media/'
     
@@ -99,8 +99,18 @@ def play_wav(input_para):
     stream.stop_stream()
     stream.close()
     p.terminate()   
-    uid = pwd.getpwnam('root')[2]
-    os.setuid(uid)
+#    uid = pwd.getpwnam('root')[2]
+#    os.setuid(uid)
+
+def play_wav(input_para):
+    location = constants.installation_folder + '/media/'
+    if '.wav' in input_para:
+        location = location + input_para
+    else:
+        subprocess.call(["espeak", "-w " + location + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
+        location = location + 'texttosonos.wav'
+    
+    os.system("mpg123 " + location)
     
 def main():
 #    sn = sonos()
@@ -647,6 +657,7 @@ class sonos:
         # save all zones
         for player in players:  
             self.soco_get_status(player)
+            time.sleep(1)
 #            print self.Status
         time.sleep(2)
 #        print self.Status
