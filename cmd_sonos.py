@@ -69,6 +69,13 @@ def send_command(self, player, endpoint, action, body):
     r = requests.post('http://' + player + ':1400' + endpoint, data=soap, headers=headers)
     return r.content
 
+def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
+  mustend = time.time() + timeout
+  while time.time() < mustend:
+    if somepredicate(*args, **kwargs): return True
+    time.sleep(period)
+  return False    
+
 def play_wav_dep(input_para):
 #    uid = pwd.getpwnam('chris')[2]
 #    os.setuid(uid)
@@ -124,14 +131,15 @@ def main():
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
 #    print sn.list_devices()
-#    players = list(soco.discover())
+    players = list(soco.discover())
 #    for player in players:
 #        print player
 #        print sn.soco_get_status(player)
 #    for player in players:
 #        sn.soco_set_status(player)    
-#    for player in players:  
-#        sn.soco_get_status(player)
+    for player in players:  
+        sn.soco_get_status(player)
+    print sn.Status
 #    print sn.get_zones() 
 #    play_wav('klingel.wav')
     sn.durchsage('klingel.wav')
@@ -667,18 +675,19 @@ class sonos:
         # save all zones
         for player in players:  
             self.soco_get_status(player)
-            time.sleep(1)
 #            print self.Status
-        time.sleep(2)
-        print self.Status
+        print len(self.Status) == len(players)
         # combine all zones
         soco.SoCo('192.168.192.203').partymode()  
+        print len(soco.SoCo('192.168.192.203').all_groups) == 2
         
 #        time.sleep(2)
         # source to PC
         soco.SoCo('192.168.192.203').switch_to_line_in()
+        print soco.SoCo('192.168.192.203').is_playing_line_in
+        
         soco.SoCo('192.168.192.203').play()
-        time.sleep(2)
+        print soco.SoCo('192.168.192.203').get_current_transport_info()['current_transport_state'] == 'PLAYING'
         
         # play file or text on PC
         play_wav(text)
