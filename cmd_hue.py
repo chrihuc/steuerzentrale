@@ -126,7 +126,7 @@ class hue_lights():
         if bright <> None and bright<=0:
             pass            
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
-            success = False
+            success = h_dev.on
             retry = 1
             while not success and retry < max_retry:
                 try:
@@ -153,7 +153,7 @@ class hue_lights():
                     success = False 
                     retry += 1
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
-            success = False
+            success = not h_dev.on
             retry = 1
             while not success and retry < max_retry:
                 try:
