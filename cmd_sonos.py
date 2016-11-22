@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import constants
 import soco
@@ -6,6 +7,7 @@ import pyaudio
 import wave
 import subprocess
 import pwd, os
+import threading
 
 import httplib
 import requests
@@ -583,7 +585,7 @@ class sonos:
         mdb_set_table(table.name,self.Names.get(player),dicti) 
         return True
         
-    def soco_get_status(self, player):   
+    def soco_get_status(self, player, store = True):   
         dicti = {}
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
@@ -613,33 +615,35 @@ class sonos:
         dicti['Time'] = track_info['position']
         dicti['Name'] = name
         dicti['Volume'] = player.volume
-        self.Status[name] = dicti
+        if store: self.Status[name] = dicti
         return dicti
         
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
-        print dicti
-        player_ip = player.ip_address
-        self.SetVolume(player_ip, dicti.get('Volume'))
-        if dicti['MasterZone'] <> '':
-            master = self.get_player(dicti['MasterZone'])
-            player.join(master)
-#            self.CombineZones(player_ip, dicti['MasterZone'])
-        else:
-            self.ClearZones(player_ip)
-            player.unjoin()
-            player.clear_queue()
-            for track in dicti['Queue']:
-                player.add_to_queue(track)   
-            if dicti['Radio']:
-#                print dicti
-                self.setRadio(player_ip, dicti['Sender'])
+        tries = 1
+        while (dicti <> self.soco_get_status(player, store=False)) and tries < 3:
+            tries += 1
+            player_ip = player.ip_address
+            self.SetVolume(player_ip, dicti.get('Volume'))
+            if dicti['MasterZone'] <> '':
+                master = self.get_player(dicti['MasterZone'])
+                player.join(master)
+    #            self.CombineZones(player_ip, dicti['MasterZone'])
             else:
-                self.Seek(player_ip, "TRACK_NR", str(dicti['TitelNr']))
-                if str(dicti['Time']) <> 'None':
-                    self.Seek(player_ip, "REL_TIME", dicti['Time'])
-            if not dicti['Pause']:
-                player.play()
+                self.ClearZones(player_ip)
+                player.unjoin()
+                player.clear_queue()
+                for track in dicti['Queue']:
+                    player.add_to_queue(track)   
+                if dicti['Radio']:
+    #                print dicti
+                    self.setRadio(player_ip, dicti['Sender'])
+                else:
+                    self.Seek(player_ip, "TRACK_NR", str(dicti['TitelNr']))
+                    if str(dicti['Time']) <> 'None':
+                        self.Seek(player_ip, "REL_TIME", dicti['Time'])
+                if not dicti['Pause']:
+                    player.play()
                 
         
         
@@ -674,20 +678,29 @@ class sonos:
         players = list(soco.discover())     
         # save all zones
         for player in players:  
-            self.soco_get_status(player)
+            t = threading.Thread(target=self.soco_get_status, args = [player])
+            t.start()
 #            print self.Status
-        print len(self.Status) == len(players)
+        mustend = time.time() + 5
+        while (len(self.Status) < len(players)) and (time.time() < mustend):
+            time.sleep(0.25)
         # combine all zones
         soco.SoCo('192.168.192.203').partymode()  
-        print len(soco.SoCo('192.168.192.203').all_groups) == 2
+        mustend = time.time() + 5
+        while (not len(soco.SoCo('192.168.192.203').all_groups) == 2) and (time.time() < mustend):
+            time.sleep(0.25)
         
 #        time.sleep(2)
         # source to PC
         soco.SoCo('192.168.192.203').switch_to_line_in()
-        print soco.SoCo('192.168.192.203').is_playing_line_in
+        mustend = time.time() + 5
+        while (not soco.SoCo('192.168.192.203').is_playing_line_in) and (time.time() < mustend):
+            time.sleep(0.25)
         
         soco.SoCo('192.168.192.203').play()
-        print soco.SoCo('192.168.192.203').get_current_transport_info()['current_transport_state'] == 'PLAYING'
+        mustend = time.time() + 5
+        while (not soco.SoCo('192.168.192.203').get_current_transport_info()['current_transport_state'] == 'PLAYING') and (time.time() < mustend):
+            time.sleep(0.25)
         
         # play file or text on PC
         play_wav(text)
