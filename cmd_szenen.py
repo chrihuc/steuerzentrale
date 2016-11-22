@@ -205,7 +205,9 @@ class szenen:
 #                        elif key == "Interner_Befehl":
 #                            for kommando in kommandos:
 #                                t = threading.Thread(target=interner_befehl, args=[commando])
-#                                t.start()    
+#                                t.start() 
+        else:
+            executed = True
         if executed:
             for itm in t_list:
                 if itm[0] == device and itm[1] == commando:
@@ -284,7 +286,9 @@ class szenen:
                     set_del.start()  
         else:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                aes.new_event(description="Szene nicht erfuellt: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)            
+                aes.new_event(description="Szene nicht erfuellt: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)
+            else:
+                aes.new_event(description="Szene nicht erfuellt: " + str(szene_dict.get("Beschreibung")), prio=(szene_dict.get("Prio")), karenz = 0.03)                 
 #==============================================================================
 # cacnel timers                              
 #==============================================================================     
