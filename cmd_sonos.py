@@ -113,7 +113,7 @@ def play_wav(input_para):
     os.system("su -m chris -c 'mpg123 " + location + "'")
     
 def main():
-#    sn = sonos()
+    sn = sonos()
 #    sn.ClearZones(sn.Bad)
 #    print sn.SaveList(sn.SchlafZi, "Bad", "34")
     #print sn.Names.get(sn.Bad)
@@ -133,7 +133,8 @@ def main():
 #    for player in players:  
 #        sn.soco_get_status(player)
 #    print sn.get_zones() 
-    play_wav('klingel.wav')
+#    play_wav('klingel.wav')
+    sn.durchsage('klingel.wav')
 
 
 class sonos:
@@ -193,6 +194,12 @@ class sonos:
                 uid = player.uid
                 return ip, uid, p_name    
 
+    def get_player(self,uid):
+        players = list(soco.discover())
+        for player in players:
+            if player.uid == uid:
+                return player                  
+                
     def get_zones(self):
         players = list(soco.discover())
         zones = []
@@ -603,10 +610,13 @@ class sonos:
         
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
+        print dicti
         player_ip = player.ip_address
         self.SetVolume(player_ip, dicti.get('Volume'))
         if dicti['MasterZone'] <> '':
-            self.CombineZones(player_ip, dicti['MasterZone'])
+            master = self.get_player(dicti['MasterZone'])
+            player.join(master)
+#            self.CombineZones(player_ip, dicti['MasterZone'])
         else:
             self.ClearZones(player_ip)
             player.unjoin()
@@ -660,13 +670,16 @@ class sonos:
             time.sleep(1)
 #            print self.Status
         time.sleep(2)
-#        print self.Status
+        print self.Status
         # combine all zones
         soco.SoCo('192.168.192.203').partymode()  
+        
 #        time.sleep(2)
         # source to PC
         soco.SoCo('192.168.192.203').switch_to_line_in()
+        soco.SoCo('192.168.192.203').play()
         time.sleep(2)
+        
         # play file or text on PC
         play_wav(text)
         # resume all playback  

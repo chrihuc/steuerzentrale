@@ -210,6 +210,8 @@ class szenen:
             for itm in t_list:
                 if itm[0] == device and itm[1] == commando:
                     t_list.remove(itm)
+        else:
+            aes.new_event(description="Failed: " + str(device) + str(commando), prio=1, karenz = 0.03)
         self.kommando_dict[szn_id] = t_list
 
     def threadExecute(self, szene, check_bedingung=False, wert = 0):
@@ -280,6 +282,9 @@ class szenen:
                     set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
                     #timer set to 0 for following actions
                     set_del.start()  
+        else:
+            if str(szene_dict.get("Beschreibung")) in ['None','']:
+                aes.new_event(description="Szene nicht erfuellt: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)            
 #==============================================================================
 # cacnel timers                              
 #==============================================================================     
