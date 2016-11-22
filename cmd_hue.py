@@ -136,9 +136,9 @@ class hue_lights():
                     time.sleep(1)
                     success = False
                     retry += 1
+            if not success:
+                return success            
             time.sleep(0.5)
-        if not success:
-            return success
         command = {}
         for key in keys:
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
