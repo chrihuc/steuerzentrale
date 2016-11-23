@@ -118,8 +118,8 @@ def play_wav(input_para):
     else:
         subprocess.call(["espeak", "-w " + location + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
         location = location + 'texttosonos.wav'
-    
-    os.system("su -m chris -c 'mpg123 " + location + "'")
+    os.system("play " + location)
+#    os.system("su -m chris -c 'play " + location + "'")
     
 def main():
     sn = sonos()
