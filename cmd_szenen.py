@@ -287,9 +287,9 @@ class szenen:
                     set_del.start()  
         else:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                aes.new_event(description="Szene nicht erfuellt: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)
+                aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = 0.03)
             else:
-                aes.new_event(description="Szene nicht erfuellt: " + str(szene_dict.get("Beschreibung")), prio=(szene_dict.get("Prio")), karenz = 0.03)                 
+                aes.new_event(description="Szene nicht erfuellt: " + str(szene_dict.get("Beschreibung")), prio=1, karenz = 0.03)                 
 #==============================================================================
 # cacnel timers                              
 #==============================================================================     
@@ -302,6 +302,7 @@ class szenen:
 #==============================================================================
         if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
             kommandos = self.__return_enum__(szene_dict.get("Follows"))
+            print start_t, szene_dict.get("Name"), kommandos
             for kommando in kommandos:
                 szn = kommando[0]
                 dlay = kommando[1]
@@ -314,6 +315,7 @@ class szenen:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
                     if ex_re == 0:
+                        print szene, dlay, szn
                         self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
                         self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
@@ -337,7 +339,6 @@ class szenen:
 #==============================================================================
         if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
             kommandos = self.__return_enum__(szene_dict.get("Follows"))
-            print start_t, szene_dict.get("Name"), kommandos
             for kommando in kommandos:
                 szn = kommando[0]
                 dlay = kommando[1]
