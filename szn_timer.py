@@ -100,7 +100,7 @@ class szenen_timer:
         return found   
     
     def retrigger_add(self, parent, delay, child, exact = False, retrig = True):
-        #print parent, delay, child, exact, retrig
+        print parent, delay, child, exact, retrig
         if not self.retrigger(parent, delay, child, exact, retrig):
             self.add_timer_start(parent, delay, child, exact, retrig)
 
