@@ -83,6 +83,7 @@ class szenen_timer:
         
     def retrigger(self, parent, delay, child, exact, retrig):
         found = False
+        print 'retrigger'
         for item in self.liste:
             if (item.get("parent") == parent or (not(item.get("exact")))) and item.get("child") == child:
                 if item.get("retrig"): item.get("timer").cancel()
@@ -102,6 +103,7 @@ class szenen_timer:
     def retrigger_add(self, parent, delay, child, exact = False, retrig = True):
         print parent, delay, child #, exact, retrig
         if not self.retrigger(parent, delay, child, exact, retrig):
+            print 'add'
             self.add_timer_start(parent, delay, child, exact, retrig)
 
     def zeige(self):
