@@ -223,7 +223,7 @@ class szenen:
     def execute(self, szene, check_bedingung=False, wert = 0):
         szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
-        print start_t, szene_dict.get("Follows")
+        print start_t, szene_dict.get("Beschreibung"), szene_dict.get("Follows")
         #check bedingung
         bedingungen = {}
         global kommando_dict
@@ -337,6 +337,7 @@ class szenen:
 #==============================================================================
         if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
             kommandos = self.__return_enum__(szene_dict.get("Follows"))
+            print start_t, kommandos
             for kommando in kommandos:
                 szn = kommando[0]
                 dlay = kommando[1]
