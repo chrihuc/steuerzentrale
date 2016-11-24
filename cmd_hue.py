@@ -137,6 +137,7 @@ class hue_lights():
                     success = False
                     retry += 1
             if not success:
+                print 'returning'
                 return success            
             time.sleep(0.5)
         command = {}
@@ -148,6 +149,7 @@ class hue_lights():
             retry = 1
             while not success and retry < max_retry:
                 try:
+                    print command
                     hbridge.set_light(device, command)
                     success = True
                 except:
