@@ -113,7 +113,7 @@ def play_wav_dep(input_para):
 
 def play_wav(input_para):
     location = constants.installation_folder + '/media/'
-    if '.wav' in input_para:
+    if ('.wav' in input_para) or ('.mp3' in input_para):
         location = location + input_para
     else:
         subprocess.call(["espeak", "-w " + location + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])

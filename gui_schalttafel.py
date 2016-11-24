@@ -59,7 +59,7 @@ cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
 szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter', 'Multimedia']
-stockwerke = ['Vm1','V00','V01','V02','']
+stockwerke = ['Vm1','V00','A00','V01','V02','']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
@@ -120,7 +120,7 @@ class StockRaum():
         self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
                       'TER':'Terasse','GRA':'Gras',
                       'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer',
-                      'SCA':'Scanner'}
+                      'SCA':'Scanner','ADV':'Advent'}
         for nam in self.namen:
             if zimmer:
                 if nam in self.name[-3:]:

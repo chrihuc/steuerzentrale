@@ -1,1 +1,1 @@
-[{'retrig': True, 'parent': PyQt4.QtCore.QString(u'Ambience'), 'due': datetime.datetime(2016, 11, 18, 13, 14, 17, 135667), 'timer': <_Timer(Thread-2, initial)>, 'delay': 0.0, 'child': 'NachtLeuchten', 'exact': False, 'hash_id': UUID('4fd431f8-3223-431d-ba93-9c2b37861832')}]
+[]

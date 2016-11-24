@@ -14,10 +14,10 @@ def main():
     #crn.new_event('Test','20:15')
     #print crn.get_now(2, '5:40' ,'Wecker')
     crn.calculate()
-    print crn.get_all(wecker = True)
-    next_i = crn.get_next(2, '23:21')
-    if next_i: print next_i[0].get("delta")
-    print next_i
+    print crn.get_all()
+#    next_i = crn.get_next(2, '23:21')
+#    if next_i: print next_i[0].get("delta")
+#    print next_i
 
 neuenh = ephem.Observer()
 neuenh.lon  = str(9.036199)

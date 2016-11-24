@@ -143,7 +143,7 @@ class hue_lights():
         for key in keys:
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
                 command[key] = int(szene.get(key))
-        if command <> {}:
+        if command <> {} and not h_dev.on:
             success = False
             retry = 1
             while not success and retry < max_retry:
