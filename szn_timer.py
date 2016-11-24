@@ -83,12 +83,11 @@ class szenen_timer:
         
     def retrigger(self, parent, delay, child, exact, retrig):
         found = False
-        print 'retrigger'
         for item in self.liste:
             if (item.get("parent") == parent or (not(item.get("exact")))) and item.get("child") == child:
                 if item.get("retrig"): item.get("timer").cancel()
                 hash_id = item.get("hash_id")
-                if delay > 0:
+                if delay >= 0:
                     t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
                     item["timer"] = t
                     item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
