@@ -31,7 +31,7 @@ except:
 
 def main():
     hue_l = hue_lights()
-    hue_l.set_device("V00WOH1RUM1LI13", "Ambience")
+    hue_l.set_device("V01SCH1BET1LI01", "Advent_aus")
     #print hue_l.list_devices()
     
 class hue_lights():
@@ -88,8 +88,6 @@ class hue_lights():
 
     def set_device(self, device, commd):
         h_dev = Light(hbridge, device)
-        if not h_dev.reachable:
-            return False
         keys = ['bri', 'hue', 'sat', 'transitiontime']
         szene = mdb_read_table_entry(table.name,commd)
         success = False
@@ -137,7 +135,6 @@ class hue_lights():
                     success = False
                     retry += 1
             if not success:
-                print 'returning'
                 return success            
             time.sleep(0.5)
         command = {}
@@ -149,7 +146,6 @@ class hue_lights():
             retry = 1
             while not success and retry < max_retry:
                 try:
-                    print command
                     hbridge.set_light(device, command)
                     success = True
                 except:
@@ -159,6 +155,9 @@ class hue_lights():
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
             success = not h_dev.on
             retry = 1
+            if 'transitiontime' in command:
+                if command['transitiontime'] > 0:
+                    time.sleep(command['transitiontime']/10)
             while not success and retry < max_retry:
                 try:
                     hbridge.set_light(device, {'on':False})  
