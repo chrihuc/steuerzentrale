@@ -44,6 +44,9 @@ class szenen_timer:
         #retrig means its possible to delay, or it is just a normal timer
         
     def add_timer(self, parent, delay, child, exact, retrig,  start=False):
+        if delay == 0 and start:
+            self.def_to_run(child)
+            return None
         dicti = {}
         dicti["parent"] = parent
         dicti["delay"] = delay
@@ -56,7 +59,7 @@ class szenen_timer:
         dicti["timer"] = t
         if start: t.start()
         self.liste.append(dicti)
-        return len(self.liste) - 1
+        return hash_id
         
     def start_timer(self, nr):
         #print self.liste, nr
@@ -66,7 +69,7 @@ class szenen_timer:
         self.liste[nr].get("timer").start()
         
     def add_timer_start(self, parent, delay, child, exact, retrig):
-        numm = self.add_timer(parent, delay, child, exact, retrig, True)
+        self.add_timer(parent, delay, child, exact, retrig, True)
         
     def stop_timer(self, nr):
         self.liste[nr].get("timer").cancel() 
@@ -87,22 +90,21 @@ class szenen_timer:
             if (item.get("parent") == parent or (not(item.get("exact")))) and item.get("child") == child:
                 if item.get("retrig"): item.get("timer").cancel()
                 hash_id = item.get("hash_id")
-                if delay >= 0:
+                if delay > 0:
                     t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
                     item["timer"] = t
                     item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                     item.get("timer").start()
                     self.store()
                 else:
+                    self.def_to_run(child)
                     self.liste.remove(item)
                     self.store()
                 found = True
         return found   
     
     def retrigger_add(self, parent, delay, child, exact = False, retrig = True):
-        print parent, delay, child #, exact, retrig
         if not self.retrigger(parent, delay, child, exact, retrig):
-            print 'add'
             self.add_timer_start(parent, delay, child, exact, retrig)
 
     def zeige(self):

@@ -57,7 +57,7 @@ class szenen:
     def __init__ (self):
         self.sz_t = szenen_timer(def_to_run = self.execute)
         self.kommando_dict = {}
-        self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=10)
+        self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
         pass
     
     def list_commands(self,gruppe='default'):    
@@ -302,7 +302,6 @@ class szenen:
 #==============================================================================
         if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
             kommandos = self.__return_enum__(szene_dict.get("Follows"))
-            print start_t, szene_dict.get("Name"), kommandos
             for kommando in kommandos:
                 szn = kommando[0]
                 dlay = kommando[1]
@@ -315,7 +314,6 @@ class szenen:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
                     if ex_re == 0:
-                        print szene, dlay, szn
                         self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
                         self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
