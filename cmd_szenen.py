@@ -234,17 +234,17 @@ class szenen:
         if str(szene_dict.get("Bedingung")) <> "None":
             bedingungen = eval(str(szene_dict.get("Bedingung")))   
         erfuellt = self.__bedingung__(bedingungen)
+        if str(szene_dict.get("Prio")) <> 'None':
+            Karenz = (szene_dict.get("Prio"))
+        else:
+            Karenz = 0.03  
+        Prio = (szene_dict.get("Prio"))            
         if check_bedingung:
             return erfuellt
 #==============================================================================
 # commandos to devices and internal commands        
 #==============================================================================
         if erfuellt:
-            Prio = (szene_dict.get("Prio"))
-            if str(szene_dict.get("Prio")) <> 'None':
-                Karenz = (szene_dict.get("Prio"))
-            else:
-                Karenz = 0.03
             if (str(szene_dict.get("Delay")) <> "None"):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
