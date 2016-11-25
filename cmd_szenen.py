@@ -9,7 +9,7 @@ Created on Thu Jan 28 20:21:24 2016
 
 import constants
 
-from mysql_con import mdb_get_table, setting_s, mdb_read_table_entry, settings_r
+from mysql_con import mdb_get_table, setting_s, mdb_read_table_entry, settings_r, mdb_set_table
 
 from cmd_sonos import sonos
 from cmd_xs1 import myezcontrol
@@ -47,7 +47,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("Tuerklingel")
+    print scenes.execute("Kalt")
 #    time.sleep(10)
 #    print scenes.execute("WohnziAnw")
 #    
@@ -240,12 +240,17 @@ class szenen:
 # commandos to devices and internal commands        
 #==============================================================================
         if erfuellt:
+            Prio = (szene_dict.get("Prio"))
+            if str(szene_dict.get("Prio")) <> 'None':
+                Karenz = (szene_dict.get("Prio"))
+            else:
+                Karenz = 0.03
             if (str(szene_dict.get("Delay")) <> "None"):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                aes.new_event(description="Szenen: " + szene, prio=(szene_dict.get("Prio")), karenz = 0.03)
+                aes.new_event(description="Szenen: " + szene, prio=Prio, karenz = Karenz)
             else:
-                aes.new_event(description= str(szene_dict.get("Beschreibung")), prio=(szene_dict.get("Prio")), karenz = 0.03) 
+                aes.new_event(description= str(szene_dict.get("Beschreibung")), prio=Prio, karenz = Karenz) 
             interlocks = {}  
             hue_count = 0
             hue_delay = 0            
@@ -289,9 +294,9 @@ class szenen:
                     setting_s(str(kommando), str(kommandos.get(kommando)))
         else:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = 0.03)
+                aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = Karenz)
             else:
-                aes.new_event(description="Szene nicht erfuellt: " + str(szene_dict.get("Beschreibung")), prio=1, karenz = 0.03)                 
+                aes.new_event(description="Szene nicht erfuellt: " + str(szene_dict.get("Beschreibung")), prio=1, karenz = Karenz)                 
 #==============================================================================
 # cacnel timers                              
 #==============================================================================     
@@ -329,6 +334,8 @@ class szenen:
             time.sleep(.1)
             if len(t_list) == 0:
                 erfolg = True
+                mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t}, primary = 'Beschreibung')
+                # write back to table
                 break
         t_list = self.kommando_dict.get(szn_id)
         for item in t_list:

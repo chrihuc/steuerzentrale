@@ -41,7 +41,8 @@ def main():
     #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
     #mdb_add_table_entry("test",values)
     #print inputs('V00WOH1RUM1HE01','6')
-    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
+#    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
+    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
     
     
 def re_calc(inpt):
@@ -152,7 +153,18 @@ def mdb_read_table_entry(db, entry, column='Name',recalc=True):
                 else:
                     commando = cmds.get(field_names[i])  
                 if recalc:
-                    dicti[commando] = re_calc(row[i])            
+                    dicti[commando] = re_calc(row[i])
+                    try:
+                        old_dict = eval(row[i])
+                        if isinstance(old_dict, dict):
+                            print old_dict
+                            new_dict = {}
+                            for key, value in old_dict.iteritems(): 
+                                new_dict[key] = re_calc(value)
+                            dicti[commando] = new_dict
+                    except:
+                        pass
+                    
                 else:
                     dicti[commando] = (row[i]) 
     con.close()    

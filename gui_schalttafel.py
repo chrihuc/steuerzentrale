@@ -120,7 +120,7 @@ class StockRaum():
         self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
                       'TER':'Terasse','GRA':'Gras',
                       'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer',
-                      'SCA':'Scanner','ADV':'Advent'}
+                      'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer'}
         for nam in self.namen:
             if zimmer:
                 if nam in self.name[-3:]:
@@ -519,7 +519,7 @@ class Szenen_tree():
                             set_dict = {}
                             for sub in some_object.get('children'):
                                 if some_object.get('children').get(sub).get('value') <> '':
-                                    set_dict[some_object.get('children').get(sub).get('name')]  = some_object.get('children').get(sub).get('value')
+                                    set_dict[some_object.get('children').get(sub).get('name')]  = eval(some_object.get('children').get(sub).get('value'))
                             dicti[device] = set_dict
                         elif device in ['Bedingung']:
                             set_lst = []
