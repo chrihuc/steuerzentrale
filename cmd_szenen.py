@@ -334,7 +334,7 @@ class szenen:
             time.sleep(.1)
             if len(t_list) == 0:
                 erfolg = True
-                mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t}, primary = 'Beschreibung')
+                mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
                 # write back to table
                 break
         t_list = self.kommando_dict.get(szn_id)
