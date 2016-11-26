@@ -9,6 +9,7 @@ import time, os, sys
 #import urllib2
 import inp_xs1, inp_cron, inp_udp #redundancy, 
 from alarmevents import alarm_event
+from mysql_con import setting_s
 #import sqlsync
 
 #delay for changeover
@@ -33,6 +34,12 @@ aes = alarm_event()
 #        aes.new_event(description="Success sync "+table, prio=0)
 #    except:
 #        aes.new_event(description="Error sync "+table, prio=0)
+
+# init
+init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}
+for setting in init_settings:
+    setting_s(setting, init_settings[setting])
+
 
 threadliste = []
 

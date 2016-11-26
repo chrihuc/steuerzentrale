@@ -166,8 +166,13 @@ class cron:
         lt = localtime()
         time = lt
         neuenh.date = strftime("%Y-%m-%d 00:00:00", lt)
-        sunrise=(neuenh.next_rising(ephem.Sun())).datetime() + datetime.timedelta(hours=2, minutes=0, seconds=0)
-        sunset =(neuenh.next_setting(ephem.Sun())).datetime() + datetime.timedelta(hours=2, minutes=0, seconds=0)
+        sommerzeit = False
+        if sommerzeit:
+            delta = 2
+        else:
+            delta = 1
+        sunrise=(neuenh.next_rising(ephem.Sun())).datetime() + datetime.timedelta(hours=delta, minutes=0, seconds=0)
+        sunset =(neuenh.next_setting(ephem.Sun())).datetime() + datetime.timedelta(hours=delta, minutes=0, seconds=0)
         for eintrag in liste:
             dynamic = False
             for setting in eintrag:
