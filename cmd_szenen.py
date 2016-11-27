@@ -47,7 +47,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("Kalt")
+    print scenes.execute("Kalt", check_bedingung=True)
 #    time.sleep(10)
 #    print scenes.execute("WohnziAnw")
 #    
@@ -234,8 +234,12 @@ class szenen:
         if str(szene_dict.get("Bedingung")) <> "None":
             bedingungen = eval(str(szene_dict.get("Bedingung")))   
         erfuellt = self.__bedingung__(bedingungen)
-        if str(szene_dict.get("Prio")) <> 'None':
-            Karenz = (szene_dict.get("Prio"))
+        if str(szene_dict.get("Latching")) <> 'None':
+            next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=int(szene_dict.get("Latching")), seconds=0)
+            if start_t < next_start:
+                erfuellt = False
+        if str(szene_dict.get("Karenz")) <> 'None':
+            Karenz = (szene_dict.get("Karenz"))
         else:
             Karenz = 0.03  
         Prio = (szene_dict.get("Prio"))            
@@ -292,6 +296,7 @@ class szenen:
 #                    set_del.start() 
                     # solution above could give timing issues
                     setting_s(str(kommando), str(kommandos.get(kommando)))
+            mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
         else:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = Karenz)
@@ -334,7 +339,6 @@ class szenen:
             time.sleep(.1)
             if len(t_list) == 0:
                 erfolg = True
-                mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
                 # write back to table
                 break
         t_list = self.kommando_dict.get(szn_id)
