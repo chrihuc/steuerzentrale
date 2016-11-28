@@ -215,10 +215,9 @@ def mdb_add_table_entry(table, values, primary = 'Id'):
         if val <> primary:
             strin += '"'+str(values.get(val)) + '", '    
     strin = strin[0:-2] + ')'
-    print strin
     with con:
         cur = con.cursor()  
-        print cur.execute(strin) 
+        cur.execute(strin) 
     con.close() 
 
 def get_raw_cmds(db):
@@ -272,14 +271,11 @@ def mdb_get_table(db):
     return rlist  
 
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
-    print table, device, commands, primary
     cmds = get_raw_cmds(table)
-    print cmds
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'SELECT COUNT(*) FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
-        print sql
         cur.execute(sql)
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+table+' ('+primary+') VALUES ("'+ str(device) + '")'     
@@ -295,7 +291,6 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             if commando <> primary:
-                print sql
                 cur.execute(sql)       
     con.close() 
 

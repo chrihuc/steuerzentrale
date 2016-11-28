@@ -7,7 +7,6 @@ from phue import Bridge, Light
 
 import MySQLdb as mdb
 import time
-import easygui
 
 import logging
 logging.basicConfig()
@@ -27,7 +26,11 @@ try:
     hbridge.connect()
 except:
     print "Hue not connecting, press button."
-    easygui.msgbox("Hue not connecting", title="press button")
+    try:
+        import easygui
+        easygui.msgbox("Hue not connecting", title="press button")
+    except:
+        pass
 
 def main():
     hue_l = hue_lights()

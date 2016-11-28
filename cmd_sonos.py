@@ -676,11 +676,11 @@ class sonos:
         
     def durchsage(self,text):
         success = False
+        players = list(soco.discover()) 
         while not success:
             try:
                 self.Status = {}
         #        print self.Status
-                players = list(soco.discover())     
                 # save all zones
                 for player in players:  
                     t = threading.Thread(target=self.soco_get_status, args = [player])
@@ -695,7 +695,14 @@ class sonos:
         # combine all zones
         success = False
         while not success:
-            try:        
+            try:     
+                for player in players:
+                    if 'S1' in player.get_speaker_info()[u'model_number']:
+                        self.SetVolume(player.ip_address, 10)
+                    elif 'ZP90' in player.get_speaker_info()[u'model_number']:
+                        self.SetVolume(player.ip_address, 65)
+                    elif 'ZP120' in player.get_speaker_info()[u'model_number']:
+                        self.SetVolume(player.ip_address, 40)            
                 soco.SoCo('192.168.192.203').partymode()  
                 mustend = time.time() + 5
                 while (not len(soco.SoCo('192.168.192.203').all_groups) == 2) and (time.time() < mustend):

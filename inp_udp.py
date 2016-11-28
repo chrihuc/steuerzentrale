@@ -57,6 +57,7 @@ def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
         data = conn.recv(1024)
+        print data
         if not data:
             break
         isdict = False
@@ -74,7 +75,7 @@ def bidirekt():
 def broadcast():
     while constants.run:
         (data,addr) = broadSocket.recvfrom(SIZE)
-        #print data
+        print data
         if not data:
             break
         isdict = False
