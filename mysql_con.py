@@ -42,7 +42,8 @@ def main():
     #mdb_add_table_entry("test",values)
     #print inputs('V00WOH1RUM1HE01','6')
 #    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
-    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
+#    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
+    print mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
     
     
 def re_calc(inpt):

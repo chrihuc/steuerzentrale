@@ -26,6 +26,7 @@ class internal:
     def git_update(self):
         g = git.cmd.Git()
         g.pull()
+        g.reset('--hard')
         print "Update done, exiting"
         aes.new_event(description="Update performed, restarting", prio=1)
         constants.run = False

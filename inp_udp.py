@@ -7,7 +7,7 @@ Created on Mon Feb 22 18:43:14 2016
 
 import constants
 
-from mysql_con import inputs
+from mysql_con import inputs, mdb_read_table_column
 from cmd_szenen import szenen
 import cmd_internal
 from alarmevents import alarm_event
@@ -46,10 +46,8 @@ def exec_data(data_ev):
     elif ('Command' in data_ev):   
         name = data_ev.get('Command') 
         value = 1
-        szns = inputs(name,value)
-        for szene in szns:
-            if szene <> None:
-                scenes.threadExecute(szene, check_bedingung=False, wert = value) 
+        if name in mdb_read_table_column(constants.sql_tables.szenen.name, 'Name'):
+            scenes.threadExecute(name, check_bedingung=False, wert = value) 
     elif ('GCM-Client' in data_ev):
         aes.new_event('GCM Client: ' + data_ev.get('GCM-Client'))                
 
@@ -57,7 +55,7 @@ def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
         data = conn.recv(1024)
-        print data
+#        print data
         if not data:
             break
         isdict = False
@@ -75,7 +73,6 @@ def bidirekt():
 def broadcast():
     while constants.run:
         (data,addr) = broadSocket.recvfrom(SIZE)
-        print data
         if not data:
             break
         isdict = False
