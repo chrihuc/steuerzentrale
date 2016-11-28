@@ -199,6 +199,7 @@ class szenen:
 #                hue_del.start()
 #                hue_count += 1
         elif device in sat_devs:
+            print device, commando
             executed = sat.set_device(device, commando)                          
         elif device in tvs_devs:
             executed = tv.set_device(device, commando)                                                          

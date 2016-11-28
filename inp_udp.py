@@ -43,11 +43,10 @@ def exec_data(data_ev):
 #    elif data_ev.get('Command')=='Update':
 #        aes.new_event(description="System update", prio=0)
 #        cmd_internal.git_update() 
-    elif ('Command' in data_ev):   
-        name = data_ev.get('Command') 
-        value = 1
+    elif ('Szene' in data_ev):   
+        name = data_ev.get('Szene') 
         if name in mdb_read_table_column(constants.sql_tables.szenen.name, 'Name'):
-            scenes.threadExecute(name, check_bedingung=False, wert = value) 
+            scenes.threadExecute(name) 
     elif ('GCM-Client' in data_ev):
         aes.new_event('GCM Client: ' + data_ev.get('GCM-Client'))                
 

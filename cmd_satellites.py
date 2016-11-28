@@ -159,7 +159,12 @@ class satelliten:
                 comands = mdb_get_table(cmds_table)
                 for comand in comands:
                     itera +=1
-                    liste[comand.get("Name")] = itera                
+                    liste[comand.get("Name")] = itera 
+            elif cmds_table == 'server':
+                comands = mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
+                for comand in comands:
+                    itera +=1
+                    liste[comand] = itera                 
         return liste        
 
 
@@ -169,7 +174,11 @@ class satelliten:
             return True      
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         satellit=mdb_read_table_entry(table.name,device)
-        command = mdb_read_table_entry(satellit.get('command_set'),commd)
+        command = {}
+        if satellit.get('command_set') == 'server':
+            command['Szene'] = commd
+        else:
+            command = mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
         data = ""
         if str(satellit.get('PORT')) <> 'None':
