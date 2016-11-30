@@ -54,12 +54,15 @@ constants.redundancy_.master = True
 eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':310},
               {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
               {'Name':'V00WOH1RUM1CO01','desc':'CO2','type':'sens','pos_x':150,'pos_y':150},
-              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20}]
+              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20},
+              {'Name':'V00KUE1ZIM1TE02','desc':'T Kueche','type':'sens','pos_x':600,'pos_y':150}]
               
 og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
               {'Name':'V01BAD1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':550,'pos_y':120},
               {'Name':'V01BAD1RUM1HU01','desc':'T Balkon','type':'sens','pos_x':600,'pos_y':120},
-              {'Name':'V01SCH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':450,'pos_y':300}]
+              {'Name':'V01SCH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':450,'pos_y':300},
+              {'Name':'V01KID1RUM1TE01','desc':'T Kind','type':'sens','pos_x':150,'pos_y':20}
+              ]
 
 weckerButtons = []
 

@@ -292,6 +292,7 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             if commando <> primary:
+#                print sql
                 cur.execute(sql)       
     con.close() 
 

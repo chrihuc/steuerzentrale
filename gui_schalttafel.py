@@ -120,7 +120,7 @@ class StockRaum():
         self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
                       'TER':'Terasse','GRA':'Gras',
                       'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer',
-                      'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer'}
+                      'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang'}
         for nam in self.namen:
             if zimmer:
                 if nam in self.name[-3:]:
@@ -260,6 +260,7 @@ class Szenen_tree():
     def set_paratree(self):
         global p, name
         #szenen = mdb_get_table(db='set_Szenen')
+        tipps = mdb_read_table_entry(db='set_Szenen',entry='Description')
         stock_list = []
         stockwerke = []
         zimmer_list = []
@@ -396,7 +397,12 @@ class Szenen_tree():
                         if str(szene.get(item)) <> "None":
                             szn_d_child['value'] = str(szene.get(item))
                         else:
-                            szn_d_child['value'] = ''                        
+                            szn_d_child['value'] = ''
+                        try:
+                            if tipps[str(item)] <> None:
+                                szn_d_child['tip'] = str(tipps[str(item)])
+                        except:
+                            pass
                     szn_d_child['expanded'] = False
                     szn_l_child.append(szn_d_child)         
 
@@ -519,7 +525,10 @@ class Szenen_tree():
                             set_dict = {}
                             for sub in some_object.get('children'):
                                 if some_object.get('children').get(sub).get('value') <> '':
-                                    set_dict[some_object.get('children').get(sub).get('name')]  = eval(some_object.get('children').get(sub).get('value'))
+                                    try:
+                                        set_dict[some_object.get('children').get(sub).get('name')]  = eval(some_object.get('children').get(sub).get('value'))
+                                    except:
+                                        set_dict[some_object.get('children').get(sub).get('name')]  = (some_object.get('children').get(sub).get('value'))
                             dicti[device] = set_dict
                         elif device in ['Bedingung']:
                             set_lst = []
@@ -1043,5 +1052,8 @@ win.resize(1400,1200)
 if __name__ == '__main__':
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+#        app = QtGui.QApplication([])
+#        app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Control_Panel.png'))
+#        app.exec_()        
         QtGui.QApplication.instance().exec_()
     
