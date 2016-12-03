@@ -428,10 +428,10 @@ def inputs(device, value):
             last_value = dicti_1['last_Value']
             last_time = dicti_1['last2']
             deltaT = lt - last_time
-            deltaTs = deltaT.total_seconds()
-            if deltaTs > 0:
+            deltaTm = deltaT.total_seconds() / 60
+            if deltaTm > 0:
                 deltaX = float(value) - float(last_value)
-                gradient = deltaX / deltaTs
+                gradient = deltaX / deltaTm
             else:
                 gradient = deltaX
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
