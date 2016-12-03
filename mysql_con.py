@@ -429,7 +429,6 @@ def inputs(device, value):
             last_time = dicti_1['last2']
             deltaT = lt - last_time
             deltaTs = deltaT.total_seconds()
-            print deltaT, deltaTs
             if deltaTs > 0:
                 deltaX = float(value) - float(last_value)
                 gradient = deltaX / deltaTs
@@ -443,6 +442,8 @@ def inputs(device, value):
             sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
             sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
             sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
+            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
+            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_lt is NULL )'
             sql2 = sql2 + ');' 
             cur.execute(sql + sql2)
             results = cur.fetchall()
@@ -461,7 +462,8 @@ def inputs(device, value):
                         szenen.append(dicti.get("Doppel"))     
                         single = False
                 if str(doppelklick) <> "True": single = True
-                if single: szenen.append(dicti.get(setting_r("Status")))         
+                if single: szenen.append(dicti.get(setting_r("Status"))) 
+                szenen.append(dicti.get('Immer')) 
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)               
             if str(dicti.get("last1")) <> "None":
@@ -474,6 +476,8 @@ def inputs(device, value):
             if cur.fetchone()[0] > 0: 
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(device) + '",' + str(value) + ', NOW())'
                 cur.execute(insertstatement) 
+                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(device) + '_grad",' + str(gradient) + ', NOW())'
+                cur.execute(insertstatement)                 
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)                 
     con.close()

@@ -684,7 +684,7 @@ class InputsTree():
                         kinder2.append({'name': sub, 'title':'Beschreibung', 'type': 'str', 'value':aktuator.get(sub)})                            
                     elif sub in ['Value_lt','Value_eq','Value_gt']:
                         kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
-                    elif sub in ['Wach','Wecken','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
+                    elif sub in ['Immer','Wach','Wecken','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
                         kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst}) 
                     elif sub in ['Id']:
                         pass
