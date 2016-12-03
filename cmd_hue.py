@@ -11,6 +11,10 @@ import time
 import logging
 logging.basicConfig()
 
+from alarmevents import alarm_event
+
+aes = alarm_event()
+
 max_retry = 4
 
 class sql_object:
@@ -34,7 +38,8 @@ except:
 
 def main():
     hue_l = hue_lights()
-    hue_l.set_device("V01SCH1BET1LI01", "Advent_aus")
+#    print hue_l.set_device("A00EIN1ADV1ST01", "Advent_an")
+    print hue_l.set_device("V01SCH1BET1LI02", "Advent_an")    
     #print hue_l.list_devices()
     
 class hue_lights():
@@ -172,6 +177,7 @@ class hue_lights():
         set_val_in_szenen(device=device, szene="Value", value=szene.get('on'))
         if not h_dev.reachable:
             success = False
+            aes.new_event(description=str(device) + " not reachable", prio=1)
         return success
 
 if __name__ == '__main__':
