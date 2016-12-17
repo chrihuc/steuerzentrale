@@ -76,9 +76,8 @@ class hue_lights():
 
     def dict_commands(self):
         #comands = mdb_get_table(table.name)
-        dicti = {}
-        itera = 1
-        dicti[''] = itera
+        dicti = {'':1,'man':2,'auto':3}
+        itera = 3
         liste = self.list_commands()
         for item in liste:
             itera +=1            

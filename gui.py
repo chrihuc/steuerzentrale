@@ -716,8 +716,8 @@ class MyGraphPopup(QtGui.QMainWindow):
         self.xaxis = TimeAxisItem('bottom')
         self.yaxis = pg.AxisItem('right')
         
-        graph = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Value', filt=item, amount=5000, order="desc"))
-        timerange = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=5000, order="desc")
+        graph = np.array(mdb_read_table_column_filt(db='HIS_inputs',column='Value', filt=item, amount=5000, order="desc",exact=True))
+        timerange = mdb_read_table_column_filt(db='HIS_inputs',column='Date', filt=item, amount=5000, order="desc",exact=True)
         time = np.array(timerange)
             #graph = np.array([0,1,2,3,4,3,2,1])#np.random.normal(size=100)
             #time = np.array([0,1,2,3,4,3,2,1])

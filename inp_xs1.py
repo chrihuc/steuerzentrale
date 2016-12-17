@@ -32,7 +32,7 @@ def on_receive(data):
     global heartbeat
     global last_data
     global ldt
-    if True:
+    if False:
         ldt.cancel()
         ldt = Timer(1, last_data_reset)
         ldt.start() 

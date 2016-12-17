@@ -1052,8 +1052,8 @@ win.resize(1400,1200)
 if __name__ == '__main__':
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-#        app = QtGui.QApplication([])
-#        app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Control_Panel.png'))
-#        app.exec_()        
-        QtGui.QApplication.instance().exec_()
+        app = QtGui.QApplication.instance()
+        app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Control_Panel.png'))
+        app.exec_()        
+#        QtGui.QApplication.instance().exec_()
     

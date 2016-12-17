@@ -40,7 +40,7 @@ def main():
     #print hue_devices
     #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
     #mdb_add_table_entry("test",values)
-    print inputs('V00WOH1RUM1HE01','7')
+    print inputs('V00ZIM0RUM0DI02','0')
 #    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
 #    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
 #    print mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
@@ -184,13 +184,16 @@ def mdb_read_table_column(db, column):
     con.close()    
     return rlist 
 
-def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc"):
+def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc", exact=False):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     rlist = []
     with con:
         cur = con.cursor()
         #SELECT * FROM Steuerzentrale.HIS_inputs where Name like '%Rose%' order by id desc limit 1000;
-        sql = 'SELECT '+column+' FROM ' + db + ' WHERE Name LIKE "%' + filt + '%" ORDER BY ID ' + order + ' LIMIT ' + str(amount)
+        if exact:
+            sql = 'SELECT '+column+' FROM ' + db + ' WHERE Name LIKE "' + filt + '" ORDER BY ID ' + order + ' LIMIT ' + str(amount) # % (column,db,filt,order, str(amount))
+        else:
+            sql = 'SELECT '+column+' FROM ' + db + ' WHERE Name LIKE "%' + filt + '%" ORDER BY ID ' + order + ' LIMIT ' + str(amount)
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
@@ -426,14 +429,15 @@ def inputs(device, value):
                 for i in range (0,len(row)):
                     dicti_1[field_names_1[i]] = row[i] 
             last_value = dicti_1['last_Value']
-            last_time = dicti_1['last2']
+            last_time = dicti_1['last1']
+            if str(last_time) == 'None': last_time = lt
             deltaT = lt - last_time
             deltaTm = deltaT.total_seconds() / 60
             if deltaTm > 0:
                 deltaX = float(value) - float(last_value)
-                gradient = deltaX / deltaTm
+                gradient = deltaX #/ deltaTm
             else:
-                gradient = deltaX
+                gradient = float(value) - float(last_value)
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)              
             
