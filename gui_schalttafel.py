@@ -52,13 +52,13 @@ tvs_cmds = tv.dict_commands()
 sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
-szn_lst = sorted(szn.list_commands('alle'))
+szn_lst = sorted(szn.list_commands())
 
 cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
-szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter', 'Multimedia']
+szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
 stockwerke = ['Vm1','V00','A00','V01','V02','']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
@@ -851,7 +851,7 @@ def selected(text):
 
 def update():
     global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox2, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
-    szn_lst = sorted(szn.list_commands('alle'))
+    szn_lst = sorted(szn.list_commands())
     xs1_devs = xs1.list_devices()
     xs1_cmds = xs1.dict_commands()
     hue_devs = hue.list_devices()

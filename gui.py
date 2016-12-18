@@ -767,6 +767,7 @@ if constants.KS:
     exectext = "xset s 10"
     os.system(exectext)       
 app = QtGui.QApplication(sys.argv)
+app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()
 myWidget.setGeometry(QRect(0, 0, 800, 500))
 myWidget.show()
