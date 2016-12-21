@@ -637,6 +637,7 @@ class InputsTree():
         self.p = None
         self.name = None
         self.expand = expand
+        self._szn_lst = sorted(szn.list_commands(gruppe="alle"))
         if isInputs:
             self.inputs = mdb_get_table(db='cmd_inputs')
         else:
@@ -685,7 +686,7 @@ class InputsTree():
                     elif sub in ['Value_lt','Value_eq','Value_gt']:
                         kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
                     elif sub in ['Immer','Wach','Wecken','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
-                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':szn_lst}) 
+                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':self._szn_lst}) 
                     elif sub in ['Id']:
                         pass
                     else:

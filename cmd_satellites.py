@@ -48,8 +48,8 @@ def main():
     #print sats.list_commands("V00WOH1RUM1AV01")
     #print sats.set_device('V00WOH1SRA1LI11','An')
     #print sats.set_device('V00WOH1SRA1LI02','Hell')
-    #print sats.set_device('V00WOH1SRA1LI03','Hell')
-    print sats.listCommandTable(device="V00WOH1RUM1AV01",nameReturn = False)
+    print sats.set_device('V00WOH1SRA1LI04','Test')
+#    print sats.listCommandTable(device="V00WOH1RUM1AV01",nameReturn = False)
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
