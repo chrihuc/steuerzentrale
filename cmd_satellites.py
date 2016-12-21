@@ -48,7 +48,7 @@ def main():
     #print sats.list_commands("V00WOH1RUM1AV01")
     #print sats.set_device('V00WOH1SRA1LI11','An')
     #print sats.set_device('V00WOH1SRA1LI02','Hell')
-    print sats.set_device('V00WOH1SRA1LI04','Test')
+    print sats.set_device('V00WOH1SRA1LI02','KlimaCO')
 #    print sats.listCommandTable(device="V00WOH1RUM1AV01",nameReturn = False)
 
 class satelliten:
@@ -181,6 +181,7 @@ class satelliten:
             command = mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
         data = ""
+        print command
         if str(satellit.get('PORT')) <> 'None':
             try:
                 satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))

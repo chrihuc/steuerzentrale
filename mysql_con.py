@@ -41,10 +41,12 @@ def main():
     #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
     #mdb_add_table_entry("test",values)
     print inputs('V01SCH1RUM1TE01','21')
+#    print inputs('V01SCH1RUM1TE01','21')
 #    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
 #    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
 #    print mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
-    
+    print mdb_read_table_entry('Steuerzentrale.sat_TFLED', 'KlimaCO')    
+
     
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
