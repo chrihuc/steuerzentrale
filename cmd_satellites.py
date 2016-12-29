@@ -45,11 +45,11 @@ def  get_satellite(name):
 def main():
     sats = satelliten()
     #print sats.list_devices()
-    #print sats.list_commands("V00WOH1RUM1AV01")
-    #print sats.set_device('V00WOH1SRA1LI11','An')
+#    print sats.list_commands("Vm1ZIM1RUM1PC02")
+    print sats.set_device('V00WOH1SRA1PC02','pi_reboot')
     #print sats.set_device('V00WOH1SRA1LI02','Hell')
-    print sats.set_device('V00WOH1SRA1LI02','KlimaCO')
-#    print sats.listCommandTable(device="V00WOH1RUM1AV01",nameReturn = False)
+#    print sats.set_device('V00WOH1SRA1LI02','KlimaCO')
+#    print sats.listCommandTable(device="Vm1ZIM1RUM1PC02",nameReturn = True)
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -182,12 +182,23 @@ class satelliten:
         command["Device"]=device
         data = ""
         print command
+#        todo check if ssh command and send as ssh
         if str(satellit.get('PORT')) <> 'None':
-            try:
-                satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
-                return True
-            except:
-                pass
+            if str(satellit.get('PORT')) == '22':
+                _name = device
+                _IP = satellit.get('IP')
+                _PORT = 22
+                _USER = satellit.get('USER')
+                _PASS = satellit.get('PASS')
+                ssh_sat = sputnik(_name,_IP,_PORT,_USER,_PASS)
+                if ssh_sat.send_ssh_cmd(command.get('Command')):
+                    return True
+            else:   
+                try:
+                    satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
+                    return True
+                except:
+                    pass
         if str(satellit.get('BiPORT')) <> 'None':
             for i in range(0,3):
                 try:
@@ -209,7 +220,7 @@ class satelliten:
 class sputnik:
     mysocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     
-    def __init__ (self, name, IP, PORT, Type, USER, PASS, command_set):
+    def __init__ (self, name, IP, PORT, USER, PASS, Type=None, command_set=None):
         self.name = name
         self.IP = IP
         self.PORT = PORT
@@ -226,19 +237,20 @@ class sputnik:
         count = 0
         while (not success) and (count <= tries):
             count += 1
-            try:
+            if True:
+#            try:
                 ssh.connect(self.IP, username=self.USER, password=self.PASS)
                 if constants.redundancy_.master:
                     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
                 success = True
-            except socket_error as serr:
-                success = False
-            except: 
-                success = False        
-        if success:
-            aes.new_event(description=self.name + " " + text, prio=0)
-        else:
-            aes.new_event(description=self.name + " nicht erreichbar", prio=1)
+#            except socket_error as serr:
+#                success = False
+#            except: 
+#                success = False        
+#        if success:
+#            aes.new_event(description=self.name + " " + text, prio=0)
+#        else:
+#            aes.new_event(description=self.name + " nicht erreichbar", prio=1)
         return success
 
     def reboot(self):

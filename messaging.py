@@ -10,7 +10,8 @@ import MySQLdb as mdb
 def main():
     mes = messaging()
     constants.redundancy_.master = True
-    print mes.send_direkt(to="Christoph", titel="Hinweis", text="test")
+#    print mes.send_direkt(to="Christoph", titel="Hinweis", text="test")
+    print mes.send_direkt(to="Christoph", titel="Setting", text="Tag")
     
 table = constants.sql_tables.Bewohner    
     
