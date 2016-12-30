@@ -128,23 +128,23 @@ def main():
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPause(sn.Kueche)
-#    print sn.set_device("Vm1ZIM1RUM1AV11", "SRF3")
+    print sn.set_device("Vm1ZIM1RUM1AV11", "Isolieren")
 #    print sn.set_device('V01SCH1RUM1AV11','Nachricht')
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
 #    print sn.list_devices()
-    players = list(soco.discover())
+#    players = list(soco.discover())
 #    for player in players:
 #        print player
 #        print sn.soco_get_status(player)
 #    for player in players:
 #        sn.soco_set_status(player)    
-    for player in players:  
-        sn.soco_get_status(player)
-    print sn.Status
+#    for player in players:  
+#        sn.soco_get_status(player)
+#    print sn.Status
 #    print sn.get_zones() 
 #    play_wav('klingel.wav')
-    sn.durchsage('klingel.wav')
+#    sn.durchsage('klingel.wav')
 
 
 class sonos:
@@ -730,7 +730,7 @@ class sonos:
             self.soco_set_status(player) 
         return True
 
-    def ansage(self,text,player_ip):
+    def ansage(self,player_ip):
         player = soco.SoCo(player_ip)
         _, uid, _ = self.get_addr('Vm1ZIM1RUM1AV11')
         # save zone
@@ -742,8 +742,15 @@ class sonos:
         # resume all playback  
         self.soco_set_status(player) 
         return True             
+
+    def isolate(self,player_ip):
+        player = soco.SoCo(player_ip)
+        if len(player.group.members) <> 1:
+            for device in player.group.members:
+                device.unjoin()
+        return True
                 
-    def set_device(self, player, command, text):
+    def set_device(self, player, command, text=''):
         if command in ["man", "auto"]:
             set_val_in_szenen(device=player, szene="Auto_Mode", value=command) 
         player, p_uid, playerName = self.get_addr(player)            
@@ -812,16 +819,18 @@ class sonos:
             time.sleep(laenge + 1)  
             self.SetPause(player) 
         elif (str(command) == "EingangWohnzi"):
-            self.StreamInput(player, self.WohnZiZone)             
+            self.StreamInput(player, self.WohnZiZone)     
+        elif (str(command) == "Isolieren"):
+            self.isolate(player)               
         elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
             sonos_szene = mdb_read_table_entry(table.name,command)
-            self.sonos_read_szene(player, sonos_szene)                                 
+            self.sonos_read_szene(player, sonos_szene)                                
         return True
 
     def list_commands(self):
         comands = mdb_get_table(table.name)
         liste = ["Pause","Play","Save","Announce_Time","Durchsage",'Ansage',"Return","resume","lauter",
-                 "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi"]
+                 "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi","Isolieren"]
         for comand in comands:
             liste.append(comand.get("Name"))
         #liste.remove("Name")
