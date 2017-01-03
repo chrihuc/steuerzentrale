@@ -154,6 +154,7 @@ class sql_tables:
 class udp_:
     IP = eigene_IP
     # constants.udp_.PORT
+    SERVER = "192.168.192.10"
     PORT = UDP_PORT
     biPORT = 5005
     broadPORT = 5000

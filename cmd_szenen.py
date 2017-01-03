@@ -265,14 +265,22 @@ class szenen:
                 if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                     kommandos = self.__return_enum__(szene_dict.get(key))
                     if constants.redundancy_.master:
+                        delay = 0
                         for kommando in kommandos:
                             if key in cmd_devs:
                                 t_list = self.kommando_dict.get(szn_id)
                                 t_list.append([key,kommando])
                                 self.kommando_dict[szn_id] = t_list
                             text=szene_dict.get("Durchsage")
-                            t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, key, kommando, text])
-                            t.start()  
+                            if kommando == 'warte_1':
+                                delay += 1
+                            elif kommando == 'warte_3':
+                                delay += 3  
+                            elif kommando == 'warte_5':
+                                delay += 5
+                            else:                                
+                                t = Timer(delay, self.__sub_cmds__, args=[szn_id, key, kommando, text])
+                                t.start()  
 #==============================================================================
 # Internal                               
 #==============================================================================
@@ -298,7 +306,7 @@ class szenen:
                     # solution above could give timing issues
                     setting_s(str(kommando), str(kommandos.get(kommando)))
             mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
-        else:
+        elif False:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = Karenz)
             else:

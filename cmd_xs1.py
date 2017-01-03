@@ -7,8 +7,8 @@ from mysql_con import mdb_read_table_entry,set_val_in_szenen
 
 def main():
     ezcontrol = myezcontrol(constants.xs1_.IP) 
-    ezcontrol.set_device("Esszimmer", "100")
-    print ezcontrol.list_commands()
+#    ezcontrol.set_device("Esszimmer", "100")
+    print ezcontrol.dict_commands()
 
 #def dimmen(device):
     #setting_s(device, "heller")

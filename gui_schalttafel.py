@@ -21,6 +21,7 @@ from pyqtgraph.Qt import QtCore, QtGui
 from mysql_con import settings_r, setting_s, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
 
 import easygui
+import socket
 
 app = QtGui.QApplication([])
 import pyqtgraph.parametertree.parameterTypes as pTypes
@@ -53,6 +54,8 @@ sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 szn_lst = sorted(szn.list_commands())
+#for cmd_set in [xs1_cmds,hue_cmds,sns_cmds,tvs_cmds,sat_cmds]:
+#    cmd_set.update({'warte_1':len(cmd_set)+1,'warte_3':len(cmd_set)+2,'warte_5':len(cmd_set)+3})
 
 cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
@@ -233,6 +236,7 @@ class Szenen_tree():
         if device in sns_devs: values = sns_cmds
         if device in tvs_devs: values = tvs_cmds
         if device in sat_devs: values = sat.dict_commands(device)
+        values.update({'warte_1':len(values)+1,'warte_3':len(values)+2,'warte_5':len(values)+3})        
         return values
 
     def dict_constructor_(self,device, cmmds):
@@ -430,6 +434,7 @@ class Szenen_tree():
                 {'name': 'Speichere Szene', 'type': 'action'},
                 {'name': u'Prüfe Bedingung', 'type': 'action'},
                 {'name': 'Execute', 'type': 'action'},
+                {'name': 'Execute on server', 'type': 'action'},
                 {'name': 'Neue Szene', 'type': 'action'},
                 {'name': 'Dupliziere Szene', 'type': 'action'}                 
             ]}
@@ -439,6 +444,7 @@ class Szenen_tree():
             self.p.param('Save/Restore functionality', 'Speichere Szene').sigActivated.connect(self.save)
             self.p.param('Save/Restore functionality', u'Prüfe Bedingung').sigActivated.connect(self.check_bedingung)
             self.p.param('Save/Restore functionality', 'Execute').sigActivated.connect(self.execute)
+            self.p.param('Save/Restore functionality', 'Execute on server').sigActivated.connect(self.execute_on_server)
             #self.p.param('Save/Restore functionality', 'Neue Szene').sigActivated.connect(self.newSzene)            
             self.p.param(self.name, 'Befehl an Handys').sigActivated.connect(self.add_task)
             self.p.param(self.name, 'Bedingung').sigActivated.connect(self.add_bedingung)
@@ -626,7 +632,12 @@ class Szenen_tree():
         else:
             easygui.msgbox("Szene wurde NICHT ausgeführt", title="Execute")
         #constants.redundancy_.master = False            
-
+    
+    def execute_on_server(self):
+        commado = {'Szene':str(self.szene_to_read)}
+        csocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+        csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))    
+        
     def newSzene(self):
         global szenen
         self.szenen = [mdb_read_table_entry(db='LeereVorlage',entry=self.szene_to_read)]
@@ -863,7 +874,9 @@ def update():
     tvs_cmds = tv.dict_commands()
     sat_devs = sat.list_devices()
     sat_cmds = sat.dict_commands()
-    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs    
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs 
+#    for cmd_set in [xs1_cmds,hue_cmds,sns_cmds,tvs_cmds,sat_cmds]:
+#        cmd_set.update({'warte_1':len(cmd_set)+1,'warte_3':len(cmd_set)+2,'warte_5':len(cmd_set)+3})    
     sets = mdb_get_table(constants.sql_tables.settings.name)
     selected(lastSelected) 
     inp=InputsTree(isInputs = True, inputsGroup = str(comboBox5.currentText()))

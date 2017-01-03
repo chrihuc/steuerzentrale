@@ -3,7 +3,6 @@
 
 import constants
 import soco
-import pyaudio
 import wave
 import subprocess
 import pwd, os
@@ -78,38 +77,6 @@ def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
     time.sleep(period)
   return False    
 
-def play_wav_dep(input_para):
-#    uid = pwd.getpwnam('chris')[2]
-#    os.setuid(uid)
-    CHUNK = 1024
-    location = constants.installation_folder + '/media/'
-    
-    if '.wav' in input_para:
-        print location + input_para
-        wf = wave.open(location + input_para, 'rb')
-        print 'wave.open'
-    else:
-        subprocess.call(["espeak", "-w " + location + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", "Ansage " + input_para])
-        wf = wave.open(location + 'texttosonos.wav', 'rb')
-    
-    p = pyaudio.PyAudio()
-    print 'pyaudo loaded'
-    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                    channels=wf.getnchannels(),
-                    rate=wf.getframerate(),
-                    output=True)
-
-    data = wf.readframes(CHUNK)
-
-    while data != '':
-        stream.write(data)
-        data = wf.readframes(CHUNK)
-    
-    stream.stop_stream()
-    stream.close()
-    p.terminate()   
-#    uid = pwd.getpwnam('root')[2]
-#    os.setuid(uid)
 
 def play_wav(input_para):
     location = constants.installation_folder + '/media/'
