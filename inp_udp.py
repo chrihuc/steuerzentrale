@@ -7,7 +7,7 @@ Created on Mon Feb 22 18:43:14 2016
 
 import constants
 
-from mysql_con import inputs, mdb_read_table_column
+from mysql_con import inputs, mdb_read_table_column, settings_r
 from cmd_szenen import szenen
 import cmd_internal
 from alarmevents import alarm_event
@@ -31,7 +31,7 @@ aes = alarm_event()
 
 SIZE = 1024
 
-def exec_data(data_ev):
+def exec_data(data_ev, data):
     if ('Name' in data_ev) and ('Value' in data_ev):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
@@ -48,7 +48,11 @@ def exec_data(data_ev):
         if name in mdb_read_table_column(constants.sql_tables.szenen.name, 'Name'):
             scenes.threadExecute(name) 
     elif ('GCM-Client' in data_ev):
-        aes.new_event('GCM Client: ' + data_ev.get('GCM-Client'))                
+        aes.new_event('GCM Client: ' + data_ev.get('GCM-Client'))  
+    elif ('Request' in data_ev):
+        if data_ev.get('Request') == 'Settings':
+            data = str(settings_r())
+    return data              
 
 def bidirekt():
     while constants.run:
@@ -64,10 +68,10 @@ def bidirekt():
                 isdict = True
         except Exception as serr:
             isdict = False
+        if isdict:
+            data = exec_data(data_ev, data)
         conn.send(data)
         conn.close()  
-        if isdict:
-            exec_data(data_ev)
 
 def broadcast():
     while constants.run:
