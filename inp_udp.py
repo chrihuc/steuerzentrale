@@ -88,7 +88,7 @@ def broadcast():
             isdict = False  
         if isdict:
             #print data_ev
-            exec_data(data_ev)
+            exec_data(data_ev, data)
 
 def main():
     constants.run = True
