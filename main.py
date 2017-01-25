@@ -8,6 +8,7 @@ import threading
 import time, os, sys
 #import urllib2
 import inp_xs1, inp_cron, inp_udp #redundancy, 
+from inp_inter import anwesenheit
 from alarmevents import alarm_event
 from mysql_con import setting_s
 #import sqlsync
@@ -64,6 +65,10 @@ t.start()
 #t.start()
 #
 t = threading.Thread(name="peri",target=inp_cron.periodic_supervision, args = [])
+threadliste.append(t)
+t.start()
+
+t = threading.Thread(name="anwesenheit",target=anwesenheit.check_handys_service, args = [])
 threadliste.append(t)
 t.start()
 

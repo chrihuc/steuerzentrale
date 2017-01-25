@@ -9,6 +9,7 @@ import constants
 import git
 from alarmevents import alarm_event
 
+
 aes = alarm_event()
 
 class internal:
@@ -30,3 +31,4 @@ class internal:
         print "Update done, exiting"
         aes.new_event(description="Update performed, restarting", prio=1)
         constants.run = False
+        

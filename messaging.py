@@ -69,7 +69,7 @@ class messaging:
             if user.get('Name') <> None:
                 if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "True") and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
-                    if str(setting_r(user.get('Name')) == "1"):
+                    if str(setting_r(user.get('Name')) == "True"):
                         response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)            
                         if response <> {}:
                             success = False
@@ -83,7 +83,7 @@ class messaging:
             if user.get('Name') <> None:
                 if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "True") and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
-                    if str(setting_r(user.get('Name')) == "0"):
+                    if str(setting_r(user.get('Name')) == "False"):
                         response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)                     
                         if response <> {}:
                             success = False
