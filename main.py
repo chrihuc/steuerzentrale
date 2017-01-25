@@ -17,6 +17,7 @@ from mysql_con import setting_s
 #time.sleep(10)
 
 aes = alarm_event()
+anw = anwesenheit()
 #ssync = sqlsync.sync()
 #
 #syncliste = []
@@ -68,7 +69,7 @@ t = threading.Thread(name="peri",target=inp_cron.periodic_supervision, args = []
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(name="anwesenheit",target=anwesenheit.check_handys_service, args = [])
+t = threading.Thread(name="anwesenheit",target=anw.check_handys_service, args = [])
 threadliste.append(t)
 t.start()
 
