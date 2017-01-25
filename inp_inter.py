@@ -60,8 +60,9 @@ class anwesenheit:
             mdb_set_table(constants.sql_tables.Bewohner.name, person['Name'], cmd)
         
     def check_handys_service(self):
-        self.check_handys()
-        time.sleep(60)
+        while True:
+            self.check_handys()
+            time.sleep(60)
 
 if __name__ == "__main__":
     anw_class = anwesenheit()
