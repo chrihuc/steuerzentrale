@@ -95,7 +95,7 @@ def main():
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPause(sn.Kueche)
-    print sn.set_device("Vm1ZIM1RUM1AV11", "Isolieren")
+    print sn.set_device("V01KID1RUM1AV11", "Schlaflieder")
 #    print sn.set_device('V01SCH1RUM1AV11','Nachricht')
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
@@ -133,7 +133,7 @@ class sonos:
         self.WohnZiZone = "RINCON_000E58232A2601400"
         self.KuecheZone = "RINCON_000E58CB9E3E01400"  
         self.Zones = [self.SchlafZiZone, self.BadZone, self.WohnZiZone, self.KuecheZone]        
-        self.sonos_zonen = {str(self.WohnZi):self.WohnZiZone,str(self.Kueche):self.KuecheZone,str(self.Bad):self.BadZone,str(self.SchlafZi):self.SchlafZiZone}
+#        self.sonos_zonen = {str(self.WohnZi):self.WohnZiZone,str(self.Kueche):self.KuecheZone,str(self.Bad):self.BadZone,str(self.SchlafZi):self.SchlafZiZone}
                
         self.Devices_neu = {'V00WOH1RUM1AV11':'Wohnzimmer','V00KUE1RUM1AV11':u'K\xfcche','V01BAD1RUM1AV11':'Bad','V01SCH1RUM1AV11':'Schlafzimmer',
                             'Vm1ZIM1RUM1AV11':'Hobbyraum','V01KID1RUM1AV11':'Kinderzimmer'}                            
@@ -618,20 +618,27 @@ class sonos:
         
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
-        print player, sonos_szene
+#        print player, sonos_szene
+        socoplayer = soco.SoCo(player)
         if str(sonos_szene.get('Volume')) <> 'None':
             self.SetVolume(player, sonos_szene.get('Volume'))
         zone = sonos_szene.get('MasterZone')
         if (str(zone) <> "None") and (str(zone) <> "Own"):
             self.CombineZones(player, zone)
         else:
-            zoneown = self.sonos_zonen.get(str(player))
+            zoneown = socoplayer.uid #self.sonos_zonen.get(str(player))
             if str(sonos_szene.get('Radio')) == '1':
                 self.setRadio(player, str(sonos_szene.get('Sender')))
             elif str(zone) <> "None":
                 self.ClearZones(player)
                 self.ClearList(player)
-                self.PlayListNr(player, str(sonos_szene.get('PlayListNr')))
+                if isinstance(sonos_szene.get('PlayListNr'), int):
+                    self.PlayListNr(player, str(sonos_szene.get('PlayListNr')))
+                elif str(sonos_szene.get('PlayListNr')) <> 'None':
+                    playlistItem = socoplayer.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
+                    socoplayer.add_to_queue(playlistItem)
+#                    self.PlayListNr(player, str())
+#                    playlist via soco
                 self.ActivateList(player, zoneown)
                 self.Seek(player, "TRACK_NR", str(sonos_szene.get('TitelNr')))
                 if str(sonos_szene.get('Time')) <> 'None':
