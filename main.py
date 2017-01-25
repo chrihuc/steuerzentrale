@@ -69,9 +69,9 @@ t = threading.Thread(name="peri",target=inp_cron.periodic_supervision, args = []
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(name="anwesenheit",target=anw.check_handys_service, args = [])
-threadliste.append(t)
-t.start()
+#t = threading.Thread(name="anwesenheit",target=anw.check_handys_service, args = [])
+#threadliste.append(t)
+#t.start()
 
 aes.new_event(description="All Threads started", prio=1)
 #print threadliste
