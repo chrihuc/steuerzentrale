@@ -52,6 +52,7 @@ def exec_data(data_ev, data):
     elif ('GCM-Client' in data_ev):
         aes.new_event('GCM Client: ' + data_ev.get('GCM-Client'))  
     elif ('Android_id' in data_ev):
+        aes.new_event('Register new Client: ' + data_ev.get('Name'))  
         mes.register_user(data_ev)
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
