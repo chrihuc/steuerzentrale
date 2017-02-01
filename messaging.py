@@ -3,7 +3,7 @@
 import constants
 
 from gcm import GCM
-from mysql_con import setting_r, mdb_get_table# gcm_users_read
+from mysql_con import setting_r, mdb_get_table, mdb_set_table, mdb_add_table_entry# gcm_users_read
 import time
 import MySQLdb as mdb
 
@@ -11,7 +11,9 @@ def main():
     mes = messaging()
     constants.redundancy_.master = True
 #    print mes.send_direkt(to="Christoph", titel="Hinweis", text="test")
-    print mes.send_direkt(to="Christoph", titel="Setting", text="Tag")
+#    print mes.send_direkt(to="Christoph", titel="Setting", text="Tag")
+    print mes.register_user({'Android_id':'413cf24a528eb3e3', 'Name':'Christoph',
+                             'Reg_id':'APA91bFX8yBcE6FDPT7zA1tfNq55wQa6H4OH9DfRAILxNEnUs1Lds5jjqVEselR6pu-8TjfmODquvOe27ujiIw68OdO7lHpy2hn3mvOUkqFGqU6HvZyLhElpcKuPc5cZfI3X--9kBGP3IMsgRThkbA-7FEQz4TifYg'})
     
 table = constants.sql_tables.Bewohner    
     
@@ -93,6 +95,34 @@ class messaging:
         if (setting_r("Status") != "Schlafen"):
             return self.send_direkt(to, titel, text)           
 
+            
+    def register_user(self, user_desc):
+        if user_desc['Name'] == '':
+            return False
+        found = False
+        update = False
+        gcm_users = mdb_get_table(table.name)
+        for user in gcm_users:
+            if user_desc['Name'] == user['Name']:
+                found = True
+                commands = {}
+                if str(user_desc['Android_id']) <> str(user['gcm_name']):
+                    commands['gcm_name'] = user_desc['Android_id']
+                    update = True
+                if str(user_desc['Reg_id']) <> str(user['gcm_regid']):
+                    commands['gcm_regid'] = user_desc['Reg_id']
+                    update = True                    
+                if update:
+                    mdb_set_table(table.name, user_desc['Name'], commands)
+        if not found:
+            commands = {}
+            commands['gcm_name'] = user_desc['Android_id']
+            commands['gcm_regid'] = user_desc['Reg_id']
+            commands['Name'] = user_desc['Name']
+            mdb_add_table_entry(table.name, commands)
+        if update or not found:
+            self.send_direkt(user_desc['Name'], 'Hinweise', 'User registered')
+        return True
 
 if __name__ == '__main__':
     main()

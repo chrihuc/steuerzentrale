@@ -9,8 +9,9 @@ import constants
 
 from mysql_con import inputs, mdb_read_table_column, settings_r
 from cmd_szenen import szenen
-import cmd_internal
+
 from alarmevents import alarm_event
+from messaging import messaging
 
 import threading
 import socket
@@ -28,6 +29,7 @@ broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 broadSocket.bind( (hostName, constants.udp_.broadPORT) )
 scenes = szenen()
 aes = alarm_event()
+mes = messaging()
 
 SIZE = 1024
 
@@ -49,6 +51,8 @@ def exec_data(data_ev, data):
             scenes.threadExecute(name) 
     elif ('GCM-Client' in data_ev):
         aes.new_event('GCM Client: ' + data_ev.get('GCM-Client'))  
+    elif ('Android_id' in data_ev):
+        mes.register_user(data_ev)
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
             data = str(settings_r())
