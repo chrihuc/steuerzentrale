@@ -44,12 +44,13 @@ def  get_satellite(name):
 
 def main():
     sats = satelliten()
-    #print sats.list_devices()
-#    print sats.list_commands("Vm1ZIM1RUM1PC02")
-    print sats.set_device('V00WOH1SRA1PC02','pi_reboot')
+#    print sats.list_devices()
+#    print sats.dict_commands(device='V00KUE1DEK1LI01')
+#    print sats.list_commands("V00KUE1DEK1LI01")
+    print sats.set_device('V00KUE1DEK1LI01','On')
     #print sats.set_device('V00WOH1SRA1LI02','Hell')
 #    print sats.set_device('V00WOH1SRA1LI02','KlimaCO')
-#    print sats.listCommandTable(device="Vm1ZIM1RUM1PC02",nameReturn = True)
+#    print sats.listCommandTable('alle',nameReturn = False)
 
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -57,7 +58,8 @@ class satelliten:
     
     def __init__ (self):
         self.__init_table__()
-        self.__check_table__()
+        self.device_type_list = self.list_devices_type(devices=None)
+        #self.__check_table__()
     
     def __init_table__(self):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -109,8 +111,25 @@ class satelliten:
         for comand in comands:
             if comands.get(comand) == "SATELLITE":
                 liste.append(comand)
+            elif comands.get(comand) == "ZWave":
+                liste.append(comand)
         #liste.remove("Name")
         return liste    
+
+    def list_devices_type(self, devices=None):
+        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        liste = {}
+        for comand in comands:
+            if comands.get(comand) == "SATELLITE" and (devices== None or comand in devices):
+                liste[comand] = 'SATELLITE'
+            elif comands.get(comand) == "ZWave" and (devices== None or comand in devices):
+                liste[comand] = 'ZWave'
+        #liste.remove("Name")
+        return liste 
+        
+    def get_type(self,device):
+        alle = self.device_type_list
+        return alle[device]
         
     def list_commands(self,device='alle'):
         liste = [] 
@@ -120,7 +139,10 @@ class satelliten:
         else:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
-            cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
+            if self.get_type(sates) == 'SATELLITE':
+                cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
+            elif self.get_type(sates) == 'ZWave':
+                cmds_table=mdb_read_table_entry(table.name,'ZWave').get('command_set')
             if self.__check_table_exists__(cmds_table):           
                 comands = mdb_get_table(cmds_table)
                 for comand in comands:
@@ -137,7 +159,10 @@ class satelliten:
         else:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
-            cmds_table=mdb_read_table_entry(table.name,sates)
+            if self.get_type(sates) == 'SATELLITE':
+                cmds_table=mdb_read_table_entry(table.name,sates)
+            elif self.get_type(sates) == 'ZWave':
+                cmds_table=mdb_read_table_entry(table.name,'ZWave')
             if self.__check_table_exists__(cmds_table.get('command_set')):           
                 if nameReturn:
                     liste.append(cmds_table.get('Name'))
@@ -155,6 +180,8 @@ class satelliten:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
             cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
+            if cmds_table == None:
+                cmds_table=mdb_read_table_entry(table.name,'ZWave').get('command_set')
             if self.__check_table_exists__(cmds_table):           
                 comands = mdb_get_table(cmds_table)
                 for comand in comands:
@@ -173,7 +200,10 @@ class satelliten:
             set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
             return True      
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        satellit=mdb_read_table_entry(table.name,device)
+        if self.get_type(device) == 'SATELLITE':
+            satellit=mdb_read_table_entry(table.name,device)
+        elif self.get_type(device) == 'ZWave':
+            satellit=mdb_read_table_entry(table.name,'ZWave')
         command = {}
         if satellit.get('command_set') == 'server':
             command['Szene'] = commd

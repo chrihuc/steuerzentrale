@@ -8,6 +8,13 @@ import time
 from time import localtime, strftime
 import datetime
 
+#import mysql.connector as sql 
+#import pandas as pd
+
+#db_connection = sql.connect(host='192.168.192.10', database='Steuerzentrale', user='customer', password='user')
+#df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
+
+
 datab = constants.sql_.DB
 
 #auto add entry to inputs

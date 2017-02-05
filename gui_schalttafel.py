@@ -53,7 +53,7 @@ tvs_cmds = tv.dict_commands()
 sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
-szn_lst = sorted(szn.list_commands())
+szn_lst = sorted(szn.list_commands(gruppe=''))
 #for cmd_set in [xs1_cmds,hue_cmds,sns_cmds,tvs_cmds,sat_cmds]:
 #    cmd_set.update({'warte_1':len(cmd_set)+1,'warte_3':len(cmd_set)+2,'warte_5':len(cmd_set)+3})
 
@@ -863,7 +863,7 @@ def selected(text):
 
 def update():
     global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox2, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
-    szn_lst = sorted(szn.list_commands())
+    szn_lst = sorted(szn.list_commands(gruppe=''))
     xs1_devs = xs1.list_devices()
     xs1_cmds = xs1.dict_commands()
     hue_devs = hue.list_devices()

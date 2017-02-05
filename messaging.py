@@ -10,10 +10,10 @@ import MySQLdb as mdb
 def main():
     mes = messaging()
     constants.redundancy_.master = True
-#    print mes.send_direkt(to="Christoph", titel="Hinweis", text="test")
+    print mes.send_direkt(to="Sabina", titel="Setting", text="Tag")
 #    print mes.send_direkt(to="Christoph", titel="Setting", text="Tag")
-    print mes.register_user({'Android_id':'413cf24a528eb3e3', 'Name':'Christoph',
-                             'Reg_id':'APA91bFX8yBcE6FDPT7zA1tfNq55wQa6H4OH9DfRAILxNEnUs1Lds5jjqVEselR6pu-8TjfmODquvOe27ujiIw68OdO7lHpy2hn3mvOUkqFGqU6HvZyLhElpcKuPc5cZfI3X--9kBGP3IMsgRThkbA-7FEQz4TifYg'})
+#    print mes.register_user({'Android_id':'413cf24a528eb3e3', 'Name':'Christoph',
+#                             'Reg_id':'APA91bFX8yBcE6FDPT7zA1tfNq55wQa6H4OH9DfRAILxNEnUs1Lds5jjqVEselR6pu-8TjfmODquvOe27ujiIw68OdO7lHpy2hn3mvOUkqFGqU6HvZyLhElpcKuPc5cZfI3X--9kBGP3IMsgRThkbA-7FEQz4TifYg'})
     
 table = constants.sql_tables.Bewohner    
     

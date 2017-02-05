@@ -177,7 +177,10 @@ class szenen:
     def __sub_cmds__(self, szn_id, device, commando, text):
         global kommando_dict
         executed = False
-        t_list = self.kommando_dict.get(szn_id)      
+        if szn_id != None:
+            t_list = self.kommando_dict.get(szn_id)   
+        else:
+            t_list = {}
         if device in xs1_devs:
             executed = xs1.set_device(device, commando)
         elif device == "setTask":
@@ -209,6 +212,8 @@ class szenen:
 #                                t.start() 
         else:
             executed = True
+        if szn_id == None:
+            return
         if executed:
             for itm in t_list:
                 if itm[0] == device and itm[1] == commando:
@@ -217,6 +222,12 @@ class szenen:
             aes.new_event(description="Failed: " + str(device) + str(commando), prio=1, karenz = 0.03)
         self.kommando_dict[szn_id] = t_list
 
+    def threadSetDevice(self, device, commando):
+        szn_id = None
+        text = ''
+        t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, device, commando, text])
+        t.start()
+        
     def threadExecute(self, szene, check_bedingung=False, wert = 0):
         t = threading.Thread(target=self.execute, args=[szene, check_bedingung, wert])
         t.start()         
