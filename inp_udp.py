@@ -8,7 +8,7 @@ Created on Mon Feb 22 18:43:14 2016
 import constants
 
 from mysql_con import inputs, mdb_read_table_column, settings_r
-from cmd_szenen import szenen, threadSetDevice
+from cmd_szenen import szenen
 
 from alarmevents import alarm_event
 from messaging import messaging
@@ -53,7 +53,7 @@ def exec_data(data_ev, data):
         # aes.new_event('Register new Client: ' + data_ev.get('Name'))  
         mes.register_user(data_ev)
     elif ('Device' in data_ev) and ('Command' in data_ev):
-        threadSetDevice(data_ev['Device'], data_ev['Command'])
+        scenes.threadSetDevice(data_ev['Device'], data_ev['Command'])
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
             data = str(settings_r())
