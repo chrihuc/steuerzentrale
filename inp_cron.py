@@ -50,7 +50,7 @@ def every_min(tag, zeit):
             task = Timer(float(60-sekunde), scenes.execute, [str(szene.get('Szene'))])              
             task.start()
         if str(szene.get('Permanent')) == "False":
-            crn.delete(szene.get('Id'))  
+            crn.executed(szene.get('Id'))  
     #if str(setting_r("Kino_Beleuchtung_Auto")) == "Ein":
         #if plex.sessions() == []:
                 #if str(setting_r("Kino_Beleuchtung")) == "Ein":

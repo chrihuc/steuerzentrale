@@ -55,7 +55,7 @@ class messaging:
         gcm_users = mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') <> None:
-                if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "True") and constants.redundancy_.master:
+                if (user.get('Name') in to) and constants.redundancy_.master:
                     response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
                     print response
                     if response <> {}:
@@ -69,7 +69,7 @@ class messaging:
         gcm_users = mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') <> None:
-                if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "True") and constants.redundancy_.master:
+                if (user.get('Name') in to) and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(setting_r(user.get('Name')) == "True"):
                         response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)            
@@ -83,7 +83,7 @@ class messaging:
         gcm_users = mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') <> None:
-                if (user.get('Name') in to) and (str(setting_r(str('Notify_'+ user.get('Name')))) == "True") and constants.redundancy_.master:
+                if (user.get('Name') in to) and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(setting_r(user.get('Name')) == "False"):
                         response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)                     

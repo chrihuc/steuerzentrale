@@ -55,7 +55,8 @@ eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,
               {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
               {'Name':'V00WOH1RUM1CO01','desc':'CO2','type':'sens','pos_x':150,'pos_y':150},
               {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20},
-              {'Name':'V00KUE1ZIM1TE02','desc':'T Kueche','type':'sens','pos_x':600,'pos_y':150}]
+              {'Name':'V00KUE1ZIM1TE02','desc':'T Kueche','type':'sens','pos_x':600,'pos_y':150},
+              {'Name':'V00KUE1DEK1LI01','desc':'Decke','type':'dev','pos_x':500,'pos_y':290}]
               
 og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
               {'Name':'V01BAD1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':550,'pos_y':120},
@@ -478,7 +479,8 @@ class weckerRow(QtGui.QWidget):
         horizontalLayoutWidget = QtGui.QHBoxLayout()
         #horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.font = QtGui.QFont()
-        self.font.setPixelSize(20)
+        if not constants.KS:
+            self.font.setPixelSize(20)
         self.timeEdit = QtGui.QTimeEdit()
         name = weckerList.get('Name')
         self.timeEdit.setObjectName(_fromUtf8(str(name)+".timeEdit"))

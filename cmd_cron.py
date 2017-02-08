@@ -9,14 +9,32 @@ import datetime
 import random
 
 
+import warnings
+import functools
+
+def deprecated(func):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emmitted
+    when the function is used."""
+
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        warnings.simplefilter('always', DeprecationWarning) #turn off filter 
+        warnings.warn("Call to deprecated function {}.".format(func.__name__), category=DeprecationWarning, stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning) #reset filter
+        return func(*args, **kwargs)
+
+    return new_func
+
 def main():
     crn = cron()
     #crn.new_event('Test','20:15')
     #print crn.get_now(2, '5:40' ,'Wecker')
-    crn.calculate()
-    print crn.get_all()
-#    next_i = crn.get_next(2, '23:21')
+#    crn.calculate()
+#    print crn.get_all()
+    print crn.get_now2(2, '21:50')
 #    if next_i: print next_i[0].get("delta")
+#    crn.executed(14)
 #    print next_i
 
 neuenh = ephem.Observer()
@@ -75,7 +93,7 @@ class cron:
         con.close
         return liste    
 
-    def get_next(self, tag, Zeit, db=constants.sql_tables.cron.name, wecker = False):
+    def get_next(self, tag, Zeit, db=constants.sql_tables.cron.name, wecker=False, datum=None):
         liste = self.get_all(wecker=wecker)
         ret_item = {}
         ret_liste = []
@@ -90,8 +108,30 @@ class cron:
             if db == "Wecker":
                 time = eintrag.get("Time") - eintrag.get("Offset")
             else:
-                time = eintrag.get("Time")                        
-            if (str(eintrag.get(tage.get(tag))) == "True"):
+                time = eintrag.get("Time")
+            if datum == None:
+                datumscheck = True
+            else:
+                datumscheck = True
+                if eintrag['Start'] != None:
+                    thresDate = eintrag['Start']
+                    if thresDate.year == 1111:
+                        thresDate = datetime.datetime(datum.year, thresDate.month, thresDate.day)
+                        if datum < thresDate:
+                            datumscheck = False
+                    else:
+                        if datum < thresDate:
+                            datumscheck = False
+                if eintrag['End'] != None:
+                    thresDate = eintrag['End']
+                    if thresDate.year == 1111:
+                        thresDate = datetime.datetime(datum.year, thresDate.month, thresDate.day) + datetime.timedelta(days=1)
+                        if datum > thresDate:
+                            datumscheck = False                          
+                    else:
+                        if datum < thresDate:
+                            datumscheck = False                   
+            if (str(eintrag.get(tage.get(tag))) == "True") and datumscheck:
                 if ((time - Zeit) ==  next_one) and (time - Zeit) >= nulltime : 
                     ret_item = eintrag
                     next_one = (time - Zeit)
@@ -103,7 +143,7 @@ class cron:
                     next_one = (time - Zeit)
                     ret_item["delta"] = next_one
                     ret_liste.append(ret_item)                    
-            if (str(eintrag.get(tage.get(morgen))) == "True"): 
+            if (str(eintrag.get(tage.get(morgen))) == "True") and datumscheck: 
                 deltati = (time - Zeit) + datetime.timedelta(hours=24, minutes=0, seconds=0)
                 if deltati == next_one: 
                     ret_item = eintrag
@@ -118,13 +158,16 @@ class cron:
                     ret_liste.append(ret_item)                    
         return ret_liste
 
-    def get_now2(self, tag, Zeit, db=constants.sql_tables.cron.name):
-        liste = self.get_next(tag, Zeit, db)
+    def get_now2(self, tag, Zeit, db=constants.sql_tables.cron.name, date=None):
+        if date == None:
+            now = datetime.datetime.now()
+        liste = self.get_next(tag, Zeit, db, False, now)
         if liste:
             if liste[0].get("delta") < datetime.timedelta(hours=0, minutes=1, seconds=0):
                 return liste
         return []
 
+    @deprecated
     def delete(self, Id):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
@@ -132,6 +175,14 @@ class cron:
             sql = 'DELETE FROM '+constants.sql_tables.cron.name+' WHERE id = '+ str(Id) 
             cur.execute(sql)
         con.close()
+        
+    def executed(self, Id):
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+        with con:
+            cur = con.cursor()
+            sql = 'UPDATE '+constants.sql_tables.cron.name+' SET Eingeschaltet = "False" WHERE id = '+ str(Id) 
+            cur.execute(sql)
+        con.close()        
 
     def new_event(self, Szene, Time, Bedingung="", permanent=0):               
         dicti = {}
@@ -166,6 +217,7 @@ class cron:
         lt = localtime()
         time = lt
         neuenh.date = strftime("%Y-%m-%d 00:00:00", lt)
+        # TODO: Sommerzeit detection
         sommerzeit = False
         if sommerzeit:
             delta = 2
