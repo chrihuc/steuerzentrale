@@ -9,6 +9,8 @@ def main():
     ezcontrol = myezcontrol(constants.xs1_.IP) 
 #    ezcontrol.set_device("Esszimmer", "100")
     print ezcontrol.dict_commands()
+    print ezcontrol.list_devices()
+#    print ezcontrol.set_device('V00KUE1RUM1ST01','func_1')
 
 #def dimmen(device):
     #setting_s(device, "heller")
@@ -55,6 +57,7 @@ class myezcontrol:
 
     def SetSwitchFunction(self,Switch,Function):
         body = """http://""" + self.ip_add + """/control?callback=cname&cmd=set_state_actuator&name=""" + str(Switch) + """&Function=""" + str(Function)
+        print body
         f = urllib2.urlopen(body)     
         f.close()
         
@@ -105,7 +108,7 @@ class myezcontrol:
     
     def list_commands(self):
         #comands = mdb_get_table(table.name)
-        liste = ["Umschalten",0,100]
+        liste = ['Umschalten',0,100,15,17,22.5,'func_1','func_2']
         #for comand in comands:
             #liste.append(comand.get("Name"))
         #liste.remove("Name")
@@ -142,6 +145,9 @@ class myezcontrol:
                 else:
                     self.SetSwitch(str(device), "100.0")
                     set_val_in_szenen(device=device, szene="Value", value=100)
+            elif 'func' in commd:
+                self.SetSwitchFunction(str(device), str(commd)[5:])  
+                set_val_in_szenen(device=device, szene="Value", value=commd)
             else:
                 self.SetSwitch(str(device), str(commd))  
                 set_val_in_szenen(device=device, szene="Value", value=commd)
