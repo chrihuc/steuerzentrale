@@ -50,12 +50,8 @@ class anwesenheit:
                 state = int(state)
             if ping(ip_adress):
                 person['Handy_State'] = 5
-                if True: #state < 5:
-                    setting_s(person['Name'],"True")
             else:
-                person['Handy_State'] = state - 1
-                if state < 2:
-                    setting_s(person['Name'],"False")                
+                person['Handy_State'] = state - 1              
             cmd = {'Handy_State':person['Handy_State']}
             mdb_set_table(constants.sql_tables.Bewohner.name, person['Name'], cmd)
         
