@@ -7,6 +7,10 @@ Created on Tue Apr 19 13:58:42 2016
 
 import socket
 
+import os
+import glob
+from subprocess import call
+
 import constants
 import git
 from alarmevents import alarm_event
@@ -37,13 +41,15 @@ class internal:
         pass
 
     def list_commands(self):
-        return ['Update', 'Check_Anwesenheit']
+        return ['Update', 'Check_Anwesenheit', 'convert_mts']
         
     def execute(self, commd):
         if commd == 'Update':
             self.git_update()
         elif commd == 'Check_Anwesenheit':
-            self.check_anwesenheit()            
+            self.check_anwesenheit()           
+        elif commd == 'convert_mts':
+            self.convert_mts()               
         
     def git_update(self):
         g = git.cmd.Git()
@@ -86,6 +92,20 @@ class internal:
             command = {'Name':'Bew_alle_weg', 'Value': int(alle_weg)}
             bidirekt(command)            
                 
+        
+    def convert_mts(self):
+        for dirname, dirnames, filenames in os.walk('/mnt/array1/photos/2017'):
+            for subdirname in dirnames:
+                folder = os.path.join(dirname, subdirname)
+                for filename in glob.glob(os.path.join(folder, '*.MTS')):
+                    print filename
+                    if True: #not os.path.isfile(filename[:-3]+'MP4'):
+                        cmd = 'ffmpeg -i "' + filename + '" -s 800x450 -c:a aac -q:a 2 -b:v 4000k -strict experimental "' + filename[:-3]+'MP4"'
+                        print cmd
+                        os.system(cmd)
+                        os.chmod(filename[:-3]+'MP4', 0777)             
                     
+                        
+                        
 if __name__ == '__main__':
     main()                    
