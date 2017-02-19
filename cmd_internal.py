@@ -100,7 +100,7 @@ class internal:
                 for filename in glob.glob(os.path.join(folder, '*.MTS')):
                     print filename
                     if True: #not os.path.isfile(filename[:-3]+'MP4'):
-                        cmd = 'ffmpeg -i "' + filename + '" -s 800x450 -c:a aac -q:a 2 -b:v 4000k -strict experimental "' + filename[:-3]+'MP4"'
+                        cmd = 'ffmpeg -i "' + filename + '" -s 800x450 -c:a aac -q:a 2 -b:v 2000k -strict experimental "' + filename[:-3]+'MP4"'
                         print cmd
                         os.system(cmd)
                         os.chmod(filename[:-3]+'MP4', 0777)             
