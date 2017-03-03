@@ -123,7 +123,7 @@ class StockRaum():
         self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
                       'TER':'Terasse','GRA':'Gras',
                       'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer',
-                      'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang'}
+                      'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang','STV':'Stromversorgung'}
         for nam in self.namen:
             if zimmer:
                 if nam in self.name[-3:]:
@@ -386,7 +386,7 @@ class Szenen_tree():
                     elif str(item) in ['Prio']:
                         szn_d_child['type'] ='list'
                         szn_d_child['values'] = {'Kein Event':-1,'Normales Event':0,'Problem ohne Hinweis':1,'Hinweis wenn zuhause':2,'immer Hinweis':3,'Hinweis wenn wach':4,
-                                                 'Achtung wenn wach':5,'Alarm':6}
+                                                 'Achtung wenn wach':5,'Alarm':6,'Debug':7}
                         if str(szene.get(item)) <> "None":
                             szn_d_child['value'] = float(szene.get(item))                          
                     elif str(item) in ['Gruppe']:

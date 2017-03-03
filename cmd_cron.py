@@ -32,7 +32,7 @@ def main():
     #print crn.get_now(2, '5:40' ,'Wecker')
 #    crn.calculate()
 #    print crn.get_all()
-    print crn.get_now2(2, '21:50')
+    print crn.get_all(wecker=True)
 #    if next_i: print next_i[0].get("delta")
 #    crn.executed(14)
 #    print next_i

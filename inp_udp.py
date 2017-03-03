@@ -9,6 +9,7 @@ import constants
 
 from mysql_con import inputs, mdb_read_table_column, settings_r
 from cmd_szenen import szenen
+from cmd_cron import cron
 
 from alarmevents import alarm_event
 from messaging import messaging
@@ -17,6 +18,8 @@ import threading
 import socket
 import time
 import sys
+import json
+import datetime
 
 hostName = socket.gethostbyname( constants.eigene_IP )
 
@@ -30,8 +33,24 @@ broadSocket.bind( (hostName, constants.udp_.broadPORT) )
 scenes = szenen()
 aes = alarm_event()
 mes = messaging()
+crn = cron()
 
 SIZE = 1024
+
+date_handler = lambda obj: (
+    obj.isoformat()
+    if isinstance(obj, datetime.datetime)
+    or isinstance(obj, datetime.date)
+    else None
+)
+
+def handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    elif isinstance(obj, datetime.timedelta):
+        return obj.seconds
+    else:
+        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
 
 def exec_data(data_ev, data):
     if ('Name' in data_ev) and ('Value' in data_ev):
@@ -57,6 +76,8 @@ def exec_data(data_ev, data):
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
             data = str(settings_r())
+        elif data_ev.get('Request') == 'Wecker':            
+            data = json.dumps(crn.get_all(wecker=True), default=handler)
     return data              
 
 def bidirekt():
@@ -75,6 +96,8 @@ def bidirekt():
             isdict = False
         if isdict:
             data = exec_data(data_ev, data)
+            
+        #conn.sendall(data)
         conn.send(data)
         conn.close()  
 

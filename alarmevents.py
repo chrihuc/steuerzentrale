@@ -144,8 +144,8 @@ class alarm_event:
                 msg["Subject"] = "Alarm"
                 p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
                 p.communicate(msg.as_string())                 
-            elif prio >= 6 and prio < 7:
-                self.mes.send_direkt(to=self.mes.chris, titel="Alarm", text=description)                    
+            elif prio >= 7 and prio < 8:
+                self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)                    
                 
     def alarm_resolved(self, description, resolv_desc):
         alarme = self.alarm_events_read(unacknowledged=True,prio=1, time=24)
