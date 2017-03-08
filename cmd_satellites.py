@@ -47,8 +47,8 @@ def main():
 #    print sats.list_devices()
 #    print sats.dict_commands(device='V00KUE1DEK1LI01')
 #    print sats.list_commands("V00KUE1DEK1LI01")
-    print sats.set_device('V00WOH1DEK1LI01','off')
-    #print sats.set_device('V00WOH1SRA1LI02','Hell')
+#    print sats.set_device('V00WOH1DEK1LI01','off')
+    print sats.set_device('V00WOH1SRA1PC01','Update')
 #    print sats.set_device('V00WOH1SRA1LI02','KlimaCO')
 #    print sats.listCommandTable('alle',nameReturn = False)
 

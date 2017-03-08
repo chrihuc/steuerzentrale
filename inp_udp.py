@@ -7,7 +7,7 @@ Created on Mon Feb 22 18:43:14 2016
 
 import constants
 
-from mysql_con import inputs, mdb_read_table_column, settings_r
+from mysql_con import inputs, mdb_read_table_column, settings_r, mdb_set_table
 from cmd_szenen import szenen
 from cmd_cron import cron
 
@@ -29,6 +29,7 @@ biSocket.listen(5)
 
 PORT_NUMBER = constants.udp_.PORT
 broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+#broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 broadSocket.bind( (hostName, constants.udp_.broadPORT) )
 scenes = szenen()
 aes = alarm_event()
@@ -78,6 +79,12 @@ def exec_data(data_ev, data):
             data = str(settings_r())
         elif data_ev.get('Request') == 'Wecker':            
             data = json.dumps(crn.get_all(wecker=True), default=handler)
+            print data
+    elif ('SetWecker' in data_ev):
+        table = constants.sql_tables.cron.name
+        for entry in eval(data_ev['SetWecker']):
+            device = entry['Name']
+            mdb_set_table(table, device, entry)
     return data              
 
 def bidirekt():

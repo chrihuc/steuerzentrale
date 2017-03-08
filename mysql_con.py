@@ -85,6 +85,8 @@ def re_calc(inpt):
         return inpt
        
 def setting_s(setting, wert):
+    ''' set single setting
+    '''
     if wert in ('Ein','ein','an'):
         wert = True
     if wert in ('Aus','aus'):
@@ -101,6 +103,8 @@ def setting_s(setting, wert):
     con.close() 
     
 def setting_r(setting):
+    ''' read single setting
+    '''    
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     value = 0
     with con:
@@ -284,6 +288,12 @@ def mdb_get_table(db):
     return rlist  
 
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
+    ''' set table
+        table = table name to change
+        device = entry in table, if primary is name then where the name fits
+        commands = columns in the table where "device" entry will be changed
+        translate with this flag the commandos will be translated according to the raw commands table
+    '''
     cmds = get_raw_cmds(table)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:

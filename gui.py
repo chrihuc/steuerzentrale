@@ -65,7 +65,7 @@ og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150
               {'Name':'V01KID1RUM1TE01','desc':'T Kind','type':'sens','pos_x':150,'pos_y':20}
               ]
               
-dg_buttons = [{'Name':'V02ZIM1RUM1TE02','desc':u'Büro','type':'dev','pos_x':550,'pos_y':120}]              
+dg_buttons = [{'Name':'V02ZIM1RUM1TE02','desc':u'Büro','type':'sens','pos_x':550,'pos_y':120}]              
 
 weckerButtons = []
 
