@@ -29,6 +29,8 @@ import os
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from pyqtgraph.parametertree import Parameter, ParameterTree
 
+import urllib2
+
 descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
 
 aes = alarm_event()
@@ -91,7 +93,8 @@ try:
 except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
-
+       
+        
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
         super(Main, self).__init__(parent)
@@ -270,6 +273,7 @@ class Main(QtGui.QMainWindow):
         self.pushButton_9.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_9.setText('Speichere')
         self.pushButton_9.clicked.connect(self.makeSaveWecker(self)) 
+        
 
 #        self.pushButton_10 = QtGui.QPushButton(self.tab_5)
 #        self.pushButton_10.setGeometry(QtCore.QRect(320, 380, 91, 50))
@@ -278,6 +282,17 @@ class Main(QtGui.QMainWindow):
 #        self.pushButton_10.clicked.connect(self.checkWecker) 
         
         self.tab_5.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
+        
+        #Cam
+        self.tab_6 = QtGui.QWidget()
+        self.tab_6.setObjectName(_fromUtf8("tab_6")) 
+        self.layout_Cam = QtGui.QFormLayout()
+        self.tabWidget.addTab(self.tab_6, _fromUtf8(""))     
+        
+
+#        lbl = QtGui.QLabel(self)
+#        lbl.setPixmap(QtGui.QPixmap(image))
+      
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -302,6 +317,32 @@ class Main(QtGui.QMainWindow):
         for i in wecker:
             self.scrollLayout3.addRow(weckerRow(i))
 
+    def load_cam(self):
+        self.clearLayout(self.layout_Cam)
+        hbox = QtGui.QHBoxLayout()
+        url = 'http://192.168.192.36/html/cam.jpg'
+#        url = 'https://www.cleverfiles.com/howto/wp-content/uploads/2016/08/mini.jpg'
+
+        req = urllib2.Request(url)
+        try:
+            response = urllib2.urlopen(req)
+            data = response.read()  
+        except urllib2.URLError as e:
+            data = None
+
+        image = QtGui.QImage()
+        image.loadFromData(data)
+        
+        lbl = QtGui.QLabel(self)
+        lbl.setPixmap(QtGui.QPixmap(image))
+        hbox.addWidget(lbl)
+        self.layout_Cam.addRow(QtGui.QLabel(""),hbox)
+        self.tab_6.setLayout(self.layout_Cam)
+#        refresh_c = Timer(1, self.load_cam, [])
+#        refresh_c.start()
+#        
+
+            
     def update(self):
         if self.tabWidget.currentIndex() ==6:
             self.add_wecker()
@@ -312,6 +353,8 @@ class Main(QtGui.QMainWindow):
                     print name, settings.get(str(name))
                     btn.setText(settings.get(str(name)))
             QApplication.processEvents()
+        if self.tabWidget.currentIndex() ==7:
+            self.load_cam()
       
 
     def close_clicked(self):
@@ -387,6 +430,7 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "2. Stock", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Settings", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("MainWindow", "Wecker", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("MainWindow", "Kamera", None))
         #self.pushButton.setText(_translate("MainWindow", "XS1", None))
         self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
         self.pushButton_3.setText(_translate("MainWindow", "Sonos", None))
