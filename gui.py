@@ -58,7 +58,7 @@ eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,
               {'Name':'V00WOH1RUM1CO01','desc':'CO2','type':'sens','pos_x':150,'pos_y':150},
               {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20},
               {'Name':'V00KUE1RUM1TE02','desc':'T Kueche','type':'sens','pos_x':600,'pos_y':150},
-              {'Name':'V00KUE1DEK1LI01','desc':'Decke','type':'dev','pos_x':500,'pos_y':290}]
+              {'Name':'V00KUE1DEK1LI02','desc':'Decke','type':'dev','pos_x':500,'pos_y':290}]
               
 og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
               {'Name':'V01BAD1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':550,'pos_y':120},
@@ -70,6 +70,7 @@ og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150
 dg_buttons = [{'Name':'V02ZIM1RUM1TE02','desc':u'Büro','type':'sens','pos_x':550,'pos_y':120}]              
 
 weckerButtons = []
+SchaltUhren = []
 
 #tab Wecker
 #tab settings
@@ -92,8 +93,23 @@ try:
         return QtGui.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
-       
+        return QtGui.QApplication.translate(context, text, disambig)    
+
+running = True
+        
+class LoadImageThread(QtCore.QThread):
+        def __init__(self):
+            QtCore.QThread.__init__(self)
+     
+        def __del__(self):
+            self.wait()
+            
+        def run(self):
+            if running:
+                self.emit(QtCore.SIGNAL('showImage()'))
+                refresh = Timer(.5, self.run, [])
+                refresh.start()
+        
         
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
@@ -274,21 +290,48 @@ class Main(QtGui.QMainWindow):
         self.pushButton_9.setText('Speichere')
         self.pushButton_9.clicked.connect(self.makeSaveWecker(self)) 
         
-
-#        self.pushButton_10 = QtGui.QPushButton(self.tab_5)
-#        self.pushButton_10.setGeometry(QtCore.QRect(320, 380, 91, 50))
-#        self.pushButton_10.setObjectName(_fromUtf8("chekAlarm"))
-#        self.pushButton_10.setText('Check')
-#        self.pushButton_10.clicked.connect(self.checkWecker) 
+        #Schaltuhr
+        self.tab_7 = QtGui.QWidget()
+        self.tab_7.setObjectName(_fromUtf8("tab_5")) 
+        self.tabWidget.addTab(self.tab_7, _fromUtf8(""))
+        self.scrollLayout4 = QtGui.QFormLayout()
+        self.scrollArea = QtGui.QScrollArea(self.tab_7)
+        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 790, 375))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 360))
+        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.scrollAreaWidgetContents.setLayout(self.scrollLayout4)        
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)  
         
-        self.tab_5.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
+        #self.add_wecker()
+        self.pushButton_12 = QtGui.QPushButton(self.tab_7)
+        self.pushButton_12.setGeometry(QtCore.QRect(10, 380, 91, 50))
+        self.pushButton_12.setObjectName(_fromUtf8("saveAlarm"))
+        self.pushButton_12.setText('Speichere')
+        self.pushButton_12.clicked.connect(self.makeSaveSchaltUhr(self)) 
+        
+        self.tab_7.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
         
         #Cam
         self.tab_6 = QtGui.QWidget()
         self.tab_6.setObjectName(_fromUtf8("tab_6")) 
         self.layout_Cam = QtGui.QFormLayout()
-        self.tabWidget.addTab(self.tab_6, _fromUtf8(""))     
-        
+        self.tabWidget.addTab(self.tab_6, _fromUtf8(""))  
+        self.tab_6.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
+        self.pushButton_10 = QtGui.QPushButton(self.tab_6)
+        self.pushButton_10.setGeometry(QtCore.QRect(10, 380, 91, 50))
+        self.pushButton_10.setObjectName(_fromUtf8("saveAlarm"))
+        self.pushButton_10.setText('Update')
+#        self.pushButton_10.setCheckable(True)
+        self.pushButton_10.clicked.connect(self.makeload_cam(self)) 
+
+        self.pushButton_11 = QtGui.QPushButton(self.tab_6)
+        self.pushButton_11.setGeometry(QtCore.QRect(100, 380, 91, 50))
+        self.pushButton_11.setObjectName(_fromUtf8("saveAlarm"))
+        self.pushButton_11.setText('Stop')
+        self.pushButton_11.clicked.connect(self.makestop(self)) 
 
 #        lbl = QtGui.QLabel(self)
 #        lbl.setPixmap(QtGui.QPixmap(image))
@@ -317,9 +360,39 @@ class Main(QtGui.QMainWindow):
         for i in wecker:
             self.scrollLayout3.addRow(weckerRow(i))
 
+    def add_SchaltUhr(self):
+        global SchaltUhren
+        self.clearLayout(self.scrollLayout4)
+        SchaltUhren = []
+        wecker = crons.get_all(typ='Gui')
+        for i in wecker:
+            self.scrollLayout4.addRow(weckerRow(i, wecker=False) )           
+            
+    def makeload_cam(self,parent=None):       
+        def wrapper():
+            global running
+            running = True 
+            self.refresh()
+        return wrapper
+
+    def makestop(self,parent=None):
+        def stoper():
+            global running
+            running = False
+        return stoper        
+        
+    def refresh(self):
+#        while True:
+        thread = LoadImageThread()
+        self.connect(thread, QtCore.SIGNAL("showImage()"), self.updateImage)
+        thread.start()         
+#            self.updateImage()
+#            time.sleep(1)
+        
     def load_cam(self):
+        QtGui.QApplication.processEvents()
         self.clearLayout(self.layout_Cam)
-        hbox = QtGui.QHBoxLayout()
+        self.hbox = QtGui.QHBoxLayout()
         url = 'http://192.168.192.36/html/cam.jpg'
 #        url = 'https://www.cleverfiles.com/howto/wp-content/uploads/2016/08/mini.jpg'
 
@@ -333,17 +406,31 @@ class Main(QtGui.QMainWindow):
         image = QtGui.QImage()
         image.loadFromData(data)
         
-        lbl = QtGui.QLabel(self)
-        lbl.setPixmap(QtGui.QPixmap(image))
-        hbox.addWidget(lbl)
-        self.layout_Cam.addRow(QtGui.QLabel(""),hbox)
+        self.lbl2 = QtGui.QLabel(self)
+        self.lbl2.setPixmap(QtGui.QPixmap(image))
+        self.hbox.addWidget(self.lbl2)
+        self.layout_Cam.addRow(QtGui.QLabel(""),self.hbox)
         self.tab_6.setLayout(self.layout_Cam)
-#        refresh_c = Timer(1, self.load_cam, [])
-#        refresh_c.start()
-#        
-
+      
+    @QtCore.pyqtSlot(str)
+    def updateImage(self):
+        url = 'http://192.168.192.36/html/cam.jpg'
+#        url = 'https://www.cleverfiles.com/howto/wp-content/uploads/2016/08/mini.jpg'
+        req = urllib2.Request(url)
+        try:
+            response = urllib2.urlopen(req)
+            data = response.read()  
+        except urllib2.URLError as e:
+            data = None
+        image = QtGui.QImage()
+        image.loadFromData(data)        
+        pixmap = QtGui.QPixmap(image)
+        self.lbl2.setPixmap(pixmap)        
             
     def update(self):
+        global running
+        running = False
+        print self.tabWidget.currentIndex()
         if self.tabWidget.currentIndex() ==6:
             self.add_wecker()
             settings = settings_r()
@@ -352,8 +439,10 @@ class Main(QtGui.QMainWindow):
                 if str(name) in settings:
                     print name, settings.get(str(name))
                     btn.setText(settings.get(str(name)))
-            QApplication.processEvents()
+            QtGui.QApplication.processEvents()
         if self.tabWidget.currentIndex() ==7:
+            self.add_SchaltUhr()            
+        if self.tabWidget.currentIndex() ==8:
             self.load_cam()
       
 
@@ -430,6 +519,7 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "2. Stock", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Settings", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("MainWindow", "Wecker", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), _translate("MainWindow", "Schaltuhr", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("MainWindow", "Kamera", None))
         #self.pushButton.setText(_translate("MainWindow", "XS1", None))
         self.pushButton_2.setText(_translate("MainWindow", "Hue", None))
@@ -514,7 +604,34 @@ class Main(QtGui.QMainWindow):
         self.lbl.setText(self.checkWecker())
         QApplication.processEvents()
         return saveWecker 
-        
+      
+    def makeSaveSchaltUhr(self,parent=None):
+        def saveSchaltUhr(self):
+            parent = {}
+            for ii in SchaltUhren:
+                name = ii.objectName().split('.')[0]
+                if name in parent:
+                    child = parent.get(name)
+                else:
+                    parent[name] = {}
+                    child = {'Name':name}
+                if "timeEdit" in ii.objectName():
+                    child['Time'] = ii.time().toString('HH:mm')
+                elif "comboBox" in ii.objectName():
+                    child['Szene'] = ii.currentText()
+                else:   
+                    if ii.checkState()  == 2:
+                        child[ii.objectName().split('.')[1]] = True
+                    else:
+                        child[ii.objectName().split('.')[1]] = False
+                parent[name] = child
+            liste = []
+            for wecker in parent:
+                liste.append(parent.get(wecker))
+                mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
+        QApplication.processEvents()
+        return saveSchaltUhr     
+    
     def checkWecker(self):
         next_i = crons.next_wecker_heute_morgen()
         return next_i
@@ -526,8 +643,8 @@ class Main(QtGui.QMainWindow):
         return True        
         
 class weckerRow(QtGui.QWidget):
-    def __init__( self ,weckerList):
-        global weckerButtons
+    def __init__( self ,weckerList, wecker=True):
+        global weckerButtons, SchaltUhren
         super(weckerRow, self).__init__(None)
         #horizontalLayoutWidget = QtGui.QWidget(self.scrollAreaWidgetContents)
         #horizontalLayoutWidget.setGeometry(QtCore.QRect(30, 10, 391, 61))
@@ -536,7 +653,7 @@ class weckerRow(QtGui.QWidget):
         #horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.font = QtGui.QFont()
         if not constants.KS:
-            self.font.setPixelSize(20)
+            self.font.setPixelSize(18)
         self.timeEdit = QtGui.QTimeEdit()
         name = weckerList.get('Name')
         self.timeEdit.setObjectName(_fromUtf8(str(name)+".timeEdit"))
@@ -548,22 +665,34 @@ class weckerRow(QtGui.QWidget):
         QTimeEdit::down-button { subcontrol-position: right; width: 40px; height: 40px;} """)
         self.timeEdit.setFont(self.font)
         horizontalLayoutWidget.addWidget(self.timeEdit)
-        weckerButtons.append(self.timeEdit)
+        if wecker:
+            weckerButtons.append(self.timeEdit)
+        else:
+            SchaltUhren.append(self.timeEdit)
         for tag in ['Mo','Di','Mi','Do','Fr','Sa','So','Eingeschaltet']:
             self.checkBox = QtGui.QCheckBox(tag)
             self.checkBox.setObjectName(_fromUtf8(str(name)+"."+tag))
             horizontalLayoutWidget.addWidget(self.checkBox)
-            weckerButtons.append(self.checkBox)
+            if wecker:
+                weckerButtons.append(self.checkBox)
+            else:
+                SchaltUhren.append(self.checkBox)                
             self.checkBox.setChecked(eval(weckerList.get(tag)))
         self.comboBox = QtGui.QComboBox()
-        weckerSzenen = scenes.list_commands("Wecker")
-        for szne in weckerSzenen:
+        if wecker:
+            SzenenList = scenes.list_commands("Wecker")
+        else:
+            SzenenList = scenes.list_commands()
+        for szne in SzenenList:
             self.comboBox.addItem(szne)    
         index = self.comboBox.findText(weckerList.get('Szene'), QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.comboBox.setCurrentIndex(index)
         self.comboBox.setObjectName(_fromUtf8(str(name)+".comboBox"))
-        weckerButtons.append(self.comboBox)
+        if wecker:        
+            weckerButtons.append(self.comboBox)
+        else:
+            SchaltUhren.append(self.comboBox)            
         horizontalLayoutWidget.addWidget(self.comboBox)
         #self.scrollArea.setWidget(self.scrollAreaWidgetContents) 
         self.setLayout(horizontalLayoutWidget)

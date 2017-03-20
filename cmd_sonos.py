@@ -4,9 +4,14 @@
 import constants
 import soco
 import wave
+import contextlib
 import subprocess
 import pwd, os
 import threading
+
+from random import choice
+
+from urllib import quote
 
 import httplib
 import requests
@@ -95,7 +100,8 @@ def main():
     #print sn.Names.get(sn.Bad)
     #sn.ActivateList(sn.Bad, sn.BadZone)
     #sn.SetPause(sn.Kueche)
-    print sn.set_device("V01KID1RUM1AV11", "Schlaflieder")
+#    print sn.set_device("V01KID1RUM1AV11", "Schlaflieder")
+    sn.play_local_file('Kinderzimmer','Es ist 16:35 Uhr')
 #    print sn.set_device('V01SCH1RUM1AV11','Nachricht')
 #    time.sleep(3)
 #    print sn.set_device('V01SCH1RUM1AV11','Return')
@@ -704,7 +710,7 @@ class sonos:
             self.soco_set_status(player) 
         return True
 
-    def ansage(self,player_ip):
+    def ansage(self,text,player_ip):
         player = soco.SoCo(player_ip)
         _, uid, _ = self.get_addr('Vm1ZIM1RUM1AV11')
         # save zone
@@ -724,6 +730,45 @@ class sonos:
                 device.unjoin()
         return True
                 
+
+    def play_local_file(self, player, text):
+        """Add a random non-py file from this folder and subfolders to soco"""
+        # Make a list of music files, right now it is done by collection all files
+        # below the current folder whose extension does not start with .py
+        # This will probably need to be modded for other pusposes.
+        if ('.wav' in text) or ('.mp3' in text):
+            filename = text
+        else:
+            subprocess.call(["espeak", "-w " + './media/' + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", text])
+            filename = "texttosonos.wav"
+        # urlencode all the path parts (but not the /'s)
+        random_file = os.path.join(
+            *[quote(part) for part in os.path.split(filename)]
+        )
+        print('\nPlaying random file:', random_file)
+        netpath = 'http://{}:{}/{}'.format(constants.eigene_IP, constants.sound_prov.PORT, random_file)
+        print netpath
+        for zone in soco.discover():
+            if zone.player_name == player:
+                break
+        zoneown = zone.uid
+        player_ip = zone.ip_address 
+            
+        self.soco_get_status(zone)
+        zone.unjoin()
+        self.ActivateList(player_ip, zoneown)
+        zone.clear_queue()
+        zone.add_uri_to_queue(netpath)
+        time.sleep(.1)
+        zone.play()
+        with contextlib.closing(wave.open('./media/'+random_file,'r')) as f:
+            frames = f.getnframes()
+            rate = f.getframerate()
+            duration = frames / float(rate)
+            print(duration)        
+        time.sleep(duration)
+        self.soco_set_status(zone) 
+        
     def set_device(self, player, command, text=''):
         if command in ["man", "auto"]:
             set_val_in_szenen(device=player, szene="Auto_Mode", value=command) 
@@ -751,7 +796,7 @@ class sonos:
         elif str(command) == "Durchsage":
             self.durchsage(text)      
         elif str(command) == "Ansage":
-            self.ansage(text,player)             
+            self.play_local_file(player, text)             
         elif str(command) == "Return":
             self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName), hergestellt = False)          
         elif ((str(command) == "resume") ):

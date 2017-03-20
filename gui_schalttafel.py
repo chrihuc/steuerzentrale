@@ -61,7 +61,7 @@ cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
-szn_typs = ['','Favorit','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
+szn_typs = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
 stockwerke = ['Vm1','V00','A00','V01','V02','']
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')

@@ -41,7 +41,7 @@ class internal:
         pass
 
     def list_commands(self):
-        return ['Update', 'Check_Anwesenheit', 'convert_mts']
+        return ['Update', 'Check_Anwesenheit', 'convert_mts', 'Klingel_Mail']
         
     def execute(self, commd):
         if commd == 'Update':
@@ -49,7 +49,9 @@ class internal:
         elif commd == 'Check_Anwesenheit':
             self.check_anwesenheit()           
         elif commd == 'convert_mts':
-            self.convert_mts()               
+            self.convert_mts()    
+        elif commd == 'Klingel_Mail':
+            aes.send_mail('Klingel', text='', url='http://192.168.192.36/html/cam.jpg')              
         
     def git_update(self):
         g = git.cmd.Git()

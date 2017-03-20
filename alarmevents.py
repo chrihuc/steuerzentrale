@@ -2,6 +2,11 @@
 
 import constants
 
+import smtplib
+import urllib2
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
 import MySQLdb as mdb
 from mysql_con import setting_r
 from messaging import messaging
@@ -89,6 +94,30 @@ class alarm_event:
                 results = cur.fetchall()      
         con.close() 
 
+    def send_mail(self, subject, text='', url=None):
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.ehlo()
+        server.starttls()
+        server.login(constants.mail_.USER,constants.mail_.PASS)
+        
+        msg = MIMEMultipart("Steurzentrale")
+        msg["From"] = constants.mail_.USER
+        msg["To"] = constants.mail_.receiver
+        msg["Subject"] = subject
+        
+        if url != None:
+            req = urllib2.Request(url)
+            try:
+                response = urllib2.urlopen(req)
+                data = response.read() 
+                img = MIMEImage(data)
+                msg.attach(img)
+            except urllib2.URLError as e:
+                data = None
+        
+        server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())        
+        
+        
     def new_event(self, description, prio=0, durchsage="", karenz=-1):
         t = threading.Thread(target=self.new_event_t, args=[description, prio, durchsage, karenz])
         t.start() 
@@ -138,12 +167,7 @@ class alarm_event:
                 self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)                  
             elif prio >= 6 and prio < 7:
                 self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description)
-                msg = MIMEText(description)
-                msg["From"] = constants.mail_.receiver
-                msg["To"] = constants.mail_.receiver
-                msg["Subject"] = "Alarm"
-                p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
-                p.communicate(msg.as_string())                 
+                self.send_mail('Alarm', text=description)               
             elif prio >= 7 and prio < 8:
                 self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)                    
                 

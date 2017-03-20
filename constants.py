@@ -14,7 +14,7 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
-
+cfg_mail ={'USER':'','PASS':'','RECIP':''}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -26,11 +26,13 @@ def init_cfg():
             else:
                 value = cfg_main.get(cfg)
             config.set('Main', cfg, value)
+            
     if not config.has_section('XS1'):
         config.add_section('XS1')
     for cfg in cfg_xs1:
         if not config.has_option('XS1', cfg):
-            config.set('XS1', cfg, cfg_xs1.get(cfg))      
+            config.set('XS1', cfg, cfg_xs1.get(cfg)) 
+            
     if not config.has_section('SQL'):
         config.add_section('SQL')
     for cfg in cfg_sql:
@@ -40,6 +42,7 @@ def init_cfg():
             else:
                 value = cfg_sql.get(cfg)
             config.set('SQL', cfg, value) 
+            
     if not config.has_section('HUE'):
         config.add_section('HUE')
     for cfg in cfg_hue:
@@ -50,6 +53,12 @@ def init_cfg():
                 value = cfg_hue.get(cfg)
             config.set('HUE', cfg, value)            
     
+    if not config.has_section('MAIL'):
+        config.add_section('MAIL')
+    for cfg in cfg_mail:
+        if not config.has_option('MAIL', cfg):
+            config.set('MAIL', cfg, cfg_mail.get(cfg)) 
+            
     # Writing our configuration file to 'main.cfg'
     with open('./main.cfg', 'wb') as configfile:
         config.write(configfile)
@@ -96,7 +105,12 @@ for i in range(0,3):
                 # constants.hue_.devices
                 notify_devices = []
                 # constants.hue_.IP
-                IP = config.get('HUE', 'IP') #"192.168.192.190"                 
+                IP = config.get('HUE', 'IP') #"192.168.192.190"   
+            class mail_:
+                # constants.sql_.IP
+                USER = config.get('MAIL', 'USER')
+                PASS = config.get('MAIL', 'PASS')
+                receiver = config.get('MAIL', 'RECIP')                 
         except:
             init_cfg()
             continue
@@ -151,6 +165,9 @@ class sql_tables:
     TV  = sql_object("TV", "TV",('TV',))
     inps = (TV, SONOS, SATELLITE, HUE, XS1)
     
+class sound_prov:
+    PORT = 8888
+    
 class udp_:
     IP = eigene_IP
     # constants.udp_.PORT
@@ -164,10 +181,6 @@ class scanner_:
     IP = "192.168.192.10"
     # constants.scanner_.PORT
     PORT = 5010   
-    
-class mail_:
-    # constants.mail_.receiver
-    receiver = ""
     
 class redundancy_:
     # constants.redundancy_.master

@@ -32,7 +32,7 @@ def main():
     #print crn.get_now(2, '5:40' ,'Wecker')
 #    crn.calculate()
 #    print crn.get_all()
-    print crn.get_all(wecker=True)
+    print crn.get_all(typ='Gui')
 #    if next_i: print next_i[0].get("delta")
 #    crn.executed(14)
 #    print next_i
@@ -69,7 +69,7 @@ class cron:
         con.close
         return liste 
     
-    def get_all(self, db=constants.sql_tables.cron.name, wecker=False):
+    def get_all(self, db=constants.sql_tables.cron.name, wecker=False, typ=None):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         dicti = {}
         liste = []    
@@ -77,7 +77,9 @@ class cron:
             cur = con.cursor()
             sql = 'SELECT * FROM '+constants.sql_tables.cron.name
             if wecker:
-                sql = 'SELECT * FROM '+constants.sql_tables.cron.name+ ' WHERE Wecker ="True"'
+                sql = 'SELECT * FROM '+constants.sql_tables.cron.name+ ' WHERE Type ="Wecker"'
+            if typ != None:
+                sql = 'SELECT * FROM '+constants.sql_tables.cron.name+ ' WHERE Type ="'+typ+'"'
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]

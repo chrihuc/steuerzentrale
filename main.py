@@ -11,6 +11,7 @@ import inp_xs1, inp_cron, inp_udp #redundancy,
 from inp_inter import anwesenheit
 from alarmevents import alarm_event
 from mysql_con import setting_s
+import sound_provider as sp
 #import sqlsync
 
 #delay for changeover
@@ -70,6 +71,10 @@ threadliste.append(t)
 t.start()
 
 t = threading.Thread(name="anwesenheit",target=anw.check_handys_service, args = [])
+threadliste.append(t)
+t.start()
+
+t = threading.Thread(name="sound_prov",target=sp.main, args = [])
 threadliste.append(t)
 t.start()
 
