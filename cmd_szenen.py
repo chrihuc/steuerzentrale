@@ -47,7 +47,7 @@ def main():
     scenes = szenen()
     constants.redundancy_.master = True
     #print scenes.list_commands()
-    print scenes.execute("SideBolAn")
+    print scenes.execute("Test")
 #    time.sleep(10)
 #    print scenes.execute("WohnziAnw")
 #    
