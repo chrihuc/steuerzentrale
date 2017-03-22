@@ -734,7 +734,8 @@ class sonos:
         return True
                 
 
-    def play_local_file(self, player, text):
+    def play_local_file(self, player_n, text):
+        print player_n
         """Add a non-py file from folder ./media and subfolders to soco"""
         # Make a list of music files, right now it is done by collection all files
         # below the current folder whose extension does not start with .py
@@ -753,7 +754,7 @@ class sonos:
         netpath = 'http://{}:{}/{}'.format(constants.eigene_IP, constants.sound_prov.PORT, random_file)
         print netpath
         for zone in soco.discover():
-            if zone.player_name == player:
+            if zone.player_name == player_n:
                 break
         zoneown = zone.uid
         player_ip = zone.ip_address 
@@ -774,13 +775,15 @@ class sonos:
         self.soco_set_status(zone) 
         
     def set_device(self, player, command, text=''):
+        # TODO: clean up this section
         print player, command, text
         if command in ["man", "auto"]:
             set_val_in_szenen(device=player, szene="Auto_Mode", value=command) 
         player, p_uid, playerName = self.get_addr(player)            
         if player in self.Devices:
             player = self.Devices.get(str(player))
-        playerName = self.Names.get(player)
+            player_ip, p_uid, playerName = self.get_addr(player)   
+        # playerName = self.Names.get(player)
         if str(command) == "Pause":
             self.SetPause(player)
         elif str(command) == "Play":
