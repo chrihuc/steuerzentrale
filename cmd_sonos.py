@@ -169,6 +169,9 @@ class sonos:
         con.close()
 
     def get_addr(self,hks):
+        """
+        translates hks haus kennzeichen system in ip, uid and p_name
+        """
         players = list(soco.discover())
         p_name = self.Devices_neu[hks]
         for player in players:
@@ -796,7 +799,7 @@ class sonos:
         elif str(command) == "Durchsage":
             self.durchsage(text)      
         elif str(command) == "Ansage":
-            self.play_local_file(player, text)             
+            self.play_local_file(playerName, text)             
         elif str(command) == "Return":
             self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName), hergestellt = False)          
         elif ((str(command) == "resume") ):
