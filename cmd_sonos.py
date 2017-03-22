@@ -765,7 +765,7 @@ class sonos:
         zone.add_uri_to_queue(netpath)
         time.sleep(.1)
         zone.play()
-        with contextlib.closing(wave.open('./media/'+random_file,'r')) as f:
+        with contextlib.closing(wave.open(location+random_file,'r')) as f:
             frames = f.getnframes()
             rate = f.getframerate()
             duration = frames / float(rate)
