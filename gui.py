@@ -25,6 +25,9 @@ from threading import Timer
 import time
 import datetime
 import os
+import socket
+#import win32api
+import random
 
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from pyqtgraph.parametertree import Parameter, ParameterTree
@@ -109,7 +112,34 @@ class LoadImageThread(QtCore.QThread):
                 self.emit(QtCore.SIGNAL('showImage()'))
                 refresh = Timer(.5, self.run, [])
                 refresh.start()
-        
+
+class ListenUdpThread(QtCore.QThread):
+        def __init__(self):
+            QtCore.QThread.__init__(self)
+            self.broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+            hostName = socket.gethostbyname( constants.eigene_IP )
+            self.broadSocket.bind( (hostName, constants.udp_.broadPORT) )            
+     
+        def __del__(self):
+            self.wait()
+            
+        def run(self):
+            SIZE = 1024
+            while True:
+                (data,addr) = self.broadSocket.recvfrom(SIZE)
+                print data
+                if not data:
+                    break
+                isdict = False
+                try:
+                    data_ev = eval(data)
+                    if type(data_ev) is dict:
+                        isdict = True
+                except Exception as serr:
+                    isdict = False  
+                if isdict:
+                    print data_ev  
+                    self.emit(QtCore.SIGNAL('showCam()'))
         
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
@@ -351,6 +381,10 @@ class Main(QtGui.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         refresh = Timer(5, self.update_values, [])
         refresh.start()
+        udpt = ListenUdpThread()
+        udptt = Timer(0, udpt.run, [])
+        self.connect(udpt, QtCore.SIGNAL("showCam()"), self.showCam)
+        udptt.start()     
 
     def add_wecker(self):
         global weckerButtons
@@ -388,7 +422,19 @@ class Main(QtGui.QMainWindow):
         thread.start()         
 #            self.updateImage()
 #            time.sleep(1)
-        
+
+    def showCam(self):
+#        win32api.SetCursorPos((random.choice(range(300)),random.choice(range(300))))
+        if constants.KS:
+            exectext = "DISPLAY=:0 xset dpms force on"
+            os.system(exectext) 
+            exectext = "xset s 30"
+            os.system(exectext)              
+        self.tabWidget.setCurrentIndex(8)
+        self.updateImage()
+        scres = Timer(30, set_screensaver, [])
+        scres.start()
+
     def load_cam(self):
         QtGui.QApplication.processEvents()
         self.clearLayout(self.layout_Cam)
@@ -572,8 +618,7 @@ class Main(QtGui.QMainWindow):
         except:
             pass
         refresh = Timer(5, self.update_values, [])
-        if running: 
-            refresh.start()        
+        refresh.start()        
 
 
     def makeSaveWecker(self,parent=None):
@@ -659,7 +704,7 @@ class weckerRow(QtGui.QWidget):
         self.timeEdit.setObjectName(_fromUtf8(str(name)+".timeEdit"))
         self.timeEdit.setTime((datetime.datetime.min+weckerList.get('Time')).time())
         self.timeEdit.setDisplayFormat("HH:mm")
-        self.timeEdit.setMinimumSize(150,50)
+        self.timeEdit.setMinimumSize(130,50)
         self.timeEdit.setStyleSheet("""
         QTimeEdit::up-button { subcontrol-position: left; width: 40px; height: 40px;}
         QTimeEdit::down-button { subcontrol-position: right; width: 40px; height: 40px;} """)
@@ -946,13 +991,15 @@ class TimeAxisItem(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):
         return [QDateTime(1970,1,1,1.0,0).addSecs(value).toString('yyyy-MM-dd hh:mm') for value in values]
 
-
+def set_screensaver():
+    if constants.KS:
+        exectext = "xset -dpms"
+        os.system(exectext)    
+        exectext = "xset s 10"
+        os.system(exectext)    
+                 
 running = True
-if constants.KS:
-    exectext = "xset -dpms"
-    os.system(exectext)    
-    exectext = "xset s 10"
-    os.system(exectext)       
+set_screensaver()
 app = QtGui.QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()

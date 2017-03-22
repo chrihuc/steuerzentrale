@@ -34,6 +34,7 @@ if True:
     dicti['Value'] = 'Test'
     #dicti['Command'] = 'Update'
     hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+    hbtsocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     hbtsocket.sendto(str(dicti),(HOST,5000))     
     
 def bidirekt(Device):
