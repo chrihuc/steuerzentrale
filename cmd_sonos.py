@@ -757,7 +757,7 @@ class sonos:
                 break
         zoneown = zone.uid
         player_ip = zone.ip_address 
-            
+        print player_ip
         self.soco_get_status(zone)
         zone.unjoin()
         self.ActivateList(player_ip, zoneown)
@@ -774,6 +774,7 @@ class sonos:
         self.soco_set_status(zone) 
         
     def set_device(self, player, command, text=''):
+        print player, command, text
         if command in ["man", "auto"]:
             set_val_in_szenen(device=player, szene="Auto_Mode", value=command) 
         player, p_uid, playerName = self.get_addr(player)            
