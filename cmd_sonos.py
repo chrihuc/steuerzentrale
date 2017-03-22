@@ -735,14 +735,15 @@ class sonos:
                 
 
     def play_local_file(self, player, text):
-        """Add a random non-py file from this folder and subfolders to soco"""
+        """Add a non-py file from folder ./media and subfolders to soco"""
         # Make a list of music files, right now it is done by collection all files
         # below the current folder whose extension does not start with .py
         # This will probably need to be modded for other pusposes.
+        location = constants.installation_folder + '/media/'
         if ('.wav' in text) or ('.mp3' in text):
             filename = text
         else:
-            subprocess.call(["espeak", "-w " + './media/' + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", text])
+            subprocess.call(["espeak", "-w " + location + "texttosonos.wav", "-a140", "-vmb-de6", "-p40", "-g0", "-s110", text])
             filename = "texttosonos.wav"
         # urlencode all the path parts (but not the /'s)
         random_file = os.path.join(
