@@ -118,7 +118,8 @@ class ListenUdpThread(QtCore.QThread):
             QtCore.QThread.__init__(self)
             self.broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
             hostName = socket.gethostbyname( constants.eigene_IP )
-            self.broadSocket.bind( (hostName, constants.udp_.broadPORT) )            
+            self.broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.broadSocket.bind( (hostName, constants.udp_.broadPORT))            
      
         def __del__(self):
             self.wait()
@@ -138,8 +139,8 @@ class ListenUdpThread(QtCore.QThread):
                 except Exception as serr:
                     isdict = False  
                 if isdict:
-                    print data_ev  
-                    self.emit(QtCore.SIGNAL('showCam()'))
+                    if data_ev['Name'] == 'Klingel':
+                        self.emit(QtCore.SIGNAL('showCam()'))
         
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
@@ -377,7 +378,7 @@ class Main(QtGui.QMainWindow):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(constants.KSHome)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         refresh = Timer(5, self.update_values, [])
         refresh.start()
@@ -434,6 +435,7 @@ class Main(QtGui.QMainWindow):
         self.updateImage()
         scres = Timer(30, set_screensaver, [])
         scres.start()
+#       TODO: self.tabWidget.setCurrentIndex(constants.KSHome)
 
     def load_cam(self):
         QtGui.QApplication.processEvents()
