@@ -507,7 +507,10 @@ class Main(QtGui.QMainWindow):
         QtCore.QCoreApplication.instance().quit()
 
     def close(self):
-        QtCore.QCoreApplication.instance().quit()        
+        global running
+        running = False
+        QtCore.QCoreApplication.instance().quit()
+        sys.exit()        
 
     def xs1_clicked(self):
         global System
@@ -623,8 +626,9 @@ class Main(QtGui.QMainWindow):
             QApplication.processEvents()
         except:
             pass
-        refresh = Timer(5, self.update_values, [])
-        refresh.start()        
+        if running:
+            refresh = Timer(5, self.update_values, [])
+            refresh.start()        
 
 
     def makeSaveWecker(self,parent=None):
