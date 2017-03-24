@@ -499,9 +499,11 @@ class Main(QtGui.QMainWindow):
         QtCore.QCoreApplication.instance().quit()
 
     def git_update(self):
+        global running
         g = git.cmd.Git()
         g.pull()
         running = False
+        sys.exit()
         QtCore.QCoreApplication.instance().quit()
 
     def close(self):
