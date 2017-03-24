@@ -378,7 +378,7 @@ class Main(QtGui.QMainWindow):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(constants.KSHome)
+        self.tabWidget.setCurrentIndex(constants.gui_.Home)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         refresh = Timer(5, self.update_values, [])
         refresh.start()
@@ -426,7 +426,7 @@ class Main(QtGui.QMainWindow):
 
     def showCam(self):
 #        win32api.SetCursorPos((random.choice(range(300)),random.choice(range(300))))
-        if constants.KS:
+        if constants.gui_.KS:
             exectext = "DISPLAY=:0 xset dpms force on"
             os.system(exectext) 
             exectext = "xset s 30"
@@ -435,7 +435,7 @@ class Main(QtGui.QMainWindow):
         self.updateImage()
         scres = Timer(30, set_screensaver, [])
         scres.start()
-#       TODO: self.tabWidget.setCurrentIndex(constants.KSHome)
+#       TODO: self.tabWidget.setCurrentIndex(constants.gui_.Home)
 
     def load_cam(self):
         QtGui.QApplication.processEvents()
@@ -699,7 +699,7 @@ class weckerRow(QtGui.QWidget):
         horizontalLayoutWidget = QtGui.QHBoxLayout()
         #horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.font = QtGui.QFont()
-        if not constants.KS:
+        if not constants.gui_.KS:
             self.font.setPixelSize(18)
         self.timeEdit = QtGui.QTimeEdit()
         name = weckerList.get('Name')
@@ -994,7 +994,7 @@ class TimeAxisItem(pg.AxisItem):
         return [QDateTime(1970,1,1,1.0,0).addSecs(value).toString('yyyy-MM-dd hh:mm') for value in values]
 
 def set_screensaver():
-    if constants.KS:
+    if constants.gui_.KS:
         exectext = "xset -dpms"
         os.system(exectext)    
         exectext = "xset s 10"
