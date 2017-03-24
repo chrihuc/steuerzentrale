@@ -126,7 +126,7 @@ class ListenUdpThread(QtCore.QThread):
             
         def run(self):
             SIZE = 1024
-            while True:
+            while running:
                 (data,addr) = self.broadSocket.recvfrom(SIZE)
                 print data
                 if not data:
