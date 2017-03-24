@@ -99,6 +99,7 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)    
 
 running = True
+streaming = True
         
 class LoadImageThread(QtCore.QThread):
         def __init__(self):
@@ -108,7 +109,7 @@ class LoadImageThread(QtCore.QThread):
             self.wait()
             
         def run(self):
-            if running:
+            if streaming:
                 self.emit(QtCore.SIGNAL('showImage()'))
                 refresh = Timer(.5, self.run, [])
                 refresh.start()
@@ -405,15 +406,15 @@ class Main(QtGui.QMainWindow):
             
     def makeload_cam(self,parent=None):       
         def wrapper():
-            global running
-            running = True 
+            global streaming
+            streaming = True 
             self.refresh()
         return wrapper
 
     def makestop(self,parent=None):
         def stoper():
-            global running
-            running = False
+            global streaming
+            streaming = False
         return stoper        
         
     def refresh(self):
@@ -500,6 +501,7 @@ class Main(QtGui.QMainWindow):
     def git_update(self):
         g = git.cmd.Git()
         g.pull()
+        running = False
         QtCore.QCoreApplication.instance().quit()
 
     def close(self):
