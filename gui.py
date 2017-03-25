@@ -148,7 +148,16 @@ class Main(QtGui.QMainWindow):
         super(Main, self).__init__(parent)
         self.set_buttons = [{'Name':'xs1_clicked','desc':'XS1','type':'int','command':self.xs1_clicked,'pos_x':0,'pos_y':10}]
         self.setupUi(self)
-
+        self.set_screensaver()
+    
+    def set_screensaver(self):
+        if constants.gui_.KS:
+            exectext = "xset -dpms"
+            os.system(exectext)    
+            exectext = "xset s 10"
+            os.system(exectext) 
+        self.tabWidget.setCurrentIndex(constants.gui_.Home)
+        
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(700, 500)
@@ -203,7 +212,7 @@ class Main(QtGui.QMainWindow):
 
         #2. Stock
         self.tab_2 = QtGui.QWidget()
-        #self.tab_2.setStyleSheet("QWidget {background-image:url(./EG.png)}")
+        self.tab_2.setStyleSheet("QWidget {background-image:url(./DG.png)}")
         self.tab_2.setObjectName(_fromUtf8("2_Stock")) 
         for btn in dg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab_2))
@@ -418,32 +427,28 @@ class Main(QtGui.QMainWindow):
         return stoper        
         
     def refresh(self):
-#        while True:
         thread = LoadImageThread()
         self.connect(thread, QtCore.SIGNAL("showImage()"), self.updateImage)
         thread.start()         
-#            self.updateImage()
-#            time.sleep(1)
+
 
     def showCam(self):
-#        win32api.SetCursorPos((random.choice(range(300)),random.choice(range(300))))
-        if constants.gui_.KS:
+        if constants.gui_.KlingelAn:
             exectext = "DISPLAY=:0 xset dpms force on"
             os.system(exectext) 
+        if constants.gui_.KS:
             exectext = "xset s 30"
             os.system(exectext)              
         self.tabWidget.setCurrentIndex(8)
         self.updateImage()
-        scres = Timer(30, set_screensaver, [])
+        scres = Timer(30, self.set_screensaver, [])
         scres.start()
-#       TODO: self.tabWidget.setCurrentIndex(constants.gui_.Home)
 
     def load_cam(self):
         QtGui.QApplication.processEvents()
         self.clearLayout(self.layout_Cam)
         self.hbox = QtGui.QHBoxLayout()
         url = 'http://192.168.192.36/html/cam.jpg'
-#        url = 'https://www.cleverfiles.com/howto/wp-content/uploads/2016/08/mini.jpg'
 
         req = urllib2.Request(url)
         try:
@@ -464,7 +469,6 @@ class Main(QtGui.QMainWindow):
     @QtCore.pyqtSlot(str)
     def updateImage(self):
         url = 'http://192.168.192.36/html/cam.jpg'
-#        url = 'https://www.cleverfiles.com/howto/wp-content/uploads/2016/08/mini.jpg'
         req = urllib2.Request(url)
         try:
             response = urllib2.urlopen(req)
@@ -1000,16 +1004,9 @@ class MySZTreePopup(QtGui.QMainWindow):
 class TimeAxisItem(pg.AxisItem):
     def tickStrings(self, values, scale, spacing):
         return [QDateTime(1970,1,1,1.0,0).addSecs(value).toString('yyyy-MM-dd hh:mm') for value in values]
-
-def set_screensaver():
-    if constants.gui_.KS:
-        exectext = "xset -dpms"
-        os.system(exectext)    
-        exectext = "xset s 10"
-        os.system(exectext)    
+    
                  
 running = True
-set_screensaver()
 app = QtGui.QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()

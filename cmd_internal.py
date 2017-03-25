@@ -68,6 +68,9 @@ class internal:
         alle_da_act = eval(setting_r('Alle_Bewohner_anwesend')) 
         alle_weg_act = eval(setting_r('Alle_Bewohner_abwesend')) 
         for person in bewohner:
+            ip_adress = person['Handy_IP']
+            if ip_adress == None:
+                continue            
             state = person['Handy_State']
             name = 'Bew_' + str(person['Name'])
             akt_stat = eval(setting_r(person['Name']))

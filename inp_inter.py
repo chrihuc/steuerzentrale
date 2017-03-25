@@ -43,6 +43,8 @@ class anwesenheit:
         bewohner = mdb_get_table(constants.sql_tables.Bewohner.name)
         for person in bewohner:
             ip_adress = person['Handy_IP']
+            if ip_adress == None:
+                continue
             state = person['Handy_State']
             if state == None:
                 state = 0
