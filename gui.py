@@ -56,12 +56,13 @@ System = None
 Device = None
 constants.redundancy_.master = True
 
-eg_buttons = [{'Name':'V00WOH1RUM1LI01','desc':'Decke','type':'dev','pos_x':150,'pos_y':310},
-              {'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
+eg_buttons = [{'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
               {'Name':'V00WOH1RUM1CO01','desc':'CO2','type':'sens','pos_x':150,'pos_y':150},
               {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20},
-              {'Name':'V00KUE1RUM1TE02','desc':'T Kueche','type':'sens','pos_x':600,'pos_y':150},
-              {'Name':'V00KUE1DEK1LI02','desc':'Decke','type':'dev','pos_x':500,'pos_y':290}]
+              {'Name':'V00KUE1RUM1TE02','desc':'T Kueche','type':'sens','pos_x':650,'pos_y':175},
+              {'Name':'V00KUE1DEK1LI01','desc':'Decke','type':'dev','pos_x':700,'pos_y':270},
+              {'Name':'V00KUE1DEK1LI02','desc':'Decke','type':'dev','pos_x':500,'pos_y':290},
+              {'Name':'V00WOH1DEK1LI01','desc':'Decke','type':'dev','pos_x':390,'pos_y':270}]
               
 og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150,'pos_y':300},
               {'Name':'V01BAD1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':550,'pos_y':120},
@@ -70,7 +71,7 @@ og_buttons = [{'Name':'V01BUE1RUM1LI01','desc':u'Büro','type':'dev','pos_x':150
               {'Name':'V01KID1RUM1TE01','desc':'T Kind','type':'sens','pos_x':150,'pos_y':20}
               ]
               
-dg_buttons = [{'Name':'V02ZIM1RUM1TE02','desc':u'Büro','type':'sens','pos_x':550,'pos_y':120}]              
+dg_buttons = [{'Name':'V02ZIM1RUM1TE02','desc':u'Büro','type':'sens','pos_x':500,'pos_y':260}]              
 
 weckerButtons = []
 SchaltUhren = []
@@ -505,6 +506,7 @@ class Main(QtGui.QMainWindow):
     def git_update(self):
         global running
         g = git.cmd.Git()
+        g.reset('--hard')
         g.pull()
         running = False
         sys.exit()
@@ -622,11 +624,20 @@ class Main(QtGui.QMainWindow):
     def update_values(self):
         try:
             settings = settings_r()
+        except:
+            pass
+        try:            
             self.lbl.setText(self.checkWecker())
+        except:
+            pass
+        try:            
             for btn in self.buttons:
                 name = btn.objectName()
                 if str(name) in settings:
                     btn.setText(settings.get(str(name)))
+        except:
+            pass
+        try:                    
             QApplication.processEvents()
         except:
             pass

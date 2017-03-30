@@ -33,6 +33,7 @@ from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_szenen import szenen
+import timeit
 
 #from gui_inp import SzenenTreeInputs
 
@@ -74,6 +75,9 @@ constants.redundancy_.master = True
 #   codes mit listen ersetzen
 #==============================================================================
 
+start = timeit.default_timer()
+
+#Your statements here
 
 ## test subclassing parameters
 ## This parameter automatically generates two child parameters which are always reciprocals of each other
@@ -791,7 +795,6 @@ class SettingsTree():
         return kommandos        
         
     def set_paratree(self):
-        global p, name
         params = []
         dicti = {'name': u'Settings', 'type': 'group', 'expanded': True}
         kinder = []
@@ -880,11 +883,16 @@ def update():
     sets = mdb_get_table(constants.sql_tables.settings.name)
     selected(lastSelected) 
     inp=InputsTree(isInputs = True, inputsGroup = str(comboBox5.currentText()))
+    print "set t2"
+    print timeit.default_timer() - start 
     t2.setParameters(inp.p, showTop=False)
+    print timeit.default_timer() - start 
     cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
-    t3.setParameters(cmds.p, showTop=False) 
+    t3.setParameters(cmds.p, showTop=False)
+    print timeit.default_timer() - start 
     seTre = SettingsTree()
-    t4.setParameters(seTre.p, showTop=False)    
+    t4.setParameters(seTre.p, showTop=False)  
+    print timeit.default_timer() - start 
     comboBox.clear()
     for szne in szn_lst:
         comboBox.addItem(szne) 
@@ -979,25 +987,34 @@ def updt_sznlst():
     for szne in szn_lst:
         comboBox.addItem(szne)    
 
+print timeit.default_timer() - start 
 win = QtGui.QWidget()
 
 t = ParameterTree()
 #sz=Szenen_tree("Alles_ein")
 inp=InputsTree(isInputs = True, inputsGroup = 'V00')
+print timeit.default_timer() - start 
+            # 0.747
 
 #t.setParameters(sz.p, showTop=False)
 #t.setWindowTitle('Szenen Setup:')
 t2 = ParameterTree()
-t2.setParameters(inp.p, showTop=False)
+print timeit.default_timer() - start 
+            # 0.7
+#t2.setParameters(inp.p, showTop=False)
+print timeit.default_timer() - start 
+            # 16.69
+
 t3 = ParameterTree()
+print timeit.default_timer() - start 
 cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
 #t3.setParameters(cmds.p, showTop=False)
-
+print timeit.default_timer() - start 
 t4 = ParameterTree()
 #seTre = SettingsTree()
 #t4.setParameters(seTre.p, showTop=False)
 
-
+print timeit.default_timer() - start 
 inp.p.sigTreeStateChanged.connect(change)
 
 layout = QtGui.QGridLayout()
@@ -1022,7 +1039,7 @@ for itm in stockwerke:
 comboBox5.setCurrentIndex(1)
 comboBox5.activated[str].connect(updInputs)  
 
-
+print timeit.default_timer() - start 
 update()
 #selected('Gehen')
 
@@ -1052,7 +1069,7 @@ layout.addWidget(t4, 3, 3, 1, 1)
 win.setWindowTitle('Schalttafel')
 win.show()
 win.resize(1400,1200)
-
+print timeit.default_timer() - start 
 #==============================================================================
 # till here
 #==============================================================================
