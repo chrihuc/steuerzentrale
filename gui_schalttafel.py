@@ -623,10 +623,10 @@ class Szenen_tree():
             for j, eintrag in enumerate(wert):
                 bedingungen[i][j]=re_calc(eintrag)
         efuellt = szn.__bedingung__(bedingungen,verbose=True)
-#        if efuellt:
-#            easygui.msgbox("Szene würde ausgeführt", title="Bedingung Check")
-#        else:
-#            easygui.msgbox("Szene würde NICHT ausgeführt", title="Bedingung Check")
+        if efuellt:
+            easygui.msgbox("Szene würde ausgeführt", title="Bedingung Check")
+        else:
+            easygui.msgbox("Szene würde NICHT ausgeführt", title="Bedingung Check")
 
     def execute(self):
         constants.redundancy_.master = True

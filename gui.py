@@ -115,11 +115,24 @@ class LoadImageThread(QtCore.QThread):
                 refresh = Timer(.5, self.run, [])
                 refresh.start()
 
+class RefreshGuiThread(QtCore.QThread):
+        def __init__(self):
+            QtCore.QThread.__init__(self)
+     
+        def __del__(self):
+            self.wait()
+            
+        def run(self):
+            if streaming:
+                self.emit(QtCore.SIGNAL('update_values()'))
+                refresh = Timer(15, self.run, [])
+                refresh.start()
+
 class ListenUdpThread(QtCore.QThread):
         def __init__(self):
             QtCore.QThread.__init__(self)
             self.broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-            hostName = socket.gethostbyname( constants.eigene_IP )
+            hostName = socket.gethostbyname( '192.168.192.255')#constants.eigene_IP )
             self.broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.broadSocket.bind( (hostName, constants.udp_.broadPORT))            
      
@@ -173,7 +186,7 @@ class Main(QtGui.QMainWindow):
         
         # Keller
         self.tab_0 = QtGui.QWidget()
-        #self.tab_0.setStyleSheet("QWidget {background-image:url(./EG.png)}")
+        self.tab_0.setStyleSheet("QWidget {background-image:url(./UG.png)}")
         self.tab_0.setObjectName(_fromUtf8("Keller"))   
         self.tabWidget.addTab(self.tab_0, _fromUtf8(""))
         
@@ -391,8 +404,9 @@ class Main(QtGui.QMainWindow):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(constants.gui_.Home)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        refresh = Timer(5, self.update_values, [])
-        refresh.start()
+        thread_ref = RefreshGuiThread()
+        self.connect(thread_ref, QtCore.SIGNAL("update_values()"), self.update_values)
+        thread_ref.start()  
         udpt = ListenUdpThread()
         udptt = Timer(0, udpt.run, [])
         self.connect(udpt, QtCore.SIGNAL("showCam()"), self.showCam)
@@ -482,23 +496,22 @@ class Main(QtGui.QMainWindow):
         self.lbl2.setPixmap(pixmap)        
             
     def update(self):
-        global running
-        running = False
-        print self.tabWidget.currentIndex()
         if self.tabWidget.currentIndex() ==6:
             self.add_wecker()
-            settings = settings_r()
-            for btn in self.buttons:
-                name = btn.objectName()
-                if str(name) in settings:
-                    print name, settings.get(str(name))
-                    btn.setText(settings.get(str(name)))
-            QtGui.QApplication.processEvents()
+            self.update_values()
         if self.tabWidget.currentIndex() ==7:
             self.add_SchaltUhr()            
         if self.tabWidget.currentIndex() ==8:
             self.load_cam()
-      
+
+    def update_values(self):
+        settings = settings_r()
+        for btn in self.buttons:
+            name = btn.objectName()
+            if str(name) in settings:
+                print name, settings.get(str(name))
+                btn.setText(settings.get(str(name)))
+        QtGui.QApplication.processEvents()             
 
     def close_clicked(self):
         QtCore.QCoreApplication.instance().quit()
@@ -619,31 +632,7 @@ class Main(QtGui.QMainWindow):
             self.w = MySZTreePopup(self,Name)
             #self.w.setGeometry(QRect(500, 100, 200, 400))
             self.w.show() 
-        return set_tree_popup
-
-    def update_values(self):
-        try:
-            settings = settings_r()
-        except:
-            pass
-        try:            
-            self.lbl.setText(self.checkWecker())
-        except:
-            pass
-        try:            
-            for btn in self.buttons:
-                name = btn.objectName()
-                if str(name) in settings:
-                    btn.setText(settings.get(str(name)))
-        except:
-            pass
-        try:                    
-            QApplication.processEvents()
-        except:
-            pass
-        if running:
-            refresh = Timer(5, self.update_values, [])
-            refresh.start()        
+        return set_tree_popup      
 
 
     def makeSaveWecker(self,parent=None):
