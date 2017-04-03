@@ -65,6 +65,14 @@ cmd_lsts = list(set(cmd_lsts))
 szn_typs = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
 stockwerke = ['Vm1','V00','A00','V01','V02','']
 
+stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
+                   'A00':'Draussen', '':''}
+zim_dict = {'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette',
+            'SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer'}
+furn_dict = {'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang',
+             'STV':'Stromversorgung', 'RUM':'Raum', 'DEK':'Decke', '':''}
+             
+
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
 
@@ -770,6 +778,72 @@ class InputsTree():
             else:
                 for item in some_object: 
                     self.itera(some_object.get(item))
+
+class TreeInputsDevices():
+    def __init__(self):
+        self.inputs = mdb_get_table(db='cmd_inputs')
+        self.set_paratree()
+        
+    def set_paratree(self):
+        params = []
+        # top level floors
+        top_level = {'name': u'Eingänge', 'type': 'group', 'expanded': True, 'children':[]}
+        for floor in stockwerke_dict:
+            floor_obj = {'name': stockwerke_dict[floor], 'type': 'group', 'expanded': True, 
+                         'Id':floor}
+            top_level['children'].append(floor_obj)
+        for aktuator in sorted(self.inputs):
+            level = aktuator[:3]
+            raum = aktuator[3:7]
+            furni = aktuator[7:11]
+            device = aktuator[11:]
+            if not level in top_level['children']:
+                floor_obj = {'name': stockwerke_dict[floor], 'type': 'group', 'expanded': True, 
+                             'Id':floor}
+                top_level['children'].append(floor_obj)                
+
+    def save(self):
+        global state
+        self.state = self.p.saveState()
+        neu_szene = self.itera(self.state)
+
+    def newCommand(self):
+        mdb_add_table_entry(table=self.cmdTable, values={'Name':'Neuer Befehl'})     
+        self.set_paratree()
+
+    def check_iter(self,some_object):
+        try:
+            iter(some_object)
+            if type(some_object) <> str:  
+                return True
+            else:
+                return False
+        except TypeError, te:
+            return False
+
+    def itera(self,some_object):
+        dicti = {}
+        if self.check_iter(some_object):
+            if some_object.get('type') == 'group':
+                eingang = some_object.get('name')
+                if eingang in self.eingaenge and eingang <> None:
+                    for aktuator in self.inputs:
+                        if str(aktuator.get('Id')) == str(eingang):  
+                            for kind in some_object.get('children'):
+                                wert = some_object.get('children').get(kind).get('value')
+                                if wert == '': wert = None
+                                if wert <> aktuator.get(kind):
+                                    dicti[kind] = wert
+                            if self.isInputs:
+                                mdb_set_table(table=constants.sql_tables.inputs.name, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
+                            elif len(dicti) > 0:
+                                mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id', translate = False)
+                else:
+                    self.itera(some_object.get('children'))
+            else:
+                for item in some_object: 
+                    self.itera(some_object.get(item))
+
 
 sets = []
 
