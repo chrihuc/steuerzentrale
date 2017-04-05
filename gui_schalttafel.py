@@ -796,22 +796,26 @@ stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2.
 zim_dict = {'ZIM':'Zimmer','WOH':'Wohnzimmer','KUE':u'Küche','BAD':u'Badezimmer/Toilette',
             'SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer'}
 furn_dict = {'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang',
-             'STV':'Stromversorgung', 'RUM':'Raum', 'DEK':'Decke', '':''}
+             'STV':'Stromversorgung', 'RUM':'Raum', 'DEK':'Decke', 'SRA':'Schrank',
+             'SOF':'Sofa', 'TUE':u'Tür', 'SEV':'Server', 'PFL':'Pflanzen'}
 
 class TreeInputsDevices(object):
-    def __init__(self, inputs):
+    def __init__(self, callback=None):
+        self.cb = callback
         #self.inputs = mdb_get_table(db='cmd_inputs')
         self.params = []        
-        self.set_paratree(inputs)
+#        self.set_paratree(inputs)
 
-    def add_sub_object(self, top_object, sub_object_Id):
+    def add_sub_object(self, top_object, sub_object_Id, expanded=True):
         name = None
+        if sub_object_Id[:3] in furn_dict:
+            expanded=False
         for liste in [stockwerke_dict, zim_dict, furn_dict]:
             if sub_object_Id[:3] in liste:
                 name = liste[sub_object_Id[:3]]
                 break
         
-        sub_object = {'title': name, 'type': 'group', 'expanded': True, 
+        sub_object = {'title': name, 'type': 'group', 'expanded': expanded, 
                              'name':sub_object_Id, 'children':[]}
         top_object['children'].append(sub_object)
         return sub_object
@@ -819,13 +823,20 @@ class TreeInputsDevices(object):
     def get_sub_object(self, top_object, sub_object_Id):
         for obj in top_object['children']:
             if obj['name'] == sub_object_Id:
-                return sub_object_Id
+                return obj
         return self.add_sub_object(top_object, sub_object_Id)
 
     def add_device(self, top_object, device):
-        device_id = device['Name']
+        device_id = device['Id']
         device_desc = device['Description']
-        dev_obj = {'title': device_desc, 'type': 'str', 'expanded': True, 'name':device_id} 
+        dev_obj = {'title': device['Name'], 'type': 'group', 'expanded': True, 
+                   'name':str(device_id), 'children':[]}
+        kind = {'title': device['Name'], 'type': 'str', 'expanded': True, 
+                'name':'Beschreibung', 'value':device_desc} 
+        dev_obj['children'].append(kind)                    
+        kind = {'title': device['Name'], 'type': 'action', 'expanded': True, 
+                'name':str(device_id), 'value':device_desc} 
+        dev_obj['children'].append(kind)   
         top_object['children'].append(dev_obj)
     
     def set_paratree(self, inputs):
@@ -836,48 +847,80 @@ class TreeInputsDevices(object):
 #                         'Id':floor}
 #            top_level['children'].append(floor_obj)
         for aktuator in sorted(inputs):
-            aktuator_id = aktuator['Name']
-            level = aktuator_id[:3]
-            level_obj = self.get_sub_object(top_level, level)
-            raum = aktuator_id[3:7]
-            raum_obj = self.get_sub_object(level_obj, raum)
-            furni = aktuator_id[7:11]
-            furni_obj = self.get_sub_object(raum_obj, furni)
-            device = aktuator_id[11:]
-            self.add_device(furni_obj, aktuator)
-           
-        self.params = Parameter.create(name='params', type='group', children=top_level)
+            aktuator_hks = aktuator['Name']
+            level = aktuator_hks[:3]
+            if level[:1] == 'V':
+                level_obj = self.get_sub_object(top_level, level)
+                raum = aktuator_hks[3:7]
+                raum_obj = self.get_sub_object(level_obj, raum)
+                furni = aktuator_hks[7:11]
+                furni_obj = self.get_sub_object(raum_obj, furni)
+                device = aktuator_hks[11:]
+                self.add_device(furni_obj, aktuator)
+        self.params = Parameter.create(name='params', type='group', children=[top_level])
+        self.walk_param(self.params)
+    
+    def walk_param(self, obj):
+        if obj.isType('group'):
+            for kid in obj.children():
+                self.walk_param(kid)
+        elif obj.isType('action'):
+            obj.sigActivated.connect(self.printit(obj.name()))
+            
+    def printit(self, value):
+        def print_wrapper():
+            self.cb(value)
+        return print_wrapper
         
 class TreeInputDevice(object):
-    def __init__(self, inputs, device):
+    def __init__(self):
         self.params = []
-        self.inputs = inputs
-        self.set_paratree(device)
+        self._inputs = None
+#        self.set_paratree(device)
 
-    def set_paratree(self, device_name):
-        _szn_lst = []
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @inputs.setter
+    def inputs(self, value): 
+        self._inputs = value 
+        
+    def set_paratree(self, device_id):
         for device in self.inputs:
-            if device['Name'] == device_name:
+            if str(device['Id']) == str(device_id):
                 break
-        top_level = {'name': device_name, 'type': 'group', 'expanded': True, 'children':[]}
+        top_level = {'name': device['Name'], 'type': 'group', 'expanded': True, 'children':[]}
         kinder = top_level['children']
+        kinder.insert(0, {'name':'Description', 'title':'Beschreibung', 'type': 'str',
+                                  'value':device['Description']})        
         for feature, value in device.iteritems():
             if feature in ['Logging','Setting','Doppelklick']:
-                kinder.append({'name':feature, 'type': 'bool', 'value':bool(value)})
-            elif feature in ['Description']:
-                kinder.insert(0, {'name':feature, 'title':'Beschreibung', 'type': 'str',
-                                  'value':value})
+                kinder.insert(1, {'name':feature, 'type': 'bool', 'value':bool(value)})
             elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise', 
                              'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',
                              'Dreifach']:
                 kinder.append({'name':feature, 'type': 'list', 'value':value, 
-                               'values':sorted(_szn_lst)}) 
-            elif feature in ['Id']:
+                               'values':sorted(szn_lst)}) 
+            elif feature in ['Id', 'Description']:
                 pass
             else:
-                kinder.append({'name':feature, 'type': 'str', 'value':value})
-        
-        self.params = Parameter.create(name='params', type='group', children=top_level)
+                kinder.insert(1, {'name':feature, 'type': 'str', 'value':value})
+        top_level_list = [top_level]
+        action = {'name': 'Speichern', 'type': 'action'}
+        top_level_list.append(action)
+        self.params = Parameter.create(name='params', type='group', children=top_level_list)
+        self.params.child('Speichern').sigActivated.connect(self.speichern)
+    
+    def speichern(self):
+        szene = {}
+        print "doing"
+        for kind in self.params.children():
+            if kind.isType('group'):
+                for enkel in kind.children():
+                    szene[enkel.name()] = enkel.value()
+        print szene
+
 """
 old part
 """
@@ -965,15 +1008,19 @@ class SettingsTree():
                     self.itera(some_object.get(item))
 
 sz=Szenen_tree('')                    
+def print_vale(value):
+    print value
 
 def populate_input_tree_1():
     ipts = mdb_get_table(db='cmd_inputs')
-    tree_ipt_dev_vals = TreeInputsDevices(ipts)
-    tree_inputs_devices.setParameters(tree_ipt_dev_vals.params, showTop=False)
+    tree_ipt_devices.set_paratree(ipts)
+    tree_inputs_devices.setParameters(tree_ipt_devices.params, showTop=False)
+    tree_ipt_devices.params.sigStateChanged.connect(change)
 
-def populate_input_tree_2():
+def populate_input_tree_2(szene=''):
     ipts = mdb_get_table(db='cmd_inputs')
-    tree_ipt_dev_vals = TreeInputDevice(ipts, '')
+    tree_ipt_dev_vals.inputs = ipts
+    tree_ipt_dev_vals.set_paratree(szene)
     tree_input_device.setParameters(tree_ipt_dev_vals.params, showTop=False)
 
 def populate_dvcs_cmds_tree():
@@ -1033,6 +1080,7 @@ def update():
     update_device_lists()
     selected(lastSelected) 
     populate_input_tree_1() 
+    populate_input_tree_2()
     populate_dvcs_cmds_tree()
     populate_settngs_tree()
     updt_sznlst() 
@@ -1108,10 +1156,15 @@ def updt_sznlst():
     for szne in szn_lst:
         cBox_scenes.addItem(szne)    
 
+        
+tree_ipt_devices = TreeInputsDevices(callback=populate_input_tree_2)   
+tree_ipt_dev_vals = TreeInputDevice()     
+        
 # setup window
 win = QtGui.QWidget()
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
+win.showMaximized()
 
 #inp=InputsTree(isInputs = True, inputsGroup = 'V00') 
 #cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])

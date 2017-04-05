@@ -2,7 +2,7 @@
 """
 Created on Mon Apr 03 11:57:40 2017
 
-@author: 212505558
+@author: chuckle
 1."""
 
 #test teil
