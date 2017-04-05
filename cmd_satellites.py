@@ -55,6 +55,7 @@ def main():
 class satelliten:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     mysocket_old = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+    mysocket_old.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     
     def __init__ (self):
         self.__init_table__()

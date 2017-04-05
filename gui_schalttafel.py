@@ -669,7 +669,6 @@ class InputsTree():
         self.set_paratree()
         
     def set_paratree(self):
-        global p, name
         params = []
         if self.isInputs:
             inp_dict = {'name': u'Eingänge', 'type': 'group', 'expanded': True}
@@ -857,15 +856,15 @@ class SettingsTree():
 sz=Szenen_tree('')                    
                     
 def selected(text):
-    global sz, t, lastSelected
+    global sz, tree_w_szenes, lastSelected
     lastSelected = text
     sz.update(lastSelected)
     print 'selected'
-    t.setParameters(sz.p, showTop=False)
+    tree_w_szenes.setParameters(sz.p, showTop=False)
     sz.p.sigTreeStateChanged.connect(change_sz)
 
 def update():
-    global inp,t,t2,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox2, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
+    global inp,tree_w_inputs,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox2, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
     szn_lst = sorted(szn.list_commands(gruppe=''))
     xs1_devs = xs1.list_devices()
     xs1_cmds = xs1.dict_commands()
@@ -883,9 +882,9 @@ def update():
     sets = mdb_get_table(constants.sql_tables.settings.name)
     selected(lastSelected) 
     inp=InputsTree(isInputs = True, inputsGroup = str(comboBox5.currentText()))
-    print "set t2"
+    print "set tree_w_inputs"
     print timeit.default_timer() - start 
-    t2.setParameters(inp.p, showTop=False)
+    tree_w_inputs.setParameters(inp.p, showTop=False)
     print timeit.default_timer() - start 
     cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
     t3.setParameters(cmds.p, showTop=False)
@@ -913,14 +912,14 @@ def neuTrig():
     mdb_add_table_entry("cmd_inputs",vals)
     
 def updInputs():
-    global inp, t2
+    global inp, tree_w_inputs
     inp=InputsTree(isInputs = True, inputsGroup=str(comboBox5.currentText()))
-    t2.setParameters(inp.p, showTop=False)    
+    tree_w_inputs.setParameters(inp.p, showTop=False)    
 
 def showInputs(eingang):
-    global inp, t2   
+    global inp, tree_w_inputs   
     inp=InputsTree(expand = eingang)
-    t2.setParameters(inp.p, showTop=False)
+    tree_w_inputs.setParameters(inp.p, showTop=False)
     inp.p.sigTreeStateChanged.connect(change)    
 
 #==============================================================================
@@ -983,14 +982,14 @@ def slctCmdLst(text):
 def updt_sznlst():
     global comboBox
     comboBox.clear()
-    szn_lst = sorted(szn.list_commands(str(comboBox4.currentText())))
+    szn_lst = sorted(szn.list_commands(str(comboBox_szn_types.currentText())))
     for szne in szn_lst:
         comboBox.addItem(szne)    
 
 print timeit.default_timer() - start 
 win = QtGui.QWidget()
 
-t = ParameterTree()
+tree_w_szenes = ParameterTree()
 #sz=Szenen_tree("Alles_ein")
 inp=InputsTree(isInputs = True, inputsGroup = 'V00')
 print timeit.default_timer() - start 
@@ -998,10 +997,11 @@ print timeit.default_timer() - start
 
 #t.setParameters(sz.p, showTop=False)
 #t.setWindowTitle('Szenen Setup:')
-t2 = ParameterTree()
+tree_w_inputs = ParameterTree()
+tree_select_input = ParameterTree()
 print timeit.default_timer() - start 
             # 0.7
-#t2.setParameters(inp.p, showTop=False)
+#tree_w_inputs.setParameters(inp.p, showTop=False)
 print timeit.default_timer() - start 
             # 16.69
 
@@ -1028,10 +1028,10 @@ comboBox.activated[str].connect(selected)
 comboBox2 = QtGui.QComboBox(win)
 comboBox3 = QtGui.QComboBox(win)
 
-comboBox4 = QtGui.QComboBox(win)
+comboBox_szn_types = QtGui.QComboBox(win)
 for itm in szn_typs:
-    comboBox4.addItem(itm)
-comboBox4.activated[str].connect(updt_sznlst)    
+    comboBox_szn_types.addItem(itm)
+comboBox_szn_types.activated[str].connect(updt_sznlst)    
 
 comboBox5 = QtGui.QComboBox(win)
 for itm in stockwerke:
@@ -1043,9 +1043,9 @@ print timeit.default_timer() - start
 update()
 #selected('Gehen')
 
-buttn = QtGui.QPushButton(win)
-buttn.setText('Update')
-buttn.clicked.connect(update)
+buttn_update = QtGui.QPushButton(win)
+buttn_update.setText('Update')
+buttn_update.clicked.connect(update)
 
 adinbttn = QtGui.QPushButton(win)
 adinbttn.setText('Neuer Trigger')
@@ -1053,18 +1053,20 @@ adinbttn.clicked.connect(neuTrig)
 
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
 #szene preselection
-layout.addWidget(comboBox4, 1, 1, 1, 1)
+layout.addWidget(comboBox_szn_types, 1, 1, 1, 1)
 
-layout.addWidget(buttn, 1, 0, 1, 1)
+layout.addWidget(buttn_update, 1, 0, 1, 1)
 layout.addWidget(comboBox5, 2, 0, 1, 1)
-layout.addWidget(t2, 3, 0, 1, 1)
-layout.addWidget(comboBox3, 4, 0, 1, 1)
-layout.addWidget(adinbttn, 5, 0, 1, 1)
+layout.addWidget(tree_w_inputs, 3, 0, 1, 1)
+layout.addWidget(tree_select_input,4,0,1,1)
+layout.addWidget(comboBox3, 5, 0, 1, 1)
+layout.addWidget(adinbttn, 6, 0, 1, 1)
 layout.addWidget(comboBox, 2, 1, 1, 1)
-layout.addWidget(t, 3, 1, 1, 1)
+#                               r, c, rs, cs
+layout.addWidget(tree_w_szenes, 3, 1, 2, 1)
 layout.addWidget(comboBox2, 2, 2, 1, 1)
-layout.addWidget(t3, 3, 2, 1, 1)
-layout.addWidget(t4, 3, 3, 1, 1)
+layout.addWidget(t3, 3, 2, 2, 1)
+layout.addWidget(t4, 3, 3, 2, 1)
 
 win.setWindowTitle('Schalttafel')
 win.show()

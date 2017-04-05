@@ -12,6 +12,7 @@ import time, datetime
 from mysql_con import setting_r
 
 # TODO: class scene
+# TODO: operationalize it, 
 
 delay = 1 * 60
 
