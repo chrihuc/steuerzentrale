@@ -133,11 +133,13 @@ class RefreshGuiThread(QtCore.QThread):
 class ListenUdpThread(QtCore.QThread):
         def __init__(self):
             QtCore.QThread.__init__(self)
+            self.active = True
             self.broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
             hostName = socket.gethostbyname( '192.168.192.255')#constants.eigene_IP )
             self.broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.broadSocket.bind( (hostName, constants.udp_.broadPORT)) 
             threading.Thread(target=self.screensaver).start()
+            
      
         def __del__(self):
             self.wait()
@@ -153,11 +155,10 @@ class ListenUdpThread(QtCore.QThread):
             import thread
             # note that sys.stdout.write and .flush should rather be used
             # instead of print
-            active = True
             while constants.gui_.KS and running:
                 try:
                     idle = float(sp.check_output('xprintidle', shell=True).strip())
-                    if idle > threshold and active:
+                    if idle > threshold and self.active:
                         if settings_r()['Status'] == 'Wach':
                             print "Start feh"
                             exectext = "DISPLAY=:0 xset dpms force off"
@@ -165,11 +166,11 @@ class ListenUdpThread(QtCore.QThread):
                         else:
                             exectext = "DISPLAY=:0 xset dpms force off"
                             os.system(exectext)
-                        active = False
-                    if idle < threshold and not active:
+                        self.active = False
+                    if idle < threshold and not self.active:
                         exectext = "DISPLAY=:0 xset dpms force on"
                         os.system(exectext)
-                        active = True
+                        self.active = True
                 except (ValueError, sp.CalledProcessError) as err:
                     print 'An error occured'
                     # add your error handling here
@@ -192,7 +193,9 @@ class ListenUdpThread(QtCore.QThread):
                     isdict = False  
                 if isdict:
                     if data_ev['Name'] == 'Klingel':
-                        self.emit(QtCore.SIGNAL('showCam()'))                     
+                        self.emit(QtCore.SIGNAL('showCam()'))  
+                    elif data_ev['Name'] == 'Wach':
+                        self.active = True                         
         
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
