@@ -65,6 +65,14 @@ cmd_lsts = list(set(cmd_lsts))
 szn_typs = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
 stockwerke = ['Vm1','V00','A00','V01','V02','']
 
+stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
+                   'A00':'Draussen', '':''}
+zim_dict = {'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette',
+            'SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer'}
+furn_dict = {'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang',
+             'STV':'Stromversorgung', 'RUM':'Raum', 'DEK':'Decke', '':''}
+             
+
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
 
@@ -77,7 +85,15 @@ constants.redundancy_.master = True
 
 start = timeit.default_timer()
 
-#Your statements here
+# tree setup
+tree_szenen = ParameterTree()
+tree_inputs_devices = ParameterTree()
+tree_input_device = ParameterTree()
+tree_dvc_tp_cmds = ParameterTree()
+tree_settings = ParameterTree()
+
+# other init
+lastSelected = ''
 
 ## test subclassing parameters
 ## This parameter automatically generates two child parameters which are always reciprocals of each other
@@ -770,6 +786,149 @@ class InputsTree():
                 for item in some_object: 
                     self.itera(some_object.get(item))
 
+"""
+part with new devices tree
+"""
+
+stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
+                   'A00':'Draussen'}
+zim_dict = {'ZIM':'Zimmer','WOH':'Wohnzimmer','KUE':u'Küche','BAD':u'Badezimmer/Toilette',
+            'SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer'}
+furn_dict = {'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang',
+             'STV':'Stromversorgung', 'RUM':'Raum', 'DEK':'Decke', 'SRA':'Schrank',
+             'SOF':'Sofa', 'TUE':u'Tür', 'SEV':'Server', 'PFL':'Pflanzen'}
+
+class TreeInputsDevices(object):
+    def __init__(self, callback=None):
+        self.cb = callback
+        #self.inputs = mdb_get_table(db='cmd_inputs')
+        self.params = []        
+#        self.set_paratree(inputs)
+
+    def add_sub_object(self, top_object, sub_object_Id, expanded=True):
+        name = None
+        if sub_object_Id[:3] in furn_dict:
+            expanded=False
+        for liste in [stockwerke_dict, zim_dict, furn_dict]:
+            if sub_object_Id[:3] in liste:
+                name = liste[sub_object_Id[:3]]
+                break
+        
+        sub_object = {'title': name, 'type': 'group', 'expanded': expanded, 
+                             'name':sub_object_Id, 'children':[]}
+        top_object['children'].append(sub_object)
+        return sub_object
+        
+    def get_sub_object(self, top_object, sub_object_Id):
+        for obj in top_object['children']:
+            if obj['name'] == sub_object_Id:
+                return obj
+        return self.add_sub_object(top_object, sub_object_Id)
+
+    def add_device(self, top_object, device):
+        device_id = device['Id']
+        device_desc = device['Description']
+        dev_obj = {'title': device['Name'], 'type': 'group', 'expanded': True, 
+                   'name':str(device_id), 'children':[]}
+        kind = {'title': device['Name'], 'type': 'str', 'expanded': True, 
+                'name':'Beschreibung', 'value':device_desc} 
+        dev_obj['children'].append(kind)                    
+        kind = {'title': device['Name'], 'type': 'action', 'expanded': True, 
+                'name':str(device_id), 'value':device_desc} 
+        dev_obj['children'].append(kind)   
+        top_object['children'].append(dev_obj)
+    
+    def set_paratree(self, inputs):
+        # top level floors
+        top_level = {'name': u'Eingänge', 'type': 'group', 'expanded': True, 'children':[]}
+#        for floor in stockwerke_dict:
+#            floor_obj = {'name': stockwerke_dict[floor], 'type': 'group', 'expanded': True, 
+#                         'Id':floor}
+#            top_level['children'].append(floor_obj)
+        for aktuator in sorted(inputs):
+            aktuator_hks = aktuator['Name']
+            level = aktuator_hks[:3]
+            if level[:1] == 'V':
+                level_obj = self.get_sub_object(top_level, level)
+                raum = aktuator_hks[3:7]
+                raum_obj = self.get_sub_object(level_obj, raum)
+                furni = aktuator_hks[7:11]
+                furni_obj = self.get_sub_object(raum_obj, furni)
+                device = aktuator_hks[11:]
+                self.add_device(furni_obj, aktuator)
+        self.params = Parameter.create(name='params', type='group', children=[top_level])
+        self.walk_param(self.params)
+    
+    def walk_param(self, obj):
+        if obj.isType('group'):
+            for kid in obj.children():
+                self.walk_param(kid)
+        elif obj.isType('action'):
+            obj.sigActivated.connect(self.printit(obj.name()))
+            
+    def printit(self, value):
+        def print_wrapper():
+            self.cb(value)
+        return print_wrapper
+        
+class TreeInputDevice(object):
+    def __init__(self):
+        self.params = []
+        self._inputs = None
+#        self.set_paratree(device)
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @inputs.setter
+    def inputs(self, value): 
+        self._inputs = value 
+        
+    def set_paratree(self, device_id):
+        for device in self.inputs:
+            if str(device['Id']) == str(device_id):
+                break
+        top_level = {'name': str(device['Id']), 'type': 'group', 'expanded': True, 'children':[]}
+        kinder = top_level['children']
+        kinder.insert(0, {'name':'Description', 'title':'Beschreibung', 'type': 'str',
+                                  'value':device['Description']})        
+        for feature, value in device.iteritems():
+            if feature in ['Logging','Setting','Doppelklick']:
+                kinder.insert(1, {'name':feature, 'type': 'bool', 'value':bool(value)})
+            elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise', 
+                             'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',
+                             'Dreifach']:
+                kinder.append({'name':feature, 'type': 'list', 'value':value, 
+                               'values':sorted(szn_lst)}) 
+            elif feature in ['Id', 'Description']:
+                pass
+            else:
+                kinder.insert(1, {'name':feature, 'type': 'str', 'value':value})
+        top_level_list = [top_level]
+        action = {'name': 'Speichern', 'type': 'action'}
+        top_level_list.append(action)
+        self.params = Parameter.create(name='params', type='group', children=top_level_list)
+        self.params.child('Speichern').sigActivated.connect(self.speichern)
+    
+    def speichern(self):
+        szene = {}
+        print "doing"
+        for kind in self.params.children():
+            if kind.isType('group'):
+                szene['Id'] = kind.name()
+                for enkel in kind.children():
+                    if enkel.value() != '':
+                        szene[enkel.name()] = enkel.value()
+                    else:
+                        szene[enkel.name()] = None
+        print szene
+        mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')), 
+                      commands=szene, primary = 'Id', translate = False)
+
+"""
+old part
+"""
 sets = []
 
 class SettingsTree():
@@ -854,17 +1013,56 @@ class SettingsTree():
                     self.itera(some_object.get(item))
 
 sz=Szenen_tree('')                    
-                    
+def print_vale(value):
+    print value
+
+def populate_input_tree_1():
+    ipts = mdb_get_table(db='cmd_inputs')
+    tree_ipt_devices.set_paratree(ipts)
+    tree_inputs_devices.setParameters(tree_ipt_devices.params, showTop=False)
+    tree_ipt_devices.params.sigStateChanged.connect(change)
+
+def populate_input_tree_2(szene=''):
+    ipts = mdb_get_table(db='cmd_inputs')
+    tree_ipt_dev_vals.inputs = ipts
+    tree_ipt_dev_vals.set_paratree(szene)
+    tree_input_device.setParameters(tree_ipt_dev_vals.params, showTop=False)
+
+def populate_dvcs_cmds_tree():
+    cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
+    tree_dvc_tp_cmds.setParameters(cmds.p, showTop=False)    
+
+def populate_settngs_tree():
+    seTre = SettingsTree()
+    tree_settings.setParameters(seTre.p, showTop=False)     
+
+# deprecated beginning
+def populate_old_input_tree():
+    inp=InputsTree(isInputs = True, inputsGroup = str(cBox_Stockwerke.currentText()))
+    tree_inputs_devices.setParameters(inp.p, showTop=False)
+    inp.p.sigTreeStateChanged.connect(change)
+
+def showInputs(eingang):  
+    inp=InputsTree(expand = eingang)
+    tree_inputs_devices.setParameters(inp.p, showTop=False)
+    inp.p.sigTreeStateChanged.connect(change)
+    
+def updInputs():
+    inp=InputsTree(isInputs = True, inputsGroup=str(cBox_Stockwerke.currentText()))
+    tree_inputs_devices.setParameters(inp.p, showTop=False)       
+# deprecrated end
+
 def selected(text):
-    global sz, tree_w_szenes, lastSelected
+    global lastSelected
     lastSelected = text
     sz.update(lastSelected)
     print 'selected'
-    tree_w_szenes.setParameters(sz.p, showTop=False)
+    tree_szenen.setParameters(sz.p, showTop=False)
     sz.p.sigTreeStateChanged.connect(change_sz)
 
-def update():
-    global inp,tree_w_inputs,t3,t4,sz, sets,cmds,seTre, comboBox, comboBox2, comboBox3, szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs, tvs_cmds, sat_devs, sat_cmds, cmd_devs
+def update_device_lists():
+    global szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs
+    global tvs_cmds, sat_devs, sat_cmds, cmd_devs
     szn_lst = sorted(szn.list_commands(gruppe=''))
     xs1_devs = xs1.list_devices()
     xs1_cmds = xs1.dict_commands()
@@ -876,59 +1074,37 @@ def update():
     tvs_cmds = tv.dict_commands()
     sat_devs = sat.list_devices()
     sat_cmds = sat.dict_commands()
-    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs 
-#    for cmd_set in [xs1_cmds,hue_cmds,sns_cmds,tvs_cmds,sat_cmds]:
-#        cmd_set.update({'warte_1':len(cmd_set)+1,'warte_3':len(cmd_set)+2,'warte_5':len(cmd_set)+3})    
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs   
+
+def update_settings():
+    global sets
     sets = mdb_get_table(constants.sql_tables.settings.name)
+
+def update():
+    update_settings()
+    update_device_lists()
     selected(lastSelected) 
-    inp=InputsTree(isInputs = True, inputsGroup = str(comboBox5.currentText()))
-    print "set tree_w_inputs"
-    print timeit.default_timer() - start 
-    tree_w_inputs.setParameters(inp.p, showTop=False)
-    print timeit.default_timer() - start 
-    cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
-    t3.setParameters(cmds.p, showTop=False)
-    print timeit.default_timer() - start 
-    seTre = SettingsTree()
-    t4.setParameters(seTre.p, showTop=False)  
-    print timeit.default_timer() - start 
-    comboBox.clear()
-    for szne in szn_lst:
-        comboBox.addItem(szne) 
-    comboBox2.clear()
+    populate_input_tree_1() 
+    populate_input_tree_2()
+    populate_dvcs_cmds_tree()
+    populate_settngs_tree()
+    updt_sznlst() 
+    
+    cBox_dvc_tp_cmds.clear()
     for cmdLst in cmd_lsts:
-        comboBox2.addItem(cmdLst)
-    comboBox2.activated[str].connect(slctCmdLst)        
-    comboBox3.clear()
+        cBox_dvc_tp_cmds.addItem(cmdLst)
+    cBox_dvc_tp_cmds.activated[str].connect(slctCmdLst)        
+    cBox_inpts_new.clear()
     inpts = sorted(mdb_read_table_column(db="cmd_inputs", column = 'Description'))
     for inpt in inpts:
         if str(inpt) <> "":
-            comboBox3.addItem(str(inpt))        
-    inp.p.sigTreeStateChanged.connect(change)
+            cBox_inpts_new.addItem(str(inpt))        
     sz.p.sigTreeStateChanged.connect(change_sz)
     
 def neuTrig():
-    vals = mdb_read_table_entry(db="cmd_inputs",entry=str(comboBox3.currentText()),column='Description')
+    vals = mdb_read_table_entry(db="cmd_inputs",entry=str(cBox_inpts_new.currentText()),column='Description')
     mdb_add_table_entry("cmd_inputs",vals)
-    
-def updInputs():
-    global inp, tree_w_inputs
-    inp=InputsTree(isInputs = True, inputsGroup=str(comboBox5.currentText()))
-    tree_w_inputs.setParameters(inp.p, showTop=False)    
 
-def showInputs(eingang):
-    global inp, tree_w_inputs   
-    inp=InputsTree(expand = eingang)
-    tree_w_inputs.setParameters(inp.p, showTop=False)
-    inp.p.sigTreeStateChanged.connect(change)    
-
-#==============================================================================
-#Uncomment following block to use as class 
-#
-#==============================================================================
-
-
-#comboBox.activated[str].connect(self.style_choice)
 def change(param, changes):
     print("tree changes:")
     for param, change, data in changes:
@@ -963,9 +1139,9 @@ def change_sz(param, changes):
         if data <> '':
             if path[-2] in ['Szenen']:
                 selected(str(path[-1]))     
-        if data <> '':
-            if path[-2] in ['Inputs']:
-                showInputs(str(path[-1]))   
+#        if data <> '':
+#            if path[-2] in ['Inputs']:
+#                showInputs(str(path[-1]))   
         if data <> '':
             if path[0] in ['Save/Restore functionality'] and path[1] == 'Neue Szene':
                 selected('LeereVorlage')       
@@ -975,19 +1151,23 @@ def change_sz(param, changes):
                 
 
 def slctCmdLst(text):
-    global cmds, t3
+    global cmds, tree_dvc_tp_cmds
     cmds=InputsTree(isInputs = False, cmdTable = text)
-    t3.setParameters(cmds.p, showTop=False)
+    tree_dvc_tp_cmds.setParameters(cmds.p, showTop=False)
 
 def updt_sznlst():
-    global comboBox
-    comboBox.clear()
-    szn_lst = sorted(szn.list_commands(str(comboBox_szn_types.currentText())))
+    cBox_scenes.clear()
+    szn_lst = sorted(szn.list_commands(str(cBox_scn_types.currentText())))
     for szne in szn_lst:
-        comboBox.addItem(szne)    
+        cBox_scenes.addItem(szne)    
 
-print timeit.default_timer() - start 
+        
+tree_ipt_devices = TreeInputsDevices(callback=populate_input_tree_2)   
+tree_ipt_dev_vals = TreeInputDevice()     
+        
+# setup window
 win = QtGui.QWidget()
+
 
 tree_w_szenes = ParameterTree()
 #sz=Szenen_tree("Alles_ein")
@@ -1017,27 +1197,34 @@ t4 = ParameterTree()
 print timeit.default_timer() - start 
 inp.p.sigTreeStateChanged.connect(change)
 
+
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
-comboBox = QtGui.QComboBox(win)
-comboBox.setMaxVisibleItems(50)    
-lastSelected = ''
+win.showMaximized()
 
-comboBox.activated[str].connect(selected)
+#inp=InputsTree(isInputs = True, inputsGroup = 'V00') 
+#cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
+#inp.p.sigTreeStateChanged.connect(change)
 
-comboBox2 = QtGui.QComboBox(win)
-comboBox3 = QtGui.QComboBox(win)
+cBox_scenes = QtGui.QComboBox(win)
+cBox_scenes.setMaxVisibleItems(50)    
+cBox_scenes.activated[str].connect(selected)
 
-comboBox_szn_types = QtGui.QComboBox(win)
+cBox_dvc_tp_cmds = QtGui.QComboBox(win)
+cBox_inpts_new = QtGui.QComboBox(win)
+
+
+cBox_scn_types = QtGui.QComboBox(win)
 for itm in szn_typs:
-    comboBox_szn_types.addItem(itm)
-comboBox_szn_types.activated[str].connect(updt_sznlst)    
+    cBox_scn_types.addItem(itm)
+cBox_scn_types.activated[str].connect(updt_sznlst)    
 
-comboBox5 = QtGui.QComboBox(win)
-for itm in stockwerke:
-    comboBox5.addItem(itm)
-comboBox5.setCurrentIndex(1)
-comboBox5.activated[str].connect(updInputs)  
+
+cBox_Stockwerke = QtGui.QComboBox(win)
+#for itm in stockwerke:
+#    cBox_Stockwerke.addItem(itm)
+#cBox_Stockwerke.setCurrentIndex(1)
+#cBox_Stockwerke.activated[str].connect(updInputs)  
 
 print timeit.default_timer() - start 
 update()
@@ -1052,21 +1239,28 @@ adinbttn.setText('Neuer Trigger')
 adinbttn.clicked.connect(neuTrig)
 
 layout.addWidget(QtGui.QLabel(""), 0,  0, 1, 2)
-#szene preselection
-layout.addWidget(comboBox_szn_types, 1, 1, 1, 1)
 
+# column 0
 layout.addWidget(buttn_update, 1, 0, 1, 1)
-layout.addWidget(comboBox5, 2, 0, 1, 1)
-layout.addWidget(tree_w_inputs, 3, 0, 1, 1)
-layout.addWidget(tree_select_input,4,0,1,1)
-layout.addWidget(comboBox3, 5, 0, 1, 1)
+layout.addWidget(cBox_Stockwerke, 2, 0, 1, 1)
+layout.addWidget(tree_inputs_devices, 3, 0, 1, 1)
+layout.addWidget(tree_input_device, 4, 0, 1, 1)
+layout.addWidget(cBox_inpts_new, 5, 0, 1, 1)
 layout.addWidget(adinbttn, 6, 0, 1, 1)
-layout.addWidget(comboBox, 2, 1, 1, 1)
-#                               r, c, rs, cs
-layout.addWidget(tree_w_szenes, 3, 1, 2, 1)
-layout.addWidget(comboBox2, 2, 2, 1, 1)
-layout.addWidget(t3, 3, 2, 2, 1)
-layout.addWidget(t4, 3, 3, 2, 1)
+
+# column 1
+#szene preselection
+
+layout.addWidget(cBox_scn_types, 1, 1, 1, 1)
+layout.addWidget(cBox_scenes, 2, 1, 1, 1)
+layout.addWidget(tree_szenen, 3, 1, 2, 1)
+
+# column 2
+layout.addWidget(cBox_dvc_tp_cmds, 2, 2, 1, 1)
+layout.addWidget(tree_dvc_tp_cmds, 3, 2, 2, 1)
+
+# column 3
+layout.addWidget(tree_settings, 3, 3, 2, 1)
 
 win.setWindowTitle('Schalttafel')
 win.show()

@@ -22,6 +22,8 @@ import git
 import pyqtgraph as pg
 import numpy as np
 from threading import Timer
+import subprocess as sp
+import threading
 import time
 import datetime
 import os
@@ -123,7 +125,7 @@ class RefreshGuiThread(QtCore.QThread):
             self.wait()
             
         def run(self):
-            if streaming:
+            if running:
                 self.emit(QtCore.SIGNAL('update_values()'))
                 refresh = Timer(15, self.run, [])
                 refresh.start()
@@ -134,16 +136,51 @@ class ListenUdpThread(QtCore.QThread):
             self.broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
             hostName = socket.gethostbyname( '192.168.192.255')#constants.eigene_IP )
             self.broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.broadSocket.bind( (hostName, constants.udp_.broadPORT))            
+            self.broadSocket.bind( (hostName, constants.udp_.broadPORT)) 
+            threading.Thread(target=self.screensaver).start()
      
         def __del__(self):
             self.wait()
+        
+        def set_screensaver(self):
+            if constants.gui_.KS:
+                exectext = "xset -dpms"
+                os.system(exectext)    
+                exectext = "xset s 10"
+                os.system(exectext)            
             
+        def screensaver(self, threshold=10000):
+            import thread
+            # note that sys.stdout.write and .flush should rather be used
+            # instead of print
+            active = True
+            while constants.gui_.KS and running:
+                try:
+                    idle = float(sp.check_output('xprintidle', shell=True).strip())
+                    if idle > threshold and active:
+                        if settings_r()['Status'] == 'Wach':
+                            print "Start feh"
+                            exectext = "DISPLAY=:0 xset dpms force off"
+                            os.system(exectext)                            
+                        else:
+                            exectext = "DISPLAY=:0 xset dpms force off"
+                            os.system(exectext)
+                        active = False
+                    if idle < threshold and not active:
+                        exectext = "DISPLAY=:0 xset dpms force on"
+                        os.system(exectext)
+                        active = True
+                except (ValueError, sp.CalledProcessError) as err:
+                    print 'An error occured'
+                    # add your error handling here
+                time.sleep(0.2)
+#            thread.interrupt_main()                
+                
         def run(self):
             SIZE = 1024
             while running:
                 (data,addr) = self.broadSocket.recvfrom(SIZE)
-                print data
+#                print data
                 if not data:
                     break
                 isdict = False
@@ -155,22 +192,28 @@ class ListenUdpThread(QtCore.QThread):
                     isdict = False  
                 if isdict:
                     if data_ev['Name'] == 'Klingel':
-                        self.emit(QtCore.SIGNAL('showCam()'))
+                        self.emit(QtCore.SIGNAL('showCam()'))                     
         
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
         super(Main, self).__init__(parent)
         self.set_buttons = [{'Name':'xs1_clicked','desc':'XS1','type':'int','command':self.xs1_clicked,'pos_x':0,'pos_y':10}]
         self.setupUi(self)
-        self.set_screensaver()
+#        self.set_screensaver()
     
     def set_screensaver(self):
-        if constants.gui_.KS:
-            exectext = "xset -dpms"
-            os.system(exectext)    
-            exectext = "xset s 10"
-            os.system(exectext) 
+#        if constants.gui_.KS:
+#            exectext = "xset -dpms"
+#            os.system(exectext)    
+#            exectext = "xset s 10"
+#            os.system(exectext) 
         self.tabWidget.setCurrentIndex(constants.gui_.Home)
+    
+    def set_fullscreen(self):
+        super(Main, self).showFullScreen()
+        
+    def set_normalscreen(self):
+        super(Main, self).showNormal()        
         
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
@@ -309,15 +352,25 @@ class Main(QtGui.QMainWindow):
         self.pushButton_7.setText('Update')
         self.pushButton_7.clicked.connect(self.update_values)     
         self.pushButton_8 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_8.setGeometry(QtCore.QRect(160, 10, 100, 50))
+        self.pushButton_8.setGeometry(QtCore.QRect(140, 10, 100, 50))
         self.pushButton_8.setObjectName(_fromUtf8("AEs"))
         self.pushButton_8.setText('AlarmEvents')
         self.pushButton_8.clicked.connect(self.showAlarmEvents)   
         self.pushButton_9 = QtGui.QPushButton(self.tab_4)
-        self.pushButton_9.setGeometry(QtCore.QRect(160, 110, 100, 50))
+        self.pushButton_9.setGeometry(QtCore.QRect(140, 110, 100, 50))
         self.pushButton_9.setObjectName(_fromUtf8("Close"))
         self.pushButton_9.setText('Close')
-        self.pushButton_9.clicked.connect(self.close)         
+        self.pushButton_9.clicked.connect(self.close)    
+        self.pushButton_19 = QtGui.QPushButton(self.tab_4)
+        self.pushButton_19.setGeometry(QtCore.QRect(280, 10, 100, 50))
+        self.pushButton_19.setObjectName(_fromUtf8("Fullscreen"))
+        self.pushButton_19.setText('Fullscreen')
+        self.pushButton_19.clicked.connect(self.set_fullscreen) 
+        self.pushButton_29 = QtGui.QPushButton(self.tab_4)
+        self.pushButton_29.setGeometry(QtCore.QRect(280, 110, 100, 50))
+        self.pushButton_29.setObjectName(_fromUtf8("Normal"))
+        self.pushButton_29.setText('Normal')
+        self.pushButton_29.clicked.connect(self.set_normalscreen)         
         self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
 
         #Wecker
@@ -509,7 +562,7 @@ class Main(QtGui.QMainWindow):
         for btn in self.buttons:
             name = btn.objectName()
             if str(name) in settings:
-                print name, settings.get(str(name))
+#                print name, settings.get(str(name))
                 btn.setText(settings.get(str(name)))
         QtGui.QApplication.processEvents()             
 
@@ -528,6 +581,9 @@ class Main(QtGui.QMainWindow):
     def close(self):
         global running
         running = False
+        print running
+#        import thread
+#        thread.interrupt_main() 
         QtCore.QCoreApplication.instance().quit()
         sys.exit()        
 
@@ -787,7 +843,7 @@ class Buttn(QtGui.QWidget):
         self.w.show() 
         
     def send_command(self,Command):
-        print Device, Command
+#        print Device, Command
         if System == "Sonos":
             if sn.set_device(player=Device, command=Command):
                 self.parent.close()
@@ -909,7 +965,7 @@ class AEPopup(QtGui.QMainWindow):
         self.newestEvent = AEs[0].get('Date')            
 
     def startAutoUpdate(self):
-        while True:
+        while running:
             self.AESrefresh()
             time.sleep(5)
 
@@ -1010,6 +1066,8 @@ running = True
 app = QtGui.QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()
+if constants.gui_.KS:
+    myWidget.showFullScreen()
 myWidget.setGeometry(QRect(0, 0, 800, 500))
 myWidget.show()
 app.exec_() 
