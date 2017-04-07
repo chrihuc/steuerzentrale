@@ -138,6 +138,7 @@ class ListenUdpThread(QtCore.QThread):
             hostName = socket.gethostbyname( '192.168.192.255')#constants.eigene_IP )
             self.broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.broadSocket.bind( (hostName, constants.udp_.broadPORT)) 
+            self.set_screensaver()
             threading.Thread(target=self.screensaver).start()
             
      
