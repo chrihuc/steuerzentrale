@@ -148,8 +148,10 @@ class ListenUdpThread(QtCore.QThread):
             if constants.gui_.KS:
                 exectext = "xset -dpms"
                 os.system(exectext)    
-                exectext = "xset s 10"
-                os.system(exectext)            
+                exectext = "xset s off"
+                os.system(exectext)   
+                exectext = "xset s ''"
+                os.system(exectext)                 
             
         def screensaver(self, threshold=10000):
             import thread
@@ -161,7 +163,7 @@ class ListenUdpThread(QtCore.QThread):
                     if idle > threshold and self.active:
                         if settings_r()['Status'] == 'Wach':
                             print "Start feh"
-                            exectext = "DISPLAY=:0 xset dpms force off"
+                            exectext = "feh -F -D 20 /home/pi/Pictures/*"
                             os.system(exectext)                            
                         else:
                             exectext = "DISPLAY=:0 xset dpms force off"
@@ -1071,7 +1073,7 @@ app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()
 if constants.gui_.KS:
     myWidget.showFullScreen()
-myWidget.setGeometry(QRect(0, 0, 800, 500))
+myWidget.setGeometry(QRect(0, 0, 800, 520))
 myWidget.show()
 app.exec_() 
 running = False
