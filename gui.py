@@ -173,6 +173,8 @@ class ListenUdpThread(QtCore.QThread):
                     if idle < threshold and not self.active:
                         exectext = "DISPLAY=:0 xset dpms force on"
                         os.system(exectext)
+                        exectext = "pkill -n feh"
+                        os.system(exectext)
                         self.active = True
                 except (ValueError, sp.CalledProcessError) as err:
                     print 'An error occured'
