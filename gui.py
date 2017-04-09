@@ -1078,6 +1078,8 @@ app = QtGui.QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()
 if constants.gui_.KS:
+    exectext = 'unclutter -idle 0.01'
+    os.system(exectext)
     myWidget.showFullScreen()
 myWidget.setGeometry(QRect(0, 0, 800, 520))
 myWidget.show()
