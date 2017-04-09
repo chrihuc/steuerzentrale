@@ -154,7 +154,7 @@ class ListenUdpThread(QtCore.QThread):
                 exectext = "xset s ''"
                 os.system(exectext)                 
             
-        def screensaver(self, threshold=10000):
+        def screensaver(self, threshold=15000):
             import thread
             # note that sys.stdout.write and .flush should rather be used
             # instead of print
@@ -169,6 +169,8 @@ class ListenUdpThread(QtCore.QThread):
                             exectext = "feh -F -D 20 /home/pi/Pictures/* &"
                             os.system(exectext)                            
                         else:
+                            exectext = "pkill feh"
+                            os.system(exectext)                            
                             exectext = "DISPLAY=:0 xset dpms force off"
                             os.system(exectext)
                         self.active = False
@@ -190,7 +192,7 @@ class ListenUdpThread(QtCore.QThread):
             while running:
                 try:
                     (data,addr) = self.broadSocket.recvfrom(SIZE)
-    #                print data
+                    print data
                     if not data:
                         break
                     isdict = False
@@ -204,7 +206,7 @@ class ListenUdpThread(QtCore.QThread):
                         if data_ev['Name'] == 'Klingel':
                             self.emit(QtCore.SIGNAL('showCam()'))  
                         elif data_ev['Name'] == 'Wach':
-                            self.active = True 
+                            self.active = True
                 except socket.error, e:
                     if e.errno != 4:
                         raise                
@@ -1090,8 +1092,8 @@ myWidget = Main()
 if constants.gui_.KS:
     exectext = 'unclutter -idle 0.01 &'
     os.system(exectext)
-    exectext = 'echo 130 > /sys/class/backlight/rpi_backlight/brightness'
-    os.system(exectext)
+#    exectext = 'sudo echo 130 > /sys/class/backlight/rpi_backlight/brightness'
+#    os.system(exectext)
     myWidget.showFullScreen()
 myWidget.setGeometry(QRect(0, 0, 800, 540))
 myWidget.show()
