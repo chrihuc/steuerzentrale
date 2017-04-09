@@ -162,7 +162,7 @@ class ListenUdpThread(QtCore.QThread):
                 try:
                     idle = float(sp.check_output('xprintidle', shell=True).strip())
                     if idle > threshold and self.active:
-                        if settings_r()['Status'] == 'Wach':
+                        if True: #settings_r()['Status'] == 'Wach':
                             print "Start feh"
                             exectext = "feh -F -D 20 /home/pi/Pictures/*"
                             os.system(exectext)                            
@@ -173,8 +173,9 @@ class ListenUdpThread(QtCore.QThread):
                     if idle < threshold and not self.active:
                         exectext = "DISPLAY=:0 xset dpms force on"
                         os.system(exectext)
-                        exectext = "pkill -n feh"
+                        exectext = "pkill feh"
                         os.system(exectext)
+                        print "Kill feh"
                         self.active = True
                 except (ValueError, sp.CalledProcessError) as err:
                     print 'An error occured'
