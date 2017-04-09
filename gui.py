@@ -162,7 +162,7 @@ class ListenUdpThread(QtCore.QThread):
                 try:
                     idle = float(sp.check_output('xprintidle', shell=True).strip())
                     if idle > threshold and self.active:
-                        if True: #settings_r()['Status'] == 'Wach':
+                        if settings_r()['Status'] == 'Wach':
                             print "Start feh"
 #                            exectext = 'xbindkeys -n -f xbindkeys.temp'
 #                            os.system(exectext) 
@@ -188,22 +188,26 @@ class ListenUdpThread(QtCore.QThread):
         def run(self):
             SIZE = 1024
             while running:
-                (data,addr) = self.broadSocket.recvfrom(SIZE)
-#                print data
-                if not data:
-                    break
-                isdict = False
                 try:
-                    data_ev = eval(data)
-                    if type(data_ev) is dict:
-                        isdict = True
-                except Exception as serr:
-                    isdict = False  
-                if isdict:
-                    if data_ev['Name'] == 'Klingel':
-                        self.emit(QtCore.SIGNAL('showCam()'))  
-                    elif data_ev['Name'] == 'Wach':
-                        self.active = True                         
+                    (data,addr) = self.broadSocket.recvfrom(SIZE)
+    #                print data
+                    if not data:
+                        break
+                    isdict = False
+                    try:
+                        data_ev = eval(data)
+                        if type(data_ev) is dict:
+                            isdict = True
+                    except Exception as serr:
+                        isdict = False  
+                    if isdict:
+                        if data_ev['Name'] == 'Klingel':
+                            self.emit(QtCore.SIGNAL('showCam()'))  
+                        elif data_ev['Name'] == 'Wach':
+                            self.active = True 
+                except socket.error, e:
+                    if e.errno != 4:
+                        raise                
         
 class Main(QtGui.QMainWindow):
     def __init__(self, parent = None):
@@ -246,8 +250,13 @@ class Main(QtGui.QMainWindow):
         
         #Erdgeschoss
         self.tab = QtGui.QWidget()
-        self.tab.setStyleSheet("background-image:url(./EG.png)")
+        
         self.tab.setObjectName(_fromUtf8("Erdgeschoss")) 
+        self.ti_lbl = QtGui.QLabel(self.tab)
+        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%m-%d %H:%M:%S')))
+        self.ti_lbl.setGeometry(QtCore.QRect(690, 10, 100, 20)) 
+        self.ti_lbl.setStyleSheet("QLabel { background-color : white; color : blue; }")
+        self.tab.setStyleSheet("background-image:url(./EG.png)")
         self.buttons = []
         for btn in eg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab))
@@ -390,21 +399,21 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.addTab(self.tab_5, _fromUtf8(""))
         self.scrollLayout3 = QtGui.QFormLayout()
         self.scrollArea = QtGui.QScrollArea(self.tab_5)
-        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 790, 375))
+        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 790, 350))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 360))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 340))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout3)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)  
         self.lbl = QtGui.QLabel(self.tab_5)
         self.lbl.setText(self.checkWecker())
-        self.lbl.setGeometry(QtCore.QRect(120, 380, 500, 50))
+        self.lbl.setGeometry(QtCore.QRect(120, 360, 500, 50))
         
         #self.add_wecker()
         self.pushButton_9 = QtGui.QPushButton(self.tab_5)
-        self.pushButton_9.setGeometry(QtCore.QRect(10, 380, 91, 50))
+        self.pushButton_9.setGeometry(QtCore.QRect(10, 360, 91, 50))
         self.pushButton_9.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_9.setText('Speichere')
         self.pushButton_9.clicked.connect(self.makeSaveWecker(self)) 
@@ -415,18 +424,18 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.addTab(self.tab_7, _fromUtf8(""))
         self.scrollLayout4 = QtGui.QFormLayout()
         self.scrollArea = QtGui.QScrollArea(self.tab_7)
-        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 790, 375))
+        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 790, 350))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 360))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 165, 340))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.scrollAreaWidgetContents.setLayout(self.scrollLayout4)        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)  
         
         #self.add_wecker()
         self.pushButton_12 = QtGui.QPushButton(self.tab_7)
-        self.pushButton_12.setGeometry(QtCore.QRect(10, 380, 91, 50))
+        self.pushButton_12.setGeometry(QtCore.QRect(10, 360, 91, 50))
         self.pushButton_12.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_12.setText('Speichere')
         self.pushButton_12.clicked.connect(self.makeSaveSchaltUhr(self)) 
@@ -575,6 +584,7 @@ class Main(QtGui.QMainWindow):
             if str(name) in settings:
 #                print name, settings.get(str(name))
                 btn.setText(settings.get(str(name)))
+        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%m-%d %H:%M:%S')))
         QtGui.QApplication.processEvents()             
 
     def close_clicked(self):
