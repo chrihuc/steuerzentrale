@@ -1036,22 +1036,6 @@ def populate_settngs_tree():
     seTre = SettingsTree()
     tree_settings.setParameters(seTre.p, showTop=False)     
 
-# deprecated beginning
-def populate_old_input_tree():
-    inp=InputsTree(isInputs = True, inputsGroup = str(cBox_Stockwerke.currentText()))
-    tree_inputs_devices.setParameters(inp.p, showTop=False)
-    inp.p.sigTreeStateChanged.connect(change)
-
-def showInputs(eingang):  
-    inp=InputsTree(expand = eingang)
-    tree_inputs_devices.setParameters(inp.p, showTop=False)
-    inp.p.sigTreeStateChanged.connect(change)
-    
-def updInputs():
-    inp=InputsTree(isInputs = True, inputsGroup=str(cBox_Stockwerke.currentText()))
-    tree_inputs_devices.setParameters(inp.p, showTop=False)       
-# deprecrated end
-
 def selected(text):
     global lastSelected
     lastSelected = text

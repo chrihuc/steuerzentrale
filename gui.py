@@ -164,9 +164,9 @@ class ListenUdpThread(QtCore.QThread):
                     if idle > threshold and self.active:
                         if True: #settings_r()['Status'] == 'Wach':
                             print "Start feh"
-                            exectext = 'xbindkeys -n -f xbindkeys.temp'
-                            os.system(exectext) 
-                            exectext = "feh -F -D 20 /home/pi/Pictures/*"
+#                            exectext = 'xbindkeys -n -f xbindkeys.temp'
+#                            os.system(exectext) 
+                            exectext = "feh -F -D 20 /home/pi/Pictures/* &"
                             os.system(exectext)                            
                         else:
                             exectext = "DISPLAY=:0 xset dpms force off"
@@ -834,9 +834,9 @@ class Buttn(QtGui.QWidget):
       else:
         desc= Name
       self.pushButton = QtGui.QPushButton(desc)
-      self.pushButton.setGeometry(QtCore.QRect(0, 0, 150, 150))
+      self.pushButton.setGeometry(QtCore.QRect(0, 0, 300, 300))
       layout = QtGui.QHBoxLayout()
-      layout.setGeometry(QtCore.QRect(0, 0, 150, 150))
+      layout.setGeometry(QtCore.QRect(0, 0, 300, 300))
       layout.addWidget(self.pushButton)
       if Type=="Device":
         self.pushButton.clicked.connect(lambda: self.set_popup(Name)) 
@@ -1080,8 +1080,10 @@ myWidget = Main()
 if constants.gui_.KS:
     exectext = 'unclutter -idle 0.01'
     os.system(exectext)
+    exectext = 'echo 130 > /sys/class/backlight/rpi_backlight/brightness'
+    os.system(exectext)
     myWidget.showFullScreen()
-myWidget.setGeometry(QRect(0, 0, 800, 520))
+myWidget.setGeometry(QRect(0, 0, 800, 540))
 myWidget.show()
 app.exec_() 
 running = False
