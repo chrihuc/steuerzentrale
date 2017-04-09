@@ -164,6 +164,8 @@ class ListenUdpThread(QtCore.QThread):
                     if idle > threshold and self.active:
                         if True: #settings_r()['Status'] == 'Wach':
                             print "Start feh"
+                            exectext = 'xbindkeys -n -f xbindkeys.temp'
+                            os.system(exectext) 
                             exectext = "feh -F -D 20 /home/pi/Pictures/*"
                             os.system(exectext)                            
                         else:
