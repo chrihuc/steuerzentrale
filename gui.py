@@ -1078,7 +1078,7 @@ app = QtGui.QApplication(sys.argv)
 app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()
 if constants.gui_.KS:
-    exectext = 'unclutter -idle 0.01'
+    exectext = 'unclutter -idle 0.01 &'
     os.system(exectext)
     exectext = 'echo 130 > /sys/class/backlight/rpi_backlight/brightness'
     os.system(exectext)
