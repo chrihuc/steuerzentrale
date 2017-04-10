@@ -8,7 +8,7 @@ Created on Wed Mar 30 15:35:24 2016
 import socket
 import threading
 
-HOST = '192.168.192.11'   # Symbolic name meaning the local host
+HOST = '192.168.192.255'   # Symbolic name meaning the local host
 PORT = 5005    # Arbitrary non-privileged port
 if False:
     while True:

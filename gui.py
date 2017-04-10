@@ -254,10 +254,10 @@ class Main(QtGui.QMainWindow):
         self.tab = QtGui.QWidget()
         
         self.tab.setObjectName(_fromUtf8("Erdgeschoss")) 
-        self.ti_lbl = QtGui.QLabel(self.tab)
-        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%m-%d %H:%M:%S')))
-        self.ti_lbl.setGeometry(QtCore.QRect(690, 10, 100, 20)) 
-        self.ti_lbl.setStyleSheet("QLabel { background-color : white; color : blue; }")
+        self.ti_lbl = QtGui.QLabel(self.tabWidget)
+        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%m-%d %H:%M')))
+        self.ti_lbl.setGeometry(QtCore.QRect(700, 10, 100, 20)) 
+        self.ti_lbl.setStyleSheet("QLabel { background-color : white; color : black; }")
         self.tab.setStyleSheet("background-image:url(./EG.png)")
         self.buttons = []
         for btn in eg_buttons:
