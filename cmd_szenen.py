@@ -247,7 +247,7 @@ class szenen:
             bedingungen = eval(str(szene_dict.get("Bedingung")))   
         erfuellt = self.__bedingung__(bedingungen)
         if str(szene_dict.get("Latching")) <> 'None':
-            next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=int(szene_dict.get("Latching")), seconds=0)
+            next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
             if start_t < next_start:
                 erfuellt = False
         if str(szene_dict.get("Karenz")) <> 'None':
