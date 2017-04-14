@@ -182,6 +182,7 @@ class ListenUdpThread(QtCore.QThread):
                         os.system(exectext)
                         print "Kill feh"
                         self.active = True
+                        self.set_screensaver()
                 except (ValueError, sp.CalledProcessError) as err:
                     print 'An error occured'
                     # add your error handling here
