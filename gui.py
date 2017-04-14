@@ -151,8 +151,8 @@ class ListenUdpThread(QtCore.QThread):
                 os.system(exectext)    
                 exectext = "xset s off"
                 os.system(exectext)   
-                exectext = "xset s ''"
-                os.system(exectext)                 
+#                exectext = "xset s ''"
+#                os.system(exectext)                 
             
         def screensaver(self, threshold=15000):
             import thread
@@ -166,7 +166,7 @@ class ListenUdpThread(QtCore.QThread):
                             print "Start feh"
 #                            exectext = 'xbindkeys -n -f xbindkeys.temp'
 #                            os.system(exectext) 
-                            exectext = "feh -F -D 20 /home/pi/Pictures/* &"
+                            exectext = "feh -F -D 20 --randomize /home/pi/Pictures/* &"
                             os.system(exectext)                            
                         else:
                             exectext = "pkill feh"
@@ -186,7 +186,13 @@ class ListenUdpThread(QtCore.QThread):
                     # add your error handling here
                 time.sleep(0.2)
 #            thread.interrupt_main()                
-                
+        def disp_an(self):
+            idle = float(sp.check_output('xprintidle', shell=True).strip())
+            exectext = "DISPLAY=:0 xset dpms force on"
+            os.system(exectext) 
+            exectext = "feh -F -D 20 --randomize /home/pi/Pictures/* &"
+            os.system(exectext)            
+
         def run(self):
             SIZE = 1024
             while running:
@@ -205,8 +211,10 @@ class ListenUdpThread(QtCore.QThread):
                     if isdict:
                         if data_ev['Name'] == 'Klingel':
                             self.emit(QtCore.SIGNAL('showCam()'))  
-                        elif data_ev['Name'] == 'Wach':
-                            self.active = True
+                        elif data_ev['Name'] == 'DisplayAn':
+                            self.disp_an()
+                        elif data_ev['Name'] == 'DisplayAus':
+                            self.active = True                            
                 except socket.error, e:
                     if e.errno != 4:
                         raise                
