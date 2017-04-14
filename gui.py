@@ -169,6 +169,7 @@ class ListenUdpThread(QtCore.QThread):
                             exectext = "feh -F -D 20 --randomize /home/pi/Pictures/* &"
                             os.system(exectext)                            
                         else:
+                            self.emit(QtCore.SIGNAL('show_homepage()'))
                             exectext = "pkill feh"
                             os.system(exectext)                            
                             exectext = "DISPLAY=:0 xset dpms force off"
@@ -191,7 +192,14 @@ class ListenUdpThread(QtCore.QThread):
             exectext = "DISPLAY=:0 xset dpms force on"
             os.system(exectext) 
             exectext = "feh -F -D 20 --randomize /home/pi/Pictures/* &"
-            os.system(exectext)            
+            os.system(exectext)  
+
+        def disp_aus(self):
+            idle = float(sp.check_output('xprintidle', shell=True).strip())
+            exectext = "pkill feh"
+            os.system(exectext)                            
+            exectext = "DISPLAY=:0 xset dpms force off"
+            os.system(exectext)
 
         def run(self):
             SIZE = 1024
@@ -214,7 +222,7 @@ class ListenUdpThread(QtCore.QThread):
                         elif data_ev['Name'] == 'DisplayAn':
                             self.disp_an()
                         elif data_ev['Name'] == 'DisplayAus':
-                            self.active = True                            
+                            self.disp_aus()                         
                 except socket.error, e:
                     if e.errno != 4:
                         raise                
@@ -493,6 +501,7 @@ class Main(QtGui.QMainWindow):
         udpt = ListenUdpThread()
         udptt = Timer(0, udpt.run, [])
         self.connect(udpt, QtCore.SIGNAL("showCam()"), self.showCam)
+        self.connect(udpt, QtCore.SIGNAL("show_homepage()"), self.set_screensaver)
         udptt.start()     
 
     def add_wecker(self):
@@ -529,7 +538,6 @@ class Main(QtGui.QMainWindow):
         self.connect(thread, QtCore.SIGNAL("showImage()"), self.updateImage)
         thread.start()         
 
-
     def showCam(self):
         if constants.gui_.KlingelAn:
             exectext = "DISPLAY=:0 xset dpms force on"
@@ -539,8 +547,8 @@ class Main(QtGui.QMainWindow):
             os.system(exectext)              
         self.tabWidget.setCurrentIndex(8)
         self.updateImage()
-        scres = Timer(30, self.set_screensaver, [])
-        scres.start()
+#        scres = Timer(30, self.set_screensaver, [])
+#        scres.start()
 
     def load_cam(self):
         QtGui.QApplication.processEvents()

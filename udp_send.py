@@ -31,7 +31,7 @@ if False:
         
 if True:
     dicti = {}
-    dicti['Name'] = 'Wach'
+    dicti['Name'] = 'DisplayAn'
     #dicti['Command'] = 'Update'
     hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     hbtsocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
