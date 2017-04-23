@@ -193,7 +193,8 @@ class ListenUdpThread(QtCore.QThread):
             exectext = "DISPLAY=:0 xset dpms force on"
             os.system(exectext) 
             exectext = "feh -F -D 20 --randomize /home/pi/Pictures/* &"
-            os.system(exectext)  
+            os.system(exectext) 
+            self.set_screensaver()
 
         def disp_aus(self):
             idle = float(sp.check_output('xprintidle', shell=True).strip())

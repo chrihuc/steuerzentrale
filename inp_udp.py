@@ -31,6 +31,10 @@ PORT_NUMBER = constants.udp_.PORT
 broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 #broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 broadSocket.bind( (hostName, constants.udp_.broadPORT) )
+
+borad_to_guis = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+borad_to_guis.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
 scenes = szenen()
 aes = alarm_event()
 mes = messaging()
@@ -85,6 +89,8 @@ def exec_data(data_ev, data):
         for entry in eval(data_ev['SetWecker']):
             device = entry['Name']
             mdb_set_table(table, device, entry)
+    elif ('Log' in data_ev):
+        borad_to_guis.sendto(str(data_ev),('192.168.192.255',5000))
     return data              
 
 def bidirekt():
