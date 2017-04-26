@@ -7,7 +7,7 @@ Created on Mon Feb 22 18:43:14 2016
 
 import constants
 
-from mysql_con import inputs, mdb_read_table_column, settings_r, mdb_set_table
+from mysql_con import inputs, mdb_read_table_column, settings_r, mdb_set_table, mdb_get_table
 from cmd_szenen import szenen
 from cmd_cron import cron
 
@@ -83,7 +83,10 @@ def exec_data(data_ev, data):
             data = str(settings_r())
         elif data_ev.get('Request') == 'Wecker':            
             data = json.dumps(crn.get_all(wecker=True), default=handler)
-            print data
+        elif data_ev.get('Request') == 'Bewohner':
+            data = str(mdb_get_table(constants.sql_tables.Bewohner.name))
+        elif data_ev.get('Request') == 'Besucher':
+            data = str(mdb_get_table(constants.sql_tables.Besucher.name))
     elif ('SetWecker' in data_ev):
         table = constants.sql_tables.cron.name
         for entry in eval(data_ev['SetWecker']):
