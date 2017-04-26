@@ -470,13 +470,13 @@ class Main(QtGui.QMainWindow):
         self.pushButton_10.setGeometry(QtCore.QRect(550, 50, 100, 100))
         self.pushButton_10.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_10.setText('Update')
-        self.pushButton_10.clicked.connect(self.makeload_cam1x(self)) 
+        self.pushButton_10.clicked.connect(lambda: self.updateImage()) 
 
         self.pushButton_111 = QtGui.QPushButton(self.tab_6)
         self.pushButton_111.setGeometry(QtCore.QRect(550, 150, 100, 100))
         self.pushButton_111.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_111.setText('Play')
-        self.pushButton_111.setCheckable(True)
+#        self.pushButton_111.setCheckable(True)
         self.pushButton_111.clicked.connect(self.makeload_cam(self)) 
 
         self.pushButton_11 = QtGui.QPushButton(self.tab_6)
@@ -526,16 +526,18 @@ class Main(QtGui.QMainWindow):
         for i in wecker:
             self.scrollLayout4.addRow(weckerRow(i, wecker=False) )           
             
-    def makeload_cam(self,parent=None):       
+    def makeload_cam(self,parent=None):  
+        print('load cam')
         def wrapper():
             global streaming
             streaming = True 
             self.refresh()
         return wrapper
 
-    def makeload_cam1x(self,parent=None):       
+    def makeload_cam1x(self,parent=None):
+        print('load cam 1')
         def wrapper(): 
-            self.updateImage()
+            self.load_cam()
         return wrapper
 
     def makestop(self,parent=None):
@@ -582,6 +584,7 @@ class Main(QtGui.QMainWindow):
       
     @QtCore.pyqtSlot(str)
     def updateImage(self):
+        print('updating')
         url = 'http://192.168.192.36/html/cam.jpg'
         req = urllib2.Request(url)
         try:
