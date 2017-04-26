@@ -805,7 +805,7 @@ class TreeInputsDevices(object):
         self.params = []        
 #        self.set_paratree(inputs)
 
-    def add_sub_object(self, top_object, sub_object_Id, expanded=True):
+    def add_sub_object(self, top_object, sub_object_Id, expanded=False):
         name = None
         if sub_object_Id[:3] in furn_dict:
             expanded=False
@@ -829,7 +829,7 @@ class TreeInputsDevices(object):
         device_id = device['Id']
         device_desc = device['Description']
         dev_obj = {'title': device['Name'], 'type': 'group', 'expanded': True, 
-                   'name':str(device_id), 'children':[]}
+                   'name':str(device_id), 'children':[], 'tip':device_desc}
         kind = {'title': device['Name'], 'type': 'str', 'expanded': True, 
                 'name':'Beschreibung', 'value':device_desc} 
         dev_obj['children'].append(kind)                    
@@ -895,7 +895,7 @@ class TreeInputDevice(object):
                                   'value':device['Description']})        
         for feature, value in device.iteritems():
             if feature in ['Logging','Setting','Doppelklick']:
-                kinder.insert(1, {'name':feature, 'type': 'bool', 'value':bool(value)})
+                kinder.insert(1, {'name':feature, 'type': 'bool', 'value':eval(value)})
             elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise', 
                              'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',
                              'Dreifach']:
@@ -1079,14 +1079,14 @@ def update():
         cBox_dvc_tp_cmds.addItem(cmdLst)
     cBox_dvc_tp_cmds.activated[str].connect(slctCmdLst)        
     cBox_inpts_new.clear()
-    inpts = sorted(mdb_read_table_column(db="cmd_inputs", column = 'Description'))
+    inpts = sorted(mdb_read_table_column(db="cmd_inputs", column = 'Name'))
     for inpt in inpts:
         if str(inpt) <> "":
             cBox_inpts_new.addItem(str(inpt))        
     sz.p.sigTreeStateChanged.connect(change_sz)
     
 def neuTrig():
-    vals = mdb_read_table_entry(db="cmd_inputs",entry=str(cBox_inpts_new.currentText()),column='Description')
+    vals = mdb_read_table_entry(db="cmd_inputs",entry=str(cBox_inpts_new.currentText()),column='Name')
     mdb_add_table_entry("cmd_inputs",vals)
 
 def change(param, changes):

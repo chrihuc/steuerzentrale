@@ -162,6 +162,7 @@ class ListenUdpThread(QtCore.QThread):
                 try:
                     idle = float(sp.check_output('xprintidle', shell=True).strip())
                     if idle > threshold and self.active:
+                        self.emit(QtCore.SIGNAL('show_homepage()'))
                         if settings_r()['Status'] == 'Wach':
                             print "Start feh"
 #                            exectext = 'xbindkeys -n -f xbindkeys.temp'
@@ -169,7 +170,6 @@ class ListenUdpThread(QtCore.QThread):
                             exectext = "feh -F -D 20 --randomize /home/pi/Pictures/* &"
                             os.system(exectext)                            
                         else:
-                            self.emit(QtCore.SIGNAL('show_homepage()'))
                             exectext = "pkill feh"
                             os.system(exectext)                            
                             exectext = "DISPLAY=:0 xset dpms force off"
@@ -197,7 +197,6 @@ class ListenUdpThread(QtCore.QThread):
             self.set_screensaver()
 
         def disp_aus(self):
-            idle = float(sp.check_output('xprintidle', shell=True).strip())
             exectext = "pkill feh"
             os.system(exectext)                            
             exectext = "DISPLAY=:0 xset dpms force off"
@@ -236,12 +235,7 @@ class Main(QtGui.QMainWindow):
         self.setupUi(self)
 #        self.set_screensaver()
     
-    def set_screensaver(self):
-#        if constants.gui_.KS:
-#            exectext = "xset -dpms"
-#            os.system(exectext)    
-#            exectext = "xset s 10"
-#            os.system(exectext) 
+    def show_homepage(self):
         self.tabWidget.setCurrentIndex(constants.gui_.Home)
     
     def set_fullscreen(self):
@@ -261,6 +255,11 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
         self.tabWidget.setStyleSheet("QTabBar::tab { height: 50px;}")
         
+        # Time
+        self.ti_lbl = QtGui.QLabel(self.tabWidget)
+        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%d. %m. %H:%M')))
+        self.ti_lbl.setGeometry(QtCore.QRect(720, 15, 100, 20)) 
+        self.ti_lbl.setStyleSheet("QLabel { background-color : white; color : black; }")
         
         # Keller
         self.tab_0 = QtGui.QWidget()
@@ -272,10 +271,6 @@ class Main(QtGui.QMainWindow):
         self.tab = QtGui.QWidget()
         
         self.tab.setObjectName(_fromUtf8("Erdgeschoss")) 
-        self.ti_lbl = QtGui.QLabel(self.tabWidget)
-        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%m-%d %H:%M')))
-        self.ti_lbl.setGeometry(QtCore.QRect(700, 10, 100, 20)) 
-        self.ti_lbl.setStyleSheet("QLabel { background-color : white; color : black; }")
         self.tab.setStyleSheet("background-image:url(./EG.png)")
         self.buttons = []
         for btn in eg_buttons:
@@ -374,7 +369,10 @@ class Main(QtGui.QMainWindow):
         self.scrollAreaWidgetContents2.setGeometry(QtCore.QRect(0, 0, 165, 360))
         self.scrollAreaWidgetContents2.setObjectName(_fromUtf8("scrollAreaWidgetContents2"))
         self.scrollAreaWidgetContents2.setLayout(self.scrollLayout2)        
-        self.scrollArea2.setWidget(self.scrollAreaWidgetContents2)        
+        self.scrollArea2.setWidget(self.scrollAreaWidgetContents2)   
+#        self.scrollArea2.scrollBar.setStyleSheet("""QScrollBar:vertical {
+#        width:30px;
+#        }""")
         self.xs1_clicked()
         self.fill_szenen_favs()
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
@@ -469,18 +467,24 @@ class Main(QtGui.QMainWindow):
         self.tabWidget.addTab(self.tab_6, _fromUtf8(""))  
         self.tab_6.connect(self.tabWidget, SIGNAL('currentChanged(int)'), self.update)
         self.pushButton_10 = QtGui.QPushButton(self.tab_6)
-        self.pushButton_10.setGeometry(QtCore.QRect(10, 380, 91, 50))
+        self.pushButton_10.setGeometry(QtCore.QRect(550, 50, 100, 100))
         self.pushButton_10.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_10.setText('Update')
-#        self.pushButton_10.setCheckable(True)
-        self.pushButton_10.clicked.connect(self.makeload_cam(self)) 
+        self.pushButton_10.clicked.connect(self.makeload_cam1x(self)) 
+
+        self.pushButton_111 = QtGui.QPushButton(self.tab_6)
+        self.pushButton_111.setGeometry(QtCore.QRect(550, 150, 100, 100))
+        self.pushButton_111.setObjectName(_fromUtf8("saveAlarm"))
+        self.pushButton_111.setText('Play')
+        self.pushButton_111.setCheckable(True)
+        self.pushButton_111.clicked.connect(self.makeload_cam(self)) 
 
         self.pushButton_11 = QtGui.QPushButton(self.tab_6)
-        self.pushButton_11.setGeometry(QtCore.QRect(100, 380, 91, 50))
+        self.pushButton_11.setGeometry(QtCore.QRect(550, 250, 100, 100))
         self.pushButton_11.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_11.setText('Stop')
         self.pushButton_11.clicked.connect(self.makestop(self)) 
-
+        self.load_cam()
 #        lbl = QtGui.QLabel(self)
 #        lbl.setPixmap(QtGui.QPixmap(image))
       
@@ -503,7 +507,7 @@ class Main(QtGui.QMainWindow):
         udpt = ListenUdpThread()
         udptt = Timer(0, udpt.run, [])
         self.connect(udpt, QtCore.SIGNAL("showCam()"), self.showCam)
-        self.connect(udpt, QtCore.SIGNAL("show_homepage()"), self.set_screensaver)
+        self.connect(udpt, QtCore.SIGNAL("show_homepage()"), self.show_homepage)
         udptt.start()     
 
     def add_wecker(self):
@@ -529,6 +533,11 @@ class Main(QtGui.QMainWindow):
             self.refresh()
         return wrapper
 
+    def makeload_cam1x(self,parent=None):       
+        def wrapper(): 
+            self.updateImage()
+        return wrapper
+
     def makestop(self,parent=None):
         def stoper():
             global streaming
@@ -543,14 +552,11 @@ class Main(QtGui.QMainWindow):
     def showCam(self):
         if constants.gui_.KlingelAn:
             exectext = "DISPLAY=:0 xset dpms force on"
-            os.system(exectext) 
-        if constants.gui_.KS:
-            exectext = "xset s 30"
-            os.system(exectext)              
+            os.system(exectext)             
         self.tabWidget.setCurrentIndex(8)
         self.updateImage()
-#        scres = Timer(30, self.set_screensaver, [])
-#        scres.start()
+        scres = Timer(30, self.show_homepage, [])
+        scres.start()
 
     def load_cam(self):
         QtGui.QApplication.processEvents()
@@ -594,8 +600,8 @@ class Main(QtGui.QMainWindow):
             self.update_values()
         if self.tabWidget.currentIndex() ==7:
             self.add_SchaltUhr()            
-        if self.tabWidget.currentIndex() ==8:
-            self.load_cam()
+#        if self.tabWidget.currentIndex() ==8:
+#            self.load_cam()
 
     def update_values(self):
         settings = settings_r()
@@ -604,7 +610,7 @@ class Main(QtGui.QMainWindow):
             if str(name) in settings:
 #                print name, settings.get(str(name))
                 btn.setText(settings.get(str(name)))
-        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%m-%d %H:%M:%S')))
+        self.ti_lbl.setText(str(datetime.datetime.now().strftime('%d. %m. %H:%M')))
         QtGui.QApplication.processEvents()             
 
     def close_clicked(self):
@@ -673,6 +679,7 @@ class Main(QtGui.QMainWindow):
         System = "Satelliten"
         self.clearLayout(self.scrollLayout)
         for item in sat_devs:
+            self.scrollLayout.setContentsMargins(0, 5, 5, 5)
             self.scrollLayout.addRow(Buttn(None,item,"Device")) 
 
     def fill_szenen_favs(self):
@@ -680,7 +687,8 @@ class Main(QtGui.QMainWindow):
         #while self.scrollLayout.rowCount() > 0:
             #self.scrollLayout.deleteLater()
         for item in szn_favs:
-            self.scrollLayout2.addRow(Buttn(None,Name=item,Type="Szene",description =szn_favs.get(item) ))
+            if szn_favs.get(item) <> "":
+                self.scrollLayout2.addRow(Buttn(None,Name=item,Type="Szene",description=szn_favs.get(item) ))
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Kontrollraum", None))
@@ -809,7 +817,7 @@ class weckerRow(QtGui.QWidget):
         #horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.font = QtGui.QFont()
         if not constants.gui_.KS:
-            self.font.setPixelSize(18)
+            self.font.setPixelSize(15)
         self.timeEdit = QtGui.QTimeEdit()
         name = weckerList.get('Name')
         self.timeEdit.setObjectName(_fromUtf8(str(name)+".timeEdit"))
@@ -865,6 +873,7 @@ class Buttn(QtGui.QWidget):
         desc= Name
       self.pushButton = QtGui.QPushButton(desc)
       self.pushButton.setGeometry(QtCore.QRect(0, 0, 300, 300))
+      self.pushButton.setMinimumHeight(50)
       layout = QtGui.QHBoxLayout()
       layout.setGeometry(QtCore.QRect(0, 0, 300, 300))
       layout.addWidget(self.pushButton)
@@ -873,7 +882,7 @@ class Buttn(QtGui.QWidget):
       elif Type=="Command":
         self.pushButton.clicked.connect(lambda: self.send_command(Name))       
       elif Type=="Szene":
-        self.pushButton.clicked.connect(lambda: scenes.execute(Name))          
+        self.pushButton.clicked.connect(lambda: self.execute_on_server(Name))          
       self.setLayout(layout)
       
     def set_popup(self,Name): 
@@ -901,6 +910,10 @@ class Buttn(QtGui.QWidget):
             if sat.set_device(Device, Command):
                 self.parent.close()     
          
+    def execute_on_server(self, szene):
+        commado = {'Szene':str(szene)}
+        csocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+        csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))                
 
 class MyPopup(QtGui.QMainWindow):
     def __init__(self, parent=None, Text="Test"):
@@ -932,7 +945,11 @@ class MyPopup(QtGui.QMainWindow):
         self.centralWidget.setLayout(self.mainLayout)
 
         # set central widget
-        self.setCentralWidget(self.centralWidget)          
+        self.setCentralWidget(self.centralWidget)  
+        
+        self.scrollLayout.setContentsMargins(50, 50, 50, 50)
+#        self.scrollLayout.setVerticalSpacing(50)
+
 
         if Text in xs1_devs:
             System = "XS1"
@@ -954,7 +971,7 @@ class MyPopup(QtGui.QMainWindow):
             System = "Satelliten"
             for item in sat.list_commands(Text):
                 self.scrollLayout.addRow(Buttn(self,str(item),"Command"))                 
-        
+        self.scrollLayout.setRowHeight(1,50)
     #def paintEvent(self, e):
         #self.scrollLayout.addRow(Test("test"))
         #pass
