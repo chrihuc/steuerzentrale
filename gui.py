@@ -1129,7 +1129,7 @@ app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Controlroom.png'))
 myWidget = Main()
 if constants.gui_.KS:
     exectext = 'unclutter -idle 0.01 &'
-    os.system(exectext)
+#    os.system(exectext)
 #    exectext = 'sudo echo 130 > /sys/class/backlight/rpi_backlight/brightness'
 #    os.system(exectext)
     myWidget.showFullScreen()
