@@ -8,7 +8,7 @@ Created on Wed Mar 30 15:35:24 2016
 import socket
 import threading
 
-HOST = '192.168.192.255'   # Symbolic name meaning the local host
+HOST = '192.168.192.10'   # Symbolic name meaning the local host
 PORT = 5005    # Arbitrary non-privileged port
 if False:
     while True:
@@ -29,7 +29,7 @@ if False:
             print reply
         s.close()
         
-if True:
+if False:
     dicti = {}
     dicti['Name'] = 'DisplayAn'
     #dicti['Command'] = 'Update'
@@ -41,10 +41,10 @@ def bidirekt(Device):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #command = {'Command':'Update'}
     data_ev = {}
-    data_ev['Device'] = Device
-    data_ev['red'] = 0L
-    data_ev['green'] = 255
-    data_ev['blue'] = 0
+    data_ev['Request'] = Device
+#    data_ev['red'] = 0L
+#    data_ev['green'] = 255
+#    data_ev['blue'] = 0
     s.connect((HOST,PORT))
 #    if command.split(' ',1)[0]=='STORE':
 #        while True:
@@ -57,6 +57,7 @@ def bidirekt(Device):
     print reply
     s.close()    
     
+bidirekt('Bewohner')
 
 #t = threading.Thread(name="broadcast", target=bidirekt, args = ['V00WOH1SRA1LI01'])
 #t.start()  
