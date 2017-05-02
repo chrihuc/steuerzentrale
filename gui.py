@@ -163,7 +163,7 @@ class ListenUdpThread(QtCore.QThread):
                     idle = float(sp.check_output('xprintidle', shell=True).strip())
                     if idle > threshold and self.active:
                         self.emit(QtCore.SIGNAL('show_homepage()'))
-                        if settings_r()['Status'] == 'Wach':
+                        if settings_r()['Status'] == 'Wach' and contants.gui_.Feh:
                             print "Start feh"
 #                            exectext = 'xbindkeys -n -f xbindkeys.temp'
 #                            os.system(exectext) 
@@ -469,20 +469,20 @@ class Main(QtGui.QMainWindow):
         self.lbl2 = QtGui.QLabel(self.tab_6)
         self.lbl2.setGeometry(100, 100, 400, 100)
         self.pushButton_10 = QtGui.QPushButton(self.tab_6)
-        self.pushButton_10.setGeometry(QtCore.QRect(0, 50, 100, 100))
+        self.pushButton_10.setGeometry(QtCore.QRect(550, 50, 100, 100))
 #        self.pushButton_10.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_10.setText('Update')
         self.pushButton_10.clicked.connect(lambda: self.updateImage()) 
 
         self.pushButton_111 = QtGui.QPushButton(self.tab_6)
-        self.pushButton_111.setGeometry(QtCore.QRect(0, 150, 100, 100))
+        self.pushButton_111.setGeometry(QtCore.QRect(550, 150, 100, 100))
 #        self.pushButton_111.setObjectName(_fromUtf8("SaveAlarm"))
         self.pushButton_111.setText('Play')
 #        self.pushButton_111.setCheckable(True)
         self.pushButton_111.clicked.connect(self.makeload_cam(self)) 
 
         self.pushButton_11 = QtGui.QPushButton(self.tab_6)
-        self.pushButton_11.setGeometry(QtCore.QRect(0, 250, 100, 100))
+        self.pushButton_11.setGeometry(QtCore.QRect(550, 250, 100, 100))
 #        self.pushButton_11.setObjectName(_fromUtf8("saveAlarm"))
         self.pushButton_11.setText('Stop')
         self.pushButton_11.clicked.connect(self.makestop(self)) 
