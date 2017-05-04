@@ -57,7 +57,7 @@ def bidirekt(Device):
     print reply
     s.close()    
     
-bidirekt('Bewohner')
+bidirekt('Settings')
 
 #t = threading.Thread(name="broadcast", target=bidirekt, args = ['V00WOH1SRA1LI01'])
 #t.start()  

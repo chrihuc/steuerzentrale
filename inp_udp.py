@@ -78,11 +78,14 @@ def exec_data(data_ev, data):
         mes.register_user(data_ev)
     elif ('Device' in data_ev) and ('Command' in data_ev):
         scenes.threadSetDevice(data_ev['Device'], data_ev['Command'])
+    elif ('Request_js' in data_ev):
+        if data_ev.get('Request_js') == 'Wecker':            
+            data = json.dumps(crn.get_all(wecker=True), default=handler) 
+        elif data_ev.get('Request_js') == 'Settings':
+            data = json.dumps(settings_r(), default=handler)
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
             data = str(settings_r())
-        elif data_ev.get('Request') == 'Wecker':            
-            data = json.dumps(crn.get_all(wecker=True), default=handler)
         elif data_ev.get('Request') == 'Bewohner':
             data = str(mdb_get_table(constants.sql_tables.Bewohner.name))
         elif data_ev.get('Request') == 'Besucher':
