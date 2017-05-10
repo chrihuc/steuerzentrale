@@ -163,7 +163,7 @@ class ListenUdpThread(QtCore.QThread):
                     idle = float(sp.check_output('xprintidle', shell=True).strip())
                     if idle > threshold and self.active:
                         self.emit(QtCore.SIGNAL('show_homepage()'))
-                        if settings_r()['Status'] == 'Wach' and contants.gui_.Feh:
+                        if settings_r()['Status'] == 'Wach' and constants.gui_.Feh:
                             print "Start feh"
 #                            exectext = 'xbindkeys -n -f xbindkeys.temp'
 #                            os.system(exectext) 
