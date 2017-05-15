@@ -56,17 +56,28 @@
                 id: TabPanIt
                 Button:
                     text: 'Refresh'
-                    on_press: root.update_webcam()        
+                    on_press: root.update_webcam()    
+                Button:
+                    text: 'Play'
+                    on_press: root.play_webcam() 
+                Button:
+                    text: 'Stop' 
+                    on_press: root.stop_webcam() 
     TabbedPanelItem:
         text: 'Szenen'
         ScrollView:
             text: 'ScrollView'
     TabbedPanelItem:
         text: 'Settings'
-        ToggleButton:
-            id: KlingelAn
-            text: 'AutoAn Klingel'
-            on_press: root.change_setting('KlingelAn')
+        BoxLayout:
+            ToggleButton:
+                id: KlingelAn
+                text: 'AutoAn Klingel'
+                on_press: root.change_setting('KlingelAn')
+            ToggleButton:
+                id: Feh
+                text: 'Zeige Bilder'
+                on_press: root.change_setting('Feh')
         
 <TemperaturLabel>:
     size_hint: None, None

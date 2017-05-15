@@ -37,12 +37,17 @@ import subprocess as sp
 import datetime
 import constants
 import threading
+import pandas as pd
+import MySQLdb as mdb
 
 from kivy.properties import ObjectProperty, StringProperty, OptionProperty, \
     ListProperty, NumericProperty, AliasProperty, BooleanProperty
 
 
 running = True
+con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+szenen = pd.read_sql('SELECT * FROM set_Szenen', con=con)
+alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
 
 def get_data(requ):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -63,14 +68,16 @@ class AlarmClock(ScrollView):
         # set size of layout
         layout.bind(minimum_height=layout.setter('height'), minimum_width=layout.setter('width'))
         # 20 alarms
-        for cnt in range(20):
+        for i, reihe in alarme.iterrows():
             # Make sure the height is such that there is something to scroll.
             row = GridLayout(rows=1, spacing=5, size_hint=(None,None))
             row.bind(minimum_height=row.setter('height'), minimum_width=row.setter('width'))
-            spinner = Spinner(text='30', values=(str(num) for num in range(24)),
+            hour = reihe['Time'].seconds // 3600
+            minutes = (reihe['Time'].seconds % 3600) / 60
+            spinner = Spinner(text=str(hour), values=(str(num) for num in range(24)),
                               size_hint=(None, None), size=(40, 40)) 
             row.add_widget(spinner)
-            spinner = Spinner(text='30', values=(str(num) for num in range(60)),
+            spinner = Spinner(text=str(minutes), values=(str(num) for num in range(60)),
                               size_hint=(None, None), size=(40, 40)) 
             row.add_widget(spinner) 
             spacer = Widget(size_hint=(None, None), size=(20, 40))
@@ -99,7 +106,7 @@ class ScreenSaver_handler(object):
     def slideshow(self, *args):
         if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=5):
             if not self.ss_on:
-                self.pic_frame.open()
+                if constants.gui_.Feh: self.pic_frame.open()
                 self.ss_on = True
                 self.go_home()
     
@@ -113,13 +120,14 @@ class OpScreen(TabbedPanel):
 
     def __init__(self, **kwargs):
         super(OpScreen, self).__init__(**kwargs) 
+        self.play_wc = False
         self.screnns = ScreenSaver_handler(self.go_home)
         self.aimg = AsyncImage(source='http://192.168.192.36/html/cam.jpg', nocache = True, size_hint=(1, 1))
         self.populate_szenen()
         self.populate_wecker()
         self.populate_webcam()
-        self.update_labels()
-        Clock.schedule_interval(self.populate_settings, 60)
+        self.populate_settings()
+        Clock.schedule_interval(self.update_labels, 60)
         threading.Thread(target=self.udp_thread).start()
     
     def go_home(self):
@@ -130,7 +138,7 @@ class OpScreen(TabbedPanel):
         self.switch_to(self.ids.Kamera)
         self.update_webcam()
 
-    def populate_settings(self):
+    def populate_settings(self, *args):
         for widg in self.ids:
             if hasattr(constants.gui_, widg):
                 value = getattr(constants.gui_, widg)
@@ -149,6 +157,8 @@ class OpScreen(TabbedPanel):
         constants.save_config()
 
     def populate_szenen(self):
+        favoriten = szenen.loc[szenen['Gruppe'] == 'Favorit']
+        guis = szenen.loc[szenen['Gruppe'] == 'Lichter']
         for tab in self.tab_list:
             if tab.text == 'Szenen':
                 splitter = GridLayout(cols=2, spacing=10, size_hint_y=None)
@@ -156,10 +166,16 @@ class OpScreen(TabbedPanel):
                 layout2 = GridLayout(cols=1, spacing=10, size_hint_y=None)
                 # Make sure the height is such that there is something to scroll.
                 layout.bind(minimum_height=layout.setter('height'))
-                for i in range(100):
-                    btn = Button(text=str(i), size_hint_y=None, height=40)
-                    btn.bind(on_press=lambda x, i=i: self.print_text(i))
+                for i, szene in favoriten.iterrows():
+                    btn = Button(text=str(szene['Beschreibung']), size_hint_y=None, height=40)
+                    commando = szene['Name']
+                    btn.bind(on_press=lambda x, commando=commando: self.print_text(commando))
                     layout.add_widget(btn)
+                for i, szene in guis.iterrows():
+                    btn = Button(text=str(szene['Beschreibung']), size_hint_y=None, height=40)
+                    commando = szene['Name']
+                    btn.bind(on_press=lambda x, commando=commando: self.print_text(commando))
+                    layout2.add_widget(btn)
                 sview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
                 sview.add_widget(layout)   
                 splitter.add_widget(sview) 
@@ -171,7 +187,7 @@ class OpScreen(TabbedPanel):
     def populate_webcam(self, *args, **kwargs):
         self.ids.KamBox.add_widget(self.aimg)
 
-    def update_labels(self):
+    def update_labels(self, *args):
         settings = get_data('Settings')
         for widg in self.ids:
             if widg in settings:
@@ -180,46 +196,19 @@ class OpScreen(TabbedPanel):
 
     def update_webcam(self, *args, **kwargs):
         self.aimg.reload()
-#        for tab in self.tab_list:
-#            if tab.text == 'Kamera':
-#                print tab.children
-#                for child in tab.children:
-#                    tab.remove_widget(child)
-    
-    def show_ontouchevent(self, *args, **kwargs):
-        for item in args:
-            print item
-        for key, value in kwargs.iteritems():
-            print key, value
+        if self.play_wc: Clock.schedule_once(self.update_webcam, 0.25)
+      
+    def play_webcam(self):
+        self.play_wc = True
+        
+    def stop_webcam(self):
+        self.play_wc = False    
         
     def populate_wecker(self):
         for tab in self.tab_list:
             if tab.text == 'Wecker':
                 alarme = AlarmClock()
                 tab.add_widget(alarme)                
-        
-    def populate_wecker_old(self):
-        for tab in self.tab_list:
-            if tab.text == 'Wecker':
-                vert_scroll_layout = GridLayout(cols=1, spacing=40, size_hint_y=None)
-                vert_scroll_layout.bind(minimum_height=vert_scroll_layout.setter('height'))
-                vert_scroll_view = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
-                vert_scroll_view.add_widget(vert_scroll_layout)
-                
-                # add wecker row
-                for cnt in range(20):
-                    hor_scroll_layout = GridLayout(rows=1, spacing=10, size_hint_x=None)
-                    hor_scroll_layout.bind(minimum_width=hor_scroll_layout.setter('width'))
-                    hor_scroll_view = ScrollView(size_hint=(1, None), size=(Window.width, 40))
-                    hor_scroll_view.add_widget(hor_scroll_layout)
-                    
-                    for j in range(20):
-                        btn = Button(text=str(j), size_hint_x=None, width=40)
-#                        btn.bind(on_press=lambda x, i=i: self.print_text(i))
-                        hor_scroll_layout.add_widget(btn) 
-                    vert_scroll_layout.add_widget(hor_scroll_view)
-                    
-                tab.add_widget(vert_scroll_view)
 
     def udp_thread(self, *args):
         broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
@@ -271,12 +260,7 @@ class LichtButton(Button):
 class GuiApp(App):
     def build(self):
         self.OpScreen = OpScreen()
-#        self.OpScreen.after_build()
         return self.OpScreen
-        
-#    def on_start(self):
-#        self.OpScreen.after_build()
-
 
 if __name__ == '__main__':
     GuiApp().run()
