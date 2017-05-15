@@ -63,14 +63,41 @@ cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
 szn_typs = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
-stockwerke = ['Vm1','V00','A00','V01','V02','']
+stockwerke = ['Vm1','V00','A00','V01','V02','VIR','']
 
 stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
-                   'A00':'Draussen', '':''}
-zim_dict = {'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette',
-            'SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer'}
-furn_dict = {'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang',
-             'STV':'Stromversorgung', 'RUM':'Raum', 'DEK':'Decke', '':''}
+                   'A00':'Draussen', 'VIR':'Virtuell'}
+
+zim_dict = {'ZIM':'Zimmer',
+            'WOH':'Wohnzimmer',
+            'KUE':u'Küche',
+            'BAD':u'Badezimmer/Toilette',
+            'SCH':'Schlafzimmer',
+            'FLU':'Flur',
+            'BUE':u'Büro',
+            'KID':'Kinderzimmer',
+            'ESS':'Esszimmer',
+            'TER':'Terasse',
+            
+            'KOM':'Kommunikation',
+            'BEW':'Bewohner'}
+
+furn_dict = {'SCA':'Scanner',
+             'ADV':'Advent',
+             'EIN':'Eingang',
+             'STV':'Stromversorgung', 
+             'RUM':'Raum', 
+             'DEK':'Decke', 
+             'SRA':'Schrank',
+             'SOF':'Sofa', 
+             'TUE':u'Tür', 
+             'SEV':'Server', 
+             'PFL':'Pflanzen',
+             'BET':'Bett',
+             
+             'SSH':'SecureShell',
+             'RUT':'Router',
+             'SAT':'Satellite'}
              
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
@@ -138,26 +165,35 @@ class StockRaum():
     def __init__(self,name,zimmer = True):
         self.name = name
         self.dicti = {'name': 'Zimmer', 'type': 'group', 'expanded': False}
+        self.dicti['name'] = self.get_description(name)
+        print name, self.dicti['name']
         self.children = []
         self.expanded = False
-        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
-                      'TER':'Terasse','GRA':'Gras',
-                      'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer',
-                      'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang','STV':'Stromversorgung'}
-        for nam in self.namen:
-            if zimmer:
-                if nam in self.name[-3:]:
-                    self.dicti['name'] = self.namen.get(nam)   
-            else:
-                if nam in self.name[0:3]:
-                    self.dicti['name'] = self.namen.get(nam)                     
+#        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
+#                      'TER':'Terasse','GRA':'Gras',
+#                      'ZIM':'Zimmer','WOH':'Wohnzimer','KUE':u'Küche','BAD':u'Badezimmer/Toilette','SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer',
+#                      'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang','STV':'Stromversorgung'}
+#        for nam in self.namen:
+#            if zimmer:
+#                if nam in self.name[-3:]:
+#                    self.dicti['name'] = self.get_description(nam)   
+#            else:
+#                if nam in self.name[0:3]:
+#                    self.dicti['name'] = self.get_description(nam)       
+        
+    @staticmethod
+    def get_description(obj_id):
+        dictionaries = [stockwerke_dict, zim_dict, furn_dict]
+        if len(obj_id) > 3:
+            obj_id = obj_id[-3:]
+        for dicit in dictionaries:
+            if obj_id in dicit:
+                return dicit[obj_id]
         
     def addChild(self,child):
-        global children
         self.children.append(child)
 
     def expand(self, status=True):
-        global expanded, dicti
         self.dicti['expanded'] = status
         self.expanded = status
         
@@ -297,10 +333,11 @@ class Szenen_tree():
                     zimmer_list.append(name[0:6])
         stock_list = list(set(stock_list))
         zimmer_list = list(set(zimmer_list))
+        print stock_list, zimmer_list
         for stock in stock_list:
             stockwerke.append(StockRaum(stock))
         for zim in zimmer_list:
-            zimmer.append(StockRaum(zim))            
+            zimmer.append(StockRaum(zim))  
         params = []
         for szene in self.szenen:
             if szene.get('Name') == 'LeereVorlage' or self.neue_szene:
@@ -789,14 +826,6 @@ class InputsTree():
 """
 part with new devices tree
 """
-
-stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
-                   'A00':'Draussen'}
-zim_dict = {'ZIM':'Zimmer','WOH':'Wohnzimmer','KUE':u'Küche','BAD':u'Badezimmer/Toilette',
-            'SCH':'Schlafzimmer','FLU':'Flur','BUE':u'Büro','ESS':'Esszimmer'}
-furn_dict = {'SCA':'Scanner','ADV':'Advent','KID':'Kinderzimmer','EIN':'Eingang',
-             'STV':'Stromversorgung', 'RUM':'Raum', 'DEK':'Decke', 'SRA':'Schrank',
-             'SOF':'Sofa', 'TUE':u'Tür', 'SEV':'Server', 'PFL':'Pflanzen'}
 
 class TreeInputsDevices(object):
     def __init__(self, callback=None):

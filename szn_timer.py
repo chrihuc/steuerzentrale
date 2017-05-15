@@ -29,9 +29,9 @@ def main():
     global start_t
     start_t = datetime.datetime.now()
     sz_t = szenen_timer(def_to_run = print_it)
-    sz_t.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True)
+    print sz_t.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True)
     time.sleep(5)
-    sz_t.cancel_timer(parent = "Bad_i", child = "Bad_aus")
+#    sz_t.cancel_timer(parent = "Bad_i", child = "Bad_aus")
     sz_t.zeige()
     
 class szenen_timer:
@@ -54,11 +54,14 @@ class szenen_timer:
         dicti["exact"] = exact
         dicti["retrig"] = retrig
         hash_id = uuid.uuid4()
-        dicti["hash_id"] = hash_id     
-        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
-        dicti["timer"] = t
-        if start: t.start()
-        self.liste.append(dicti)
+        dicti["hash_id"] = hash_id 
+        if delay < 0:
+            self.cancel_timer(parent, child)
+        else:
+            t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
+            dicti["timer"] = t
+            if start: t.start()
+            self.liste.append(dicti)
         return hash_id
         
     def start_timer(self, nr):
@@ -69,7 +72,7 @@ class szenen_timer:
         self.liste[nr].get("timer").start()
         
     def add_timer_start(self, parent, delay, child, exact, retrig):
-        self.add_timer(parent, delay, child, exact, retrig, True)
+        return self.add_timer(parent, delay, child, exact, retrig, start=True)
         
     def stop_timer(self, nr):
         self.liste[nr].get("timer").cancel() 
@@ -105,7 +108,7 @@ class szenen_timer:
     
     def retrigger_add(self, parent, delay, child, exact = False, retrig = True):
         if not self.retrigger(parent, delay, child, exact, retrig):
-            self.add_timer_start(parent, delay, child, exact, retrig)
+            return self.add_timer_start(parent, delay, child, exact, retrig)
 
     def zeige(self):
         print self.liste 

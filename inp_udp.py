@@ -90,6 +90,10 @@ def exec_data(data_ev, data):
             data = str(mdb_get_table(constants.sql_tables.Bewohner.name))
         elif data_ev.get('Request') == 'Besucher':
             data = str(mdb_get_table(constants.sql_tables.Besucher.name))
+        elif data_ev.get('Request') == 'Wecker':
+            data = crn.get_all(wecker=True)
+        elif data_ev.get('Request') == 'GuiAlarms':
+            data = crn.get_all(typ='Gui')
     elif ('SetWecker' in data_ev):
         table = constants.sql_tables.cron.name
         for entry in eval(data_ev['SetWecker']):
@@ -102,7 +106,7 @@ def exec_data(data_ev, data):
 def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
-        data = conn.recv(1024)
+        data = conn.recv(SIZE)
         print data
         if not data:
             break

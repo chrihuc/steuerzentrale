@@ -69,7 +69,13 @@ def init_cfg():
     with open('./main.cfg', 'wb') as configfile:
         config.write(configfile)
 
-
+def save_config():
+    config.set('GUI', 'KommandoStation', gui_.KS)
+    config.set('GUI', 'KSHome', gui_.Home)
+    config.set('GUI', 'KlingelAn', gui_.KlingelAn)
+    config.set('GUI', 'Feh', gui_.Feh)
+    with open('./main.cfg', 'wb') as configfile:
+        config.write(configfile)
 
 for i in range(0,3):
     while True:

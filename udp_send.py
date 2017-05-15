@@ -8,7 +8,7 @@ Created on Wed Mar 30 15:35:24 2016
 import socket
 import threading
 
-HOST = '192.168.192.10'   # Symbolic name meaning the local host
+HOST = '192.168.192.255'   # Symbolic name meaning the local host
 PORT = 5005    # Arbitrary non-privileged port
 if False:
     while True:
@@ -29,9 +29,9 @@ if False:
             print reply
         s.close()
         
-if False:
+if True:
     dicti = {}
-    dicti['Name'] = 'DisplayAn'
+    dicti['Name'] = 'Klingel'
     #dicti['Command'] = 'Update'
     hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     hbtsocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -53,11 +53,12 @@ def bidirekt(Device):
 #            if additional_text=='.':
 #                break
     s.send(str(data_ev))
-    reply = s.recv(1024)
+    reply = s.recv(2048)
     print reply
+    print type(eval(reply))
     s.close()    
     
-bidirekt('Settings')
+#bidirekt('Settings')
 
 #t = threading.Thread(name="broadcast", target=bidirekt, args = ['V00WOH1SRA1LI01'])
 #t.start()  
