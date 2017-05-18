@@ -11,12 +11,6 @@
                     pos: self.pos
                     size: self.size            
                     source: 'UG.png'
-            Button:
-                text: 'Licht'
-                size_hint: 0.1, 0.1
-                pos_hint: {'center_x': .5, 'center_y': .5}
-                on_press: root.slideshow()
-                background_normal: 'bulb.png'
     TabbedPanelItem:
         text: 'EG'
         id: EG
@@ -27,7 +21,7 @@
                     size: self.size            
                     source: 'EG.png'
             LichtButton:
-                pos_hint: {'center_x': .85, 'center_y': .8}
+                pos_hint: {'center_x': .5, 'center_y': .25}
                 id: V00WOH1DEK1LI01
             TemperaturLabel:
                 pos_hint: {'center_x': .05, 'center_y': .6}
@@ -84,7 +78,7 @@
     size: 70, 22
     text: u'[ref=A00TER1GEN1TE01]NN degC[/ref]'
     markup: True
-    on_ref_press: root.pop_up()    
+    on_ref_press: root.pop_up(id)
     canvas.before:
         Color:
             rgb: 0, 0, 0 # your color here
@@ -93,7 +87,7 @@
             size: self.size         
             
 <LichtButton>:
-    size_hint: 0.2, 0.2
+    size_hint: 0.15, 0.1
     on_press: root.pop_up()
     background_normal: 'bulb2.png'
     

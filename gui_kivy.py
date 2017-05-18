@@ -31,6 +31,7 @@ from kivy.uix.widget import Widget
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.cache import Cache
+from kivy.garden.graph import Graph, MeshLinePlot
 
 import socket
 import subprocess as sp
@@ -60,15 +61,19 @@ def get_data(requ):
     
 class AlarmClock(ScrollView):
     
-    def __init__(self, **kwargs):
+    def __init__(self, typ, **kwargs):
         super(AlarmClock, self).__init__(**kwargs)   
         self.size_hint=(1, 1)
         # cols, TimePicker, Mo, Di, Mi, Do, Fr, Sa, So, Sz, Enabled
-        layout = GridLayout(cols=1, spacing=10, size_hint=(None,None))
+        self.layout = GridLayout(cols=1, spacing=5, size_hint=(None,None))
         # set size of layout
-        layout.bind(minimum_height=layout.setter('height'), minimum_width=layout.setter('width'))
-        # 20 alarms
-        for i, reihe in alarme.iterrows():
+        self.layout.bind(minimum_height=self.layout.setter('height'), minimum_width=self.layout.setter('width'))
+        self.typ = typ
+        self.update()
+
+    def update(self):
+        reihen = alarme.loc[alarme['Type']==self.typ]
+        for i, reihe in reihen.iterrows():
             # Make sure the height is such that there is something to scroll.
             row = GridLayout(rows=1, spacing=5, size_hint=(None,None))
             row.bind(minimum_height=row.setter('height'), minimum_width=row.setter('width'))
@@ -77,16 +82,32 @@ class AlarmClock(ScrollView):
             spinner = Spinner(text=str(hour), values=(str(num) for num in range(24)),
                               size_hint=(None, None), size=(40, 40)) 
             row.add_widget(spinner)
+            colon = Label(text=':')
+            row.add_widget(colon)
             spinner = Spinner(text=str(minutes), values=(str(num) for num in range(60)),
                               size_hint=(None, None), size=(40, 40)) 
             row.add_widget(spinner) 
             spacer = Widget(size_hint=(None, None), size=(20, 40))
             row.add_widget(spacer)
-            for i in range(2,15):
-                btn = ToggleButton(text=str(i), size_hint=(None,None), size=(80,40), state='down')
+            for i in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']:
+                btn = ToggleButton(text=str(i), size_hint=(None,None), size=(80,40))
+                if eval(reihe[i]):
+                    btn.state='down'
                 row.add_widget(btn)
-            layout.add_widget(row)
-        self.add_widget(layout)  
+            spacer = Widget(size_hint=(None, None), size=(20, 40))
+            row.add_widget(spacer)
+            btn = ToggleButton(text=str('An'), size_hint=(None,None), size=(80,40))
+            if eval(reihe['Eingeschaltet']):
+                btn.state='down'
+            row.add_widget(btn)            
+            self.layout.add_widget(row)
+        btn = Button(text=str('Save'), size_hint=(None,None), size=(80,40))
+        btn.bind(on_press=self.save)
+        self.layout.add_widget(btn)
+        self.add_widget(self.layout)        
+
+    def save(self, *args):
+        print self.layout.children
 
 class PictureFrame(ModalView):
     
@@ -120,6 +141,7 @@ class OpScreen(TabbedPanel):
 
     def __init__(self, **kwargs):
         super(OpScreen, self).__init__(**kwargs) 
+        self.alarme = AlarmClock('Wecker')
         self.play_wc = False
         self.screnns = ScreenSaver_handler(self.go_home)
         self.aimg = AsyncImage(source='http://192.168.192.36/html/cam.jpg', nocache = True, size_hint=(1, 1))
@@ -127,6 +149,7 @@ class OpScreen(TabbedPanel):
         self.populate_wecker()
         self.populate_webcam()
         self.populate_settings()
+        self.update_labels()
         Clock.schedule_interval(self.update_labels, 60)
         threading.Thread(target=self.udp_thread).start()
     
@@ -166,6 +189,7 @@ class OpScreen(TabbedPanel):
                 layout2 = GridLayout(cols=1, spacing=10, size_hint_y=None)
                 # Make sure the height is such that there is something to scroll.
                 layout.bind(minimum_height=layout.setter('height'))
+                layout2.bind(minimum_height=layout2.setter('height'))
                 for i, szene in favoriten.iterrows():
                     btn = Button(text=str(szene['Beschreibung']), size_hint_y=None, height=40)
                     commando = szene['Name']
@@ -207,8 +231,7 @@ class OpScreen(TabbedPanel):
     def populate_wecker(self):
         for tab in self.tab_list:
             if tab.text == 'Wecker':
-                alarme = AlarmClock()
-                tab.add_widget(alarme)                
+                tab.add_widget(self.alarme)                
 
     def udp_thread(self, *args):
         broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
@@ -245,9 +268,18 @@ class OpScreen(TabbedPanel):
 
 class TemperaturLabel(Label):
     def pop_up(self, *args):
+        print self.id
+        print args[0]
         popup = Popup(title='Test popup',
-            content=Label(text='Hello world'),
             size_hint=(None, None), size=(400, 400))   
+        graph = Graph(xlabel='X', ylabel='Y', x_ticks_minor=5,
+        x_ticks_major=25, y_ticks_major=1,
+        y_grid_label=True, x_grid_label=True, padding=5,
+        x_grid=True, y_grid=True, xmin=-0, xmax=10, ymin=-0, ymax=2)
+        plot = MeshLinePlot(color=[1, 0, 0, 1])
+        plot.points = [(1,1),(2,2)]
+        graph.add_plot(plot)     
+        popup.add_widget(graph)
         popup.open()
 
 class LichtButton(Button):
