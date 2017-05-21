@@ -22,7 +22,7 @@
                     source: 'EG.png'
             LichtButton:
                 pos_hint: {'center_x': .5, 'center_y': .25}
-                id: V00WOH1DEK1LI01
+                on_press: root.licht_button_pop_up('V00KUE1DEK1LI01')
             TemperaturLabel:
                 pos_hint: {'center_x': .05, 'center_y': .6}
                 id: A00TER1GEN1TE01
@@ -46,6 +46,7 @@
                 id: KamBox
                 size_hint: 0.75, 1
             BoxLayout:
+                orientation: 'vertical'
                 size_hint: 0.25, 1
                 id: TabPanIt
                 Button:
@@ -87,7 +88,6 @@
             size: self.size         
             
 <LichtButton>:
+    id: selber
     size_hint: 0.15, 0.1
-    on_press: root.pop_up()
     background_normal: 'bulb2.png'
-    

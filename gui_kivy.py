@@ -22,6 +22,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
 from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.uix.carousel import Carousel
 from kivy.uix.image import AsyncImage
 from kivy.uix.image import Image
 from kivy.uix.togglebutton import ToggleButton
@@ -33,6 +34,8 @@ from kivy.lang import Builder
 from kivy.cache import Cache
 from kivy.garden.graph import Graph, MeshLinePlot
 
+import random
+import os
 import socket
 import subprocess as sp
 import datetime
@@ -41,14 +44,30 @@ import threading
 import pandas as pd
 import MySQLdb as mdb
 
+from cmd_sonos import sonos
+from cmd_xs1 import myezcontrol
+from cmd_hue import hue_lights
+from cmd_samsung import TV
+from cmd_satellites import satelliten
+from cmd_szenen import szenen
+from cmd_cron import cron
+
 from kivy.properties import ObjectProperty, StringProperty, OptionProperty, \
     ListProperty, NumericProperty, AliasProperty, BooleanProperty
 
+xs1 = myezcontrol(constants.xs1_.IP)
+hue = hue_lights()
+sn = sonos()
+tv = TV()
+sat = satelliten()
+scenes = szenen()
+crons = cron()
 
 running = True
 con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-szenen = pd.read_sql('SELECT * FROM set_Szenen', con=con)
-alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
+pd_szenen = pd.read_sql('SELECT * FROM set_Szenen', con=con)
+pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
+
 
 def get_data(requ):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -72,7 +91,7 @@ class AlarmClock(ScrollView):
         self.update()
 
     def update(self):
-        reihen = alarme.loc[alarme['Type']==self.typ]
+        reihen = pd_alarme.loc[pd_alarme['Type']==self.typ]
         for i, reihe in reihen.iterrows():
             # Make sure the height is such that there is something to scroll.
             row = GridLayout(rows=1, spacing=5, size_hint=(None,None))
@@ -80,17 +99,20 @@ class AlarmClock(ScrollView):
             hour = reihe['Time'].seconds // 3600
             minutes = (reihe['Time'].seconds % 3600) / 60
             spinner = Spinner(text=str(hour), values=(str(num) for num in range(24)),
-                              size_hint=(None, None), size=(40, 40)) 
+                              size_hint=(None, None), size=(40, 40))
+            spinner.id = 'hour'
             row.add_widget(spinner)
             colon = Label(text=':')
             row.add_widget(colon)
             spinner = Spinner(text=str(minutes), values=(str(num) for num in range(60)),
                               size_hint=(None, None), size=(40, 40)) 
+            spinner.id = 'min'
             row.add_widget(spinner) 
             spacer = Widget(size_hint=(None, None), size=(20, 40))
             row.add_widget(spacer)
             for i in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']:
                 btn = ToggleButton(text=str(i), size_hint=(None,None), size=(80,40))
+                btn.id = i
                 if eval(reihe[i]):
                     btn.state='down'
                 row.add_widget(btn)
@@ -99,6 +121,7 @@ class AlarmClock(ScrollView):
             btn = ToggleButton(text=str('An'), size_hint=(None,None), size=(80,40))
             if eval(reihe['Eingeschaltet']):
                 btn.state='down'
+            btn.id = 'Eingeschaltet'
             row.add_widget(btn)            
             self.layout.add_widget(row)
         btn = Button(text=str('Save'), size_hint=(None,None), size=(80,40))
@@ -107,13 +130,36 @@ class AlarmClock(ScrollView):
         self.add_widget(self.layout)        
 
     def save(self, *args):
-        print self.layout.children
+        for kid in self.layout.children:
+            for baby in kid.children:
+                if baby.id in ['hour', 'min']:
+                    print baby.id, baby.text
+                if baby.id in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So', 'Eingeschaltet']:
+                    print baby.id, baby.state == 'down'
+
 
 class PictureFrame(ModalView):
     
     def __init__(self, **kwargs):
         super(PictureFrame, self).__init__(**kwargs)
         self.bind(on_touch_down=self.dismiss)
+        self.carousel = Carousel(direction='right', loop=True)
+        base_dir = "/home/christoph/Pictures/GartenPaket/"
+        self.delay = 5
+        imgs = [os.path.join(base_dir, img) for img in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, img))]
+        random.shuffle(imgs)
+#        self.carousel.slides = imgs
+        for img in imgs:
+            image = AsyncImage(source=img)
+            image.allow_stretch = True
+            self.carousel.add_widget(image)
+        self.add_widget(self.carousel)
+        self.open()
+        Clock.schedule_once(self.load_next_p, self.delay)
+
+    def load_next_p(self, *args):
+        self.carousel.load_next(mode='next')
+        Clock.schedule_once(self.load_next_p, self.delay)
 
 class ScreenSaver_handler(object):
     def __init__(self, go_home):
@@ -180,8 +226,8 @@ class OpScreen(TabbedPanel):
         constants.save_config()
 
     def populate_szenen(self):
-        favoriten = szenen.loc[szenen['Gruppe'] == 'Favorit']
-        guis = szenen.loc[szenen['Gruppe'] == 'Lichter']
+        favoriten = pd_szenen.loc[pd_szenen['Gruppe'] == 'Favorit']
+        guis = pd_szenen.loc[pd_szenen['Gruppe'] == 'Lichter']
         for tab in self.tab_list:
             if tab.text == 'Szenen':
                 splitter = GridLayout(cols=2, spacing=10, size_hint_y=None)
@@ -266,28 +312,69 @@ class OpScreen(TabbedPanel):
     def print_text(self, text):
         print text
 
+    def licht_button_pop_up(self, device):
+        dev_type = pd_szenen.get_value(0,device)
+        desc = pd_szenen.get_value(4,device)
+        self.popup = Popup(title=desc, 
+            size_hint=(None, None), size=(400, 400))
+        layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        layout.bind(minimum_height=layout.setter('height'))
+        if dev_type == 'XS1':
+            for item in xs1.list_commands():
+                btn = Button(text=str(item), size_hint_y=None, height=40)
+                btn.bind(on_press=self.send_dev_command)
+                layout.add_widget(btn)
+        elif dev_type == 'HUE':
+            for item in hue.list_commands():
+                btn = Button(text=str(item), size_hint_y=None, height=40)
+                btn.bind(on_press=self.send_dev_command)
+                layout.add_widget(btn)      
+        elif dev_type == 'SONOS':
+            for item in sn.list_commands():
+                btn = Button(text=str(item), size_hint_y=None, height=40)
+                btn.bind(on_press=self.send_dev_command)
+                layout.add_widget(btn)  
+        elif dev_type == 'TV':
+            for item in tv.list_commands():
+                btn = Button(text=str(item), size_hint_y=None, height=40)
+                btn.bind(on_press=self.send_dev_command)
+                layout.add_widget(btn)  
+        elif dev_type == 'SATELLITE' or dev_type == 'ZWave':
+            for item in sat.list_commands(device):
+                btn = Button(text=str(item), size_hint_y=None, height=40)
+                btn.bind(on_press=lambda x, device=device, command=str(item): self.send_dev_command(device, command))
+                layout.add_widget(btn)               
+        root = ScrollView(size_hint=(1, 1), size=(Window.width, Window.height))
+        root.add_widget(layout)
+        self.popup.add_widget(root)
+        self.popup.open()
+        
+    def send_dev_command(self, device, command):
+        print device, command
+        self.popup.dismiss()
+
 class TemperaturLabel(Label):
     def pop_up(self, *args):
-        print self.id
-        print args[0]
         popup = Popup(title='Test popup',
             size_hint=(None, None), size=(400, 400))   
         graph = Graph(xlabel='X', ylabel='Y', x_ticks_minor=5,
         x_ticks_major=25, y_ticks_major=1,
         y_grid_label=True, x_grid_label=True, padding=5,
-        x_grid=True, y_grid=True, xmin=-0, xmax=10, ymin=-0, ymax=2)
+        x_grid=True, y_grid=True, xmin=-0, xmax=100, ymin=0, ymax=10)
         plot = MeshLinePlot(color=[1, 0, 0, 1])
-        plot.points = [(1,1),(2,2)]
-        graph.add_plot(plot)     
+        x = (1,2,3)
+        y = (5,6,7)
+#        plot.points = [(x, sin(x / 10.)) for x in range(0, 101)]
+        plot.points = zip(x,y)
+        graph.add_plot(plot)
         popup.add_widget(graph)
+        nachricht = 'Min: ' + str(min(y)) + ' Max: ' + str(max(y))
+        graph.add_widget(Label(text=nachricht))
         popup.open()
 
 class LichtButton(Button):
-    def pop_up(self, *args):
-        popup = Popup(title='Test popup',
-            content=Label(text='Hello world'),
-            size_hint=(None, None), size=(400, 400))   
-        popup.open()
+    pass
 
 class GuiApp(App):
     def build(self):
