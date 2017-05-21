@@ -73,6 +73,14 @@
                 id: Feh
                 text: 'Zeige Bilder'
                 on_press: root.change_setting('Feh')
+            ToggleButton:
+                id: KS
+                text: 'KommandoStation'
+                on_press: root.change_setting('KS')  
+            ToggleButton:
+                id: Exit
+                text: 'Exit'
+                on_press: root.close_gui()                  
         
 <TemperaturLabel>:
     size_hint: None, None

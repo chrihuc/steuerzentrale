@@ -196,6 +196,8 @@ class OpScreen(TabbedPanel):
         self.populate_webcam()
         self.populate_settings()
         self.update_labels()
+        if constants.gui_.KS:
+            Window.fullscreen = True
         Clock.schedule_interval(self.update_labels, 60)
         threading.Thread(target=self.udp_thread).start()
     
@@ -222,6 +224,7 @@ class OpScreen(TabbedPanel):
                 value = True
             else:
                 value = False
+        Window.fullscreen = constants.gui_.KS
         setattr(constants.gui_, _id, value)
         constants.save_config()
 
@@ -353,6 +356,14 @@ class OpScreen(TabbedPanel):
     def send_dev_command(self, device, command):
         print device, command
         self.popup.dismiss()
+
+    def close_gui(self, *args):
+        global running
+        running = False
+        hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+        hbtsocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        hbtsocket.sendto(str('empty'),('192.168.192.255',constants.udp_.broadPORT))          
+        App.get_running_app().stop()
 
 class TemperaturLabel(Label):
     def pop_up(self, *args):
