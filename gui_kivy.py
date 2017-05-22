@@ -96,8 +96,12 @@ class AlarmClock(ScrollView):
             # Make sure the height is such that there is something to scroll.
             row = GridLayout(rows=1, spacing=5, size_hint=(None,None))
             row.bind(minimum_height=row.setter('height'), minimum_width=row.setter('width'))
-            hour = reihe['Time'].seconds // 3600
-            minutes = (reihe['Time'].seconds % 3600) / 60
+            if isinstance(reihe['Time'], datetime.timedelta):
+                hour = reihe['Time'].seconds // 3600
+                minutes = (reihe['Time'].seconds % 3600) / 60
+            else:
+                hour = 0
+                minutes = 0
             spinner = Spinner(text=str(hour), values=(str(num) for num in range(24)),
                               size_hint=(None, None), size=(40, 40))
             spinner.id = 'hour'
@@ -364,6 +368,7 @@ class OpScreen(TabbedPanel):
         hbtsocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         hbtsocket.sendto(str('empty'),('192.168.192.255',constants.udp_.broadPORT))          
         App.get_running_app().stop()
+        if constants.gui_.KS: exit()
 
 class TemperaturLabel(Label):
     def pop_up(self, *args):
