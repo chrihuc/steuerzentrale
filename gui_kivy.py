@@ -149,6 +149,7 @@ class PictureFrame(ModalView):
         self.bind(on_touch_down=self.dismiss)
         self.carousel = Carousel(direction='right', loop=True)
         base_dir = "/home/christoph/Pictures/GartenPaket/"
+        base_dir = "/home/pi/Pictures/"
         self.delay = 5
         imgs = [os.path.join(base_dir, img) for img in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, img))]
         random.shuffle(imgs)
