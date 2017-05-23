@@ -14,10 +14,12 @@ Created on Tue May 09 12:14:56 2017
 """
 
 from kivy.app import App
+from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.core.window import Window
+
 from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
 from kivy.uix.button import Button
@@ -29,7 +31,7 @@ from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.spinner import Spinner
 from kivy.uix.widget import Widget
-from kivy.clock import Clock
+
 from kivy.lang import Builder
 from kivy.cache import Cache
 from kivy.garden.graph import Graph, MeshLinePlot
