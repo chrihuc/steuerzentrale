@@ -204,7 +204,8 @@ class OpScreen(TabbedPanel):
         self.populate_settings()
         self.update_labels()
         if constants.gui_.KS:
-            Window.fullscreen = True
+            pass
+#            Window.fullscreen = True
         Clock.schedule_interval(self.update_labels, 60)
         threading.Thread(target=self.udp_thread).start()
     
