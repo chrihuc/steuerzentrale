@@ -150,8 +150,7 @@ class PictureFrame(ModalView):
         super(PictureFrame, self).__init__(**kwargs)
         self.bind(on_touch_down=self.dismiss)
         self.carousel = Carousel(direction='right', loop=True)
-        base_dir = "/home/christoph/Pictures/GartenPaket/"
-        base_dir = "/home/pi/Pictures/"
+        base_dir = constants.gui_.Bilder
         self.delay = 5
         imgs = [os.path.join(base_dir, img) for img in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, img))]
         random.shuffle(imgs)
@@ -205,7 +204,7 @@ class OpScreen(TabbedPanel):
         self.update_labels()
         if constants.gui_.KS:
             pass
-#            Window.fullscreen = True
+            Window.fullscreen = True
         Clock.schedule_interval(self.update_labels, 60)
         threading.Thread(target=self.udp_thread).start()
     

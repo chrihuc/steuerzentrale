@@ -15,7 +15,8 @@ cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
 cfg_mail ={'USER':'','PASS':'','RECIP':''}
-cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True}
+cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
+           'Bilder': ''}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -126,7 +127,8 @@ for i in range(0,3):
                 KS = config.getboolean('GUI', 'KommandoStation')
                 Home = config.getint('GUI', 'KSHome')
                 KlingelAn = config.getboolean('GUI', 'KlingelAn') 
-                Feh = config.getboolean('GUI', 'Feh')                
+                Feh = config.getboolean('GUI', 'Feh')   
+                Bilder = config.get('GUI', 'Bilder')
         except:
             init_cfg()
             continue
