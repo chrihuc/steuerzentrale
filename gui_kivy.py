@@ -280,13 +280,16 @@ class OpScreen(TabbedPanel):
         self.ids.KamBox.add_widget(self.aimg)
 
     def update_labels(self, *args):
-        settings = get_data('Settings')
-        for widg in self.ids:
-            if widg in settings:
-                if widg[11:13] == 'TE':
-                    self.ids[widg].text = '[ref='+widg+']'+settings[widg]+' degC[/ref]'
-                elif widg[11:13] == 'CO':
-                    self.ids[widg].text = '[ref='+widg+']'+settings[widg]+'[/ref]'                    
+        try:
+            settings = get_data('Settings')
+            for widg in self.ids:
+                if widg in settings:
+                    if widg[11:13] == 'TE':
+                        self.ids[widg].text = '[ref='+widg+']'+settings[widg]+' degC[/ref]'
+                    elif widg[11:13] == 'CO':
+                        self.ids[widg].text = '[ref='+widg+']'+settings[widg]+'[/ref]'    
+        except socket.error:
+            pass
 
     def update_webcam(self, *args, **kwargs):
         self.aimg.reload()

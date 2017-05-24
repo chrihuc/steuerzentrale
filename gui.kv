@@ -33,7 +33,7 @@
                 pos_hint: {'center_x': .2, 'center_y': .8}
                 id: V00WOH1RUM1TE01   
             TemperaturLabel:
-                pos_hint: {'center_x': .8, 'center_y': .4}
+                pos_hint: {'center_x': .7, 'center_y': .3}
                 id: V00KUE1RUM1TE02                   
     TabbedPanelItem:
         text: '1.Stock'
@@ -45,8 +45,14 @@
                     size: self.size            
                     source: 'OG.png'
             TemperaturLabel:
-                pos_hint: {'center_x': .8, 'center_y': .4}
-                id: V01SCH1RUM1TE01                      
+                pos_hint: {'center_x': .8, 'center_y': .35}
+                id: V01SCH1RUM1TE01
+            TemperaturLabel:
+                pos_hint: {'center_x': .8, 'center_y': .6}
+                id: V01BAD1RUM1TE01
+            TemperaturLabel:
+                pos_hint: {'center_x': .3, 'center_y': .8}
+                id: V01KID1RUM1TE01                     
     TabbedPanelItem:
         text: '2.Stock'
         id: DG
@@ -55,7 +61,10 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size            
-                    source: 'DG.png'        
+                    source: 'DG.png' 
+            TemperaturLabel:
+                pos_hint: {'center_x': .8, 'center_y': .6}
+                id: V02ZIM1RUM1TE02
     TabbedPanelItem:
         text: 'Wecker' 
     TabbedPanelItem:
