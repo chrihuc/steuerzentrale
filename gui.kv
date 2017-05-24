@@ -28,12 +28,22 @@
                 id: A00TER1GEN1TE01
     TabbedPanelItem:
         text: '1.Stock'
-        RstDocument:
-            text:
-                '\\n'.join(("Hello world", "-----------",
-                "You are in the third tab."))
+        id: OG
+        FloatLayout:
+            canvas:
+                Rectangle:
+                    pos: self.pos
+                    size: self.size            
+                    source: 'OG.png'
     TabbedPanelItem:
         text: '2.Stock'
+        id: DG
+        FloatLayout:
+            canvas:
+                Rectangle:
+                    pos: self.pos
+                    size: self.size            
+                    source: 'DG.png'        
     TabbedPanelItem:
         text: 'Wecker' 
     TabbedPanelItem:

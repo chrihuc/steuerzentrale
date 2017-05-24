@@ -158,8 +158,10 @@ class PictureFrame(ModalView):
         random.shuffle(imgs)
         self.carousel.clear_widgets()
         try:
+            print imgs[0]
             image = AsyncImage(source=imgs[0], nocache=True)
             self.carousel.add_widget(image)
+            print 'added'
         except:
             pass
 # TODO: stop clock
@@ -179,7 +181,7 @@ class ScreenSaver_handler(object):
         self.go_home = go_home
         
     def slideshow(self, *args):
-        if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=5):
+        if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=20):
             if not self.ss_on:
                 if constants.gui_.Feh: 
                     self.pic_frame.start_show()
@@ -194,7 +196,6 @@ class ScreenSaver_handler(object):
         self.last_event = datetime.datetime.now()
         self.pic_frame.dismiss()
         exectext = 'echo 100 > /sys/class/backlight/rpi_backlight/brightness'
-        print exectext
         os.system(exectext)         
         self.ss_on = False   
 
