@@ -26,6 +26,15 @@
             TemperaturLabel:
                 pos_hint: {'center_x': .05, 'center_y': .6}
                 id: A00TER1GEN1TE01
+            CO2Label:
+                pos_hint: {'center_x': .4, 'center_y': .6}
+                id: V00WOH1RUM1CO01                
+            TemperaturLabel:
+                pos_hint: {'center_x': .2, 'center_y': .8}
+                id: V00WOH1RUM1TE01   
+            TemperaturLabel:
+                pos_hint: {'center_x': .8, 'center_y': .4}
+                id: V00KUE1RUM1TE02                   
     TabbedPanelItem:
         text: '1.Stock'
         id: OG
@@ -35,6 +44,9 @@
                     pos: self.pos
                     size: self.size            
                     source: 'OG.png'
+            TemperaturLabel:
+                pos_hint: {'center_x': .8, 'center_y': .4}
+                id: V01SCH1RUM1TE01                      
     TabbedPanelItem:
         text: '2.Stock'
         id: DG
@@ -103,6 +115,19 @@
         Rectangle:
             pos: self.pos
             size: self.size         
+
+<CO2Label>:
+    size_hint: None, None
+    size: 70, 22
+    text: u'[ref=A00TER1GEN1TE01]NN[/ref]'
+    markup: True
+    on_ref_press: root.pop_up(id)
+    canvas.before:
+        Color:
+            rgb: 0, 0, 0 # your color here
+        Rectangle:
+            pos: self.pos
+            size: self.size
             
 <LichtButton>:
     id: selber

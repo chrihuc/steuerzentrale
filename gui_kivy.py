@@ -285,6 +285,8 @@ class OpScreen(TabbedPanel):
             if widg in settings:
                 if widg[11:13] == 'TE':
                     self.ids[widg].text = '[ref='+widg+']'+settings[widg]+' degC[/ref]'
+                elif widg[11:13] == 'CO':
+                    self.ids[widg].text = '[ref='+widg+']'+settings[widg]+'[/ref]'                    
 
     def update_webcam(self, *args, **kwargs):
         self.aimg.reload()
@@ -386,6 +388,25 @@ class OpScreen(TabbedPanel):
         if constants.gui_.KS: exit()
 
 class TemperaturLabel(Label):
+    def pop_up(self, *args):
+        popup = Popup(title='Test popup',
+            size_hint=(None, None), size=(400, 400))   
+        graph = Graph(xlabel='X', ylabel='Y', x_ticks_minor=5,
+        x_ticks_major=25, y_ticks_major=1,
+        y_grid_label=True, x_grid_label=True, padding=5,
+        x_grid=True, y_grid=True, xmin=-0, xmax=100, ymin=0, ymax=10)
+        plot = MeshLinePlot(color=[1, 0, 0, 1])
+        x = (1,2,3)
+        y = (5,6,7)
+#        plot.points = [(x, sin(x / 10.)) for x in range(0, 101)]
+        plot.points = zip(x,y)
+        graph.add_plot(plot)
+        popup.add_widget(graph)
+        nachricht = 'Min: ' + str(min(y)) + ' Max: ' + str(max(y))
+        graph.add_widget(Label(text=nachricht))
+        popup.open()
+
+class CO2Label(Label):
     def pop_up(self, *args):
         popup = Popup(title='Test popup',
             size_hint=(None, None), size=(400, 400))   
