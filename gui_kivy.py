@@ -181,13 +181,19 @@ class ScreenSaver_handler(object):
     def slideshow(self, *args):
         if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=5):
             if not self.ss_on:
-                if constants.gui_.Feh: self.pic_frame.start_show()
+                if constants.gui_.Feh: 
+                    self.pic_frame.start_show()
+                else:
+                    exectext = 'sudo /bin/su -c "echo 0 > /sys/class/backlight/rpi_backlight/brightness"'
+                    os.system(exectext)                     
                 self.ss_on = True
                 self.go_home()
     
     def on_motion(self, *args, **kwargs):
         self.last_event = datetime.datetime.now()
         self.pic_frame.dismiss()
+        exectext = 'sudo /bin/su -c "echo 100 > /sys/class/backlight/rpi_backlight/brightness"'
+        os.system(exectext)         
         self.ss_on = False   
 
 
