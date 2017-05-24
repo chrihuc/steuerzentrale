@@ -184,7 +184,8 @@ class ScreenSaver_handler(object):
                 if constants.gui_.Feh: 
                     self.pic_frame.start_show()
                 else:
-                    exectext = 'sudo /bin/su -c "echo 0 > /sys/class/backlight/rpi_backlight/brightness"'
+#                    exectext = 'sudo /bin/su -c "echo 0 > /sys/class/backlight/rpi_backlight/brightness"'
+                    exectext = 'echo 0 > /sys/class/backlight/rpi_backlight/brightness'
                     os.system(exectext)                     
                 self.ss_on = True
                 self.go_home()
@@ -192,7 +193,8 @@ class ScreenSaver_handler(object):
     def on_motion(self, *args, **kwargs):
         self.last_event = datetime.datetime.now()
         self.pic_frame.dismiss()
-        exectext = 'sudo /bin/su -c "echo 100 > /sys/class/backlight/rpi_backlight/brightness"'
+        exectext = 'echo 100 > /sys/class/backlight/rpi_backlight/brightness'
+        print exectext
         os.system(exectext)         
         self.ss_on = False   
 
