@@ -150,21 +150,23 @@ class PictureFrame(ModalView):
         super(PictureFrame, self).__init__(**kwargs)
         self.bind(on_touch_down=self.dismiss)
         self.carousel = Carousel(direction='right', loop=True)
-        base_dir = constants.gui_.Bilder
+        self.base_dir = constants.gui_.Bilder
         self.delay = 5
-        imgs = [os.path.join(base_dir, img) for img in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, img))]
-        random.shuffle(imgs)
-#        self.carousel.slides = imgs
-        for img in imgs:
-            image = AsyncImage(source=img)
-            image.allow_stretch = True
-            self.carousel.add_widget(image)
-        self.add_widget(self.carousel)
-        self.open()
-        Clock.schedule_once(self.load_next_p, self.delay)
 
     def load_next_p(self, *args):
-        self.carousel.load_next(mode='next')
+        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        random.shuffle(imgs)
+        self.carousel.clear_widgets()
+        try:
+            image = AsyncImage(source=imgs[0], nocache=True)
+            self.carousel.add_widget(image)
+        except:
+            pass
+# TODO: stop clock
+        Clock.schedule_once(self.load_next_p, self.delay)
+
+    def start_show(self):
+        self.open()
         Clock.schedule_once(self.load_next_p, self.delay)
 
 class ScreenSaver_handler(object):
@@ -179,7 +181,7 @@ class ScreenSaver_handler(object):
     def slideshow(self, *args):
         if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=5):
             if not self.ss_on:
-                if constants.gui_.Feh: self.pic_frame.open()
+                if constants.gui_.Feh: self.pic_frame.start_show()
                 self.ss_on = True
                 self.go_home()
     
@@ -204,7 +206,7 @@ class OpScreen(TabbedPanel):
         self.update_labels()
         if constants.gui_.KS:
             pass
-            Window.fullscreen = True
+#            Window.fullscreen = True
         Clock.schedule_interval(self.update_labels, 60)
         threading.Thread(target=self.udp_thread).start()
     
@@ -231,7 +233,7 @@ class OpScreen(TabbedPanel):
                 value = True
             else:
                 value = False
-        Window.fullscreen = constants.gui_.KS
+#        Window.fullscreen = constants.gui_.KS
         setattr(constants.gui_, _id, value)
         constants.save_config()
 
@@ -240,11 +242,12 @@ class OpScreen(TabbedPanel):
         guis = pd_szenen.loc[pd_szenen['Gruppe'] == 'Lichter']
         for tab in self.tab_list:
             if tab.text == 'Szenen':
-                splitter = GridLayout(cols=2, spacing=10, size_hint_y=None)
+                splitter = GridLayout(cols=2, spacing=10, size_hint=(1, 1))
                 layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
                 layout2 = GridLayout(cols=1, spacing=10, size_hint_y=None)
                 # Make sure the height is such that there is something to scroll.
                 layout.bind(minimum_height=layout.setter('height'))
+#                splitter.bind(minimum_height=splitter.setter('height'))
                 layout2.bind(minimum_height=layout2.setter('height'))
                 for i, szene in favoriten.iterrows():
                     btn = Button(text=str(szene['Beschreibung']), size_hint_y=None, height=40)
@@ -256,7 +259,7 @@ class OpScreen(TabbedPanel):
                     commando = szene['Name']
                     btn.bind(on_press=lambda x, commando=commando: self.print_text(commando))
                     layout2.add_widget(btn)
-                sview = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
+                sview = ScrollView(size_hint=(1, 1))
                 sview.add_widget(layout)   
                 splitter.add_widget(sview) 
                 sview2 = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
