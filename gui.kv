@@ -26,15 +26,18 @@
             TemperaturLabel:
                 pos_hint: {'center_x': .05, 'center_y': .6}
                 id: A00TER1GEN1TE01
+                hks: 'A00TER1GEN1TE01'
             CO2Label:
                 pos_hint: {'center_x': .4, 'center_y': .6}
                 id: V00WOH1RUM1CO01                
             TemperaturLabel:
                 pos_hint: {'center_x': .2, 'center_y': .8}
-                id: V00WOH1RUM1TE01   
+                id: V00WOH1RUM1TE01  
+                hks: 'V00WOH1RUM1TE01'
             TemperaturLabel:
                 pos_hint: {'center_x': .7, 'center_y': .3}
-                id: V00KUE1RUM1TE02                   
+                id: V00KUE1RUM1TE02  
+                hks: 'V00KUE1RUM1TE02'                 
     TabbedPanelItem:
         text: '1.Stock'
         id: OG
@@ -47,12 +50,15 @@
             TemperaturLabel:
                 pos_hint: {'center_x': .8, 'center_y': .35}
                 id: V01SCH1RUM1TE01
+                hks: 'V01SCH1RUM1TE01'
             TemperaturLabel:
                 pos_hint: {'center_x': .8, 'center_y': .6}
                 id: V01BAD1RUM1TE01
+                hks: 'V01BAD1RUM1TE01'
             TemperaturLabel:
                 pos_hint: {'center_x': .3, 'center_y': .8}
-                id: V01KID1RUM1TE01                     
+                id: V01KID1RUM1TE01  
+                hks: 'V01KID1RUM1TE01'                   
     TabbedPanelItem:
         text: '2.Stock'
         id: DG
@@ -65,6 +71,7 @@
             TemperaturLabel:
                 pos_hint: {'center_x': .8, 'center_y': .6}
                 id: V02ZIM1RUM1TE02
+                hks: 'V02ZIM1RUM1TE02'
     TabbedPanelItem:
         text: 'Wecker' 
     TabbedPanelItem:
@@ -117,7 +124,8 @@
     size: 70, 22
     text: u'[ref=A00TER1GEN1TE01]NN degC[/ref]'
     markup: True
-    on_ref_press: root.pop_up(id)
+    hks: 'Vm1'
+    on_ref_press: root.pop_up(root.hks)
     canvas.before:
         Color:
             rgb: 0, 0, 0 # your color here

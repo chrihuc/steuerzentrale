@@ -266,7 +266,7 @@ class OpScreen(TabbedPanel):
                 for i, szene in guis.iterrows():
                     btn = Button(text=str(szene['Beschreibung']), size_hint_y=None, height=40)
                     commando = szene['Name']
-                    btn.bind(on_press=lambda x, commando=commando: self.print_text(commando))
+                    btn.bind(on_press=lambda x, commando=commando: self.execute_szn(commando))
                     layout2.add_widget(btn)
                 sview = ScrollView(size_hint=(1, 1))
                 sview.add_widget(layout)   
@@ -275,6 +275,9 @@ class OpScreen(TabbedPanel):
                 sview2.add_widget(layout2)
                 splitter.add_widget(sview2)                
                 tab.add_widget(splitter)
+
+    def execute_szn(self, szene):
+        szene.execute(szene)
 
     def populate_webcam(self, *args, **kwargs):
         self.ids.KamBox.add_widget(self.aimg)
@@ -391,18 +394,22 @@ class OpScreen(TabbedPanel):
         if constants.gui_.KS: exit()
 
 class TemperaturLabel(Label):
-    def pop_up(self, *args):
+    def pop_up(self, text):
+        cmd = ('SELECT Value, Date FROM Steuerzentrale.HIS_inputs where Name like "%s" and Date >= now() - INTERVAL 1 DAY;') % text
+        tag_hist = pd.read_sql(cmd, con=con)
+        x = pd.to_timedelta(tag_hist['Date'].values).astype('timedelta64[m]')#(1,2,3)
+        x_2 = [int(wert - min(x)) for wert in x]
+        y = tag_hist['Value'].values        
         popup = Popup(title='Test popup',
-            size_hint=(None, None), size=(400, 400))   
-        graph = Graph(xlabel='X', ylabel='Y', x_ticks_minor=5,
-        x_ticks_major=25, y_ticks_major=1,
+            size_hint=(None, None), size=(600, 500))   
+        graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x_2), xmax=max(x_2) , y_ticks_major=10,
         y_grid_label=True, x_grid_label=True, padding=5,
-        x_grid=True, y_grid=True, xmin=-0, xmax=100, ymin=0, ymax=10)
+        x_grid=True, y_grid=True, ymin=-10, ymax=40)
+        #, xmin=min(x), xmax=max(x)
+        print 
         plot = MeshLinePlot(color=[1, 0, 0, 1])
-        x = (1,2,3)
-        y = (5,6,7)
 #        plot.points = [(x, sin(x / 10.)) for x in range(0, 101)]
-        plot.points = zip(x,y)
+        plot.points = zip(x_2,y)
         graph.add_plot(plot)
         popup.add_widget(graph)
         nachricht = 'Min: ' + str(min(y)) + ' Max: ' + str(max(y))
