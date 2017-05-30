@@ -102,8 +102,9 @@ class AlarmClock(ScrollView):
                 hour = reihe['Time'].seconds // 3600
                 minutes = (reihe['Time'].seconds % 3600) / 60
             else:
-                hour = 0
-                minutes = 0
+                print reihe['Time']
+                hour = reihe['Time']
+                minutes = reihe['Time']
             spinner = Spinner(text=str(hour), values=(str(num) for num in range(24)),
                               size_hint=(None, None), size=(40, 40))
             spinner.id = 'hour'
@@ -261,7 +262,7 @@ class OpScreen(TabbedPanel):
                 for i, szene in favoriten.iterrows():
                     btn = Button(text=str(szene['Beschreibung']), size_hint_y=None, height=40)
                     commando = szene['Name']
-                    btn.bind(on_press=lambda x, commando=commando: self.print_text(commando))
+                    btn.bind(on_press=lambda x, commando=commando: self.execute_szn(commando))
                     layout.add_widget(btn)
                 for i, szene in guis.iterrows():
                     btn = Button(text=str(szene['Beschreibung']), size_hint_y=None, height=40)
@@ -277,7 +278,7 @@ class OpScreen(TabbedPanel):
                 tab.add_widget(splitter)
 
     def execute_szn(self, szene):
-        szene.execute(szene)
+        scenes.execute(szene)
 
     def populate_webcam(self, *args, **kwargs):
         self.ids.KamBox.add_widget(self.aimg)
@@ -381,7 +382,7 @@ class OpScreen(TabbedPanel):
         self.popup.open()
         
     def send_dev_command(self, device, command):
-        print device, command
+        scenes.threadSetDevice(device, command)
         self.popup.dismiss()
 
     def close_gui(self, *args):
