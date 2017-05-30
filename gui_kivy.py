@@ -103,8 +103,8 @@ class AlarmClock(ScrollView):
                 minutes = (reihe['Time'].seconds % 3600) / 60
             else:
                 print reihe['Time']
-                hour = reihe['Time']
-                minutes = reihe['Time']
+                hour = reihe['Time'] // 3600
+                minutes = (reihe['Time'] % 3600) / 60
             spinner = Spinner(text=str(hour), values=(str(num) for num in range(24)),
                               size_hint=(None, None), size=(40, 40))
             spinner.id = 'hour'
