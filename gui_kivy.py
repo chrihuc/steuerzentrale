@@ -224,7 +224,8 @@ class OpScreen(TabbedPanel):
         self.switch_to(self.ids.EG)
 
     def klingel(self):
-        self.screnns.on_motion()
+        if constants.gui_.KlingelAn:
+            self.screnns.on_motion()
         self.switch_to(self.ids.Kamera)
         self.update_webcam()
 
