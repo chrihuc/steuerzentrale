@@ -397,19 +397,17 @@ class TemperaturLabel(Label):
     def pop_up(self, text):
         cmd = ('SELECT Value, Date FROM Steuerzentrale.HIS_inputs where Name like "%s" and Date >= now() - INTERVAL 1 DAY;') % text
         tag_hist = pd.read_sql(cmd, con=con)
-        x = pd.to_timedelta(tag_hist['Date'].values).astype('timedelta64[m]')#(1,2,3)
-        x_2 = [int(wert - min(x)) for wert in x]
-        y = tag_hist['Value'].values        
+        x = tag_hist['Date'].values.tolist()
+        y = tag_hist['Value'].values.tolist()     
         popup = Popup(title='Test popup',
-            size_hint=(None, None), size=(600, 500))   
-        graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x_2), xmax=max(x_2) , y_ticks_major=10,
+            size_hint=(None, None), size=(500, 500))   
+        graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x) , y_ticks_major=5,
         y_grid_label=True, x_grid_label=True, padding=5,
-        x_grid=True, y_grid=True, ymin=-10, ymax=40)
+        x_grid=True, y_grid=True, ymin=(min(y)-2.5), ymax=(max(y)+2.5))
         #, xmin=min(x), xmax=max(x)
-        print 
         plot = MeshLinePlot(color=[1, 0, 0, 1])
 #        plot.points = [(x, sin(x / 10.)) for x in range(0, 101)]
-        plot.points = zip(x_2,y)
+        plot.points = zip(x,y)
         graph.add_plot(plot)
         popup.add_widget(graph)
         nachricht = 'Min: ' + str(min(y)) + ' Max: ' + str(max(y))
