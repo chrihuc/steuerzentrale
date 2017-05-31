@@ -19,6 +19,7 @@ from kivy.core.window import Window
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.config import Config
 
 from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
@@ -31,6 +32,7 @@ from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.spinner import Spinner
 from kivy.uix.widget import Widget
+from kivy.cache import Cache
 
 from kivy.lang import Builder
 from kivy.cache import Cache
@@ -70,6 +72,7 @@ con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, c
 pd_szenen = pd.read_sql('SELECT * FROM set_Szenen', con=con)
 pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
 
+Config.set('kivy', 'log_level', 'debug')
 
 def get_data(requ):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -79,7 +82,16 @@ def get_data(requ):
     reply = s.recv(2048)
     return eval(reply)
     
+
+class AssImage(AsyncImage):
+    def __init__(self, **kwargs):
+        super(AssImage, self).__init__(**kwargs)    
     
+    def reload(self,**kwargs):
+        Cache.remove('kv.loader')
+        super(AssImage, self).reload(**kwargs) 
+
+
 class AlarmClock(ScrollView):
     
     def __init__(self, typ, **kwargs):
@@ -208,7 +220,7 @@ class OpScreen(TabbedPanel):
         self.alarme = AlarmClock('Wecker')
         self.play_wc = False
         self.screnns = ScreenSaver_handler(self.go_home)
-        self.aimg = AsyncImage(source='http://192.168.192.36/html/cam.jpg', nocache = True, size_hint=(1, 1))
+        self.aimg = AssImage(source='http://192.168.192.36/html/cam.jpg', size_hint=(1, 1))#, nocache = True)
         self.populate_szenen()
         self.populate_wecker()
         self.populate_webcam()
@@ -402,7 +414,7 @@ class TemperaturLabel(Label):
         x = tag_hist['Date'].values.tolist()
         y = tag_hist['Value'].values.tolist()     
         popup = Popup(title='Test popup',
-            size_hint=(None, None), size=(500, 500))   
+            size_hint=(None, None), size=(650, 500))   
         graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x) , y_ticks_major=5,
         y_grid_label=True, x_grid_label=True, padding=5,
         x_grid=True, y_grid=True, ymin=(min(y)-2.5), ymax=(max(y)+2.5))
