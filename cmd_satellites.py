@@ -49,7 +49,7 @@ def main():
 #    print sats.list_commands("V00FLU1TUE1PC01")
 #    print sats.set_device('V00WOH1DEK1LI01','off')
 #    print sats.set_device('V00WOH1SRA1PC01','Update')
-    print sats.set_device('V00FLU1TUE1PC01','Take_Pic')
+    print sats.set_device('VIRKOM1SSH1PC03','KillPython')
 #    print sats.listCommandTable('alle',nameReturn = False)
 
 class satelliten:

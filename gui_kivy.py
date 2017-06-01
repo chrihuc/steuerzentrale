@@ -115,8 +115,8 @@ class AlarmClock(ScrollView):
                 minutes = (reihe['Time'].seconds % 3600) / 60
             else:
                 print reihe['Time']
-                hour = ((reihe['Time']) /1000000 )// 3600
-                minutes = (((reihe['Time']) /1000000 ) % 3600) / 60
+                hour = ((reihe['Time']) /1000000000 )// 3600
+                minutes = (((reihe['Time']) /1000000000 ) % 3600) / 60
             spinner = Spinner(text=str(hour), values=(str(num) for num in range(24)),
                               size_hint=(None, None), size=(40, 40))
             spinner.id = 'hour'
@@ -410,11 +410,16 @@ class OpScreen(TabbedPanel):
 class TemperaturLabel(Label):
     def pop_up(self, text):
         cmd = ('SELECT Value, Date FROM Steuerzentrale.HIS_inputs where Name like "%s" and Date >= now() - INTERVAL 1 DAY;') % text
-        tag_hist = pd.read_sql(cmd, con=con)
-        x = tag_hist['Date'].values.tolist()
-        y = tag_hist['Value'].values.tolist()     
-        popup = Popup(title='Test popup',
-            size_hint=(None, None), size=(650, 500))   
+#        TODO: Try Except
+        try:
+            tag_hist = pd.read_sql(cmd, con=con)
+            x = tag_hist['Date'].values.tolist()
+            y = tag_hist['Value'].values.tolist()  
+        except:
+            x=[0]
+            y=[0]
+        popup = Popup(title=text,
+            size_hint=(None, None), size=(600, 500))   
         graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x) , y_ticks_major=5,
         y_grid_label=True, x_grid_label=True, padding=5,
         x_grid=True, y_grid=True, ymin=(min(y)-2.5), ymax=(max(y)+2.5))
