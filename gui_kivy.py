@@ -70,7 +70,7 @@ crons = cron()
 running = True
 con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
 pd_szenen = pd.read_sql('SELECT * FROM set_Szenen', con=con)
-pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
+con.close()
 
 Config.set('kivy', 'log_level', 'debug')
 
@@ -102,14 +102,25 @@ class AlarmClock(ScrollView):
         # set size of layout
         self.layout.bind(minimum_height=self.layout.setter('height'), minimum_width=self.layout.setter('width'))
         self.typ = typ
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+        self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
+        con.close()        
         self.update()
 
     def update(self):
-        reihen = pd_alarme.loc[pd_alarme['Type']==self.typ]
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+        self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
+        con.close()        
+        reihen = self.pd_alarme.loc[self.pd_alarme['Type']==self.typ]
         for i, reihe in reihen.iterrows():
             # Make sure the height is such that there is something to scroll.
             row = GridLayout(rows=1, spacing=5, size_hint=(None,None))
             row.bind(minimum_height=row.setter('height'), minimum_width=row.setter('width'))
+            row.id = str(reihe['Id'])
+            spinner = Spinner(text=reihe['Szene'], values=scenes.list_commands(),
+                              size_hint=(None, None), size=(140, 40))
+            spinner.id = 'Szene'
+            row.add_widget(spinner)            
             if isinstance(reihe['Time'], datetime.timedelta):
                 hour = reihe['Time'].seconds // 3600
                 minutes = (reihe['Time'].seconds % 3600) / 60
@@ -152,9 +163,10 @@ class AlarmClock(ScrollView):
         for kid in self.layout.children:
             for baby in kid.children:
                 if baby.id in ['hour', 'min']:
-                    print baby.id, baby.text
+                    print kid.id, baby.id, baby.text
+#                    self.pd_alarme
                 if baby.id in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So', 'Eingeschaltet']:
-                    print baby.id, baby.state == 'down'
+                    print kid.id, baby.id, baby.state == 'down'
 
 
 class PictureFrame(ModalView):
@@ -218,6 +230,7 @@ class OpScreen(TabbedPanel):
     def __init__(self, **kwargs):
         super(OpScreen, self).__init__(**kwargs) 
         self.alarme = AlarmClock('Wecker')
+        self.schaltuhr = AlarmClock('Gui')
         self.play_wc = False
         self.screnns = ScreenSaver_handler(self.go_home)
         self.aimg = AssImage(source='http://192.168.192.36/html/cam.jpg', size_hint=(1, 1))#, nocache = True)
@@ -321,7 +334,9 @@ class OpScreen(TabbedPanel):
     def populate_wecker(self):
         for tab in self.tab_list:
             if tab.text == 'Wecker':
-                tab.add_widget(self.alarme)                
+                tab.add_widget(self.alarme)  
+            if tab.text == 'Zeitschaltuhr':
+                tab.add_widget(self.schaltuhr)                 
 
     def udp_thread(self, *args):
         broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
@@ -410,17 +425,18 @@ class OpScreen(TabbedPanel):
 class TemperaturLabel(Label):
     def pop_up(self, text):
         cmd = ('SELECT Value, Date FROM Steuerzentrale.HIS_inputs where Name like "%s" and Date >= now() - INTERVAL 1 DAY;') % text
-#        TODO: Try Except
         try:
+            con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
             tag_hist = pd.read_sql(cmd, con=con)
+            con.close()
             x = tag_hist['Date'].values.tolist()
             y = tag_hist['Value'].values.tolist()  
         except:
             x=[0]
             y=[0]
         popup = Popup(title=text,
-            size_hint=(None, None), size=(600, 500))   
-        graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x) , y_ticks_major=5,
+            size_hint=(None, None), size=(600, 500)) 
+        graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x)+10000000000000 , y_ticks_major=5,
         y_grid_label=True, x_grid_label=True, padding=5,
         x_grid=True, y_grid=True, ymin=(min(y)-2.5), ymax=(max(y)+2.5))
         #, xmin=min(x), xmax=max(x)
