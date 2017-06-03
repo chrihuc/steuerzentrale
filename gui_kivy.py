@@ -424,6 +424,9 @@ class OpScreen(TabbedPanel):
 
 class TemperaturLabel(Label):
     def pop_up(self, text):
+        popup = Popup(title=text,
+            size_hint=(None, None), size=(600, 500))       
+        popup.open()
         cmd = ('SELECT Value, Date FROM Steuerzentrale.HIS_inputs where Name like "%s" and Date >= now() - INTERVAL 1 DAY;') % text
         try:
             con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -434,8 +437,6 @@ class TemperaturLabel(Label):
         except:
             x=[0]
             y=[0]
-        popup = Popup(title=text,
-            size_hint=(None, None), size=(600, 500)) 
         graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x)+10000000000000 , y_ticks_major=5,
         y_grid_label=True, x_grid_label=True, padding=5,
         x_grid=True, y_grid=True, ymin=(min(y)-2.5), ymax=(max(y)+2.5))
@@ -447,7 +448,7 @@ class TemperaturLabel(Label):
         popup.add_widget(graph)
         nachricht = 'Min: ' + str(min(y)) + ' Max: ' + str(max(y))
         graph.add_widget(Label(text=nachricht))
-        popup.open()
+
 
 class CO2Label(Label):
     def pop_up(self, *args):
