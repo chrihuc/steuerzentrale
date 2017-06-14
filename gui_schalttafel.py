@@ -66,7 +66,7 @@ szn_typs = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', '
 stockwerke = ['Vm1','V00','A00','V01','V02','VIR','']
 
 stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
-                   'A00':'Draussen', 'VIR':'Virtuell'}
+                   'A00':'Draussen', 'VIR':'Virtuell', 'NEW':'Unassigned'}
 
 zim_dict = {'ZIM':'Zimmer',
             'WOH':'Wohnzimmer',
@@ -78,6 +78,7 @@ zim_dict = {'ZIM':'Zimmer',
             'KID':'Kinderzimmer',
             'ESS':'Esszimmer',
             'TER':'Terasse',
+            'GEN':'Generell',
             
             'KOM':'Kommunikation',
             'BEW':'Bewohner'}
@@ -94,6 +95,8 @@ furn_dict = {'SCA':'Scanner',
              'SEV':'Server', 
              'PFL':'Pflanzen',
              'BET':'Bett',
+             'TER':'Terasse',
+             'GEN':'Generell',
              
              'SSH':'SecureShell',
              'RUT':'Router',
@@ -857,12 +860,12 @@ class TreeInputsDevices(object):
     def add_device(self, top_object, device):
         device_id = device['Id']
         device_desc = device['Description']
-        dev_obj = {'title': device['Name'], 'type': 'group', 'expanded': True, 
+        dev_obj = {'title': device['HKS'], 'type': 'group', 'expanded': True, 
                    'name':str(device_id), 'children':[], 'tip':device_desc}
-        kind = {'title': device['Name'], 'type': 'str', 'expanded': True, 
+        kind = {'title': device['HKS'], 'type': 'str', 'expanded': True, 
                 'name':'Beschreibung', 'value':device_desc} 
         dev_obj['children'].append(kind)                    
-        kind = {'title': device['Name'], 'type': 'action', 'expanded': True, 
+        kind = {'title': device['HKS'], 'type': 'action', 'expanded': True, 
                 'name':str(device_id), 'value':device_desc} 
         dev_obj['children'].append(kind)   
         top_object['children'].append(dev_obj)
@@ -875,9 +878,9 @@ class TreeInputsDevices(object):
 #                         'Id':floor}
 #            top_level['children'].append(floor_obj)
         for aktuator in sorted(inputs):
-            aktuator_hks = aktuator['Name']
+            aktuator_hks = aktuator['HKS']
             level = aktuator_hks[:3]
-            if level[:1] == 'V':
+            if level[:1] == 'V' or level[:1] == 'A':
                 level_obj = self.get_sub_object(top_level, level)
                 raum = aktuator_hks[3:7]
                 raum_obj = self.get_sub_object(level_obj, raum)
@@ -885,6 +888,11 @@ class TreeInputsDevices(object):
                 furni_obj = self.get_sub_object(raum_obj, furni)
                 device = aktuator_hks[11:]
                 self.add_device(furni_obj, aktuator)
+            else:
+                level = 'NEW'
+                level_obj = self.get_sub_object(top_level, level)
+                if aktuator['Description'] != None and aktuator['Description'] != '':
+                    self.add_device(level_obj, aktuator)
         self.params = Parameter.create(name='params', type='group', children=[top_level])
         self.walk_param(self.params)
     

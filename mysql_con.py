@@ -48,11 +48,11 @@ def main():
     #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
     #mdb_add_table_entry("test",values)
 #    print str(mdb_get_table(constants.sql_tables.Besucher.name))
-#    print inputs('V00WOH1SRA1DI02','0')
+    print inputs('6De9SU.m4d','0')
 #    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
 #    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
 #    print mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
-    print mdb_read_table_entry('Steuerzentrale.sat_TFLED', 'Ambience')    
+#    print mdb_read_table_entry('Steuerzentrale.sat_TFLED', 'Ambience')    
 
     
 def re_calc(inpt):
@@ -436,7 +436,7 @@ def inputs(device, value):
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
         if cur.fetchone()[0] == 0:    
-            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, Description, Logging) VALUES ("' + str(device) + '","' + str(device) + '","True")'
+            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
             cur.execute(sql)
         else:
 #            get last value and last time

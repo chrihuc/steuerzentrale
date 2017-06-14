@@ -312,6 +312,7 @@ class DetailsScreen(GridLayout):
         self.mainview.build_tree()
     
     def btn_callback(self, instance):
+        # Save button
         print(self.hks)
         if self.hks <> self.designation.text:
             exce_msql("ALTER TABLE `Steuerzentrale`.`set_Szenen` CHANGE COLUMN `%s` `%s` TEXT NULL DEFAULT NULL;" % (self.hks, self.designation.text))

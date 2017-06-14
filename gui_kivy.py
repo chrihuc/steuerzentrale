@@ -105,9 +105,11 @@ class AlarmClock(ScrollView):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
         con.close()        
-        self.update()
+#        self.update()
 
     def update(self):
+        self.clear_widgets()
+        self.layout.clear_widgets()
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
         con.close()        
@@ -116,8 +118,13 @@ class AlarmClock(ScrollView):
             # Make sure the height is such that there is something to scroll.
             row = GridLayout(rows=1, spacing=5, size_hint=(None,None))
             row.bind(minimum_height=row.setter('height'), minimum_width=row.setter('width'))
-            row.id = str(reihe['Id'])
-            spinner = Spinner(text=reihe['Szene'], values=scenes.list_commands(),
+#            print row
+            row.id = str(i)
+            if self.typ == 'Wecker':
+                szenenlist = scenes.list_commands('Wecker')
+            else:
+                szenenlist = scenes.list_commands(['Favorit', 'Gui'])
+            spinner = Spinner(text=reihe['Szene'], values=szenenlist,
                               size_hint=(None, None), size=(140, 40))
             spinner.id = 'Szene'
             row.add_widget(spinner)            
@@ -161,12 +168,20 @@ class AlarmClock(ScrollView):
 
     def save(self, *args):
         for kid in self.layout.children:
+            time = 0
             for baby in kid.children:
-                if baby.id in ['hour', 'min']:
-                    print kid.id, baby.id, baby.text
-#                    self.pd_alarme
-                if baby.id in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So', 'Eingeschaltet']:
-                    print kid.id, baby.id, baby.state == 'down'
+                if baby.id == 'hour':
+                    time += int(baby.text) * 60
+                elif baby.id == 'min':
+                    time += int(baby.text)
+#                    self.pd_alarme[self.pd_alarme['Id']==int(kid.id)][baby.id] = baby.text
+                elif baby.id in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So', 'Eingeschaltet']:
+#                    print kid.id, baby.id, baby.state == 'down'
+                    pass
+                    self.pd_alarme.set_value(int(kid.id), baby.id, baby.state == 'down')
+#                    self.pd_alarme[self.pd_alarme['Id']==int(kid.id)][baby.id] = baby.state == 'down'
+            print time
+        print self.pd_alarme
 
 
 class PictureFrame(ModalView):
@@ -239,6 +254,7 @@ class OpScreen(TabbedPanel):
         self.populate_webcam()
         self.populate_settings()
         self.update_labels()
+        self.bind(current_tab=self.tab_change)
         if constants.gui_.KS:
             pass
 #            Window.fullscreen = True
@@ -368,8 +384,15 @@ class OpScreen(TabbedPanel):
                 if e.errno != 4:
                     raise 
 
-    def print_text(self, text):
-        print text
+    def tab_change(self, *args):
+        if args[1].text == 'Wecker':
+            self.alarme.update()
+        elif args[1].text == 'Zeitschaltuhr':
+            self.schaltuhr.update()            
+
+    def print_text(self, *args):
+        for arg in args:
+            print dir(arg)
 
     def licht_button_pop_up(self, device):
         dev_type = pd_szenen.get_value(0,device)

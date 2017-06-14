@@ -63,27 +63,30 @@ class szenen:
     def list_commands(self,gruppe='default'):    
         table = mdb_get_table(constants.sql_tables.szenen.name)
         liste = {'':''}
-        if gruppe == "default":
-            for szene in table:
-                if szene.get("Gruppe") <>"Intern":
-                    if str(szene.get("Beschreibung")) <> "None":
-                        liste[szene.get("Name")] = szene.get("Beschreibung")
-                    else:
-                        liste[szene.get("Name")] = szene.get("Name")
-        elif gruppe == "alle" or gruppe == "":
-            for szene in table:
-                if int(szene.get("Id")) > 19:
-                    if str(szene.get("Beschreibung")) <> "None":
-                        liste[szene.get("Name")] = szene.get("Beschreibung")
-                    else:
-                        liste[szene.get("Name")] = szene.get("Name")                        
-        else:
-            for szene in table:
-                if szene.get("Gruppe") == gruppe:
-                    if str(szene.get("Beschreibung")) <> "None":
-                        liste[szene.get("Name")] = szene.get("Beschreibung")
-                    else:
-                        liste[szene.get("Name")] = szene.get("Name")           
+        if not isinstance(gruppe, list):
+            gruppe = [gruppe]
+        for eintrag in gruppe:
+            if eintrag == "default":
+                for szene in table:
+                    if szene.get("Gruppe") <>"Intern":
+                        if str(szene.get("Beschreibung")) <> "None":
+                            liste[szene.get("Name")] = szene.get("Beschreibung")
+                        else:
+                            liste[szene.get("Name")] = szene.get("Name")
+            elif eintrag == "alle" or eintrag == "":
+                for szene in table:
+                    if int(szene.get("Id")) > 19:
+                        if str(szene.get("Beschreibung")) <> "None":
+                            liste[szene.get("Name")] = szene.get("Beschreibung")
+                        else:
+                            liste[szene.get("Name")] = szene.get("Name")                        
+            else:
+                for szene in table:
+                    if szene.get("Gruppe") == eintrag:
+                        if str(szene.get("Beschreibung")) <> "None":
+                            liste[szene.get("Name")] = szene.get("Beschreibung")
+                        else:
+                            liste[szene.get("Name")] = szene.get("Name")           
         return (liste)
         
 
