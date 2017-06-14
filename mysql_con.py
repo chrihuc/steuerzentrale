@@ -486,22 +486,26 @@ def inputs(device, value):
                         single = False
                 if str(doppelklick) <> "True": single = True
                 if single: szenen.append(dicti.get(setting_r("Status"))) 
-                szenen.append(dicti.get('Immer')) 
-            hks = dicti['HKS']
+                szenen.append(dicti.get('Immer'))
+            try:
+                hks = dicti['HKS']
+                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
+                if cur.fetchone()[0] > 0: 
+                    setting_s(hks, value)
+                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
+                if cur.fetchone()[0] > 0: 
+                    insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
+                    cur.execute(insertstatement) 
+                    insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
+                    cur.execute(insertstatement)
+            except:
+                pass
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)               
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)            
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
-            if cur.fetchone()[0] > 0: 
-                setting_s(hks, value)
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-            if cur.fetchone()[0] > 0: 
-                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
-                cur.execute(insertstatement) 
-                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
-                cur.execute(insertstatement)                 
+                
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)                 
     con.close()
