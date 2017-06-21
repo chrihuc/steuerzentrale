@@ -48,7 +48,7 @@ def main():
     #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
     #mdb_add_table_entry("test",values)
 #    print str(mdb_get_table(constants.sql_tables.Besucher.name))
-    print inputs('6De9SU.m4d','0')
+    print inputs('V01KID1RUM1TE01', 23)
 #    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
 #    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
 #    print mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
@@ -487,19 +487,17 @@ def inputs(device, value):
                 if str(doppelklick) <> "True": single = True
                 if single: szenen.append(dicti.get(setting_r("Status"))) 
                 szenen.append(dicti.get('Immer'))
-            try:
-                hks = dicti['HKS']
-                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
-                if cur.fetchone()[0] > 0: 
-                    setting_s(hks, value)
-                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-                if cur.fetchone()[0] > 0: 
-                    insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
-                    cur.execute(insertstatement) 
-                    insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
-                    cur.execute(insertstatement)
-            except:
-                pass
+#            get stting and logging 
+            hks = dicti_1['HKS']
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
+            if cur.fetchone()[0] > 0: 
+                setting_s(hks, value)
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
+            if cur.fetchone()[0] > 0: 
+                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
+                cur.execute(insertstatement) 
+                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
+                cur.execute(insertstatement)
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)               
             if str(dicti.get("last1")) <> "None":

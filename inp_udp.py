@@ -79,6 +79,7 @@ def exec_data(data_ev, data):
     elif ('Device' in data_ev) and ('Command' in data_ev):
         scenes.threadSetDevice(data_ev['Device'], data_ev['Command'])
     elif ('Request_js' in data_ev):
+        print data_ev
         if data_ev.get('Request_js') == 'Wecker':            
             data = json.dumps(crn.get_all(wecker=True), default=handler) 
         elif data_ev.get('Request_js') == 'Settings':
@@ -107,16 +108,21 @@ def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
         data = conn.recv(SIZE)
-        print data
+#        print data
         if not data:
             break
         isdict = False
         try:
             data_ev = eval(data)
             if type(data_ev) is dict:
-                isdict = True
+                isdict = True               
         except Exception as serr:
-            isdict = False
+            try:
+                data_ev = eval(data[2:])
+                if type(data_ev) is dict:
+                    isdict = True
+            except Exception as serr:
+                isdict = False
         if isdict:
             data = exec_data(data_ev, data)
             
@@ -127,7 +133,7 @@ def bidirekt():
 def broadcast():
     while constants.run:
         (data,addr) = broadSocket.recvfrom(SIZE)
-        print data
+#        print data
         if not data:
             break
         isdict = False

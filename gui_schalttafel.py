@@ -100,7 +100,9 @@ furn_dict = {'SCA':'Scanner',
              
              'SSH':'SecureShell',
              'RUT':'Router',
-             'SAT':'Satellite'}
+             'SAT':'Satellite',
+             'USB':'USBKey',
+             'IPA':'Handy'}
              
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
