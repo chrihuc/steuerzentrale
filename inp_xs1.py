@@ -57,9 +57,7 @@ def on_receive(data):
         heartbeat = Timer(constants.heartbt, heartbeat_sup)
         heartbeat.start()   
         ezcontrol.SetSwitchFunction("heartbeat", "1") 
-    print name, value
     szns = inputs(name,value)
-    print szns
     for szene in szns:
         if szene <> None:
             scenes.threadExecute(szene, check_bedingung=False, wert = value)

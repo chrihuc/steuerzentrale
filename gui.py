@@ -60,7 +60,7 @@ constants.redundancy_.master = True
 
 eg_buttons = [{'Name':'A00TER1GEN1TE01','desc':'T Balkon','type':'sens','pos_x':5,'pos_y':150},
               {'Name':'V00WOH1RUM1CO01','desc':'CO2','type':'sens','pos_x':150,'pos_y':150},
-              {'Name':'V00WOH1RUM1TE01','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20},
+              {'Name':'V00WOH1RUM1TE02','desc':'T Balkon','type':'sens','pos_x':150,'pos_y':20},
               {'Name':'V00KUE1RUM1TE02','desc':'T Kueche','type':'sens','pos_x':650,'pos_y':175},
               {'Name':'V00KUE1DEK1LI01','desc':'Decke','type':'dev','pos_x':700,'pos_y':270},
               {'Name':'V00KUE1DEK1LI02','desc':'Decke','type':'dev','pos_x':500,'pos_y':290},

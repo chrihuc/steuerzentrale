@@ -5,10 +5,10 @@ needed packages
 git clone https://github.com/chrihuc/steuerzentrale.git sz
 cd sz
 
-sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip 
-python-pycurl python-pysolar python-dateutil python-pymad python-pip python-pyaudio 
-python-paramiko python3-pyaudio espeak python-pandas (xprintidle feh)
+sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip python-paramiko espeak python-pandas 
 sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui soco
+
+python-pyaudio (xprintidle feh) python3-pyaudio 
 
 sudo pip install phue                   #??
 sudo pip install gcm                    #??
@@ -19,6 +19,9 @@ sudo pip install gitpython
 sudo pip install pyqtgraph
 sudo pip install easygui
 sudo pip install gitpython
+
+python constants.py
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 
 ##################################
 setup of daemon tools
