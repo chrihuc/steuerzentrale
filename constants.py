@@ -176,12 +176,12 @@ class sql_tables:
     
     
     tables = [his_inputs,inputs,cron,settings,szenen,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner]
-    HUE = sql_object("HUE", "HUE",('BettChris', 'Stablampe_1', 'Stablampe_2', 'Lightstrip_Eingang', 'Lightstrip_Kueche', 'Balkonlampe', 'Stehlampe', 'BettSabina', 'Buero', 'Bad', 'Monaco_Lampe'))
-    SATELLITE = sql_object("SATELLITE", "SATELLITE",('Sideb_links', 'LightstripSchlafzi', 'Sideb_mitte', 'Sideb_rechts', 'Marantz', 'Sideb_oben', 'TuerSPi','Scanner'))
-    XS1 = sql_object("XS1", "XS1",('Sideboard', 'Kueche', 'Diele', 'Video_Audio', 'Lattenrost', 'Wohnzimmer_Decke', 'Schlafzimmer', 'Webcams', 'Elchlampe', 'Adventslichter', 'Reduit', 'Pflanzen', 'Saugstauber', 'PC_Peripherie', 'Weihnachtsbaum', 'Esszimmer','Rauchmelder'))
-    SONOS = sql_object("SONOS", "SONOS",('SonosWohnZi','SonosKueche','SonosBad','SonosSchlafZi'))
-    TV  = sql_object("TV", "TV",('TV',))
-    inps = (TV, SONOS, SATELLITE, HUE, XS1)
+#    HUE = sql_object("HUE", "HUE",('BettChris', 'Stablampe_1', 'Stablampe_2', 'Lightstrip_Eingang', 'Lightstrip_Kueche', 'Balkonlampe', 'Stehlampe', 'BettSabina', 'Buero', 'Bad', 'Monaco_Lampe'))
+#    SATELLITE = sql_object("SATELLITE", "SATELLITE",('Sideb_links', 'LightstripSchlafzi', 'Sideb_mitte', 'Sideb_rechts', 'Marantz', 'Sideb_oben', 'TuerSPi','Scanner'))
+#    XS1 = sql_object("XS1", "XS1",('Sideboard', 'Kueche', 'Diele', 'Video_Audio', 'Lattenrost', 'Wohnzimmer_Decke', 'Schlafzimmer', 'Webcams', 'Elchlampe', 'Adventslichter', 'Reduit', 'Pflanzen', 'Saugstauber', 'PC_Peripherie', 'Weihnachtsbaum', 'Esszimmer','Rauchmelder'))
+#    SONOS = sql_object("SONOS", "SONOS",('SonosWohnZi','SonosKueche','SonosBad','SonosSchlafZi'))
+#    TV  = sql_object("TV", "TV",('TV',))
+#    inps = (TV, SONOS, SATELLITE, HUE, XS1)
     
 class sound_prov:
     PORT = 8888

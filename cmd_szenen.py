@@ -46,8 +46,8 @@ mes = messaging()
 def main():
     scenes = szenen()
 #    constants.redundancy_.master = True
-    print scenes.list_commands()
-#    print scenes.execute("Test")
+#    print scenes.list_commands()
+    print scenes.execute("Ambience")
 #    time.sleep(10)
 #    print scenes.execute("WohnziAnw")
 #    

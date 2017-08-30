@@ -1,3 +1,12 @@
+This repo is thought mainly for my own use, it's 
+ - not yet cleaned up 
+ - the installer is not ready
+ - parts of it were written 10 years ago
+ -> you can see my python skills developing over the years
+ - I did not care to follow pep8 rules strictly
+ - instead of unittests I wrote the modules to be standalone
+Feel free to roam and explore and use whatever you like.
+
 ###################################
 needed packages
 ###################################
