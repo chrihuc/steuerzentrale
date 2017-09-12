@@ -189,14 +189,19 @@ class PictureFrame(ModalView):
     def __init__(self, **kwargs):
         super(PictureFrame, self).__init__(**kwargs)
         self.bind(on_touch_down=self.dismiss)
-        self.carousel = Carousel(direction='right', loop=True)
         self.base_dir = constants.gui_.Bilder
+        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        self.carousel = Carousel(direction='right', loop=True)
+        image = AsyncImage(source=imgs[0], nocache=True)
+        self.carousel.add_widget(image)
+        
         self.delay = 5
+        self.load_next_p()
 
     def load_next_p(self, *args):
         imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
         random.shuffle(imgs)
-        self.carousel.clear_widgets()
+        #self.carousel.clear_widgets()
         try:
             print imgs[0]
             image = AsyncImage(source=imgs[0], nocache=True)
@@ -209,6 +214,7 @@ class PictureFrame(ModalView):
 
     def start_show(self):
         self.open()
+        
         Clock.schedule_once(self.load_next_p, self.delay)
 
 class ScreenSaver_handler(object):
@@ -221,7 +227,7 @@ class ScreenSaver_handler(object):
         self.go_home = go_home
         
     def slideshow(self, *args):
-        if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=20):
+        if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=5):
             if not self.ss_on:
                 if constants.gui_.Feh: 
                     self.pic_frame.start_show()
