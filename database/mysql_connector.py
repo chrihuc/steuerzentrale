@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .. import constants
+import constants
 
 import MySQLdb as mdb
 from threading import Timer

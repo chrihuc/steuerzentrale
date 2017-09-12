@@ -6,7 +6,7 @@ Created on Tue Sep 12 09:11:37 2017
 """
 
 import unittest
-from steuerzentrale.database import mysql_connector
+from database import mysql_connector
 
 class TestUM(unittest.TestCase):
 
