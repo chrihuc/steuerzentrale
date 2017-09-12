@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sz.constants as constants
+from .. import constants
 
 import MySQLdb as mdb
 from threading import Timer
