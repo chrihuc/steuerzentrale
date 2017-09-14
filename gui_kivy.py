@@ -192,30 +192,36 @@ class PictureFrame(ModalView):
         self.base_dir = constants.gui_.Bilder
         imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
         self.carousel = Carousel(direction='right', loop=True)
-        image = AsyncImage(source=imgs[0], nocache=True)
-        self.carousel.add_widget(image)
+        random.shuffle(imgs)
+        for img in imgs:
+            image = AsyncImage(source=img, nocache=True)
+            self.carousel.add_widget(image)
+        self.add_widget(self.carousel)
         
         self.delay = 5
-        self.load_next_p()
+        #self.load_next_p()
+        self.clock_event = None
 
     def load_next_p(self, *args):
         imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
         random.shuffle(imgs)
-        #self.carousel.clear_widgets()
+        self.carousel.clear_widgets()
         try:
-            print imgs[0]
             image = AsyncImage(source=imgs[0], nocache=True)
             self.carousel.add_widget(image)
-            print 'added'
         except:
             pass
 # TODO: stop clock
-        Clock.schedule_once(self.load_next_p, self.delay)
+        self.clock_event = Clock.schedule_once(self.load_next, self.delay)
+
+    def dismiss(self, *args,**kwargs):
+        super(PictureFrame, self).dismiss()
+        if self.clock_event != None:
+            self.clock_event.cancel()
 
     def start_show(self):
         self.open()
-        
-        Clock.schedule_once(self.load_next_p, self.delay)
+        self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)
 
 class ScreenSaver_handler(object):
     def __init__(self, go_home):
@@ -227,7 +233,7 @@ class ScreenSaver_handler(object):
         self.go_home = go_home
         
     def slideshow(self, *args):
-        if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=5):
+        if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=20):
             if not self.ss_on:
                 if constants.gui_.Feh: 
                     self.pic_frame.start_show()
