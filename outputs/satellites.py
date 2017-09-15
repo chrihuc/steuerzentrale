@@ -8,6 +8,7 @@ from socket import error as socket_error
 from alarmevents import alarm_event
 import paramiko
 
+# TODO Tests split adress from hks
 import MySQLdb as mdb
 
 aes = alarm_event()

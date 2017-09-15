@@ -11,6 +11,8 @@ from socket import error as socket_error
 
 from mysql_con import mdb_read_table_entry,set_val_in_szenen
 
+# TODO Tests split adress from hks
+
 def ping(IP, number = 1):
     pinged = False
     if IP == None:

@@ -17,6 +17,8 @@ from alarmevents import alarm_event
 
 from mysql_con import mdb_get_table, setting_s, setting_r
 
+# TODO Tests split adress from hks
+
 HOST = '192.168.192.10'   # Symbolic name meaning the local host
 PORT = 5005    # Arbitrary non-privileged port
 aes = alarm_event()

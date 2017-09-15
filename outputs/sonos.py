@@ -23,6 +23,7 @@ from database.mysql_connector import mdb_read_table_entry, set_val_in_szenen, md
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, StreamInput, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList, ClearList, PlayList (defect), PlayListNr)
 #RenderingControl (SetMute, GetVolume, SetVolume)
+# TODO Tests split adress from hks
 
 class sql_object:
     def __init__(self,name,typ,columns):

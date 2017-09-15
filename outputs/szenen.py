@@ -42,6 +42,8 @@ cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 aes = alarm_event()
 mes = messaging()
 
+# TODO Tests split adress from hks
+# Add Aktor_bedingung
 
 def main():
     scenes = szenen()

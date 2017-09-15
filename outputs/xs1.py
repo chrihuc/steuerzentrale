@@ -5,6 +5,8 @@ import constants
 import urllib2
 from mysql_con import mdb_read_table_entry,set_val_in_szenen
 
+# TODO Tests split adress from hks
+
 def main():
     ezcontrol = myezcontrol(constants.xs1_.IP) 
 #    ezcontrol.set_device("Esszimmer", "100")

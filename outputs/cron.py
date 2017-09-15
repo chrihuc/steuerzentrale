@@ -26,6 +26,8 @@ def deprecated(func):
 
     return new_func
 
+# TODO Tests
+
 def main():
     crn = cron()
     #crn.new_event('Test','20:15')

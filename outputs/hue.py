@@ -13,6 +13,8 @@ logging.basicConfig()
 
 from alarmevents import alarm_event
 
+# TODO Tests split adress from hks
+
 aes = alarm_event()
 
 max_retry = 4

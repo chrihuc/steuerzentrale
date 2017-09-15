@@ -13,6 +13,7 @@ from mysql_con import setting_r
 
 # TODO: class scene
 # TODO: operationalize it, 
+# TODO Tests split adress from hks
 
 delay = 1 * 60
 
