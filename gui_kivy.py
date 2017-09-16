@@ -81,21 +81,21 @@ def get_data(requ):
     s.send(str(data_ev))
     reply = s.recv(2048)
     return eval(reply)
-    
+
 
 class AssImage(AsyncImage):
     def __init__(self, **kwargs):
-        super(AssImage, self).__init__(**kwargs)    
-    
+        super(AssImage, self).__init__(**kwargs)
+
     def reload(self,**kwargs):
         Cache.remove('kv.loader')
-        super(AssImage, self).reload(**kwargs) 
+        super(AssImage, self).reload(**kwargs)
 
 
 class AlarmClock(ScrollView):
-    
+
     def __init__(self, typ, **kwargs):
-        super(AlarmClock, self).__init__(**kwargs)   
+        super(AlarmClock, self).__init__(**kwargs)
         self.size_hint=(1, 1)
         # cols, TimePicker, Mo, Di, Mi, Do, Fr, Sa, So, Sz, Enabled
         self.layout = GridLayout(cols=1, spacing=5, size_hint=(None,None))
@@ -104,7 +104,7 @@ class AlarmClock(ScrollView):
         self.typ = typ
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
-        con.close()        
+        con.close()
 #        self.update()
 
     def update(self):
@@ -112,7 +112,7 @@ class AlarmClock(ScrollView):
         self.layout.clear_widgets()
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
-        con.close()        
+        con.close()
         reihen = self.pd_alarme.loc[self.pd_alarme['Type']==self.typ]
         for i, reihe in reihen.iterrows():
             # Make sure the height is such that there is something to scroll.
@@ -127,7 +127,7 @@ class AlarmClock(ScrollView):
             spinner = Spinner(text=reihe['Szene'], values=szenenlist,
                               size_hint=(None, None), size=(140, 40))
             spinner.id = 'Szene'
-            row.add_widget(spinner)            
+            row.add_widget(spinner)
             if isinstance(reihe['Time'], datetime.timedelta):
                 hour = reihe['Time'].seconds // 3600
                 minutes = (reihe['Time'].seconds % 3600) / 60
@@ -142,9 +142,9 @@ class AlarmClock(ScrollView):
             colon = Label(text=':')
             row.add_widget(colon)
             spinner = Spinner(text=str(minutes), values=(str(num) for num in range(60)),
-                              size_hint=(None, None), size=(40, 40)) 
+                              size_hint=(None, None), size=(40, 40))
             spinner.id = 'min'
-            row.add_widget(spinner) 
+            row.add_widget(spinner)
             spacer = Widget(size_hint=(None, None), size=(20, 40))
             row.add_widget(spacer)
             for i in ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']:
@@ -159,12 +159,12 @@ class AlarmClock(ScrollView):
             if eval(reihe['Eingeschaltet']):
                 btn.state='down'
             btn.id = 'Eingeschaltet'
-            row.add_widget(btn)            
+            row.add_widget(btn)
             self.layout.add_widget(row)
         btn = Button(text=str('Save'), size_hint=(None,None), size=(80,40))
         btn.bind(on_press=self.save)
         self.layout.add_widget(btn)
-        self.add_widget(self.layout)        
+        self.add_widget(self.layout)
 
     def save(self, *args):
         for kid in self.layout.children:
@@ -185,7 +185,7 @@ class AlarmClock(ScrollView):
 
 
 class PictureFrame(ModalView):
-    
+
     def __init__(self, **kwargs):
         super(PictureFrame, self).__init__(**kwargs)
         self.bind(on_touch_down=self.dismiss)
@@ -197,7 +197,7 @@ class PictureFrame(ModalView):
             image = AsyncImage(source=img, nocache=True)
             self.carousel.add_widget(image)
         self.add_widget(self.carousel)
-        
+
         self.delay = 5
         #self.load_next_p()
         self.clock_event = None
@@ -229,33 +229,34 @@ class ScreenSaver_handler(object):
         Window.bind(on_motion=self.on_motion)
         Clock.schedule_interval(self.slideshow, .5)
         self.ss_on = False
+        self.state_awake = False
         self.pic_frame = PictureFrame()
         self.go_home = go_home
-        
+
     def slideshow(self, *args):
         if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=20):
             if not self.ss_on:
-                if constants.gui_.Feh: 
+                if constants.gui_.Feh and self.state_awake:
                     self.pic_frame.start_show()
                 else:
 #                    exectext = 'sudo /bin/su -c "echo 0 > /sys/class/backlight/rpi_backlight/brightness"'
                     exectext = 'echo 0 > /sys/class/backlight/rpi_backlight/brightness'
-                    os.system(exectext)                     
+                    os.system(exectext)
                 self.ss_on = True
                 self.go_home()
-    
+
     def on_motion(self, *args, **kwargs):
         self.last_event = datetime.datetime.now()
         self.pic_frame.dismiss()
         exectext = 'echo 100 > /sys/class/backlight/rpi_backlight/brightness'
-        os.system(exectext)         
-        self.ss_on = False   
+        os.system(exectext)
+        self.ss_on = False
 
 
 class OpScreen(TabbedPanel):
 
     def __init__(self, **kwargs):
-        super(OpScreen, self).__init__(**kwargs) 
+        super(OpScreen, self).__init__(**kwargs)
         self.alarme = AlarmClock('Wecker')
         self.schaltuhr = AlarmClock('Gui')
         self.play_wc = False
@@ -272,7 +273,7 @@ class OpScreen(TabbedPanel):
 #            Window.fullscreen = True
         Clock.schedule_interval(self.update_labels, 60)
         threading.Thread(target=self.udp_thread).start()
-    
+
     def go_home(self):
         self.switch_to(self.ids.EG)
 
@@ -289,7 +290,7 @@ class OpScreen(TabbedPanel):
                 if isinstance(value, (bool)):
                     if value:
                         print widg, value
-                        self.ids[widg].state = 'down'   
+                        self.ids[widg].state = 'down'
 
     def change_setting(self, _id):
         if isinstance(self.ids[_id], ToggleButton):
@@ -324,11 +325,11 @@ class OpScreen(TabbedPanel):
                     btn.bind(on_press=lambda x, commando=commando: self.execute_szn(commando))
                     layout2.add_widget(btn)
                 sview = ScrollView(size_hint=(1, 1))
-                sview.add_widget(layout)   
-                splitter.add_widget(sview) 
+                sview.add_widget(layout)
+                splitter.add_widget(sview)
                 sview2 = ScrollView(size_hint=(1, None), size=(Window.width, Window.height))
                 sview2.add_widget(layout2)
-                splitter.add_widget(sview2)                
+                splitter.add_widget(sview2)
                 tab.add_widget(splitter)
 
     def execute_szn(self, szene):
@@ -345,26 +346,26 @@ class OpScreen(TabbedPanel):
                     if widg[11:13] == 'TE':
                         self.ids[widg].text = '[ref='+widg+']'+settings[widg]+' degC[/ref]'
                     elif widg[11:13] == 'CO':
-                        self.ids[widg].text = '[ref='+widg+']'+settings[widg]+'[/ref]'    
+                        self.ids[widg].text = '[ref='+widg+']'+settings[widg]+'[/ref]'
         except socket.error:
             pass
 
     def update_webcam(self, *args, **kwargs):
         self.aimg.reload()
         if self.play_wc: Clock.schedule_once(self.update_webcam, 0.25)
-      
+
     def play_webcam(self):
         self.play_wc = True
-        
+
     def stop_webcam(self):
-        self.play_wc = False    
-        
+        self.play_wc = False
+
     def populate_wecker(self):
         for tab in self.tab_list:
             if tab.text == 'Wecker':
-                tab.add_widget(self.alarme)  
+                tab.add_widget(self.alarme)
             if tab.text == 'Zeitschaltuhr':
-                tab.add_widget(self.schaltuhr)                 
+                tab.add_widget(self.schaltuhr)
 
     def udp_thread(self, *args):
         broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
@@ -384,23 +385,25 @@ class OpScreen(TabbedPanel):
                     if type(data_ev) is dict:
                         isdict = True
                 except Exception as serr:
-                    isdict = False  
+                    isdict = False
                 if isdict:
                     if data_ev['Name'] == 'Klingel':
                         self.klingel()
                     elif data_ev['Name'] == 'DisplayAn':
-                        pass
+                        self.screnns.state_awake = True
+                        self.screnns.ss_on = False
                     elif data_ev['Name'] == 'DisplayAus':
-                        pass                       
+                        self.screnns.state_awake = False
+                        self.screnns.ss_on = False
             except socket.error, e:
                 if e.errno != 4:
-                    raise 
+                    raise
 
     def tab_change(self, *args):
         if args[1].text == 'Wecker':
             self.alarme.update()
         elif args[1].text == 'Zeitschaltuhr':
-            self.schaltuhr.update()            
+            self.schaltuhr.update()
 
     def print_text(self, *args):
         for arg in args:
@@ -409,7 +412,7 @@ class OpScreen(TabbedPanel):
     def licht_button_pop_up(self, device):
         dev_type = pd_szenen.get_value(0,device)
         desc = pd_szenen.get_value(4,device)
-        self.popup = Popup(title=desc, 
+        self.popup = Popup(title=desc,
             size_hint=(None, None), size=(400, 400))
         layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
@@ -423,27 +426,27 @@ class OpScreen(TabbedPanel):
             for item in hue.list_commands():
                 btn = Button(text=str(item), size_hint_y=None, height=40)
                 btn.bind(on_press=self.send_dev_command)
-                layout.add_widget(btn)      
+                layout.add_widget(btn)
         elif dev_type == 'SONOS':
             for item in sn.list_commands():
                 btn = Button(text=str(item), size_hint_y=None, height=40)
                 btn.bind(on_press=self.send_dev_command)
-                layout.add_widget(btn)  
+                layout.add_widget(btn)
         elif dev_type == 'TV':
             for item in tv.list_commands():
                 btn = Button(text=str(item), size_hint_y=None, height=40)
                 btn.bind(on_press=self.send_dev_command)
-                layout.add_widget(btn)  
+                layout.add_widget(btn)
         elif dev_type == 'SATELLITE' or dev_type == 'ZWave':
             for item in sat.list_commands(device):
                 btn = Button(text=str(item), size_hint_y=None, height=40)
                 btn.bind(on_press=lambda x, device=device, command=str(item): self.send_dev_command(device, command))
-                layout.add_widget(btn)               
+                layout.add_widget(btn)
         root = ScrollView(size_hint=(1, 1), size=(Window.width, Window.height))
         root.add_widget(layout)
         self.popup.add_widget(root)
         self.popup.open()
-        
+
     def send_dev_command(self, device, command):
         scenes.threadSetDevice(device, command)
         self.popup.dismiss()
@@ -453,14 +456,14 @@ class OpScreen(TabbedPanel):
         running = False
         hbtsocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
         hbtsocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        hbtsocket.sendto(str('empty'),('192.168.192.255',constants.udp_.broadPORT))          
+        hbtsocket.sendto(str('empty'),('192.168.192.255',constants.udp_.broadPORT))
         App.get_running_app().stop()
         if constants.gui_.KS: exit()
 
 class TemperaturLabel(Label):
     def pop_up(self, text):
         popup = Popup(title=text,
-            size_hint=(None, None), size=(600, 500))       
+            size_hint=(None, None), size=(600, 500))
         popup.open()
         cmd = ('SELECT Value, Date FROM Steuerzentrale.HIS_inputs where Name like "%s" and Date >= now() - INTERVAL 1 DAY;') % text
         try:
@@ -468,7 +471,7 @@ class TemperaturLabel(Label):
             tag_hist = pd.read_sql(cmd, con=con)
             con.close()
             x = tag_hist['Date'].values.tolist()
-            y = tag_hist['Value'].values.tolist()  
+            y = tag_hist['Value'].values.tolist()
         except:
             x=[0]
             y=[0]
@@ -488,7 +491,7 @@ class TemperaturLabel(Label):
 class CO2Label(Label):
     def pop_up(self, *args):
         popup = Popup(title='Test popup',
-            size_hint=(None, None), size=(400, 400))   
+            size_hint=(None, None), size=(400, 400))
         graph = Graph(xlabel='X', ylabel='Y', x_ticks_minor=5,
         x_ticks_major=25, y_ticks_major=1,
         y_grid_label=True, x_grid_label=True, padding=5,
