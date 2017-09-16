@@ -192,7 +192,6 @@ class Cron(object):
         return []
 
     @deprecated
-    @staticmethod
     def delete(ident):
         """ deletes the stored timed event, should not be used anymore
             use executed

@@ -11,7 +11,7 @@ from outputs import cron
 class TestUM(unittest.TestCase):
 
     def setUp(self):
-        self.crn = cron()
+        self.crn = cron.Cron()
 
     def test_inputs(self):
         print self.crn.get_all(typ='Gui')
