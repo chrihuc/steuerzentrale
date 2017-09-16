@@ -102,12 +102,21 @@ class AlarmClock(ScrollView):
         # set size of layout
         self.layout.bind(minimum_height=self.layout.setter('height'), minimum_width=self.layout.setter('width'))
         self.typ = typ
-        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-        self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
-        con.close()
+#        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+#        self.pd_alarme = pd.read_sql('SELECT * FROM cmd_cron', con=con)
+#        con.close()
+        self.set_load_button()
+
+    def set_load_button(self):
+        self.clear_widgets()
+        self.layout.clear_widgets()
+        btn = Button(text=str('Load'), size_hint=(None,None), size=(80,40))
+        btn.bind(on_press=self.update)
+        self.layout.add_widget(btn)
+        self.add_widget(self.layout)        
 #        self.update()
 
-    def update(self):
+    def update(self, *args):
         self.clear_widgets()
         self.layout.clear_widgets()
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -338,6 +347,7 @@ class OpScreen(TabbedPanel):
         scenes.execute(szene)
 
     def populate_webcam(self, *args, **kwargs):
+        self.ids.KamBox.clear_widgets()        
         self.ids.KamBox.add_widget(self.aimg)
 
     def update_labels(self, *args):
@@ -353,6 +363,7 @@ class OpScreen(TabbedPanel):
             pass
 
     def update_webcam(self, *args, **kwargs):
+        self.populate_webcam()
         self.aimg.reload()
         if self.play_wc: Clock.schedule_once(self.update_webcam, 0.25)
 
@@ -403,9 +414,9 @@ class OpScreen(TabbedPanel):
 
     def tab_change(self, *args):
         if args[1].text == 'Wecker':
-            self.alarme.update()
+            self.alarme.set_load_button()
         elif args[1].text == 'Zeitschaltuhr':
-            self.schaltuhr.update()
+            self.schaltuhr.set_load_button()
 
     def print_text(self, *args):
         for arg in args:
