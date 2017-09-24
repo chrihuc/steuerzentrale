@@ -9,11 +9,12 @@ Created on Thu Jan 28 20:21:24 2016
 
 import constants
 
-from mysql_con import mdb_get_table, setting_s, mdb_read_table_entry, settings_r, mdb_set_table
+from database import mysql_connector
 
-from cmd_sonos import sonos
+from outputs.sonos import Sonos
+from outputs.hue import Hue_lights
+
 from cmd_xs1 import myezcontrol
-from cmd_hue import hue_lights
 from cmd_samsung import TV
 from cmd_satellites import satelliten
 from cmd_internal import internal
@@ -28,8 +29,8 @@ import datetime
 import time
 
 xs1 = myezcontrol(constants.xs1_.IP)
-hue = hue_lights()
-sn = sonos()
+hue = Hue_lights()
+sn = Sonos()
 tv = TV()
 sat = satelliten()
 interna = internal()
@@ -44,17 +45,9 @@ mes = messaging()
 
 # TODO Tests split adress from hks
 # Add Aktor_bedingung
-
-def main():
-    scenes = szenen()
-#    constants.redundancy_.master = True
-#    print scenes.list_commands()
-    print scenes.execute("Ambience")
-#    time.sleep(10)
-#    print scenes.execute("WohnziAnw")
-#    
+   
     
-class szenen:    
+class Szenen:    
     
     def __init__ (self):
         self.sz_t = szenen_timer(def_to_run = self.execute)
@@ -63,7 +56,7 @@ class szenen:
         pass
     
     def list_commands(self,gruppe='default'):    
-        table = mdb_get_table(constants.sql_tables.szenen.name)
+        table = mysql_connector.mdb_get_table(constants.sql_tables.szenen.name)
         liste = {'':''}
         if not isinstance(gruppe, list):
             gruppe = [gruppe]
@@ -94,14 +87,14 @@ class szenen:
 
     def __bedingung__(self,bedingungen, verbose = False):
         erfuellt = True
-        settings = settings_r() 
+        settings = mysql_connector.settings_r() 
         if type(bedingungen) == dict:
 #==============================================================================
 #             Deprecated
 #==============================================================================
             for bedingung in bedingungen:
                 if settings.get(bedingung) == None:
-                    setting_s(bedingung, '')
+                    mysql_connector.setting_s(bedingung, '')
                 try:
                     groesser = bedingungen.get(bedingung).find('>')
                     kleiner = bedingungen.get(bedingung).find('<')
@@ -133,7 +126,7 @@ class szenen:
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
             for bedingung in bedingungen:
                 if settings.get(bedingung[0]) == None:
-                    setting_s(bedingung, '')                
+                    mysql_connector.setting_s(bedingung, '')                
                 item, operand, wert = bedingung
                 item = settings.get(item)
                 if verbose: print item, operand, wert
@@ -181,13 +174,18 @@ class szenen:
 
     def __sub_cmds__(self, szn_id, device, commando, text):
         global kommando_dict
+        try:
+            adress = mysql_connector.get_device_adress(device)
+        except:
+            print('device not found')
+            adress = device
         executed = False
         if szn_id != None:
             t_list = self.kommando_dict.get(szn_id)   
         else:
             t_list = {}
         if device in xs1_devs:
-            executed = xs1.set_device(device, commando)
+            executed = xs1.set_device(adress, commando)
         elif device == "setTask":
             if commando[0] == 'Alle':
                 executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando[1]))
@@ -196,9 +194,9 @@ class szenen:
             else:
                 executed = mes.send_zuhause(to=str(commando[0]), titel="Setting", text=str(commando[1]))                 
         elif device in sns_devs:
-            executed = sn.set_device(device, commando, text)               
+            executed = sn.set_device(adress, commando, text)               
         elif device in hue_devs:
-            executed = hue.set_device(device, commando)  
+            executed = hue.set_device(adress, commando)  
 #            for kommando in kommandos:
 #                if hue_count > 1:
 #                    hue_delay += 0.75
@@ -208,9 +206,9 @@ class szenen:
 #                hue_count += 1
         elif device in sat_devs:
 #            print device, commando
-            executed = sat.set_device(device, commando)                   
+            executed = sat.set_device(adress, commando)                   
         elif device in tvs_devs:
-            executed = tv.set_device(device, commando)                                                          
+            executed = tv.set_device(adress, commando)                                                          
 #                        elif key == "Interner_Befehl":
 #                            for kommando in kommandos:
 #                                t = threading.Thread(target=interner_befehl, args=[commando])
@@ -238,7 +236,7 @@ class szenen:
         t.start()         
 
     def execute(self, szene, check_bedingung=False, wert = 0):
-        szene_dict = mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
+        szene_dict = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
 #        print start_t, szene_dict.get("Beschreibung"), szene_dict.get("Follows")
         #check bedingung
@@ -276,7 +274,7 @@ class szenen:
             hue_count = 0
             hue_delay = 0            
             if str(szene_dict.get("AutoMode")) == "True":
-                interlocks = mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
+                interlocks = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
             for idk, key in enumerate(szene_dict):        
                 if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                     kommandos = self.__return_enum__(szene_dict.get(key))
@@ -320,8 +318,8 @@ class szenen:
 #                    #timer set to 0 for following actions
 #                    set_del.start() 
                     # solution above could give timing issues
-                    setting_s(str(kommando), str(kommandos.get(kommando)))
-            mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
+                    mysql_connector.setting_s(str(kommando), str(kommandos.get(kommando)))
+            mysql_connector.mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
         elif False:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = Karenz)
@@ -393,6 +391,3 @@ class szenen:
                     elif ex_re == 2:
                         self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)           
         return erfolg
-
-if __name__ == '__main__':
-    main()      

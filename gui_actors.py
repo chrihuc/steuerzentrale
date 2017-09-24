@@ -178,8 +178,10 @@ class ActorScreen(GridLayout):
         if node.id in self.szenen.columns:
             device_desc = self.szenen.get_value(4, node.id)
             device_type = self.szenen.get_value(0, node.id)
+            device_adr = self.szenen.get_value(5, node.id)
             self.det_screen.designation.text = node.id
             self.det_screen.description.text = self.r_none(device_desc)
+            self.det_screen.adress.text = self.r_none(device_adr)
             self.det_screen.mainbutton.text = self.r_none(device_type)
             self.det_screen.hks = node.id
             if device_type in ['SATELLITE']:
@@ -219,6 +221,12 @@ class DetailsScreen(GridLayout):
         self.description = TextInput(multiline=False)
         self.description.text = ''
         self.add_widget(self.description)
+        
+        # Adress
+        self.add_widget(Label(text='Adress'))     
+        self.adress = TextInput(multiline=False)
+        self.adress.text = ''
+        self.add_widget(self.adress)
  
         # Dropdown for Type
         self.add_widget(Label(text='Type'))
@@ -317,11 +325,14 @@ class DetailsScreen(GridLayout):
         if self.hks <> self.designation.text:
             exce_msql("ALTER TABLE `Steuerzentrale`.`set_Szenen` CHANGE COLUMN `%s` `%s` TEXT NULL DEFAULT NULL;" % (self.hks, self.designation.text))
         exce_msql("UPDATE `Steuerzentrale`.`set_Szenen` SET `%s`='%s' WHERE `Id`='5';" % (self.designation.text, self.description.text))
+        exce_msql("UPDATE `Steuerzentrale`.`set_Szenen` SET `%s`='%s' WHERE `Id`='6';" % (self.designation.text, self.adress.text))
         exce_msql("UPDATE `Steuerzentrale`.`set_Szenen` SET `%s`='%s' WHERE `Id`='1';" % (self.designation.text, self.mainbutton.text))
         if self.mainbutton.text == 'SATELLITE':
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `IP`='%s' WHERE `Name`='%s';" % (self.IP_add.text, self.designation.text))
-            exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `PORT`='%s' WHERE `Name`='%s';" % (self.port_bc.text, self.designation.text))
-            exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `BiPORT`='%s' WHERE `Name`='%s';" % (self.port_bid.text, self.designation.text))
+            if self.port_bc.text != 'nan':
+                exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `PORT`='%s' WHERE `Name`='%s';" % (self.port_bc.text, self.designation.text))
+            if self.port_bid.text != 'nan':
+                exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `BiPORT`='%s' WHERE `Name`='%s';" % (self.port_bid.text, self.designation.text))
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `USER`='%s' WHERE `Name`='%s';" % (self.username.text, self.designation.text))
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `PASS`='%s' WHERE `Name`='%s';" % (self.password.text, self.designation.text))
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `command_set`='%s' WHERE `Name`='%s';" % (self.table.text, self.designation.text))
@@ -334,6 +345,7 @@ class DetailsScreen(GridLayout):
         print(self.hks)
         exce_msql("ALTER TABLE `Steuerzentrale`.`set_Szenen` ADD COLUMN `%s` TEXT NULL AFTER `%s`;" % (self.designation.text, self.hks))
         exce_msql("UPDATE `Steuerzentrale`.`set_Szenen` SET `%s`='%s' WHERE `Id`='5';" % (self.designation.text, self.description.text))
+        exce_msql("UPDATE `Steuerzentrale`.`set_Szenen` SET `%s`='%s' WHERE `Id`='6';" % (self.designation.text, self.adress.text))
         exce_msql("UPDATE `Steuerzentrale`.`set_Szenen` SET `%s`='%s' WHERE `Id`='1';" % (self.designation.text, self.mainbutton.text))
         if self.mainbutton.text == 'SATELLITE':
             exce_msql("INSERT INTO `Steuerzentrale`.`set_satellites` (`Name`) VALUES ('%s');" % (self.designation.text))

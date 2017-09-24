@@ -110,7 +110,7 @@ class AlarmClock(ScrollView):
     def set_load_button(self):
         self.clear_widgets()
         self.layout.clear_widgets()
-        btn = Button(text=str('Load'), size_hint=(None,None), size=(80,40))
+        btn = Button(text=str('Load'), size_hint=(None,None), size=(200,200))
         btn.bind(on_press=self.update)
         self.layout.add_widget(btn)
         self.add_widget(self.layout)        

@@ -2,7 +2,7 @@
 
 import constants
 
-from mysql_con import mdb_set_table, mdb_read_table_entry,set_val_in_szenen,mdb_get_table
+from database.mysql_connector import mdb_set_table, mdb_read_table_entry,set_val_in_szenen,mdb_get_table
 from phue import Bridge, Light
 
 import MySQLdb as mdb
@@ -44,7 +44,7 @@ def main():
     print hue_l.set_device("V01SCH1BET1LI02", "Advent_an")    
     #print hue_l.list_devices()
     
-class hue_lights():
+class Hue_lights():
     def __init__(self):
         self.__init_table__()
     
@@ -150,7 +150,20 @@ class hue_lights():
         for key in keys:
             if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
                 command[key] = int(szene.get(key))
-        if command <> {} and h_dev.on:
+        # first get status then execute command
+        t_sucess = False
+        retry = 1
+        t_h_dev = False
+        while not t_sucess and retry < max_retry:
+            try:
+                t_h_dev = h_dev.on
+            except:
+                time.sleep(retry * 1)
+                t_sucess = False
+                retry += 1
+        if retry == max_retry:
+            print(device, ' hue timed out')
+        if command <> {} and t_h_dev:
             success = False
             retry = 1
             while not success and retry < max_retry:
@@ -162,7 +175,7 @@ class hue_lights():
                     success = False 
                     retry += 1
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
-            success = not h_dev.on
+            success = False #not h_dev.on
             retry = 1
             if 'transitiontime' in command:
                 if command['transitiontime'] > 0:
@@ -176,9 +189,13 @@ class hue_lights():
                     success = False 
                     retry += 1
         set_val_in_szenen(device=device, szene="Value", value=szene.get('on'))
-        if not h_dev.reachable:
+        try:
+            if not h_dev.reachable:
+                success = False
+                aes.new_event(description=str(device) + " not reachable", prio=1)
+        except:
             success = False
-            aes.new_event(description=str(device) + " not reachable", prio=1)
+            aes.new_event(description=str(device) + " not reachable", prio=1)            
         return success
 
 if __name__ == '__main__':

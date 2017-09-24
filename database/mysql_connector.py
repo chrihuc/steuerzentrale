@@ -376,6 +376,22 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
         #cur.execute(sql)     
     #con.close() 
     
+def get_device_adress(device):
+    """ returns the adress with with the device is saved in each interface
+    """
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    value = 0
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT %s FROM %s.%s WHERE ID = '6'" % (device, datab, constants.sql_tables.szenen.name))
+#        if cur.fetchone()[0] != 0:   
+        results = cur.fetchall()
+        for row in results:
+            value = row[0]
+    con.close()            
+    return value    
+    
+
 def getSzenenSources(szene):
     if szene in ['', None]:
         return [],[]
