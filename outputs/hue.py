@@ -2,7 +2,6 @@
 
 import constants
 
-from database.mysql_connector import mdb_set_table, mdb_read_table_entry,set_val_in_szenen,mdb_get_table
 from phue import Bridge, Light
 
 import MySQLdb as mdb
@@ -11,11 +10,12 @@ import time
 import logging
 logging.basicConfig()
 
-from alarmevents import alarm_event
+from database import mysql_connector
+from alarm_event_messaging import alarmevents
 
 # TODO Tests split adress from hks
 
-aes = alarm_event()
+aes = alarmevents.AES()
 
 max_retry = 4
 
@@ -38,12 +38,7 @@ except:
     except:
         pass
 
-def main():
-    hue_l = hue_lights()
-#    print hue_l.set_device("A00EIN1ADV1ST01", "Advent_an")
-    print hue_l.set_device("V01SCH1BET1LI02", "Advent_an")    
-    #print hue_l.list_devices()
-    
+
 class Hue_lights():
     def __init__(self):
         self.__init_table__()
@@ -69,7 +64,7 @@ class Hue_lights():
         con.close()     
     
     def list_commands(self):
-        comands = mdb_get_table(table.name)
+        comands = mysql_connector.mdb_get_table(table.name)
         liste = ['Umschalten']
         for comand in comands:
             liste.append(comand.get("Name"))
@@ -87,7 +82,7 @@ class Hue_lights():
         return dicti  
         
     def list_devices(self):
-        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
         liste = []
         for comand in comands:
             if comands.get(comand) == "HUE":
@@ -98,14 +93,11 @@ class Hue_lights():
     def set_device(self, device, commd):
         h_dev = Light(hbridge, device)
         keys = ['bri', 'hue', 'sat', 'transitiontime']
-        szene = mdb_read_table_entry(table.name,commd)
+        szene = mysql_connector.mdb_read_table_entry(table.name,commd)
         success = False
         if szene.get('bri')<=0:
             szene['bri'] = 0
             szene['on'] = False
-        if commd in ["man", "auto"]:
-            set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
-            return True
         elif commd == 'Save': 
             hue = hbridge.get_light(device, 'hue')
             bri = hbridge.get_light(device, 'bri')
@@ -113,7 +105,7 @@ class Hue_lights():
             an = hbridge.get_light(device, 'on') 
             #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
             setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
-            mdb_set_table(table.name,device, setting)
+            mysql_connector.mdb_set_table(table.name,device, setting)
             return True
         elif commd == 'Umschalten':
             an = hbridge.get_light(device, 'on') 
@@ -157,6 +149,7 @@ class Hue_lights():
         while not t_sucess and retry < max_retry:
             try:
                 t_h_dev = h_dev.on
+                t_sucess = True
             except:
                 time.sleep(retry * 1)
                 t_sucess = False
@@ -188,7 +181,6 @@ class Hue_lights():
                     time.sleep(1)
                     success = False 
                     retry += 1
-        set_val_in_szenen(device=device, szene="Value", value=szene.get('on'))
         try:
             if not h_dev.reachable:
                 success = False
@@ -197,6 +189,4 @@ class Hue_lights():
             success = False
             aes.new_event(description=str(device) + " not reachable", prio=1)            
         return success
-
-if __name__ == '__main__':
-    main()  
+ 

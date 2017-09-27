@@ -19,6 +19,7 @@ import constants
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
 from mysql_con import settings_r, setting_s, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
+from database import mysql_connector
 
 import easygui
 import socket
@@ -109,10 +110,11 @@ szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
 
 #==============================================================================
-# Todo:
+# TODO:
 #   all list to be updated (no need to use dicts)
 #   gehe zu szenen
 #   codes mit listen ersetzen
+#   save settings not working
 #==============================================================================
 
 start = timeit.default_timer()
@@ -947,8 +949,11 @@ class TreeInputDevice(object):
         top_level_list = [top_level]
         action = {'name': 'Speichern', 'type': 'action'}
         top_level_list.append(action)
+        action = {'name': 'Loeschen', 'type': 'action'}
+        top_level_list.append(action)
         self.params = Parameter.create(name='params', type='group', children=top_level_list)
         self.params.child('Speichern').sigActivated.connect(self.speichern)
+        self.params.child('Loeschen').sigActivated.connect(self.loeschen)
     
     def speichern(self):
         szene = {}
@@ -964,6 +969,13 @@ class TreeInputDevice(object):
         print szene
         mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')), 
                       commands=szene, primary = 'Id', translate = False)
+
+    def loeschen(self):
+        for kind in self.params.children():
+            if kind.isType('group'):
+                _id = kind.name()
+        mysql_connector.remove_entry(table=constants.sql_tables.inputs.name, device=_id, 
+                                     primary = 'Id')
 
 """
 old part

@@ -184,37 +184,42 @@ class Szenen:
             t_list = self.kommando_dict.get(szn_id)   
         else:
             t_list = {}
-        if device in xs1_devs:
-            executed = xs1.set_device(adress, commando)
-        elif device == "setTask":
-            if commando[0] == 'Alle':
-                executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando[1]))
-            elif commando[0] == 'Zuhause':
-                executed = mes.send_zuhause(to=mes.alle, titel="Setting", text=str(commando[1]))  
-            else:
-                executed = mes.send_zuhause(to=str(commando[0]), titel="Setting", text=str(commando[1]))                 
-        elif device in sns_devs:
-            executed = sn.set_device(adress, commando, text)               
-        elif device in hue_devs:
-            executed = hue.set_device(adress, commando)  
-#            for kommando in kommandos:
-#                if hue_count > 1:
-#                    hue_delay += 0.75
-#                    hue_count = 0
-#                hue_del = Timer(hue_delay, hue.set_device, [key, commando])
-#                hue_del.start()
-#                hue_count += 1
-        elif device in sat_devs:
-#            print device, commando
-            executed = sat.set_device(adress, commando)                   
-        elif device in tvs_devs:
-            executed = tv.set_device(adress, commando)                                                          
-#                        elif key == "Interner_Befehl":
-#                            for kommando in kommandos:
-#                                t = threading.Thread(target=interner_befehl, args=[commando])
-#                                t.start() 
+        if commando in ["man", "auto"]:
+            mysql_connector.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
         else:
-            executed = True
+            if device in xs1_devs:
+                executed = xs1.set_device(adress, commando)
+            elif device == "setTask":
+                if commando[0] == 'Alle':
+                    executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando[1]))
+                elif commando[0] == 'Zuhause':
+                    executed = mes.send_zuhause(to=mes.alle, titel="Setting", text=str(commando[1]))  
+                else:
+                    executed = mes.send_zuhause(to=str(commando[0]), titel="Setting", text=str(commando[1]))                 
+            elif device in sns_devs:
+                executed = sn.set_device(adress, commando, text)               
+            elif device in hue_devs:
+                executed = hue.set_device(adress, commando)  
+    #            for kommando in kommandos:
+    #                if hue_count > 1:
+    #                    hue_delay += 0.75
+    #                    hue_count = 0
+    #                hue_del = Timer(hue_delay, hue.set_device, [key, commando])
+    #                hue_del.start()
+    #                hue_count += 1
+            elif device in sat_devs:
+    #            print device, commando
+                executed = sat.set_device(adress, commando)                   
+            elif device in tvs_devs:
+                executed = tv.set_device(adress, commando)                                                          
+    #                        elif key == "Interner_Befehl":
+    #                            for kommando in kommandos:
+    #                                t = threading.Thread(target=interner_befehl, args=[commando])
+    #                                t.start() 
+            else:
+                executed = True
+        if executed:
+            mysql_connector.set_val_in_szenen(device=device, szene="Value", value=commando)
         if szn_id == None:
             return
         if executed:
@@ -270,9 +275,7 @@ class Szenen:
                 aes.new_event(description="Szenen: " + szene, prio=Prio, karenz = Karenz)
             else:
                 aes.new_event(description= str(szene_dict.get("Beschreibung")), prio=Prio, karenz = Karenz) 
-            interlocks = {}  
-            hue_count = 0
-            hue_delay = 0            
+            interlocks = {}           
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
             for idk, key in enumerate(szene_dict):        

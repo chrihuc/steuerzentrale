@@ -8,7 +8,7 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
 import MySQLdb as mdb
-from mysql_con import setting_r
+from database import mysql_connector
 from messaging import messaging
 from threading import Timer
 import threading
@@ -39,24 +39,6 @@ import time
 
 
 
-
-def main():
-    aes = alarm_event()
-    
-    #aes.new_event(description="anderer Alarm", prio=0)
-    print aes.alarm_events_read(unacknowledged=False, prio=0, time=24*60)
-    #acknowledge_alarm(alarm_id=1)
-    
-    #acknowledge_all()
-    
-    #alarms = aes.alarm_events_read(unacknowledged=True, prio=1)
-    #for alarm in alarms:
-    #    print alarm.get("description")
-    
-    #print alarm_events_read()
-    
-    #aes.check_liste()
-
 class sql_object:
     def __init__(self,name,typ,columns):
         self.name = name
@@ -65,7 +47,7 @@ class sql_object:
 
 table    = sql_object("HIS_alarmevents", "Historic", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"), ("Description","TEXT"),("Prio","DECIMAL(2,0)"),("Date","DATETIME"),("Acknowledged","DATETIME")))
 
-class alarm_event:
+class AES:
     def __init__(self):
         self.__init_table__()
         self.mes = messaging()
@@ -145,7 +127,7 @@ class alarm_event:
                 else:
                     insertstatement = 'INSERT INTO '+table.name+'(description, prio, Date) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
                 cur.execute(insertstatement)
-            if str(setting_r("Status")) == "Wach":
+            if str(mysql_connector.setting_r("Status")) == "Wach":
                 anwesend = True
             else:
                 anwesend = False
@@ -237,5 +219,3 @@ class alarm_event:
             self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text="Es gibt " + str(len(alarme)) + " neue Alarme:" + nachricht)
         
 
-if __name__ == '__main__':
-    main()  

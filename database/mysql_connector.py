@@ -318,6 +318,22 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
                 cur.execute(sql)       
     con.close() 
 
+def remove_entry(table, device, primary = 'Name'):
+    ''' remove line
+        table = table name to change
+        device = entry in table, if primary is name then where the name fits
+    '''
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT COUNT(*) FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
+        cur.execute(sql)
+        if cur.fetchone()[0] == 0:
+            con.close() 
+            return True   
+        sql = 'DELETE FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
+        cur.execute(sql)
+    con.close() 
 #def mdb_sonos_s(player, commands):
     ##commands = Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume
     #if player in sn.Names:
