@@ -44,17 +44,19 @@ sn = sonos()
 tv = TV()
 sat = satelliten()
 szn = szenen()
-xs1_devs = xs1.list_devices()
+#xs1_devs = xs1.list_devices()
 xs1_cmds = xs1.dict_commands()
-hue_devs = hue.list_devices()
+#hue_devs = hue.list_devices()
 hue_cmds = hue.dict_commands()
-sns_devs = sn.list_devices()
+#sns_devs = sn.list_devices()
 sns_cmds = sn.dict_commands()
-tvs_devs = tv.list_devices()
+#tvs_devs = tv.list_devices()
 tvs_cmds = tv.dict_commands()
-sat_devs = sat.list_devices()
+#sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
-cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
+devices_types = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+TYPES = ['XS1','SATELLITE','ZWave', 'SONOS', 'HUE', 'TV']
+cmd_devs = [device for device in devices_types if devices_types[device] in TYPES]
 szn_lst = sorted(szn.list_commands(gruppe=''))
 #for cmd_set in [xs1_cmds,hue_cmds,sns_cmds,tvs_cmds,sat_cmds]:
 #    cmd_set.update({'warte_1':len(cmd_set)+1,'warte_3':len(cmd_set)+2,'warte_5':len(cmd_set)+3})
@@ -80,31 +82,31 @@ zim_dict = {'ZIM':'Zimmer',
             'ESS':'Esszimmer',
             'TER':'Terasse',
             'GEN':'Generell',
-            
+
             'KOM':'Kommunikation',
             'BEW':'Bewohner'}
 
 furn_dict = {'SCA':'Scanner',
              'ADV':'Advent',
              'EIN':'Eingang',
-             'STV':'Stromversorgung', 
-             'RUM':'Raum', 
-             'DEK':'Decke', 
+             'STV':'Stromversorgung',
+             'RUM':'Raum',
+             'DEK':'Decke',
              'SRA':'Schrank',
-             'SOF':'Sofa', 
-             'TUE':u'Tür', 
-             'SEV':'Server', 
+             'SOF':'Sofa',
+             'TUE':u'Tür',
+             'SEV':'Server',
              'PFL':'Pflanzen',
              'BET':'Bett',
              'TER':'Terasse',
              'GEN':'Generell',
-             
+
              'SSH':'SecureShell',
              'RUT':'Router',
              'SAT':'Satellite',
              'USB':'USBKey',
              'IPA':'Handy'}
-             
+
 
 szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
@@ -136,14 +138,14 @@ class ComplexParameter(pTypes.GroupParameter):
         opts['type'] = 'bool'
         opts['value'] = True
         pTypes.GroupParameter.__init__(self, **opts)
-        
+
         self.addChild({'name': 'A = 1/B', 'type': 'float', 'value': 7, 'suffix': 'Hz', 'siPrefix': True})
         self.addChild({'name': 'B = 1/A', 'type': 'float', 'value': 1/7., 'suffix': 's', 'siPrefix': True})
         self.a = self.param('A = 1/B')
         self.b = self.param('B = 1/A')
         self.a.sigValueChanged.connect(self.aChanged)
         self.b.sigValueChanged.connect(self.bChanged)
-        
+
     def aChanged(self):
         self.b.setValue(1.0 / self.a.value(), blockSignal=self.bChanged)
 
@@ -162,7 +164,7 @@ class ScalableGroup(pTypes.GroupParameter):
             opts['addList'].append(seting)
         #opts['addList'] = ['str', 'float', 'int']
         pTypes.GroupParameter.__init__(self, **opts)
-    
+
     def addNew(self, typ):
         values = settings_r()
         val=values.get(typ)
@@ -183,11 +185,11 @@ class StockRaum():
 #        for nam in self.namen:
 #            if zimmer:
 #                if nam in self.name[-3:]:
-#                    self.dicti['name'] = self.get_description(nam)   
+#                    self.dicti['name'] = self.get_description(nam)
 #            else:
 #                if nam in self.name[0:3]:
-#                    self.dicti['name'] = self.get_description(nam)       
-        
+#                    self.dicti['name'] = self.get_description(nam)
+
     @staticmethod
     def get_description(obj_id):
         dictionaries = [stockwerke_dict, zim_dict, furn_dict]
@@ -196,14 +198,14 @@ class StockRaum():
         for dicit in dictionaries:
             if obj_id in dicit:
                 return dicit[obj_id]
-        
+
     def addChild(self,child):
         self.children.append(child)
 
     def expand(self, status=True):
         self.dicti['expanded'] = status
         self.expanded = status
-        
+
     def build(self):
         self.dicti['children'] = self.children
         return self.dicti
@@ -217,7 +219,7 @@ class KommandoGroup(pTypes.GroupParameter):
         self.cmds = cmds
         pTypes.GroupParameter.__init__(self, **opts)
         self.autoExpand()
-    
+
     def addNew(self, typ):
         val = {
             'list': self.cmds
@@ -230,26 +232,26 @@ class KommandoGroup(pTypes.GroupParameter):
                 return True
         else:
             return False
-            
+
     def autoExpand(self):
         for kind in self.children():
             if kind.value() > 1:
                 self.setOpts(expanded = True)
         else:
-            return False            
+            return False
 
 class Szenen_tree():
-    
+
     szenen = []
     neue_szene = False
-    
+
     def __init__(self, Szene_to_read):
         self.szene_to_read = Szene_to_read
         self.p = None
         self.name = None
         # self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read,recalc=False)]
         # self.set_paratree()
-        
+
     def __return_enum__(self,eingabe):
         if (type(eingabe) == str):
             try:
@@ -262,14 +264,14 @@ class Szenen_tree():
         elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
             return eingabe
         else:
-            kommandos = [eingabe]    
-        return kommandos 
+            kommandos = [eingabe]
+        return kommandos
 
     def update(self, neue_szene):
         self.szene_to_read = neue_szene
         self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read,recalc=False)]
-        self.set_paratree()        
-        
+        self.set_paratree()
+
     def dict_constructor(self,name, values, value):
         if str(name) == "None": name = ''
         dicti = {'name':name, 'type':'list','values':values}
@@ -280,7 +282,7 @@ class Szenen_tree():
 
     def group_constructor(self,name, namen, values, values2):
         if str(name) == "None": name = ''
-        dicti = {'name':name, 'type':'group', 'expanded': True}    
+        dicti = {'name':name, 'type':'group', 'expanded': True}
         liste = []
         itera = 0
         for value in values2:
@@ -294,12 +296,12 @@ class Szenen_tree():
         return dicti
 
     def get_commando_set(self,device):
-        if device in xs1_devs: values = xs1_cmds
-        if device in hue_devs: values = hue_cmds
-        if device in sns_devs: values = sns_cmds
-        if device in tvs_devs: values = tvs_cmds
-        if device in sat_devs: values = sat.dict_commands(device)
-        values.update({'warte_1':len(values)+1,'warte_3':len(values)+2,'warte_5':len(values)+3})        
+        if devices_types[device] == 'XS1': values = xs1_cmds
+        if devices_types[device] == 'HUE': values = hue_cmds
+        if devices_types[device] == 'SONOS': values = sns_cmds
+        if devices_types[device] == 'TV': values = tvs_cmds
+        if devices_types[device] in ['SATELLITE', 'ZWave']: values = sat.dict_commands(device)
+        values.update({'warte_1':len(values)+1,'warte_3':len(values)+2,'warte_5':len(values)+3})
         return values
 
     def dict_constructor_(self,device, cmmds):
@@ -317,13 +319,13 @@ class Szenen_tree():
                         dicti['expanded'] = False
             liste.append(dicti)
         return liste
-        
+
     def getValueFromValues(self,value, values):
         for num, val in enumerate(values):
             if str(val) == str(value):
                 print val, num
                 return num + 1
-        
+
     def set_paratree(self):
         global p, name
         #szenen = mdb_get_table(db='set_Szenen')
@@ -344,7 +346,7 @@ class Szenen_tree():
         for stock in stock_list:
             stockwerke.append(StockRaum(stock))
         for zim in zimmer_list:
-            zimmer.append(StockRaum(zim))  
+            zimmer.append(StockRaum(zim))
         params = []
         for szene in self.szenen:
             if szene.get('Name') == 'LeereVorlage' or self.neue_szene:
@@ -359,7 +361,7 @@ class Szenen_tree():
             szn_dict['name'] = self.name
             szn_dict['type']='group'
             szn_dict['expanded'] = True
-            szn_l_child = []    
+            szn_l_child = []
             #del szene['Name']
             for item in szene:
                 szn_d_child = {}
@@ -374,15 +376,15 @@ class Szenen_tree():
                             zim.addChild(kom_group)
                             if kom_group.shouldExpand():
                                 zim.expand(True)
-                                #Stockwerke auch expandieren                                   
-                elif str(item) in ['Setting']: 
+                                #Stockwerke auch expandieren
+                elif str(item) in ['Setting']:
                     for child in self.__return_enum__(szene.get(item)):
                         if type(self.__return_enum__(szene.get(item))) == dict:
                             szn_d_child_l.append({'name': child, 'type': 'str', 'value': self.__return_enum__(szene.get(item)).get(child)})
-                    szn_d_child = ScalableGroup(name= item, children= szn_d_child_l, expanded = False) 
-                    szn_l_child.append(szn_d_child) 
-                elif str(item) in ['Bedingung']: 
-                    szn_d_child = {'name': item, 'type': 'action', 'expanded': True} 
+                    szn_d_child = ScalableGroup(name= item, children= szn_d_child_l, expanded = False)
+                    szn_l_child.append(szn_d_child)
+                elif str(item) in ['Bedingung']:
+                    szn_d_child = {'name': item, 'type': 'action', 'expanded': True}
                     kinder = self.__return_enum__(szene.get(item))
                     for child in kinder:
                         if type(kinder) == dict:
@@ -393,20 +395,20 @@ class Szenen_tree():
                                 szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(settings_r()), 'value': child[0]},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'],'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
                     szn_d_child['children']= szn_d_child_l
-                    szn_l_child.append(szn_d_child)                             
-                elif str(item) in ['setTask']: 
-                    szn_d_child = {'name': 'Befehl an Handys', 'type': 'action', 'expanded': True} 
-                    kinder = self.__return_enum__(szene.get(item))  
-                    for kind in kinder:       
+                    szn_l_child.append(szn_d_child)
+                elif str(item) in ['setTask']:
+                    szn_d_child = {'name': 'Befehl an Handys', 'type': 'action', 'expanded': True}
+                    kinder = self.__return_enum__(szene.get(item))
+                    for kind in kinder:
                         if kind <> None:
                             szn_d_child_l.append({'name': 'Befehl %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'An wen', 'type': 'str', 'value': kind[0]},
-                        {'name': 'Befehl', 'type': 'str', 'value': kind[1]}]})  
+                        {'name': 'Befehl', 'type': 'str', 'value': kind[1]}]})
                     szn_d_child['children']= szn_d_child_l
-                    szn_l_child.append(szn_d_child)                             
-                elif str(item) in ['Follows']: 
-                    szn_d_child = {'name': 'Szene folgt', 'type': 'action', 'expanded': True} 
-                    kinder = self.__return_enum__(szene.get(item))  
-                    for kind in kinder:       
+                    szn_l_child.append(szn_d_child)
+                elif str(item) in ['Follows']:
+                    szn_d_child = {'name': 'Szene folgt', 'type': 'action', 'expanded': True}
+                    kinder = self.__return_enum__(szene.get(item))
+                    for kind in kinder:
                         if kind <> None:
                             if len(kind)<4:
                                 immer = True
@@ -415,21 +417,21 @@ class Szenen_tree():
                             if len(kind)<5:
                                 depErfolg = 0
                             else:
-                                depErfolg = kind[4]                            
+                                depErfolg = kind[4]
                             szn_d_child_l.append({'name': 'Szene %d' % (len(szn_d_child_l)+1), 'type': 'action', 'children':[{'name': 'Szene', 'type': 'list','value': kind[0], 'values':szn_lst},
                         {'name': 'nach [s]', 'type': 'str', 'value': kind[1]},{'name': 'Verlaengerbar', 'type': 'list', 'values':{'Verlaengerbar':0,'nur exact':1,'fest':2}, 'value': kind[2]},{'name': 'Abhaengig Bedingung', 'type': 'bool', 'value': immer}
-                        ,{'name': 'Abhaengig Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': depErfolg}]})  
+                        ,{'name': 'Abhaengig Erfolg', 'type': 'list', 'values':{'egal':0,'bei Erfolg':1,'bei Nichterfolg':2}, 'value': depErfolg}]})
                     szn_d_child['children']= szn_d_child_l
-                    szn_l_child.append(szn_d_child) 
-                elif str(item) in ['Cancels']: 
-                    szn_d_child = {'name': 'Folgende stoppen', 'type': 'action', 'expanded': True} 
-                    kinder = self.__return_enum__(szene.get(item))  
-                    for kind in kinder:       
+                    szn_l_child.append(szn_d_child)
+                elif str(item) in ['Cancels']:
+                    szn_d_child = {'name': 'Folgende stoppen', 'type': 'action', 'expanded': True}
+                    kinder = self.__return_enum__(szene.get(item))
+                    for kind in kinder:
                         if kind <> None:
                             szn_d_child_l.append({'name': 'Stops %d' % (len(szn_d_child_l)+1), 'type': 'list','value': kind, 'values':szn_lst})
                     szn_d_child['children']= szn_d_child_l
-                    szn_l_child.append(szn_d_child)                     
-                elif str(item) in ['AutoMode']: 
+                    szn_l_child.append(szn_d_child)
+                elif str(item) in ['AutoMode']:
                     szn_d_child['name'] = str(item)
                     szn_d_child['type'] = 'bool'
                     szn_d_child['expanded'] = False
@@ -437,7 +439,7 @@ class Szenen_tree():
                         szn_d_child['value'] = eval(szene.get(item))
                     else:
                         szn_d_child['value'] = False
-                    szn_l_child.append(szn_d_child)                     
+                    szn_l_child.append(szn_d_child)
                 else:
                     szn_d_child['name'] = str(item)
                     if str(item) in ['Delay']:
@@ -452,14 +454,14 @@ class Szenen_tree():
                         szn_d_child['values'] = {'Kein Event':-1,'Normales Event':0,'Problem ohne Hinweis':1,'Hinweis wenn zuhause':2,'immer Hinweis':3,'Hinweis wenn wach':4,
                                                  'Achtung wenn wach':5,'Alarm':6,'Debug':7}
                         if str(szene.get(item)) <> "None":
-                            szn_d_child['value'] = float(szene.get(item))                          
+                            szn_d_child['value'] = float(szene.get(item))
                     elif str(item) in ['Gruppe']:
                         szn_d_child['type'] ='list'
                         szn_d_child['values'] = szn_typs
                         if str(szene.get(item)) <> "None":
                             szn_d_child['value'] = str(szene.get(item))
                         else:
-                            szn_d_child['value'] = ''                          
+                            szn_d_child['value'] = ''
                     else:
                         szn_d_child['type'] = 'str'
                         if str(szene.get(item)) <> "None":
@@ -472,7 +474,7 @@ class Szenen_tree():
                         except:
                             pass
                     szn_d_child['expanded'] = False
-                    szn_l_child.append(szn_d_child)         
+                    szn_l_child.append(szn_d_child)
 
             for stock in stockwerke:
                 for zim in zimmer:
@@ -488,19 +490,19 @@ class Szenen_tree():
         for quelle in iquellen:
             ichilds.append({'name': quelle.get('Name'), 'type': 'action', 'value': quelle.get('Name'),'autoIncrementName':True})
         for quelle in squellen:
-            schilds.append({'name': quelle.get('Name'), 'type': 'action', 'value': quelle.get('Name'),'autoIncrementName':True})   
+            schilds.append({'name': quelle.get('Name'), 'type': 'action', 'value': quelle.get('Name'),'autoIncrementName':True})
         szn_dict = {'name': 'Sources', 'type': 'group', 'children': [
                 {'name': 'Inputs', 'type': 'group', 'autoIncrementName':True, 'children':ichilds },
-                {'name': 'Szenen', 'type': 'group', 'autoIncrementName':True, 'children':schilds }    
-            ]}       
-        params.append(szn_dict)  
+                {'name': 'Szenen', 'type': 'group', 'autoIncrementName':True, 'children':schilds }
+            ]}
+        params.append(szn_dict)
         szn_dict =     {'name': 'Save/Restore functionality', 'type': 'group', 'children': [
                 {'name': 'Speichere Szene', 'type': 'action'},
                 {'name': u'Prüfe Bedingung', 'type': 'action'},
                 {'name': 'Execute', 'type': 'action'},
                 {'name': 'Execute on server', 'type': 'action'},
                 {'name': 'Neue Szene', 'type': 'action'},
-                {'name': 'Dupliziere Szene', 'type': 'action'}                 
+                {'name': 'Dupliziere Szene', 'type': 'action'}
             ]}
         params.append(szn_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
@@ -509,7 +511,7 @@ class Szenen_tree():
             self.p.param('Save/Restore functionality', u'Prüfe Bedingung').sigActivated.connect(self.check_bedingung)
             self.p.param('Save/Restore functionality', 'Execute').sigActivated.connect(self.execute)
             self.p.param('Save/Restore functionality', 'Execute on server').sigActivated.connect(self.execute_on_server)
-            #self.p.param('Save/Restore functionality', 'Neue Szene').sigActivated.connect(self.newSzene)            
+            #self.p.param('Save/Restore functionality', 'Neue Szene').sigActivated.connect(self.newSzene)
             self.p.param(self.name, 'Befehl an Handys').sigActivated.connect(self.add_task)
             self.p.param(self.name, 'Bedingung').sigActivated.connect(self.add_bedingung)
             self.p.param(self.name, 'Szene folgt').sigActivated.connect(self.addSzene)
@@ -546,22 +548,22 @@ class Szenen_tree():
     def linkSzene(self):
         for kind in self.p.param(self.name, 'Szene folgt').children():
             kind.sigActivated.connect(self.makeInit(kind.getValues().get('Szene')[0]))
-            
+
     def makeInit(self, Name):
-        def setInit(): 
-            self.__init__(Name) 
+        def setInit():
+            self.__init__(Name)
         return setInit
-            
-        
+
+
     def check_iter(self,some_object):
         try:
             iter(some_object)
-            if type(some_object) <> str:  
+            if type(some_object) <> str:
                 return True
             else:
                 return False
         except TypeError, te:
-            return False   
+            return False
 
     def return_list(self,some_object):
         liste = []
@@ -571,7 +573,7 @@ class Szenen_tree():
             wert = dicti.get('value')
             if sub_dicti <> None:
                 for jtem in sub_dicti:
-                    if sub_dicti[jtem] == wert:   
+                    if sub_dicti[jtem] == wert:
                         wert_str = jtem
                 if wert_str <> '':
                     liste.append(wert_str)
@@ -610,7 +612,7 @@ class Szenen_tree():
                                         set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), eval(bed_tuple.get('Bedingung').get('value'))])
                                     except:
                                         set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), (bed_tuple.get('Bedingung').get('value'))])
-                            dicti[device] = set_lst                                  
+                            dicti[device] = set_lst
                         else:
                             kommandos = self.return_list(some_object.get('children'))
                             if str(device) == "Id":
@@ -627,7 +629,7 @@ class Szenen_tree():
                                 tsk_tuple = some_object.get('children').get(child).get('children')
                                 if tsk_tuple.get('An wen').get('value') <> '':
                                     set_lst.append([tsk_tuple.get('An wen').get('value'), tsk_tuple.get('Befehl').get('value')])
-                            dicti['setTask'] = set_lst  
+                            dicti['setTask'] = set_lst
                         elif device == 'Szene folgt':
                             set_lst = []
                             for child in some_object.get('children'):
@@ -636,14 +638,14 @@ class Szenen_tree():
                                     print szn_tuple.get('Verlaengerbar')
                                     set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get('Verlaengerbar').get('value'),
                                                     szn_tuple.get('Abhaengig Bedingung').get('value'),szn_tuple.get('Abhaengig Erfolg').get('value')])
-                            dicti['Follows'] = set_lst     
+                            dicti['Follows'] = set_lst
                         elif device == 'Folgende stoppen':
                             set_lst = []
                             for child in some_object.get('children'):
                                 if some_object.get('children').get(child).get('value') <> '':
                                     szen = some_object.get('children').get(child).get('value')
                                     set_lst.append(szen)
-                            dicti['Cancels'] = set_lst                              
+                            dicti['Cancels'] = set_lst
                         else:
                             #strucutre group only if name not ambivalent
                             dicti.update(self.itera(some_object.get('children')))
@@ -657,7 +659,7 @@ class Szenen_tree():
                                 if self.szenen[0].get(device) <> value:
                                     dicti[some_object.get('name')] =  value
                             else:
-                                dicti[some_object.get('name')] =  value                    
+                                dicti[some_object.get('name')] =  value
                     else:
                         #ordered dict:
                         for item in some_object:
@@ -673,7 +675,7 @@ class Szenen_tree():
         neu_szene = self.itera(self.state)
         print neu_szene
         mdb_set_table(table='set_Szenen', device=neu_szene.get('Id'), commands=neu_szene, primary = 'Id')
-            
+
 
     def check_bedingung(self):
         self.state = self.p.saveState()
@@ -691,21 +693,21 @@ class Szenen_tree():
     def execute(self):
         constants.redundancy_.master = True
         if szn.execute(self.szene_to_read):
-            pass            
+            pass
             #easygui.msgbox("Szene ausgeführt", title="Execute")
         else:
             easygui.msgbox("Szene wurde NICHT ausgeführt", title="Execute")
-        #constants.redundancy_.master = False            
-    
+        #constants.redundancy_.master = False
+
     def execute_on_server(self):
         commado = {'Szene':str(self.szene_to_read)}
         csocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-        csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))    
-        
+        csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))
+
     def newSzene(self):
         global szenen
         self.szenen = [mdb_read_table_entry(db='LeereVorlage',entry=self.szene_to_read)]
-        self.set_paratree()        
+        self.set_paratree()
 
 class InputsTree():
     def __init__(self, expand = None, isInputs = True, inputsGroup = None, cmdTable = None):
@@ -727,7 +729,7 @@ class InputsTree():
         self.isInputs = isInputs
         self.cmdTable = cmdTable
         self.set_paratree()
-        
+
     def set_paratree(self):
         params = []
         if self.isInputs:
@@ -735,15 +737,15 @@ class InputsTree():
         else:
             inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
         inp_kinder = []
-        for aktuator in sorted(self.inputs):   
+        for aktuator in sorted(self.inputs):
             if (aktuator.get('Description') <> None and self.inputsGroup in aktuator.get('Name') and self.isInputs) or (not self.isInputs and not aktuator.get('Name') in ['Name']):
-                if self.isInputs:             
+                if self.isInputs:
                     title = aktuator.get('Description')
                 else:
                     title = str(aktuator.get('Name'))
                 akt_dict = {'name': str(aktuator.get('Id')), 'title':title , 'type': 'group', 'expanded': False}
                 if self.expand == aktuator.get('Name'):
-                    akt_dict['expanded']= True                
+                    akt_dict['expanded']= True
                 kinder1 = []
                 kinder2 = []
                 kinder3, kinder4 = [], []
@@ -752,15 +754,15 @@ class InputsTree():
                         if aktuator.get(sub) == '1':
                             kinder1.append({'name': sub, 'type': 'bool', 'value':True})
                         elif aktuator.get(sub) in ['0', None]:
-                            kinder1.append({'name': sub, 'type': 'bool', 'value':False}) 
+                            kinder1.append({'name': sub, 'type': 'bool', 'value':False})
                         else:
-                            kinder1.append({'name': sub, 'type': 'bool', 'value':eval(aktuator.get(sub))}) 
+                            kinder1.append({'name': sub, 'type': 'bool', 'value':eval(aktuator.get(sub))})
                     elif sub in ['Description']:
-                        kinder2.append({'name': sub, 'title':'Beschreibung', 'type': 'str', 'value':aktuator.get(sub)})                            
+                        kinder2.append({'name': sub, 'title':'Beschreibung', 'type': 'str', 'value':aktuator.get(sub)})
                     elif sub in ['Value_lt','Value_eq','Value_gt']:
                         kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
                     elif sub in ['Immer','Wach','Wecken','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
-                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':self._szn_lst}) 
+                        kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':self._szn_lst})
                     elif sub in ['Id']:
                         pass
                     else:
@@ -773,14 +775,14 @@ class InputsTree():
         if self.isInputs:
             inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
                     {'name': 'Speichere Inputs', 'type': 'action'}
-                ]}   
+                ]}
             params.append(inp_dict)
         else:
             inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
                     {'name': 'Speichere', 'type': 'action'},
                     {'name': 'Neues Kommando', 'type': 'action'}
-                ]}   
-            params.append(inp_dict)            
+                ]}
+            params.append(inp_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
         if self.isInputs:
             self.p.param('Aktionen', 'Speichere Inputs').sigActivated.connect(self.save)
@@ -794,13 +796,13 @@ class InputsTree():
         neu_szene = self.itera(self.state)
 
     def newCommand(self):
-        mdb_add_table_entry(table=self.cmdTable, values={'Name':'Neuer Befehl'})     
+        mdb_add_table_entry(table=self.cmdTable, values={'Name':'Neuer Befehl'})
         self.set_paratree()
 
     def check_iter(self,some_object):
         try:
             iter(some_object)
-            if type(some_object) <> str:  
+            if type(some_object) <> str:
                 return True
             else:
                 return False
@@ -814,7 +816,7 @@ class InputsTree():
                 eingang = some_object.get('name')
                 if eingang in self.eingaenge and eingang <> None:
                     for aktuator in self.inputs:
-                        if str(aktuator.get('Id')) == str(eingang):  
+                        if str(aktuator.get('Id')) == str(eingang):
                             for kind in some_object.get('children'):
                                 wert = some_object.get('children').get(kind).get('value')
                                 if wert == '': wert = None
@@ -827,7 +829,7 @@ class InputsTree():
                 else:
                     self.itera(some_object.get('children'))
             else:
-                for item in some_object: 
+                for item in some_object:
                     self.itera(some_object.get(item))
 
 """
@@ -838,7 +840,7 @@ class TreeInputsDevices(object):
     def __init__(self, callback=None):
         self.cb = callback
         #self.inputs = mdb_get_table(db='cmd_inputs')
-        self.params = []        
+        self.params = []
 #        self.set_paratree(inputs)
 
     def add_sub_object(self, top_object, sub_object_Id, expanded=False):
@@ -849,12 +851,12 @@ class TreeInputsDevices(object):
             if sub_object_Id[:3] in liste:
                 name = liste[sub_object_Id[:3]]
                 break
-        
-        sub_object = {'title': name, 'type': 'group', 'expanded': expanded, 
+
+        sub_object = {'title': name, 'type': 'group', 'expanded': expanded,
                              'name':sub_object_Id, 'children':[]}
         top_object['children'].append(sub_object)
         return sub_object
-        
+
     def get_sub_object(self, top_object, sub_object_Id):
         for obj in top_object['children']:
             if obj['name'] == sub_object_Id:
@@ -864,21 +866,21 @@ class TreeInputsDevices(object):
     def add_device(self, top_object, device):
         device_id = device['Id']
         device_desc = device['Description']
-        dev_obj = {'title': device['HKS'], 'type': 'group', 'expanded': True, 
+        dev_obj = {'title': device['HKS'], 'type': 'group', 'expanded': True,
                    'name':str(device_id), 'children':[], 'tip':device_desc}
-        kind = {'title': device['HKS'], 'type': 'str', 'expanded': True, 
-                'name':'Beschreibung', 'value':device_desc} 
-        dev_obj['children'].append(kind)                    
-        kind = {'title': device['HKS'], 'type': 'action', 'expanded': True, 
-                'name':str(device_id), 'value':device_desc} 
-        dev_obj['children'].append(kind)   
+        kind = {'title': device['HKS'], 'type': 'str', 'expanded': True,
+                'name':'Beschreibung', 'value':device_desc}
+        dev_obj['children'].append(kind)
+        kind = {'title': device['HKS'], 'type': 'action', 'expanded': True,
+                'name':str(device_id), 'value':device_desc}
+        dev_obj['children'].append(kind)
         top_object['children'].append(dev_obj)
-    
+
     def set_paratree(self, inputs):
         # top level floors
         top_level = {'name': u'Eingänge', 'type': 'group', 'expanded': True, 'children':[]}
 #        for floor in stockwerke_dict:
-#            floor_obj = {'name': stockwerke_dict[floor], 'type': 'group', 'expanded': True, 
+#            floor_obj = {'name': stockwerke_dict[floor], 'type': 'group', 'expanded': True,
 #                         'Id':floor}
 #            top_level['children'].append(floor_obj)
         for aktuator in sorted(inputs):
@@ -899,19 +901,19 @@ class TreeInputsDevices(object):
                     self.add_device(level_obj, aktuator)
         self.params = Parameter.create(name='params', type='group', children=[top_level])
         self.walk_param(self.params)
-    
+
     def walk_param(self, obj):
         if obj.isType('group'):
             for kid in obj.children():
                 self.walk_param(kid)
         elif obj.isType('action'):
             obj.sigActivated.connect(self.printit(obj.name()))
-            
+
     def printit(self, value):
         def print_wrapper():
             self.cb(value)
         return print_wrapper
-        
+
 class TreeInputDevice(object):
     def __init__(self):
         self.params = []
@@ -923,9 +925,9 @@ class TreeInputDevice(object):
         return self._inputs
 
     @inputs.setter
-    def inputs(self, value): 
-        self._inputs = value 
-        
+    def inputs(self, value):
+        self._inputs = value
+
     def set_paratree(self, device_id):
         for device in self.inputs:
             if str(device['Id']) == str(device_id):
@@ -933,15 +935,15 @@ class TreeInputDevice(object):
         top_level = {'name': str(device['Id']), 'type': 'group', 'expanded': True, 'children':[]}
         kinder = top_level['children']
         kinder.insert(0, {'name':'Description', 'title':'Beschreibung', 'type': 'str',
-                                  'value':device['Description']})        
+                                  'value':device['Description']})
         for feature, value in device.iteritems():
             if feature in ['Logging','Setting','Doppelklick']:
                 kinder.insert(1, {'name':feature, 'type': 'bool', 'value':eval(value)})
-            elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise', 
+            elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise',
                              'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',
                              'Dreifach']:
-                kinder.append({'name':feature, 'type': 'list', 'value':value, 
-                               'values':sorted(szn_lst)}) 
+                kinder.append({'name':feature, 'type': 'list', 'value':value,
+                               'values':sorted(szn_lst)})
             elif feature in ['Id', 'Description']:
                 pass
             else:
@@ -954,7 +956,7 @@ class TreeInputDevice(object):
         self.params = Parameter.create(name='params', type='group', children=top_level_list)
         self.params.child('Speichern').sigActivated.connect(self.speichern)
         self.params.child('Loeschen').sigActivated.connect(self.loeschen)
-    
+
     def speichern(self):
         szene = {}
         print "doing"
@@ -967,14 +969,14 @@ class TreeInputDevice(object):
                     else:
                         szene[enkel.name()] = None
         print szene
-        mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')), 
+        mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')),
                       commands=szene, primary = 'Id', translate = False)
 
     def loeschen(self):
         for kind in self.params.children():
             if kind.isType('group'):
                 _id = kind.name()
-        mysql_connector.remove_entry(table=constants.sql_tables.inputs.name, device=_id, 
+        mysql_connector.remove_entry(table=constants.sql_tables.inputs.name, device=_id,
                                      primary = 'Id')
 
 """
@@ -987,7 +989,7 @@ class SettingsTree():
         self.p = None
         self.name = None
         self.set_paratree()
-        
+
     def __return_enum__(self,eingabe):
         if (type(eingabe) == str):
             try:
@@ -1000,14 +1002,14 @@ class SettingsTree():
         elif type((eingabe)) == list or type((eingabe)) == dict or type((eingabe)) == tuple:
             return eingabe
         else:
-            kommandos = [eingabe]    
-        return kommandos        
-        
+            kommandos = [eingabe]
+        return kommandos
+
     def set_paratree(self):
         params = []
         dicti = {'name': u'Settings', 'type': 'group', 'expanded': True}
         kinder = []
-        for seti in sets:  
+        for seti in sets:
             kind = {'name':seti.get('Name')}
             if seti.get('Typ') == None:
                 kind['type'] = 'str'
@@ -1016,16 +1018,16 @@ class SettingsTree():
                 kind['type'] = 'list'
                 kind['values']=self.__return_enum__(seti.get('Typ'))
                 kind['value']  = seti.get('Value')
-            else:                    
+            else:
                 kind['type'] =seti.get('Typ')
                 kind['value']  = eval(seti.get('Value'))
             kinder.append(kind)
         dicti['children'] = kinder
         inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
                 {'name': 'Speichern', 'type': 'action'}
-            ]}   
+            ]}
         params.append(dicti)
-        params.append(inp_dict)        
+        params.append(inp_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
         self.p.param('Aktionen', 'Speichern').sigActivated.connect(self.save)
 
@@ -1037,7 +1039,7 @@ class SettingsTree():
     def check_iter(self,some_object):
         try:
             iter(some_object)
-            if type(some_object) <> str:  
+            if type(some_object) <> str:
                 return True
             else:
                 return False
@@ -1060,10 +1062,10 @@ class SettingsTree():
                 else:
                     self.itera(some_object.get('children'))
             else:
-                for item in some_object: 
+                for item in some_object:
                     self.itera(some_object.get(item))
 
-sz=Szenen_tree('')                    
+sz=Szenen_tree('')
 def print_vale(value):
     print value
 
@@ -1081,11 +1083,11 @@ def populate_input_tree_2(szene=''):
 
 def populate_dvcs_cmds_tree():
     cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
-    tree_dvc_tp_cmds.setParameters(cmds.p, showTop=False)    
+    tree_dvc_tp_cmds.setParameters(cmds.p, showTop=False)
 
 def populate_settngs_tree():
     seTre = SettingsTree()
-    tree_settings.setParameters(seTre.p, showTop=False)     
+    tree_settings.setParameters(seTre.p, showTop=False)
 
 def selected(text):
     global lastSelected
@@ -1109,7 +1111,7 @@ def update_device_lists():
     tvs_cmds = tv.dict_commands()
     sat_devs = sat.list_devices()
     sat_cmds = sat.dict_commands()
-    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs   
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 
 def update_settings():
     global sets
@@ -1118,24 +1120,24 @@ def update_settings():
 def update():
     update_settings()
     update_device_lists()
-    selected(lastSelected) 
-    populate_input_tree_1() 
+    selected(lastSelected)
+    populate_input_tree_1()
     populate_input_tree_2()
     populate_dvcs_cmds_tree()
     populate_settngs_tree()
-    updt_sznlst() 
-    
+    updt_sznlst()
+
     cBox_dvc_tp_cmds.clear()
     for cmdLst in cmd_lsts:
         cBox_dvc_tp_cmds.addItem(cmdLst)
-    cBox_dvc_tp_cmds.activated[str].connect(slctCmdLst)        
+    cBox_dvc_tp_cmds.activated[str].connect(slctCmdLst)
     cBox_inpts_new.clear()
     inpts = sorted(mdb_read_table_column(db="cmd_inputs", column = 'Name'))
     for inpt in inpts:
         if str(inpt) <> "":
-            cBox_inpts_new.addItem(str(inpt))        
+            cBox_inpts_new.addItem(str(inpt))
     sz.p.sigTreeStateChanged.connect(change_sz)
-    
+
 def neuTrig():
     vals = mdb_read_table_entry(db="cmd_inputs",entry=str(cBox_inpts_new.currentText()),column='Name')
     mdb_add_table_entry("cmd_inputs",vals)
@@ -1156,7 +1158,7 @@ def change(param, changes):
         if data <> '':
             if path[-1] in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
                 selected(str(data))
-    
+
 def change_sz(param, changes):
     print("tree changes:")
     for param, change, data in changes:
@@ -1166,24 +1168,24 @@ def change_sz(param, changes):
         else:
             childName = param.name()
             if param.parent().name() == 'Szene folgt':
-                selected(param.child('Szene').value())         
+                selected(param.child('Szene').value())
         print('  parameter: %s'% childName)
         print('  change:    %s'% change)
         print('  data:      %s'% str(data))
         print('  ----------')
         if data <> '':
             if path[-2] in ['Szenen']:
-                selected(str(path[-1]))     
+                selected(str(path[-1]))
 #        if data <> '':
 #            if path[-2] in ['Inputs']:
-#                showInputs(str(path[-1]))   
+#                showInputs(str(path[-1]))
         if data <> '':
             if path[0] in ['Save/Restore functionality'] and path[1] == 'Neue Szene':
-                selected('LeereVorlage')       
+                selected('LeereVorlage')
             if path[0] in ['Save/Restore functionality'] and path[1] == 'Dupliziere Szene':
                 sz.neue_szene = True
-                selected(lastSelected)              
-                
+                selected(lastSelected)
+
 
 def slctCmdLst(text):
     global cmds, tree_dvc_tp_cmds
@@ -1194,12 +1196,12 @@ def updt_sznlst():
     cBox_scenes.clear()
     szn_lst = sorted(szn.list_commands(str(cBox_scn_types.currentText())))
     for szne in szn_lst:
-        cBox_scenes.addItem(szne)    
+        cBox_scenes.addItem(szne)
 
-        
-tree_ipt_devices = TreeInputsDevices(callback=populate_input_tree_2)   
-tree_ipt_dev_vals = TreeInputDevice()     
-        
+
+tree_ipt_devices = TreeInputsDevices(callback=populate_input_tree_2)
+tree_ipt_dev_vals = TreeInputDevice()
+
 # setup window
 win = QtGui.QWidget()
 
@@ -1207,29 +1209,29 @@ win = QtGui.QWidget()
 tree_w_szenes = ParameterTree()
 #sz=Szenen_tree("Alles_ein")
 inp=InputsTree(isInputs = True, inputsGroup = 'V00')
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
             # 0.747
 
 #t.setParameters(sz.p, showTop=False)
 #t.setWindowTitle('Szenen Setup:')
 tree_w_inputs = ParameterTree()
 tree_select_input = ParameterTree()
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
             # 0.7
 #tree_w_inputs.setParameters(inp.p, showTop=False)
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
             # 16.69
 
 t3 = ParameterTree()
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
 cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
 #t3.setParameters(cmds.p, showTop=False)
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
 t4 = ParameterTree()
 #seTre = SettingsTree()
 #t4.setParameters(seTre.p, showTop=False)
 
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
 inp.p.sigTreeStateChanged.connect(change)
 
 
@@ -1237,12 +1239,12 @@ layout = QtGui.QGridLayout()
 win.setLayout(layout)
 win.showMaximized()
 
-#inp=InputsTree(isInputs = True, inputsGroup = 'V00') 
+#inp=InputsTree(isInputs = True, inputsGroup = 'V00')
 #cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
 #inp.p.sigTreeStateChanged.connect(change)
 
 cBox_scenes = QtGui.QComboBox(win)
-cBox_scenes.setMaxVisibleItems(50)    
+cBox_scenes.setMaxVisibleItems(50)
 cBox_scenes.activated[str].connect(selected)
 
 cBox_dvc_tp_cmds = QtGui.QComboBox(win)
@@ -1252,16 +1254,16 @@ cBox_inpts_new = QtGui.QComboBox(win)
 cBox_scn_types = QtGui.QComboBox(win)
 for itm in szn_typs:
     cBox_scn_types.addItem(itm)
-cBox_scn_types.activated[str].connect(updt_sznlst)    
+cBox_scn_types.activated[str].connect(updt_sznlst)
 
 
 cBox_Stockwerke = QtGui.QComboBox(win)
 #for itm in stockwerke:
 #    cBox_Stockwerke.addItem(itm)
 #cBox_Stockwerke.setCurrentIndex(1)
-#cBox_Stockwerke.activated[str].connect(updInputs)  
+#cBox_Stockwerke.activated[str].connect(updInputs)
 
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
 update()
 #selected('Gehen')
 
@@ -1300,7 +1302,7 @@ layout.addWidget(tree_settings, 3, 3, 2, 1)
 win.setWindowTitle('Schalttafel')
 win.show()
 win.resize(1400,1200)
-print timeit.default_timer() - start 
+print timeit.default_timer() - start
 #==============================================================================
 # till here
 #==============================================================================
@@ -1316,6 +1318,5 @@ if __name__ == '__main__':
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         app = QtGui.QApplication.instance()
         app.setWindowIcon(QtGui.QIcon('/home/christoph/spyder/sz/Control_Panel.png'))
-        app.exec_()        
+        app.exec_()
 #        QtGui.QApplication.instance().exec_()
-    

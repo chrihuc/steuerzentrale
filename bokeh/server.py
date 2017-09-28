@@ -8,7 +8,7 @@ Created on Mon May 29 16:55:21 2017
 from os.path import join, dirname
 import datetime
 
-import mysql.connector as sql 
+import mysql.connector as sql
 import pandas as pd
 from scipy.signal import savgol_filter
 
@@ -68,7 +68,7 @@ def update_plot(attrname, old, new):
 distribution = 'Discrete'
 
 sensors = {'Wohnzimmer': 'V00WOH1RUM1TE01',
-           'Aussentemoeratur': 'A00TER1GEN1TE01',
+           'Aussentemperatur': 'A00TER1GEN1TE01',
            'Bad': 'V01BAD1RUM1TE01'}
 
 

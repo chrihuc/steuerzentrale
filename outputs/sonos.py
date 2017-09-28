@@ -19,25 +19,22 @@ import time
 from time import localtime,strftime
 from datetime import date
 import MySQLdb as mdb
-from database.mysql_connector import mdb_read_table_entry, set_val_in_szenen, mdb_get_table, mdb_set_table, setting_s, setting_r
+from database import mysql_connector
+from outputs import cron
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, StreamInput, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList, ClearList, PlayList (defect), PlayListNr)
 #RenderingControl (SetMute, GetVolume, SetVolume)
 # TODO Tests split adress from hks
 
-class sql_object:
-    def __init__(self,name,typ,columns):
-        self.name = name
-        self.typ = typ
-        self.columns = columns
+crn = cron.Cron()
 
-table           = sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("MasterZone","VARCHAR(45)"),("Pause","INT(4)"),("Sender","VARCHAR(300)"),("Radio","INT(4)"),("TitelNr","VARCHAR(45)"),("Time","VARCHAR(45)"),("PlayListNr","VARCHAR(45)"),("Volume","VARCHAR(45)")))
+table = constants.sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("MasterZone","VARCHAR(45)"),("Pause","INT(4)"),("Sender","VARCHAR(300)"),("Radio","INT(4)"),("TitelNr","VARCHAR(45)"),("Time","VARCHAR(45)"),("PlayListNr","VARCHAR(45)"),("Volume","VARCHAR(45)")))
 
 #sonos_ezcont = {str(sn.WohnZi):'Sonos_Wohnzi',str(sn.Kueche):'Sonos_Kueche',str(sn.Bad):'Sonos_Bad',str(sn.SchlafZi):'Sonos_Schlafzi'}
 #sonos_szenen = {str(sn.WohnZi):'WohnZi',str(sn.Kueche):'Kueche',str(sn.Bad):'Bad',str(sn.SchlafZi):'SchlafZi'}
 
 #Envelope for all AVTrans actions the same
-def Envelope(self, Player, body, SOAPAction):  
+def Envelope(self, Player, body, SOAPAction):
     blen = len(body)
     requestor = httplib.HTTP(Player, self.SERVER_PORT)
     requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
@@ -48,7 +45,7 @@ def Envelope(self, Player, body, SOAPAction):
     requestor.endheaders()
     requestor.send(body)
     (status_code, message, reply_headers) = requestor.getreply()
-    reply_body = requestor.getfile().read()  
+    reply_body = requestor.getfile().read()
     return reply_body
 
 #Envelope for all RendCont actions the same
@@ -81,7 +78,7 @@ def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
   while time.time() < mustend:
     if somepredicate(*args, **kwargs): return True
     time.sleep(period)
-  return False    
+  return False
 
 
 def play_wav(input_para):
@@ -93,68 +90,42 @@ def play_wav(input_para):
         location = location + 'texttosonos.wav'
     os.system("play " + location)
 #    os.system("su -m chris -c 'play " + location + "'")
-    
-def main():
-    sn = sonos()
-#    sn.ClearZones(sn.Bad)
-#    print sn.SaveList(sn.SchlafZi, "Bad", "34")
-    #print sn.Names.get(sn.Bad)
-    #sn.ActivateList(sn.Bad, sn.BadZone)
-    #sn.SetPause(sn.Kueche)
-#    print sn.set_device("V01KID1RUM1AV11", "Schlaflieder")
-#    sn.play_local_file('Kinderzimmer','Es ist 16:35 Uhr')
-    print sn.set_device('V01KID1RUM1AV11','Ansage')
-#    time.sleep(3)
-#    print sn.set_device('V01SCH1RUM1AV11','Return')
-#    print sn.list_devices()
-#    players = list(soco.discover())
-#    for player in players:
-#        print player
-#        print sn.soco_get_status(player)
-#    for player in players:
-#        sn.soco_set_status(player)    
-#    for player in players:  
-#        sn.soco_get_status(player)
-#    print sn.Status
-#    print sn.get_zones() 
-#    play_wav('klingel.wav')
-#    sn.durchsage('klingel.wav')
 
 
 class Sonos:
-    
+
     Status = {}
-    
+
     def __init__(self):
         # deprecated
         self.WohnZi = "192.168.192.201"
         self.SchlafZi = "192.168.192.202"
         self.Bad = "192.168.192.203"
-        self.Kueche = "192.168.192.204"        
+        self.Kueche = "192.168.192.204"
         self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche"}
         self.Devices = {'V00WOH1RUM1AV11':self.WohnZi,'V00KUE1RUM1AV11':self.Kueche,'V01BAD1RUM1AV11':self.Bad,'V01SCH1RUM1AV11':self.SchlafZi}
-        
+
         # deprecated
         self.SchlafZiZone = "RINCON_000E5830220001400"
         self.BadZone = "RINCON_000E583138BA01400"
         self.WohnZiZone = "RINCON_000E58232A2601400"
-        self.KuecheZone = "RINCON_000E58CB9E3E01400"  
-        self.Zones = [self.SchlafZiZone, self.BadZone, self.WohnZiZone, self.KuecheZone]        
+        self.KuecheZone = "RINCON_000E58CB9E3E01400"
+        self.Zones = [self.SchlafZiZone, self.BadZone, self.WohnZiZone, self.KuecheZone]
 #        self.sonos_zonen = {str(self.WohnZi):self.WohnZiZone,str(self.Kueche):self.KuecheZone,str(self.Bad):self.BadZone,str(self.SchlafZi):self.SchlafZiZone}
-               
         self.Devices_neu = {'V00WOH1RUM1AV11':'Wohnzimmer','V00KUE1RUM1AV11':u'K\xfcche','V01BAD1RUM1AV11':'Bad','V01SCH1RUM1AV11':'Schlafzimmer',
-                            'Vm1ZIM1RUM1AV11':'Hobbyraum','V01KID1RUM1AV11':'Kinderzimmer'}                            
+                            'Vm1ZIM1RUM1AV11':'Hobbyraum','V01KID1RUM1AV11':'Kinderzimmer'}
+
         self.SERVER_PORT = 1400
         self.VOLUME = 0
         self.PLAYLISTS = {}
-        self.__init_table__()
+#        self.__init_table__()
 
     def __init_table__(self):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             cur.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '"+table.name+"'")
-            if cur.fetchone()[0] == 0:       
+            if cur.fetchone()[0] == 0:
                 command = "CREATE TABLE "+constants.sql_.DB+"."+table.name +"("
                 for num, col in enumerate(table.columns):
                     if num == len(table.columns)-1:
@@ -163,10 +134,10 @@ class Sonos:
                         command +=  ");"
                     else:
                         for co in col:
-                            command += co + " "                    
+                            command += co + " "
                         command +=  ", "
                 cur.execute(command)
-                results = cur.fetchall()      
+                results = cur.fetchall()
         con.close()
 
     def get_addr(self,hks):
@@ -174,26 +145,29 @@ class Sonos:
         translates hks haus kennzeichen system in ip, uid and p_name
         """
         players = list(soco.discover())
-        p_name = self.Devices_neu[hks]
+        if hks in self.Devices_neu:
+            p_name = self.Devices_neu[hks]
+        else:
+            p_name = hks
         for player in players:
             if player._player_name == p_name:
                 ip = player.ip_address
                 uid = player.uid
-                return ip, uid, p_name    
+                return ip, uid, p_name
 
     def get_player(self,uid):
         players = list(soco.discover())
         for player in players:
             if player.uid == uid:
-                return player                  
-                
+                return player
+
     def get_zones(self):
         players = list(soco.discover())
         zones = []
         for player in players:
             zones.append(player.uid)
-        return zones               
-        
+        return zones
+
     def Envelope(self, Player, body, SOAPAction):
         blen = len(body)
         requestor = httplib.HTTP(Player, self.SERVER_PORT)
@@ -205,7 +179,7 @@ class Sonos:
         requestor.endheaders()
         requestor.send(body)
         (status_code, message, reply_headers) = requestor.getreply()
-        reply_body = requestor.getfile().read()  
+        reply_body = requestor.getfile().read()
         return reply_body
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList)
@@ -242,7 +216,7 @@ class Sonos:
             </s:Body>
             </s:Envelope>"""
         SOAPAction = "AVTransport:1#Play"
-        Envelope(self, Player, body, SOAPAction)      
+        Envelope(self, Player, body, SOAPAction)
 
     def CombineZones(self,Player,Zone):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -267,7 +241,7 @@ class Sonos:
             </s:Envelope>"""
         SOAPAction = "AVTransport:1#SetAVTransportURI"
         Envelope(self, Player, body, SOAPAction)
-    
+
     def ClearZones(self,Player):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
             <s:Body>
@@ -277,7 +251,7 @@ class Sonos:
             </s:Body>
             </s:Envelope>"""
         SOAPAction = "AVTransport:1#BecomeCoordinatorOfStandaloneGroup"
-        Envelope(self, Player, body, SOAPAction)  
+        Envelope(self, Player, body, SOAPAction)
 
     def AddTrack(self, Player, Position, File):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>
@@ -290,7 +264,7 @@ class Sonos:
                     </u:AddURIToQueue></s:Body>
                     </s:Envelope>"""
         SOAPAction = "AVTransport:1#AddURIToQueue"
-        Envelope(self, Player, body, SOAPAction)  
+        Envelope(self, Player, body, SOAPAction)
 
     def PlayList(self, Player, List):
         List = "file:///jffs/settings/savedqueues.rsq#1"
@@ -304,8 +278,8 @@ class Sonos:
                     </u:AddURIToQueue></s:Body>
                     </s:Envelope>"""
         SOAPAction = "AVTransport:1#AddURIToQueue"
-        Envelope(self, Player, body, SOAPAction) 
-        
+        Envelope(self, Player, body, SOAPAction)
+
     def PlayListNr(self, Player, ListNr):
         List = "file:///jffs/settings/savedqueues.rsq#1"
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>
@@ -318,7 +292,7 @@ class Sonos:
                     </u:AddURIToQueue></s:Body>
                     </s:Envelope>"""
         SOAPAction = "AVTransport:1#AddURIToQueue"
-        return Envelope(self, Player, body, SOAPAction)         
+        return Envelope(self, Player, body, SOAPAction)
 
     def SaveList(self, Player, List, ListNr):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -332,7 +306,7 @@ class Sonos:
                     </s:Envelope>"""
         SOAPAction = "AVTransport:1#SaveQueue"
         return Envelope(self, Player, body, SOAPAction)
-        
+
     def RemoveTrack(self, Player, TrackNr):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
                 <s:Body>
@@ -344,9 +318,9 @@ class Sonos:
                 </s:Body>
                 </s:Envelope>"""
         SOAPAction = "AVTransport:1#RemoveTrackFromQueue"
-        Envelope(self, Player, body, SOAPAction)      
+        Envelope(self, Player, body, SOAPAction)
 
-    def GetPosition(self, Player):       
+    def GetPosition(self, Player):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:GetPositionInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:GetPositionInfo></s:Body></s:Envelope>"""
         SOAPAction = "AVTransport:1#GetPositionInfo"
         reply_body = Envelope(self, Player, body, SOAPAction)
@@ -356,14 +330,14 @@ class Sonos:
         Position.append (reply_body [Track1+7:Track2])
         RelTime1 = reply_body.find ('<RelTime>',0)
         RelTime2 = reply_body.find ('</RelTime>',0)
-        Position.append (reply_body [RelTime1+9:RelTime2])      
+        Position.append (reply_body [RelTime1+9:RelTime2])
         return Position
 
     def GetPositionInfo2(self, Player):
         TRANSPORT_ENDPOINT = '/MediaRenderer/AVTransport/Control'
         GET_CUR_TRACK_ACTION = '"urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo"'
         GET_CUR_TRACK_BODY = '<u:GetPositionInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:GetPositionInfo>'
-        response = send_command(self, Player, TRANSPORT_ENDPOINT, GET_CUR_TRACK_ACTION, GET_CUR_TRACK_BODY)        
+        response = send_command(self, Player, TRANSPORT_ENDPOINT, GET_CUR_TRACK_ACTION, GET_CUR_TRACK_BODY)
         #body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
          #       <s:Body>
          #       <u:GetPositionInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
@@ -372,9 +346,9 @@ class Sonos:
          #       </s:Body>
          #       </s:Envelope>"""
          # removed: <Channel>Master</Channel>
-        #SOAPAction = "AVTransport:1#GetPositionInfo"     
+        #SOAPAction = "AVTransport:1#GetPositionInfo"
         return response
-        
+
     def GetPositionInfo(self, Player):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
                 <s:Body>
@@ -384,8 +358,8 @@ class Sonos:
                 </s:Body>
                 </s:Envelope>"""
         SOAPAction = "AVTransport:1#GetPositionInfo"
-        return Envelope(self, Player, body, SOAPAction)       
-        
+        return Envelope(self, Player, body, SOAPAction)
+
     def Seek(self, Player, What, Position):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
                 <s:Body>
@@ -397,8 +371,8 @@ class Sonos:
                 </s:Body>
                 </s:Envelope>"""
         SOAPAction = "AVTransport:1#Seek"
-        Envelope(self, Player, body, SOAPAction)  
-        
+        Envelope(self, Player, body, SOAPAction)
+
     def ActivateList(self, Player, ZoneController):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
                     <s:Body>
@@ -411,7 +385,7 @@ class Sonos:
                     </s:Body>
                     </s:Envelope>"""
         SOAPAction = "AVTransport:1#SetAVTransportURI"
-        Envelope(self, Player, body, SOAPAction)      
+        Envelope(self, Player, body, SOAPAction)
 
     def setRadio(self, Player, Radio):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -425,7 +399,7 @@ class Sonos:
                     </s:Envelope>"""
         SOAPAction = "AVTransport:1#SetAVTransportURI"
         Envelope(self, Player, body, SOAPAction)
-        
+
     def ClearList(self, Player):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
                     <s:Body>
@@ -435,10 +409,10 @@ class Sonos:
                     </s:Body>
                     </s:Envelope>"""
         SOAPAction = "AVTransport:1#RemoveAllTracksFromQueue"
-        Envelope(self, Player, body, SOAPAction)  
-        
-#RenderingControl (SetMute, GetVolume, SetVolume)               
-                    
+        Envelope(self, Player, body, SOAPAction)
+
+#RenderingControl (SetMute, GetVolume, SetVolume)
+
     def SetMute(self, Player,wert):
         body = """<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
             <s:Body>
@@ -450,7 +424,7 @@ class Sonos:
             </s:Body>
             </s:Envelope>"""
         SOAPAction = "RenderingControl:1#SetMute"
-        EnvelopeRC(self, Player, body, SOAPAction) 
+        EnvelopeRC(self, Player, body, SOAPAction)
 
     def GetVolume(self, Player):
         body = """<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
@@ -479,10 +453,10 @@ class Sonos:
             </s:Body>
             </s:Envelope>"""
         SOAPAction = "RenderingControl:1#SetVolume"
-        EnvelopeRC(self, Player, body, SOAPAction)  
-        
+        EnvelopeRC(self, Player, body, SOAPAction)
+
 #AlarmClock different putrequest!!
-        
+
     def GetAlarms(self,Player):
         body = """<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
             <s:Body>
@@ -516,7 +490,7 @@ class Sonos:
                     ReturnV.append (reply_body [i+16:i+24]) #Wochentage
             return ReturnV
         except socket.error:
-            return ReturnV          
+            return ReturnV
 
     def sonos_write_szene(self, player):
         dicti = {}
@@ -559,10 +533,10 @@ class Sonos:
             playern = player
             plnum = 0
         self.SaveList(player, playern, plnum)
-        mdb_set_table(table.name,self.Names.get(player),dicti) 
+        mysql_connector.mdb_set_table(table.name,self.Names.get(player),dicti)
         return True
-        
-    def soco_get_status(self, player, store = True):   
+
+    def soco_get_status(self, player, store = True):
         dicti = {}
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
@@ -594,7 +568,7 @@ class Sonos:
         dicti['Volume'] = player.volume
         if store: self.Status[name] = dicti
         return dicti
-        
+
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
         tries = 1
@@ -612,7 +586,7 @@ class Sonos:
                     player.unjoin()
                     player.clear_queue()
                     for track in dicti['Queue']:
-                        player.add_to_queue(track)   
+                        player.add_to_queue(track)
                     if dicti['Radio']:
         #                print dicti
                         self.setRadio(player_ip, dicti['Sender'])
@@ -624,8 +598,8 @@ class Sonos:
                         player.play()
             except:
                 pass
-                
-        
+
+
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
 #        print player, sonos_szene
@@ -657,16 +631,16 @@ class Sonos:
                 self.SetPause(player)
             elif sonos_szene.get('Pause') == 0:
                 self.SetPlay(player)
-        
+
     def durchsage(self,text):
         success = False
-        players = list(soco.discover()) 
+        players = list(soco.discover())
         while not success:
             try:
                 self.Status = {}
         #        print self.Status
                 # save all zones
-                for player in players:  
+                for player in players:
                     t = threading.Thread(target=self.soco_get_status, args = [player])
                     t.start()
         #            print self.Status
@@ -679,39 +653,39 @@ class Sonos:
         # combine all zones
         success = False
         while not success:
-            try:     
+            try:
                 for player in players:
                     if 'S1' in player.get_speaker_info()[u'model_number']:
                         self.SetVolume(player.ip_address, 10)
                     elif 'ZP90' in player.get_speaker_info()[u'model_number']:
                         self.SetVolume(player.ip_address, 65)
                     elif 'ZP120' in player.get_speaker_info()[u'model_number']:
-                        self.SetVolume(player.ip_address, 40)            
-                soco.SoCo('192.168.192.203').partymode()  
+                        self.SetVolume(player.ip_address, 40)
+                soco.SoCo('192.168.192.203').partymode()
                 mustend = time.time() + 5
                 while (not len(soco.SoCo('192.168.192.203').all_groups) == 2) and (time.time() < mustend):
                     time.sleep(0.25)
-                
+
         #        time.sleep(2)
-                # source to PC      
+                # source to PC
                 soco.SoCo('192.168.192.203').switch_to_line_in()
                 mustend = time.time() + 5
                 while (not soco.SoCo('192.168.192.203').is_playing_line_in) and (time.time() < mustend):
                     time.sleep(0.25)
-                
+
                 soco.SoCo('192.168.192.203').play()
                 mustend = time.time() + 5
                 while (not soco.SoCo('192.168.192.203').get_current_transport_info()['current_transport_state'] == 'PLAYING') and (time.time() < mustend):
                     time.sleep(0.25)
                 success = True
             except:
-                pass        
+                pass
         # play file or text on PC
         play_wav(text)
-        # resume all playback  
+        # resume all playback
         for player in players:
             player.unjoin()
-            self.soco_set_status(player) 
+            self.soco_set_status(player)
         return True
 
     def ansage(self,text,player_ip):
@@ -723,9 +697,9 @@ class Sonos:
         self.StreamInput(player_ip,uid)
         # play file or text on PC
         play_wav(text)
-        # resume all playback  
-        self.soco_set_status(player) 
-        return True             
+        # resume all playback
+        self.soco_set_status(player)
+        return True
 
     def isolate(self,player_ip):
         player = soco.SoCo(player_ip)
@@ -733,7 +707,7 @@ class Sonos:
             for device in player.group.members:
                 device.unjoin()
         return True
-                
+
 
     def play_local_file(self, player_n, text):
         """Add a non-py file from folder ./media and subfolders to soco"""
@@ -755,7 +729,7 @@ class Sonos:
             if zone.player_name == player_n:
                 break
         zoneown = zone.uid
-        player_ip = zone.ip_address 
+        player_ip = zone.ip_address
         self.soco_get_status(zone)
         zone.unjoin()
         self.ActivateList(player_ip, zoneown)
@@ -766,55 +740,53 @@ class Sonos:
         with contextlib.closing(wave.open(location+random_file,'r')) as f:
             frames = f.getnframes()
             rate = f.getframerate()
-            duration = frames / float(rate)       
+            duration = frames / float(rate)
         time.sleep(duration)
-        self.soco_set_status(zone) 
-        
+        self.soco_set_status(zone)
+
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
-        if command in ["man", "auto"]:
-            set_val_in_szenen(device=player, szene="Auto_Mode", value=command) 
-        player, p_uid, playerName = self.get_addr(player)            
+        player, p_uid, playerName = self.get_addr(player)
         if player in self.Devices:
             player = self.Devices.get(str(player))
-            player_ip, p_uid, playerName = self.get_addr(player)   
+            player_ip, p_uid, playerName = self.get_addr(player)
         # playerName = self.Names.get(player)
         if str(command) == "Pause":
             self.SetPause(player)
         elif str(command) == "Play":
-            self.SetPlay(player)                
+            self.SetPlay(player)
         elif str(command) == "Save":
-            self.sonos_write_szene(player)                   
+            self.sonos_write_szene(player)
         elif str(command) == "Announce_Time":
             self.sonos_write_szene(player)
             lt = localtime()
             stunde = int(strftime("%H", lt))
-            minute = int(strftime("%M", lt)) 
+            minute = int(strftime("%M", lt))
             if (minute <> 0) and (minute <> 30):
                 text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
                 laenge = downloadAudioFile(text)
-                self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
-                time.sleep(laenge + 1)            
-                self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName))
+                self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
+                time.sleep(laenge + 1)
+                self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
         elif str(command) == "Durchsage":
-            self.durchsage(text)      
+            self.durchsage(text)
         elif str(command) == "Ansage":
-            self.play_local_file(playerName, text)             
+            self.play_local_file(playerName, text)
         elif str(command) == "Return":
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName), hergestellt = False)          
+            self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName), hergestellt = False)
         elif ((str(command) == "resume") ):
             time.sleep(60)
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,playerName))            
+            self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
         elif (str(command) == "lauter"):
             ActVol = self.GetVolume(player)
             increment = 8
-            VOLUME = ActVol + increment 
+            VOLUME = ActVol + increment
             self.SetVolume(player, VOLUME)
             return
         elif (str(command) == "leiser"):
             ActVol = self.GetVolume(player)
             increment = 8
-            VOLUME = ActVol - increment 
+            VOLUME = ActVol - increment
             self.SetVolume(player, VOLUME)
             return
         elif (str(command) == "inc_lauter"):
@@ -822,35 +794,35 @@ class Sonos:
             if ActVol >= 20: increment = 8
             if ActVol < 20: increment = 4
             if ActVol < 8: increment = 2
-            VOLUME = ActVol + increment 
+            VOLUME = ActVol + increment
             self.SetVolume(player, VOLUME)
         elif (str(command) == "inc_leiser"):
             ActVol = self.GetVolume(player)
             if ActVol >= 20: increment = 8
             if ActVol < 20: increment = 4
             if ActVol < 8: increment = 2
-            VOLUME = ActVol - increment 
-            self.SetVolume(player, VOLUME)                
+            VOLUME = ActVol - increment
+            self.SetVolume(player, VOLUME)
         elif (str(command) == "WeckerAnsage"):
             self.SetPause(player)
             self.SetVolume(player, 20)
-            setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
-            text = setting_r("Durchsage")        
+            mysql_connector.setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
+            text = mysql_connector.setting_r("Durchsage")
             laenge = downloadAudioFile(text)
-            self.sonos_read_szene(player, mdb_read_table_entry(table.name,"TextToSonos"))
-            time.sleep(laenge + 1)  
-            self.SetPause(player) 
+            self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
+            time.sleep(laenge + 1)
+            self.SetPause(player)
         elif (str(command) == "EingangWohnzi"):
-            self.StreamInput(player, self.WohnZiZone)     
+            self.StreamInput(player, self.WohnZiZone)
         elif (str(command) == "Isolieren"):
-            self.isolate(player)               
+            self.isolate(player)
         elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
-            sonos_szene = mdb_read_table_entry(table.name,command)
-            self.sonos_read_szene(player, sonos_szene)                                
+            sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
+            self.sonos_read_szene(player, sonos_szene)
         return True
 
     def list_commands(self):
-        comands = mdb_get_table(table.name)
+        comands = mysql_connector.mdb_get_table(table.name)
         liste = ["Pause","Play","Save","Announce_Time","Durchsage",'Ansage',"Return","resume","lauter",
                  "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi","Isolieren"]
         for comand in comands:
@@ -865,18 +837,17 @@ class Sonos:
         dicti[''] = itera
         liste = self.list_commands()
         for item in liste:
-            itera +=1            
+            itera +=1
             dicti[str(item)] = itera
-        return dicti  
+        return dicti
 
     def list_devices(self):
-        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
-        liste = []
-        for comand in comands:
-            if comands.get(comand) == "SONOS":
-                liste.append(comand)
-        #liste.remove("Name")
-        return liste
+        return list(soco.discover())
+#        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+#        liste = []
+#        for comand in comands:
+#            if comands.get(comand) == "SONOS":
+#                liste.append(comand)
+#        #liste.remove("Name")
+#        return liste
 
-if __name__ == '__main__':
-    main()
