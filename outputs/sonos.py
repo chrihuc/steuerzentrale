@@ -842,7 +842,7 @@ class Sonos:
         return dicti
 
     def list_devices(self):
-        return list(soco.discover())
+        return [player._player_name for player in soco.discover()]
 #        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
 #        liste = []
 #        for comand in comands:

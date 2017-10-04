@@ -5,7 +5,7 @@ from szn_timer import szenen_timer
 
 import threading
 #from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
-import time, os, sys
+import time, sys
 #import urllib2
 import inp_xs1, inp_cron, inp_udp #redundancy, 
 from inp_inter import anwesenheit

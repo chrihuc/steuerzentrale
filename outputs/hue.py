@@ -82,13 +82,9 @@ class Hue_lights():
         return dicti  
         
     def list_devices(self):
-        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
-        liste = []
-        for comand in comands:
-            if comands.get(comand) == "HUE":
-                liste.append(comand)
-        #liste.remove("Name")
-        return liste
+        lights = hbridge.lights
+        return  [l.name for l in lights]
+
 
     def set_device(self, device, commd):
         h_dev = Light(hbridge, device)

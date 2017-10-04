@@ -9,7 +9,7 @@ import re
 import sys, os
 from socket import error as socket_error
 
-from mysql_con import mdb_read_table_entry,set_val_in_szenen
+from database import mysql_connector
 
 # TODO Tests split adress from hks
 
@@ -35,19 +35,7 @@ def ping(IP, number = 1):
         return pinged
 
 
-def main():
-    rem = TV()
-    print rem.list_commands()
-    print rem.list_devices()
-#    print rem.set_device('V00WOH1RUM1TV01','max_vol')
-    print rem.set_device('V00WOH1RUM1TV01','KEY_1')
-    print rem.set_device('V00WOH1RUM1TV01','KEY_ENTER')
-    print rem.set_device('V00WOH1RUM1TV01','KEY_CH_LIST')
-    print rem.set_device('V00WOH1RUM1TV01','KEY_ENTER')
-    #tv_remote.authenti()
-    #tv_remote_lan.authenti()
-
-class remotecontrol:
+class Remotecontrol:
     def __init__(self,myip,tvip,mymac):
         self.data = []
         self.my_ip = str(myip)
@@ -131,13 +119,11 @@ class remotecontrol:
 class TV:
     def __init__(self):
         #self.tv_remote = remotecontrol('192.168.192.10','192.168.192.26','00:30:1b:a0:2f:05')
-        self.tv_remote_lan = remotecontrol('192.168.192.10','192.168.192.29','00:30:1b:a0:2f:05')         
+        own_ip = constants.eigene_IP
+        self.tv_remote_lan = Remotecontrol(own_ip,'192.168.192.29','00:30:1b:a0:2f:05')         
         
-    def set_device(self,device, commd):
-        if commd in ["man", "auto"]:
-            set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)        
+    def set_device(self,device, commd):       
         if self.tv_remote_lan.sendKey([str(commd)]): # or self.tv_remote.sendKey([str(commd)]):
-            set_val_in_szenen(device=device, szene="Value", value=commd)
             return True
         else:
             return False
@@ -205,7 +191,7 @@ class TV:
         return dicti  
      
     def list_devices(self):
-        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
         liste = []
         for comand in comands:
             if comands.get(comand) == "TV":
@@ -228,8 +214,6 @@ class TV:
      #KEY_PROGUP
      #KEY_PROG_UP
 
-if __name__ == '__main__':
-    main()
 
     
 '''

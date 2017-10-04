@@ -13,19 +13,15 @@ from subprocess import call
 
 import constants
 import git
-from alarmevents import alarm_event
+from alarm_event_messaging import alarmevents
 
-from mysql_con import mdb_get_table, setting_s, setting_r
+from database import mysql_connector
 
 # TODO Tests split adress from hks
 
-HOST = '192.168.192.10'   # Symbolic name meaning the local host
-PORT = 5005    # Arbitrary non-privileged port
-aes = alarm_event()
-
-def main():
-    inter = internal()
-    inter.check_anwesenheit()
+HOST = constants.udp_.SERVER   # Symbolic name meaning the local host
+PORT = constants.udp_.biPORT    # Arbitrary non-privileged port
+aes = alarmevents.AES()
 
 def bidirekt(message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,7 +33,7 @@ def bidirekt(message):
         return True
     return False
     
-class internal:
+class Internal:
     
     def __init__ (self):
         pass
@@ -65,18 +61,18 @@ class internal:
         constants.run = False
         
     def check_anwesenheit(self):
-        bewohner = mdb_get_table(constants.sql_tables.Bewohner.name)
+        bewohner = mysql_connector.mdb_get_table(constants.sql_tables.Bewohner.name)
         alle_da = True
         alle_weg = True
-        alle_da_act = eval(setting_r('Alle_Bewohner_anwesend')) 
-        alle_weg_act = eval(setting_r('Alle_Bewohner_abwesend')) 
+        alle_da_act = eval(mysql_connector.setting_r('Alle_Bewohner_anwesend')) 
+        alle_weg_act = eval(mysql_connector.setting_r('Alle_Bewohner_abwesend')) 
         for person in bewohner:
             ip_adress = person['Handy_IP']
             if ip_adress == None:
                 continue            
             state = person['Handy_State']
             name = 'Bew_' + str(person['Name'])
-            akt_stat = eval(setting_r(person['Name']))
+            akt_stat = eval(mysql_connector.setting_r(person['Name']))
             if state == None:
                 state = 0
             else:
@@ -88,17 +84,18 @@ class internal:
             alle_da = alle_da & new_state
             alle_weg = alle_weg & (not new_state)
             if akt_stat != new_state:
-                setting_s(person['Name'], new_state)
+                mysql_connector.setting_s(person['Name'], new_state)
                 command = {'Name':name, 'Value': int(new_state)}
                 bidirekt(command)
         if alle_da_act != alle_da:
-            setting_s('Alle_Bewohner_anwesend', alle_da)
+            mysql_connector.setting_s('Alle_Bewohner_anwesend', alle_da)
             command = {'Name':'Bew_alle_da', 'Value': int(alle_da)}
             bidirekt(command)
         if alle_weg_act != alle_weg:
-            setting_s('Alle_Bewohner_abwesend', alle_weg)
+            mysql_connector.setting_s('Alle_Bewohner_abwesend', alle_weg)
             command = {'Name':'Bew_alle_weg', 'Value': int(alle_weg)}
-            bidirekt(command)            
+            bidirekt(command)
+        return True            
                 
         
     def convert_mts(self):
@@ -114,6 +111,4 @@ class internal:
                         os.chmod(filename[:-3]+'MP4', 0777)             
                     
                         
-                        
-if __name__ == '__main__':
-    main()                    
+                   

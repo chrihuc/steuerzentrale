@@ -3,52 +3,13 @@
 import constants
 
 import urllib2
-from mysql_con import mdb_read_table_entry,set_val_in_szenen
+from database import mysql_connector
 
 # TODO Tests split adress from hks
 
-def main():
-    ezcontrol = myezcontrol(constants.xs1_.IP) 
-#    ezcontrol.set_device("Esszimmer", "100")
-    print ezcontrol.dict_commands()
-    print ezcontrol.list_devices()
-#    print ezcontrol.set_device('V00KUE1RUM1ST01','func_1')
 
-#def dimmen(device):
-    #setting_s(device, "heller")
-    #while str(setting_r(device)) <> 'fixed':
-        #Helligkeit = ezcontrol.GetSwitch(device)
-        #if (Helligkeit == "100.0"):
-            #setting_s(device, "dunkler")
-        #elif (Helligkeit == "0.0"):
-            #setting_s(device, "heller")
-        #if str(setting_r(device)) == "heller":
-            #n_Helligkeit = str(float(Helligkeit)+10)
-        #else:
-            #n_Helligkeit = str(float(Helligkeit)-10)
-        #ezcontrol.SetSwitch(device, str((n_Helligkeit)))
-        #time.sleep(1.5)
-
-#def xs1_set_szene(device, szene):
-    #if szene in ["man", "auto"]:
-        #mysql_con.set_automode(device=device, mode=szene)
-        #return
-    #if szene == "dimmen":
-        #if str(setting_r(device)) <> 'fixed':
-            #setting_s(device, "fixed")
-        #else:
-            #dimmen(device)
-        #return
-    #if szene == str(-1):
-        #if ezcontrol.GetSwitch(str(device)) > "0.0":
-            #ezcontrol.SetSwitch(str(device), "0.0")
-        #else:
-            #ezcontrol.SetSwitch(str(device), "100.0")
-    #else:
-        #ezcontrol.SetSwitch(str(device), str(szene))
-
-class myezcontrol:
-    def __init__(self,ip):
+class XS1:
+    def __init__(self,ip=constants.xs1_.IP):
         self.data = []
         self.ip_add = str(ip)
         
@@ -128,7 +89,7 @@ class myezcontrol:
         return dicti    
 
     def list_devices(self):
-        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
         liste = []
         for comand in comands:
             if comands.get(comand) == "XS1":
@@ -138,24 +99,18 @@ class myezcontrol:
     
     def set_device(self, device, commd):
         try:
-            if commd in ["man", "auto"]:
-                set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
             if commd == str(-1) or commd == "toggle":
                 if self.GetSwitch(str(device)) > "0.0":
                     self.SetSwitch(str(device), "0.0")
-                    set_val_in_szenen(device=device, szene="Value", value=0)
+                    value=0
                 else:
                     self.SetSwitch(str(device), "100.0")
-                    set_val_in_szenen(device=device, szene="Value", value=100)
+                    value=100
             elif 'func' in commd:
                 self.SetSwitchFunction(str(device), str(commd)[5:])  
-                set_val_in_szenen(device=device, szene="Value", value=commd)
             else:
                 self.SetSwitch(str(device), str(commd))  
-                set_val_in_szenen(device=device, szene="Value", value=commd)
             return True
         except:
             return False
             
-if __name__ == '__main__':
-    main()  

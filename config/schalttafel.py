@@ -18,7 +18,7 @@ import constants
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mysql_con import settings_r, setting_s, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
+#from mysql_con import settings_r, setting_s, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
 from database import mysql_connector
 
 import easygui
@@ -108,7 +108,7 @@ furn_dict = {'SCA':'Scanner',
              'IPA':'Handy'}
 
 
-szenen_beschreibung = mdb_read_table_entry(db='set_Szenen',entry='Description')
+szenen_beschreibung = mysql_connector.mdb_read_table_entry(db='set_Szenen',entry='Description')
 constants.redundancy_.master = True
 
 #==============================================================================
@@ -160,13 +160,13 @@ class ScalableGroup(pTypes.GroupParameter):
         opts['type'] = 'group'
         opts['addText'] = "Add"
         opts['addList'] = []
-        for seting in settings_r():
+        for seting in mysql_connector.settings_r():
             opts['addList'].append(seting)
         #opts['addList'] = ['str', 'float', 'int']
         pTypes.GroupParameter.__init__(self, **opts)
 
     def addNew(self, typ):
-        values = settings_r()
+        values = mysql_connector.settings_r()
         val=values.get(typ)
         self.addChild(dict(name=typ, type="str", value=val, removable=True, renamable=True))
 
@@ -269,7 +269,7 @@ class Szenen_tree():
 
     def update(self, neue_szene):
         self.szene_to_read = neue_szene
-        self.szenen = [mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read,recalc=False)]
+        self.szenen = [mysql_connector.mdb_read_table_entry(db='set_Szenen',entry=self.szene_to_read,recalc=False)]
         self.set_paratree()
 
     def dict_constructor(self,name, values, value):
@@ -329,7 +329,7 @@ class Szenen_tree():
     def set_paratree(self):
         global p, name
         #szenen = mdb_get_table(db='set_Szenen')
-        tipps = mdb_read_table_entry(db='set_Szenen',entry='Description')
+        tipps = mysql_connector.mdb_read_table_entry(db='set_Szenen',entry='Description')
         stock_list = []
         stockwerke = []
         zimmer_list = []
@@ -351,7 +351,7 @@ class Szenen_tree():
         for szene in self.szenen:
             if szene.get('Name') == 'LeereVorlage' or self.neue_szene:
                 szene['Name']= 'NeueSzene'
-                szene['Id'] = maxSzenenId()-maxSzenenId()%10 +10
+                szene['Id'] = mysql_connector.maxSzenenId()-mysql_connector.maxSzenenId()%10 +10
                 self.neue_szene = False
             szn_dict = {}
             if str(szene.get('Beschreibung')) <> 'None':
@@ -392,7 +392,7 @@ class Szenen_tree():
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
                         else:
                             if child <> None:
-                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(settings_r()), 'value': child[0]},
+                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(mysql_connector.settings_r()), 'value': child[0]},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'],'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)
@@ -486,7 +486,7 @@ class Szenen_tree():
             szn_dict['children']= szn_l_child
             params.append(szn_dict)
         ichilds, schilds = [], []
-        iquellen, squellen = getSzenenSources(self.szene_to_read)
+        iquellen, squellen = mysql_connector.getSzenenSources(self.szene_to_read)
         for quelle in iquellen:
             ichilds.append({'name': quelle.get('Name'), 'type': 'action', 'value': quelle.get('Name'),'autoIncrementName':True})
         for quelle in squellen:
@@ -527,7 +527,7 @@ class Szenen_tree():
 
     def add_bedingung(self):
         global p
-        self.p.param(self.name, 'Bedingung').addChild({'name': 'Bedingung ','type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':sorted(settings_r()), 'value': ''},
+        self.p.param(self.name, 'Bedingung').addChild({'name': 'Bedingung ','type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':sorted(mysql_connector.settings_r()), 'value': ''},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': ''},{'name': 'Bedingung', 'type': 'str', 'value': ''}]}, autoIncrementName=True)
 
     def add_task(self):
@@ -674,7 +674,7 @@ class Szenen_tree():
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
         print neu_szene
-        mdb_set_table(table='set_Szenen', device=neu_szene.get('Id'), commands=neu_szene, primary = 'Id')
+        mysql_connector.mdb_set_table(table='set_Szenen', device=neu_szene.get('Id'), commands=neu_szene, primary = 'Id')
 
 
     def check_bedingung(self):
@@ -683,7 +683,7 @@ class Szenen_tree():
         bedingungen = neu_szene.get('Bedingung')
         for i, wert in enumerate(bedingungen):
             for j, eintrag in enumerate(wert):
-                bedingungen[i][j]=re_calc(eintrag)
+                bedingungen[i][j]=mysql_connector.re_calc(eintrag)
         efuellt = szn.__bedingung__(bedingungen,verbose=True)
         if efuellt:
             easygui.msgbox("Szene würde ausgeführt", title="Bedingung Check")
@@ -706,7 +706,7 @@ class Szenen_tree():
 
     def newSzene(self):
         global szenen
-        self.szenen = [mdb_read_table_entry(db='LeereVorlage',entry=self.szene_to_read)]
+        self.szenen = [mysql_connector.mdb_read_table_entry(db='LeereVorlage',entry=self.szene_to_read)]
         self.set_paratree()
 
 class InputsTree():
@@ -716,9 +716,9 @@ class InputsTree():
         self.expand = expand
         self._szn_lst = sorted(szn.list_commands(gruppe="alle"))
         if isInputs:
-            self.inputs = mdb_get_table(db='cmd_inputs')
+            self.inputs = mysql_connector.mdb_get_table(db='cmd_inputs')
         else:
-            self.inputs = mdb_get_table(db=cmdTable)
+            self.inputs = mysql_connector.mdb_get_table(db=cmdTable)
         if inputsGroup == None:
             self.inputsGroup = ''
         else:
@@ -796,7 +796,7 @@ class InputsTree():
         neu_szene = self.itera(self.state)
 
     def newCommand(self):
-        mdb_add_table_entry(table=self.cmdTable, values={'Name':'Neuer Befehl'})
+        mysql_connector.mdb_add_table_entry(table=self.cmdTable, values={'Name':'Neuer Befehl'})
         self.set_paratree()
 
     def check_iter(self,some_object):
@@ -823,9 +823,9 @@ class InputsTree():
                                 if wert <> aktuator.get(kind):
                                     dicti[kind] = wert
                             if self.isInputs:
-                                mdb_set_table(table=constants.sql_tables.inputs.name, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
+                                mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
                             elif len(dicti) > 0:
-                                mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id', translate = False)
+                                mysql_connector.mdb_set_table(table=self.cmdTable, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id', translate = False)
                 else:
                     self.itera(some_object.get('children'))
             else:
@@ -969,7 +969,7 @@ class TreeInputDevice(object):
                     else:
                         szene[enkel.name()] = None
         print szene
-        mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')),
+        mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')),
                       commands=szene, primary = 'Id', translate = False)
 
     def loeschen(self):
@@ -1058,7 +1058,7 @@ class SettingsTree():
                             if wert == '': wert = None
                             dicti[kind] = wert
                     for setting in dicti:
-                        setting_s(setting,dicti.get(setting))
+                        mysql_connector.setting_s(setting,dicti.get(setting))
                 else:
                     self.itera(some_object.get('children'))
             else:
@@ -1070,13 +1070,13 @@ def print_vale(value):
     print value
 
 def populate_input_tree_1():
-    ipts = mdb_get_table(db='cmd_inputs')
+    ipts = mysql_connector.mdb_get_table(db='cmd_inputs')
     tree_ipt_devices.set_paratree(ipts)
     tree_inputs_devices.setParameters(tree_ipt_devices.params, showTop=False)
     tree_ipt_devices.params.sigStateChanged.connect(change)
 
 def populate_input_tree_2(szene=''):
-    ipts = mdb_get_table(db='cmd_inputs')
+    ipts = mysql_connector.mdb_get_table(db='cmd_inputs')
     tree_ipt_dev_vals.inputs = ipts
     tree_ipt_dev_vals.set_paratree(szene)
     tree_input_device.setParameters(tree_ipt_dev_vals.params, showTop=False)
@@ -1115,7 +1115,7 @@ def update_device_lists():
 
 def update_settings():
     global sets
-    sets = mdb_get_table(constants.sql_tables.settings.name)
+    sets = mysql_connector.mdb_get_table(constants.sql_tables.settings.name)
 
 def update():
     update_settings()
@@ -1132,15 +1132,15 @@ def update():
         cBox_dvc_tp_cmds.addItem(cmdLst)
     cBox_dvc_tp_cmds.activated[str].connect(slctCmdLst)
     cBox_inpts_new.clear()
-    inpts = sorted(mdb_read_table_column(db="cmd_inputs", column = 'Name'))
+    inpts = sorted(mysql_connector.mdb_read_table_column(db="cmd_inputs", column = 'Name'))
     for inpt in inpts:
         if str(inpt) <> "":
             cBox_inpts_new.addItem(str(inpt))
     sz.p.sigTreeStateChanged.connect(change_sz)
 
 def neuTrig():
-    vals = mdb_read_table_entry(db="cmd_inputs",entry=str(cBox_inpts_new.currentText()),column='Name')
-    mdb_add_table_entry("cmd_inputs",vals)
+    vals = mysql_connector.mdb_read_table_entry(db="cmd_inputs",entry=str(cBox_inpts_new.currentText()),column='Name')
+    mysql_connector.mdb_add_table_entry("cmd_inputs",vals)
 
 def change(param, changes):
     print("tree changes:")

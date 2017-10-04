@@ -9,16 +9,18 @@ Created on Thu Jan 28 20:21:24 2016
 
 import constants
 
+from alarm_event_messaging import alarmevents
+
 from database import mysql_connector
 
-from outputs.sonos import Sonos
-from outputs.hue import Hue_lights
+from outputs import hue
+from outputs import internal
+from outputs import samsung
+from outputs import satellites
+from outputs import sonos
+from outputs import xs1
 
-from cmd_xs1 import myezcontrol
-from cmd_samsung import TV
-from cmd_satellites import satelliten
-from cmd_internal import internal
-from alarmevents import alarm_event
+
 from szn_timer import szenen_timer
 from messaging import messaging
 
@@ -28,19 +30,19 @@ import uuid
 import datetime
 import time
 
-xs1 = myezcontrol(constants.xs1_.IP)
-hue = Hue_lights()
-sn = Sonos()
-tv = TV()
-sat = satelliten()
-interna = internal()
+xs1 = xs1.XS1()
+hues = hue.Hue_lights()
+sn = sonos.Sonos()
+tv = samsung.TV()
+sat = satellites.Satellite()
+interna = internal.Internal()
 xs1_devs = xs1.list_devices()
-hue_devs = hue.list_devices()
+hue_devs = hues.list_devices()
 sns_devs = sn.list_devices()
 tvs_devs = tv.list_devices()
 sat_devs = sat.list_devices()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
-aes = alarm_event()
+aes = alarmevents.AES()
 mes = messaging()
 
 # TODO Tests split adress from hks
@@ -199,7 +201,7 @@ class Szenen:
             elif device in sns_devs:
                 executed = sn.set_device(adress, commando, text)               
             elif device in hue_devs:
-                executed = hue.set_device(adress, commando)  
+                executed = hues.set_device(adress, commando)  
     #            for kommando in kommandos:
     #                if hue_count > 1:
     #                    hue_delay += 0.75
@@ -219,6 +221,7 @@ class Szenen:
             else:
                 executed = True
         if executed:
+# TODO: Return True and value and write value to table
             mysql_connector.set_val_in_szenen(device=device, szene="Value", value=commando)
         if szn_id == None:
             return

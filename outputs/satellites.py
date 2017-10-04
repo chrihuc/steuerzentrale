@@ -2,16 +2,17 @@
 
 import constants
 
-from mysql_con import mdb_get_table, mdb_read_table_entry, mdb_read_table_column, set_val_in_szenen
 import socket
 from socket import error as socket_error
-from alarmevents import alarm_event
 import paramiko
 
 # TODO Tests split adress from hks
 import MySQLdb as mdb
 
-aes = alarm_event()
+from database import mysql_connector
+from alarm_event_messaging import alarmevents
+
+aes = alarmevents.AES()
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -24,7 +25,7 @@ class sql_object:
 table = sql_object("set_satellites", "Settings", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)",'Name_UNIQUE'),("IP","VARCHAR(45)"),("PORT","INT(11)"),("Type","VARCHAR(45)"),("USER","VARCHAR(45)"),("PASS","VARCHAR(45)"),("command_set","VARCHAR(45)")))
 
 def  get_satellites():
-    list = mdb_get_table(constants.sql_tables.satellites.name)
+    list = mysql_connector.mdb_get_table(constants.sql_tables.satellites.name)
     simplelist = []
     x = None
     for satellite in list:
@@ -34,7 +35,7 @@ def  get_satellites():
     return simplelist
 
 def  get_satellite(name):
-    list = mdb_get_table(constants.sql_tables.satellites.name)
+    list = mysql_connector.mdb_get_table(constants.sql_tables.satellites.name)
     simplelist = []
     x = None
     for satellite in list:
@@ -44,7 +45,7 @@ def  get_satellite(name):
     return x
 
 def main():
-    sats = satelliten()
+    sats = Satellite()
 #    print sats.list_devices()
 #    print sats.dict_commands(device='V00KUE1DEK1LI01')
 #    print sats.list_commands("V00FLU1TUE1PC01")
@@ -53,7 +54,7 @@ def main():
     print sats.set_device('VIRKOM1SSH1PC03','KillPython')
 #    print sats.listCommandTable('alle',nameReturn = False)
 
-class satelliten:
+class Satellite:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     mysocket_old = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     mysocket_old.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -108,7 +109,7 @@ class satelliten:
         return True         
 
     def list_devices(self):
-        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
         liste = []
         for comand in comands:
             if comands.get(comand) == "SATELLITE":
@@ -119,7 +120,7 @@ class satelliten:
         return liste    
 
     def list_devices_type(self, devices=None):
-        comands = mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
+        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
         liste = {}
         for comand in comands:
             if comands.get(comand) == "SATELLITE" and (devices== None or comand in devices):
@@ -142,11 +143,11 @@ class satelliten:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
             if self.get_type(sates) == 'SATELLITE':
-                cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
+                cmds_table=mysql_connector.mdb_read_table_entry(table.name,sates).get('command_set')
             elif self.get_type(sates) == 'ZWave':
-                cmds_table=mdb_read_table_entry(table.name,'ZWave').get('command_set')
+                cmds_table=mysql_connector.mdb_read_table_entry(table.name,'ZWave').get('command_set')
             if self.__check_table_exists__(cmds_table):           
-                comands = mdb_get_table(cmds_table)
+                comands = mysql_connector.mdb_get_table(cmds_table)
                 for comand in comands:
                     liste.append(comand.get("Name"))
         return liste        
@@ -157,14 +158,14 @@ class satelliten:
         if device == 'alle':
             list_cmds_of = self.list_devices()
         elif device=="forSave":
-            list_cmds_of = mdb_read_table_column(table.name,"Name")            
+            list_cmds_of = mysql_connector.mdb_read_table_column(table.name,"Name")            
         else:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
             if self.get_type(sates) == 'SATELLITE':
-                cmds_table=mdb_read_table_entry(table.name,sates)
+                cmds_table=mysql_connector.mdb_read_table_entry(table.name,sates)
             elif self.get_type(sates) == 'ZWave':
-                cmds_table=mdb_read_table_entry(table.name,'ZWave')
+                cmds_table=mysql_connector.mdb_read_table_entry(table.name,'ZWave')
             if self.__check_table_exists__(cmds_table.get('command_set')):           
                 if nameReturn:
                     liste.append(cmds_table.get('Name'))
@@ -181,36 +182,33 @@ class satelliten:
         else:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
-            cmds_table=mdb_read_table_entry(table.name,sates).get('command_set')
+            cmds_table=mysql_connector.mdb_read_table_entry(table.name,sates).get('command_set')
             if cmds_table == None:
-                cmds_table=mdb_read_table_entry(table.name,'ZWave').get('command_set')
+                cmds_table=mysql_connector.mdb_read_table_entry(table.name,'ZWave').get('command_set')
             if self.__check_table_exists__(cmds_table):           
-                comands = mdb_get_table(cmds_table)
+                comands = mysql_connector.mdb_get_table(cmds_table)
                 for comand in comands:
                     itera +=1
                     liste[comand.get("Name")] = itera 
             elif cmds_table == 'server':
-                comands = mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
+                comands = mysql_connector.mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
                 for comand in comands:
                     itera +=1
                     liste[comand] = itera                 
         return liste        
 
 
-    def set_device(self, device, commd): 
-        if commd in ["man", "auto"]:
-            set_val_in_szenen(device=device, szene="Auto_Mode", value=commd)
-            return True      
+    def set_device(self, device, commd):     
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.get_type(device) == 'SATELLITE':
-            satellit=mdb_read_table_entry(table.name,device)
+            satellit=mysql_connector.mdb_read_table_entry(table.name,device)
         elif self.get_type(device) == 'ZWave':
-            satellit=mdb_read_table_entry(table.name,'ZWave')
+            satellit=mysql_connector.mdb_read_table_entry(table.name,'ZWave')
         command = {}
         if satellit.get('command_set') == 'server':
             command['Szene'] = commd
         else:
-            command = mdb_read_table_entry(satellit.get('command_set'),commd)
+            command = mysql_connector.mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
         data = ""
         print command
@@ -227,14 +225,14 @@ class satelliten:
                     return True
             else:   
                 try:
-                    satelliten.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
+                    Satellite.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
                     return True
                 except:
                     pass
         if str(satellit.get('BiPORT')) <> 'None':
             for i in range(0,3):
                 try:
-                    satelliten.mysocket.settimeout(10)
+                    Satellite.mysocket.settimeout(10)
                     s.connect((satellit.get('IP'),satellit.get('BiPORT')))
                     s.send(str(command))
                     data=s.recv(1024)
