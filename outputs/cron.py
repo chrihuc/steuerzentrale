@@ -13,32 +13,13 @@ Created on Fri Sep 15 19:52:27 2016
 from time import localtime, strftime
 import datetime
 import random
-import warnings
-import functools
 
 import constants
+from tools import decorators
 from database.mysql_connector import mdb_get_table
 
 import MySQLdb as mdb
 import ephem
-
-
-def deprecated(func):
-    """This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emmitted
-    when the function is used."""
-
-    @functools.wraps(func)
-    def new_func(*args, **kwargs):
-        """ Deprecation warning function
-        """
-        warnings.simplefilter('always', DeprecationWarning) #turn off filter
-        warnings.warn("Call to deprecated function {}.".format(func.__name__),
-                      category=DeprecationWarning, stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning) #reset filter
-        return func(*args, **kwargs)
-
-    return new_func
 
 # TODO Tests
 
@@ -191,7 +172,7 @@ class Cron(object):
                 return liste
         return []
 
-    @deprecated
+    @decorators.deprecated
     def delete(ident):
         """ deletes the stored timed event, should not be used anymore
             use executed

@@ -239,11 +239,11 @@ class Szenen:
         t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, device, commando, text])
         t.start()
         
-    def threadExecute(self, szene, check_bedingung=False, wert = 0):
-        t = threading.Thread(target=self.execute, args=[szene, check_bedingung, wert])
+    def threadExecute(self, szene, check_bedingung=False, wert=0, device=None):
+        t = threading.Thread(target=self.execute, args=[szene, check_bedingung, wert, device])
         t.start()         
 
-    def execute(self, szene, check_bedingung=False, wert = 0):
+    def execute(self, szene, check_bedingung=False, wert=0, device=None):
         szene_dict = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
 #        print start_t, szene_dict.get("Beschreibung"), szene_dict.get("Follows")
@@ -275,9 +275,10 @@ class Szenen:
             if (str(szene_dict.get("Delay")) <> "None"):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                aes.new_event(description="Szenen: " + szene, prio=Prio, karenz = Karenz)
+                aes.new_event(description="Szenen: " + szene, prio=Prio, karenz=Karenz)
             else:
-                aes.new_event(description= str(szene_dict.get("Beschreibung")), prio=Prio, karenz = Karenz) 
+                # TODO: add device
+                aes.new_event(description=str(szene_dict.get("Beschreibung")), prio=Prio, karenz=Karenz) 
             interlocks = {}           
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")

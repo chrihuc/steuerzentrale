@@ -60,7 +60,7 @@ def on_receive(data):
     szns = inputs(name,value)
     for szene in szns:
         if szene <> None:
-            scenes.threadExecute(szene, check_bedingung=False, wert = value)
+            scenes.threadExecute(szene, check_bedingung=False, wert=value)
     last_data = data
     
 def heartbeat_sup():

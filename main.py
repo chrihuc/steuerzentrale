@@ -38,6 +38,11 @@ anw = anwesenheit()
 #    except:
 #        aes.new_event(description="Error sync "+table, prio=0)
 
+if sys.argv:
+    if sys.argv[1] == 'debug':
+        print('debug on')
+        constants.debug = True
+
 # init
 init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}
 for setting in init_settings:
