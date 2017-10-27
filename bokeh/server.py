@@ -2,7 +2,7 @@
 """
 Created on Mon May 29 16:55:21 2017
 
-@author: 212505558
+@author: christoph
 """
 
 from os.path import join, dirname

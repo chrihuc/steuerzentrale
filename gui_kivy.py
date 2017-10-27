@@ -6,13 +6,6 @@ Created on Thu May 11 17:06:57 2017
 @author: christoph
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Tue May 09 12:14:56 2017
-
-@author: 212505558
-"""
-
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
@@ -113,7 +106,7 @@ class AlarmClock(ScrollView):
         btn = Button(text=str('Load'), size_hint=(None,None), size=(200,200))
         btn.bind(on_press=self.update)
         self.layout.add_widget(btn)
-        self.add_widget(self.layout)        
+        self.add_widget(self.layout)
 #        self.update()
 
     def update(self, *args):
@@ -247,7 +240,7 @@ class ScreenSaver_handler(object):
             if not self.ss_on:
                 if constants.gui_.Feh and self.state_awake:
                     exectext = 'echo 100 > /sys/class/backlight/rpi_backlight/brightness'
-                    os.system(exectext)                    
+                    os.system(exectext)
                     self.pic_frame.start_show()
                 else:
 #                    exectext = 'sudo /bin/su -c "echo 0 > /sys/class/backlight/rpi_backlight/brightness"'
@@ -347,7 +340,7 @@ class OpScreen(TabbedPanel):
         scenes.execute(szene)
 
     def populate_webcam(self, *args, **kwargs):
-        self.ids.KamBox.clear_widgets()        
+        self.ids.KamBox.clear_widgets()
         self.ids.KamBox.add_widget(self.aimg)
 
     def update_labels(self, *args):
