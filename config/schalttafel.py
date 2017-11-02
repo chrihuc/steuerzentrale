@@ -1033,6 +1033,7 @@ class SettingsTree():
 
     def save(self):
         global state
+        print "here"
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
 
@@ -1051,6 +1052,7 @@ class SettingsTree():
         if self.check_iter(some_object):
             if some_object.get('type') == 'group':
                 seting = some_object.get('name')
+                print seting
                 if seting <> None:
                     for seti in sets:
                         for kind in some_object.get('children').get('Settings').get('children'):
@@ -1058,6 +1060,7 @@ class SettingsTree():
                             if wert == '': wert = None
                             dicti[kind] = wert
                     for setting in dicti:
+                        print setting,dicti.get(setting)
                         mysql_connector.setting_s(setting,dicti.get(setting))
                 else:
                     self.itera(some_object.get('children'))

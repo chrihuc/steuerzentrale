@@ -464,6 +464,7 @@ def inputs(device, value):
     dicti_1 = {}
     szenen = []  
     lt = datetime.datetime.now()
+    desc = None
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
@@ -481,6 +482,7 @@ def inputs(device, value):
                     dicti_1[field_names_1[i]] = row[i] 
             last_value = dicti_1['last_Value']
             last_time = dicti_1['last1']
+            desc = dicti_1['Name']
             if str(last_time) == 'None': last_time = lt
             deltaT = lt - last_time
             deltaTm = deltaT.total_seconds() / 60
@@ -539,7 +541,7 @@ def inputs(device, value):
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)                 
     con.close()
-    return szenen
+    return szenen, desc
         
 if __name__ == '__main__':
     main()    

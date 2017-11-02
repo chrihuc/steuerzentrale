@@ -21,7 +21,7 @@ from outputs import sonos
 from outputs import xs1
 
 
-from szn_timer import szenen_timer
+from tools import szn_timer
 from messaging import messaging
 
 import threading
@@ -52,7 +52,7 @@ mes = messaging()
 class Szenen:    
     
     def __init__ (self):
-        self.sz_t = szenen_timer(def_to_run = self.execute)
+        self.sz_t = szn_timer.Szenen_Timer(def_to_run = self.execute)
         self.kommando_dict = {}
         self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
         pass
@@ -275,10 +275,10 @@ class Szenen:
             if (str(szene_dict.get("Delay")) <> "None"):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                aes.new_event(description="Szenen: " + szene, prio=Prio, karenz=Karenz)
+                text = '%s = %s, Szene: %s' % (device, wert, szene)
             else:
-                # TODO: add device
-                aes.new_event(description=str(szene_dict.get("Beschreibung")), prio=Prio, karenz=Karenz) 
+                text = '%s = %s, %s' % (device, wert, str(szene_dict.get("Beschreibung")))
+            aes.new_event(description=text, prio=Prio, karenz=Karenz)
             interlocks = {}           
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")

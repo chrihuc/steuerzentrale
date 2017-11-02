@@ -17,6 +17,7 @@ Created on Sat Feb  6 09:24:15 2016
 
 from threading import Timer
 import time
+import pickle
 
 import datetime
 import uuid
@@ -30,13 +31,13 @@ def print_it(it):
 def main():
     global start_t
     start_t = datetime.datetime.now()
-    sz_t = szenen_timer(def_to_run = print_it)
+    sz_t = Szenen_Timer(def_to_run = print_it)
     print sz_t.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True)
     time.sleep(5)
 #    sz_t.cancel_timer(parent = "Bad_i", child = "Bad_aus")
     sz_t.zeige()
 
-class szenen_timer:
+class Szenen_Timer:
     def __init__(self,def_to_run):
         self.liste = []
         self.def_to_run = def_to_run

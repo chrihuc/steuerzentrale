@@ -9,10 +9,10 @@ import constants
 
 from database import mysql_connector as msqc
 from alarm_event_messaging import alarmevents as aevs
+from alarm_event_messaging import messaging
 from outputs import szenen
-from cmd_cron import cron
+from outputs import cron
 
-from messaging import messaging
 
 import threading
 import socket
@@ -37,8 +37,8 @@ borad_to_guis.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 scenes = szenen.Szenen()
 aes = aevs.AES()
-mes = messaging()
-crn = cron()
+mes = messaging.Messaging()
+crn = cron.Cron()
 
 SIZE = 1024
 
@@ -62,16 +62,16 @@ def exec_data(data_ev, data):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
 #        print name, value
-        szns = inputs(name,value)
+        szns, desc = msqc.inputs(name,value)
         for szene in szns:
             if szene <> None:
-                scenes.threadExecute(szene, check_bedingung=False, wert = value)
+                scenes.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
 #    elif data_ev.get('Command')=='Update':
 #        aes.new_event(description="System update", prio=0)
 #        cmd_internal.git_update()
     elif ('Szene' in data_ev):
         name = data_ev.get('Szene')
-        if name in mdb_read_table_column(constants.sql_tables.szenen.name, 'Name'):
+        if name in msqc.mdb_read_table_column(constants.sql_tables.szenen.name, 'Name'):
             scenes.threadExecute(name)
     elif ('Android_id' in data_ev):
         # aes.new_event('Register new Client: ' + data_ev.get('Name'))
@@ -83,14 +83,14 @@ def exec_data(data_ev, data):
         if data_ev.get('Request_js') == 'Wecker':
             data = json.dumps(crn.get_all(wecker=True), default=handler)
         elif data_ev.get('Request_js') == 'Settings':
-            data = json.dumps(settings_r(), default=handler)
+            data = json.dumps(msqc.settings_r(), default=handler)
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
-            data = str(settings_r())
+            data = str(msqc.settings_r())
         elif data_ev.get('Request') == 'Bewohner':
-            data = str(mdb_get_table(constants.sql_tables.Bewohner.name))
+            data = str(msqc.mdb_get_table(constants.sql_tables.Bewohner.name))
         elif data_ev.get('Request') == 'Besucher':
-            data = str(mdb_get_table(constants.sql_tables.Besucher.name))
+            data = str(msqc.mdb_get_table(constants.sql_tables.Besucher.name))
         elif data_ev.get('Request') == 'Wecker':
             data = crn.get_all(wecker=True)
         elif data_ev.get('Request') == 'GuiAlarms':
@@ -99,7 +99,7 @@ def exec_data(data_ev, data):
         table = constants.sql_tables.cron.name
         for entry in eval(data_ev['SetWecker']):
             device = entry['Name']
-            mdb_set_table(table, device, entry)
+            msqc.mdb_set_table(table, device, entry)
     elif ('Log' in data_ev):
         borad_to_guis.sendto(str(data_ev),('192.168.192.255',5000))
     return data
