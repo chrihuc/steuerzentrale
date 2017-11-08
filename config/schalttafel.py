@@ -28,22 +28,22 @@ app = QtGui.QApplication([])
 import pyqtgraph.parametertree.parameterTypes as pTypes
 from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
 
-from cmd_sonos import sonos
-from cmd_xs1 import myezcontrol
-from cmd_hue import hue_lights
-from cmd_samsung import TV
-from cmd_satellites import satelliten
-from cmd_szenen import szenen
+from outputs import sonos
+from outputs import xs1
+from outputs import hue
+from outputs import samsung
+from outputs import satellites
+from outputs import szenen
 import timeit
 
 #from gui_inp import SzenenTreeInputs
 
-xs1 = myezcontrol(constants.xs1_.IP)
-hue = hue_lights()
-sn = sonos()
-tv = TV()
-sat = satelliten()
-szn = szenen()
+xs1 = xs1.XS1(constants.xs1_.IP)
+hue = hue.Hue_lights()
+sn = sonos.Sonos()
+tv = samsung.TV()
+sat = satellites.Satellite()
+szn = szenen.Szenen()
 #xs1_devs = xs1.list_devices()
 xs1_cmds = xs1.dict_commands()
 #hue_devs = hue.list_devices()

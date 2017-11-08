@@ -1,57 +1,45 @@
 #!  /usr/bin/python
 
-import constants
-from szn_timer import szenen_timer
+
 
 import threading
-#from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import time, sys
-#import urllib2
-import inp_xs1, inp_cron, inp_udp #redundancy, 
-from inp_inter import anwesenheit
-from alarmevents import alarm_event
-from mysql_con import setting_s
-import sound_provider as sp
-#import sqlsync
 
-#delay for changeover
-#time.sleep(10)
+import constants
 
-aes = alarm_event()
-anw = anwesenheit()
-#ssync = sqlsync.sync()
-#
-#syncliste = []
-#syncliste += ["Settings"]
-#syncliste += ["Besucher"]
-#syncliste += ["Bewohner"]
-##syncliste += ["cron"]
-#syncliste += ["gcm_users"]
-##syncliste += ["Szenen"]
-#syncliste += ["Wecker"]
-##syncliste += ["Sideboard"]
-#for table in syncliste:
-#    try:
-#        ssync.export(table, "XS1DB")
-#        ssync.trunc_import(table, "XS1DB") 
-#        aes.new_event(description="Success sync "+table, prio=0)
-#    except:
-#        aes.new_event(description="Error sync "+table, prio=0)
+from inputs import cron
+from inputs import udp_listener
+from inputs import xs1
+from inputs import internal
+
+from database import mysql_connector as msqc
+
+from alarm_event_messaging import alarmevents as aevs
+
+from tools import sound_provider as sp
+
+
+aes = aevs.AES()
+anw = internal.Anwesenheit()
+
 
 if sys.argv:
-    if sys.argv[1] == 'debug':
+    if 'debug' in sys.argv:
         print('debug on')
         constants.debug = True
+    if 'passive' in sys.argv:
+        print('passive on')
+        constants.passive = False
 
 # init
 init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}
 for setting in init_settings:
-    setting_s(setting, init_settings[setting])
+    msqc.setting_s(setting, init_settings[setting])
 
 
 threadliste = []
 
-t = threading.Thread(name="xs1", target=inp_xs1.main, args = [])
+t = threading.Thread(name="xs1", target=xs1.main, args = [])
 threadliste.append(t)
 t.start()
 
@@ -59,11 +47,11 @@ t.start()
 #threadliste.append(t)
 #t.start()
 
-t = threading.Thread(name="udp.bidirekt", target=inp_udp.bidirekt, args = [])
+t = threading.Thread(name="udp.bidirekt", target=udp_listener.bidirekt, args = [])
 threadliste.append(t)
 t.start()
 
-t = threading.Thread(name="udp.broadcast", target=inp_udp.broadcast, args = [])
+t = threading.Thread(name="udp.broadcast", target=udp_listener.broadcast, args = [])
 threadliste.append(t)
 t.start()
 #
@@ -71,7 +59,7 @@ t.start()
 #threadliste.append(t)
 #t.start()
 #
-t = threading.Thread(name="peri",target=inp_cron.periodic_supervision, args = [])
+t = threading.Thread(name="peri",target=cron.periodic_supervision, args = [])
 threadliste.append(t)
 t.start()
 
@@ -84,7 +72,8 @@ threadliste.append(t)
 t.start()
 
 aes.new_event(description="All Threads started", prio=1)
-#print threadliste
+if constants.debug:
+    print threadliste
 #add supervision of threads
 
 try:

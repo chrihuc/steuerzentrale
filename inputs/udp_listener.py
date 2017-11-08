@@ -5,6 +5,13 @@ Created on Mon Feb 22 18:43:14 2016
 @author: christoph
 """
 
+import threading
+import socket
+import time
+import sys
+import json
+import datetime
+
 import constants
 
 from database import mysql_connector as msqc
@@ -13,13 +20,7 @@ from alarm_event_messaging import messaging
 from outputs import szenen
 from outputs import cron
 
-
-import threading
-import socket
-import time
-import sys
-import json
-import datetime
+# TODO: unittest?
 
 hostName = socket.gethostbyname( constants.eigene_IP )
 

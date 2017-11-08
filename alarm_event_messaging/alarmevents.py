@@ -9,7 +9,8 @@ from email.mime.multipart import MIMEMultipart
 
 import MySQLdb as mdb
 from database import mysql_connector
-from messaging import messaging
+from alarm_event_messaging import messaging
+
 from threading import Timer
 import threading
 from email.mime.text import MIMEText
@@ -50,7 +51,7 @@ table    = sql_object("HIS_alarmevents", "Historic", (("Id","INT(11)","PRIMARY K
 class AES:
     def __init__(self):
         self.__init_table__()
-        self.mes = messaging()
+        self.mes = messaging.Messaging()
         #self.mySocket = socket( AF_INET, SOCK_DGRAM )
         #self.OUTPUTS_IP   = '192.168.192.10'
         #self.OUTPUTS_PORT = 5000

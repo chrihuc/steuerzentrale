@@ -19,11 +19,11 @@ class TestUM(unittest.TestCase):
         self.assertTrue(list_devices,
                          'Error getting devices')
 
-#    def test_list_commands(self):
-#        list_commands = self.test_mod.list_commands()
-#        print list_commands
-#        self.assertTrue(list_commands,
-#                         'Error getting commands')
+    def test_list_commands(self):
+        list_commands = self.test_mod.list_commands()
+        print list_commands
+        self.assertTrue(list_commands,
+                         'Error getting commands')
 #
 #    def test_set_device(self):
 #        result = self.test_mod.set_device('Kinderzimmer', 'Play')
@@ -38,6 +38,9 @@ class TestUM(unittest.TestCase):
 #        for command in list_commands:
 #            self.test_mod.set_device('Kinderzimmer', command)
 #        self.test_mod.set_device('Kinderzimmer', 'Pause')
+
+    def test_set_device(self):
+        self.test_mod.set_device('Kinderzimmer', 'unittest')
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,9 +7,16 @@ Created on Thu Jan 28 20:21:24 2016
 
 #!/usr/bin/env python
 
+import threading
+from threading import Timer
+import uuid
+import datetime
+import time
+
 import constants
 
 from alarm_event_messaging import alarmevents
+from alarm_event_messaging import messaging
 
 from database import mysql_connector
 
@@ -20,15 +27,7 @@ from outputs import satellites
 from outputs import sonos
 from outputs import xs1
 
-
 from tools import szn_timer
-from messaging import messaging
-
-import threading
-from threading import Timer
-import uuid
-import datetime
-import time
 
 xs1 = xs1.XS1()
 hues = hue.Hue_lights()
@@ -43,7 +42,7 @@ tvs_devs = tv.list_devices()
 sat_devs = sat.list_devices()
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 aes = alarmevents.AES()
-mes = messaging()
+mes = messaging.Messaging()
 
 # TODO Tests split adress from hks
 # Add Aktor_bedingung
@@ -244,6 +243,8 @@ class Szenen:
         t.start()         
 
     def execute(self, szene, check_bedingung=False, wert=0, device=None):
+        if not constants.passive:
+            return True
         szene_dict = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
 #        print start_t, szene_dict.get("Beschreibung"), szene_dict.get("Follows")

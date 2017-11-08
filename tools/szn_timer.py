@@ -5,14 +5,6 @@ Created on Sat Feb  6 09:24:15 2016
 @author: christoph
 """
 
-#neue idee kann aber dann nicht szene als task to run setzen
-#((szene,zeit,retrigger))
-#retrigger 0,1,2
-#retrigger erhoeht um 1
-#liste mit origin, destination, trg_count
-
-#alte idee:
-
 # TODO: pickle, unittest
 
 from threading import Timer
@@ -21,21 +13,6 @@ import pickle
 
 import datetime
 import uuid
-
-liste = {}
-global start_t
-
-def print_it(it):
-    print datetime.datetime.now() - start_t, it
-
-def main():
-    global start_t
-    start_t = datetime.datetime.now()
-    sz_t = Szenen_Timer(def_to_run = print_it)
-    print sz_t.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True)
-    time.sleep(5)
-#    sz_t.cancel_timer(parent = "Bad_i", child = "Bad_aus")
-    sz_t.zeige()
 
 class Szenen_Timer:
     def __init__(self,def_to_run):
@@ -128,5 +105,3 @@ class Szenen_Timer:
         self.def_to_run(child)
         self.store()
 
-if __name__ == '__main__':
-    main()

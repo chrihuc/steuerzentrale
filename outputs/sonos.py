@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import constants
 import soco
 import wave
 import contextlib
 import subprocess
 import pwd, os
 import threading
+
+import constants
+from tools import decorators
 
 from random import choice
 
@@ -218,6 +220,7 @@ class Sonos:
         SOAPAction = "AVTransport:1#Play"
         Envelope(self, Player, body, SOAPAction)
 
+    @decorators.deprecated
     def CombineZones(self,Player,Zone):
         body = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
             <s:Body>
@@ -608,7 +611,13 @@ class Sonos:
             self.SetVolume(player, sonos_szene.get('Volume'))
         zone = sonos_szene.get('MasterZone')
         if (str(zone) <> "None") and (str(zone) <> "Own"):
-            self.CombineZones(player, zone)
+            if 'RINCON' in str(zone):
+                self.CombineZones(player, zone)
+            else:
+                z_ip, _, _ = self.get_addr(str(zone))
+                print(z_ip)
+                to_att = soco.SoCo(z_ip)
+                socoplayer.join(to_att.group.coordinator)
         else:
             zoneown = socoplayer.uid #self.sonos_zonen.get(str(player))
             if str(sonos_szene.get('Radio')) == '1':
@@ -631,6 +640,7 @@ class Sonos:
                 self.SetPause(player)
             elif sonos_szene.get('Pause') == 0:
                 self.SetPlay(player)
+        return True
 
     def durchsage(self,text):
         success = False

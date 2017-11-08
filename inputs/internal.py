@@ -14,7 +14,7 @@ from database import mysql_connector as msqc
 # TODO: unittest
 
 
-class anwesenheit:
+class Anwesenheit:
     def __init__(self):
         self.data = []
 
@@ -43,5 +43,5 @@ class anwesenheit:
             time.sleep(60)
 
 if __name__ == "__main__":
-    anw_class = anwesenheit()
+    anw_class = Anwesenheit()
     anw_class.check_handys()
