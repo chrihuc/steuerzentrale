@@ -246,7 +246,7 @@ class Szenen:
 
     def execute(self, szene, check_bedingung=False, wert=0, device=None):
         toolbox.log(szene)
-        if not constants.passive:
+        if constants.passive:
             return True
         szene_dict = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()

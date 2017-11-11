@@ -29,8 +29,8 @@ if sys.argv:
         toolbox.log('debug on')
         constants.debug = True
     if 'passive' in sys.argv:
-        toolbox.log('debug on')
-        constants.passive = False
+        toolbox.log('passive on')
+        constants.passive = True
 
 # init
 init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}

@@ -14,7 +14,7 @@ from database import mysql_connector
 from alarm_event_messaging import alarmevents
 
 from tools import toolbox
-#toolbox.log('debug on')
+#toolbox.log(device, commd)
 
 # TODO Tests split adress from hks
 
