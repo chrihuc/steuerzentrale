@@ -15,6 +15,9 @@ from tools import toolbox
 from outputs import xs1
 from outputs import szenen
 
+from tools import toolbox
+#toolbox.log('debug on')
+
 # TODO: unittest?
 
 selfsupervision = True
@@ -47,6 +50,7 @@ def on_receive(data):
         aes.new_event(description="XS1 wieder erreichbar", prio=3)
         msqc.setting_s("XS1_off", "inactive")
 #Zerlegung des Empfangs
+    toolbox.log(data)
     value = float(data.split(" ")[-1])
     name = str(data.split(" ")[-3])
     #now = datetime.datetime.now().strftime("%H:%M:%S.%f") 

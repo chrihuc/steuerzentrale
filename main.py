@@ -17,7 +17,8 @@ from database import mysql_connector as msqc
 from alarm_event_messaging import alarmevents as aevs
 
 from tools import sound_provider as sp
-
+from tools import toolbox
+#toolbox.log('debug on')
 
 aes = aevs.AES()
 anw = internal.Anwesenheit()
@@ -25,10 +26,10 @@ anw = internal.Anwesenheit()
 
 if sys.argv:
     if 'debug' in sys.argv:
-        print('debug on')
+        toolbox.log('debug on')
         constants.debug = True
     if 'passive' in sys.argv:
-        print('passive on')
+        toolbox.log('debug on')
         constants.passive = False
 
 # init
@@ -73,8 +74,9 @@ t.start()
 
 aes.new_event(description="All Threads started", prio=1)
 if constants.debug:
-    print threadliste
+    toolbox.log(threadliste)
 #add supervision of threads
+toolbox.log('threads running')
 
 try:
     while constants.run:

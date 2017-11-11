@@ -6,6 +6,9 @@ import urllib2
 import json
 from database import mysql_connector
 
+from tools import toolbox
+#toolbox.log('debug on')
+
 # TODO Tests split adress from hks
 
 
@@ -21,7 +24,7 @@ class XS1:
 
     def SetSwitchFunction(self,Switch,Function):
         body = """http://""" + self.ip_add + """/control?callback=cname&cmd=set_state_actuator&name=""" + str(Switch) + """&Function=""" + str(Function)
-        print body
+        toolbox.log(body)
         f = urllib2.urlopen(body)
         f.close()
 

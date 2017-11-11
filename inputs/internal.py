@@ -11,6 +11,9 @@ import constants
 from tools import toolbox as tb
 from database import mysql_connector as msqc
 
+from tools import toolbox
+#toolbox.log('debug on')
+
 # TODO: unittest
 
 
@@ -20,6 +23,7 @@ class Anwesenheit:
 
 
     def check_handys(self):
+        toolbox.log()
         bewohner = msqc.mdb_get_table(constants.sql_tables.Bewohner.name)
         for person in bewohner:
             ip_adress = person['Handy_IP']

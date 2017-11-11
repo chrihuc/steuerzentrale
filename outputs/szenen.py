@@ -28,6 +28,8 @@ from outputs import sonos
 from outputs import xs1
 
 from tools import szn_timer
+from tools import toolbox
+#toolbox.log('debug on')
 
 xs1 = xs1.XS1()
 hues = hue.Hue_lights()
@@ -243,6 +245,7 @@ class Szenen:
         t.start()         
 
     def execute(self, szene, check_bedingung=False, wert=0, device=None):
+        toolbox.log(szene)
         if not constants.passive:
             return True
         szene_dict = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)

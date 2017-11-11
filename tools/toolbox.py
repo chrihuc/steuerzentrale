@@ -8,6 +8,7 @@ import re, sys
 import time
 from time import localtime,strftime
 from datetime import date
+import inspect
 #pycurl
 
 # TODO: unittest
@@ -40,6 +41,11 @@ def ping(IP, number = 1):
                     pass
         return pinged
 
+def log(text='', level=0):
+    if constants.debug:
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        print '[%s, %s] %s' % (calframe[1][1], calframe[1][3], text) 
 #def restart_services():
   #lgd = logdebug(True, True)
   #lgd.debug("Heartbeat supervision")

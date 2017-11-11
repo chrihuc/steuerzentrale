@@ -10,6 +10,9 @@ from time import localtime,strftime
 from outputs import cron
 from outputs import szenen
 
+from tools import toolbox
+#toolbox.log('debug on')
+
 # TODO: unittest?
 
 crn = cron.Cron()
@@ -22,6 +25,7 @@ def main():
 def every_min(tag, zeit):
     liste = crn.get_now2(tag, zeit)
     for szene in liste:
+        toolbox.log(szene)
         if str(szene.get('Szene')) <> "None":
             lt = localtime()
             sekunde = int(strftime("%S", lt))

@@ -20,6 +20,9 @@ from alarm_event_messaging import messaging
 from outputs import szenen
 from outputs import cron
 
+from tools import toolbox
+#toolbox.log('debug on')
+
 # TODO: unittest?
 
 hostName = socket.gethostbyname( constants.eigene_IP )
@@ -80,7 +83,7 @@ def exec_data(data_ev, data):
     elif ('Device' in data_ev) and ('Command' in data_ev):
         scenes.threadSetDevice(data_ev['Device'], data_ev['Command'])
     elif ('Request_js' in data_ev):
-        print data_ev
+        toolbox.log(data_ev)
         if data_ev.get('Request_js') == 'Wecker':
             data = json.dumps(crn.get_all(wecker=True), default=handler)
         elif data_ev.get('Request_js') == 'Settings':
@@ -109,7 +112,7 @@ def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
         data = conn.recv(SIZE)
-#        print data
+        toolbox.log(data)
         if not data:
             break
         isdict = False
@@ -134,7 +137,7 @@ def bidirekt():
 def broadcast():
     while constants.run:
         (data,addr) = broadSocket.recvfrom(SIZE)
-#        print data
+        toolbox.log(data)
         if not data:
             break
         isdict = False
@@ -164,7 +167,7 @@ def main():
         while constants.run:
             for t in threadliste:
                 if not t in threading.enumerate():
-                    print t.name
+                    toolbox.log(t.name)
                     constants.run = False
                     sys.exit()
             time.sleep(10)
