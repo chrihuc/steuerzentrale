@@ -13,6 +13,9 @@ logging.basicConfig()
 from database import mysql_connector
 from alarm_event_messaging import alarmevents
 
+from tools import toolbox
+#toolbox.log('debug on')
+
 # TODO Tests split adress from hks
 
 aes = alarmevents.AES()
@@ -87,6 +90,7 @@ class Hue_lights():
 
 
     def set_device(self, device, commd):
+        toolbox.log(device, commd)
         h_dev = Light(hbridge, device)
         keys = ['bri', 'hue', 'sat', 'transitiontime']
         szene = mysql_connector.mdb_read_table_entry(table.name,commd)

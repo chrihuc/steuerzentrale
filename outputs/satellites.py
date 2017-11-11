@@ -12,6 +12,9 @@ import MySQLdb as mdb
 from database import mysql_connector
 from alarm_event_messaging import alarmevents
 
+from tools import toolbox
+#toolbox.log(device, commd)
+
 aes = alarmevents.AES()
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -199,6 +202,7 @@ class Satellite:
 
 
     def set_device(self, device, commd):     
+        toolbox.log(device, commd)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.get_type(device) == 'SATELLITE':
             satellit=mysql_connector.mdb_read_table_entry(table.name,device)

@@ -41,11 +41,13 @@ def ping(IP, number = 1):
                     pass
         return pinged
 
-def log(text='', level=0):
+def log(*args, **kwargs):
+    if 'level' not in kwargs:
+        level=0
     if constants.debug:
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
-        print '[%s, %s] %s' % (calframe[1][1], calframe[1][3], text) 
+        print '[%s, %s] %s' % (calframe[1][1], calframe[1][3], args) 
 #def restart_services():
   #lgd = logdebug(True, True)
   #lgd.debug("Heartbeat supervision")
