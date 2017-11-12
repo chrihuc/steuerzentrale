@@ -39,8 +39,8 @@ class TestUM(unittest.TestCase):
 #            self.test_mod.set_device('Kinderzimmer', command)
 #        self.test_mod.set_device('Kinderzimmer', 'Pause')
 
-    def test_set_device(self):
-        self.test_mod.set_device('Kinderzimmer', 'unittest')
+#    def test_set_device(self):
+#        self.test_mod.set_device('Kinderzimmer', 'unittest')
 
 if __name__ == '__main__':
     unittest.main()

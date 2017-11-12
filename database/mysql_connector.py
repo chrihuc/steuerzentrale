@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import mysql.connector as sql 
+import pandas as pd
+
 import constants
 
 import MySQLdb as mdb
@@ -8,14 +11,19 @@ import time
 from time import localtime, strftime
 import datetime
 
-#import mysql.connector as sql 
-#import pandas as pd
 
-#db_connection = sql.connect(host='192.168.192.10', database='Steuerzentrale', user='customer', password='user')
-#df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
+#TODO: debounce
 
 
 datab = constants.sql_.DB
+
+class tables(object):
+    db_connection = sql.connect(host='192.168.192.10', database='Steuerzentrale', user='customer', password='user')
+    scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
+    
+    @classmethod
+    def reload_scenes(cls):
+        cls.scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=cls.db_connection)
 
 #auto add entry to inputs
 #replace all dbs with constants
