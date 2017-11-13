@@ -20,6 +20,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
 #from mysql_con import settings_r, setting_s, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
 from database import mysql_connector
+from database import mysql_connector as msqc
 
 import easygui
 import socket
@@ -1108,7 +1109,7 @@ def update_device_lists():
     xs1_cmds = xs1.dict_commands()
     hue_devs = hue.list_devices()
     hue_cmds = hue.dict_commands()
-    sns_devs = sn.list_devices()
+    sns_devs = msqc.tables.akt_type_dict['SONOS']
     sns_cmds = sn.dict_commands()
     tvs_devs = tv.list_devices()
     tvs_cmds = tv.dict_commands()

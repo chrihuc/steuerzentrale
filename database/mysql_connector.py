@@ -18,12 +18,26 @@ import datetime
 datab = constants.sql_.DB
 
 class tables(object):
-    db_connection = sql.connect(host='192.168.192.10', database='Steuerzentrale', user='customer', password='user')
+    db_connection = sql.connect(host=constants.sql_.IP, 
+                                database=constants.sql_.DB, 
+                                user=constants.sql_.USER, 
+                                password=constants.sql_.PASS)
     scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
+    _lines = ['Adress', 'Device_Type', 'Description', 'Auto_Mode']
+    aktors_df = scenes_df.loc[scenes_df['Name'].isin(_lines)].set_index('Name')
+    akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave']
+    akt_type_dict = {typ:[] for typ in akt_types}
+    aktors_dict = aktors_df.to_dict()
+    for aktor in aktors_dict:
+        if aktors_dict[aktor]['Device_Type'] in akt_types:
+            akt_type_dict[aktors_dict[aktor]['Device_Type']].append(aktor)
+    akt_adr_dict = aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
     
     @classmethod
     def reload_scenes(cls):
         cls.scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=cls.db_connection)
+
+
 
 #auto add entry to inputs
 #replace all dbs with constants
