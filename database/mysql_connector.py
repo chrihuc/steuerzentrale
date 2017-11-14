@@ -32,12 +32,24 @@ class tables(object):
         if aktors_dict[aktor]['Device_Type'] in akt_types:
             akt_type_dict[aktors_dict[aktor]['Device_Type']].append(aktor)
     akt_adr_dict = aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
+    inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
+    _inputs_dict = inputs_df.to_dict(orient='records')
+    inputs_dict = {}
+    for item in _inputs_dict:
+        inputs_dict[item['Name']] = item
     
     @classmethod
     def reload_scenes(cls):
         cls.scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=cls.db_connection)
 
-
+    @classmethod
+    def reload_inputs(cls):
+        cls.inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=cls.db_connection)
+        _inputs_dict = cls.inputs_df.to_dict(orient='records')
+        cls.inputs_dict = {}
+        for item in _inputs_dict:
+            cls.inputs_dict[item['Name']] = item
+        
 
 #auto add entry to inputs
 #replace all dbs with constants

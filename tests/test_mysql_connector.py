@@ -8,6 +8,7 @@ Created on Tue Sep 12 19:11:37 2017
 import unittest
 from database import mysql_connector
 import numpy as np
+import time
 
 class TestUM(unittest.TestCase):
 
@@ -22,13 +23,17 @@ class TestUM(unittest.TestCase):
         print mysql_connector.get_device_adress('Vm1ZIM1SAT1LI01')
     
     def test_tables_no_init(self):
-        scenes_df = mysql_connector.tables.scenes_df
-        print scenes_df.loc[scenes_df['Name'] == 'Adress']
-        aktors_df = mysql_connector.tables.aktors_df
+#        scenes_df = mysql_connector.tables.scenes_df
+#        print scenes_df.loc[scenes_df['Name'] == 'Adress']
+#        aktors_df = mysql_connector.tables.aktors_df
 #        types = aktors_df[aktors_df.index == 'Device_Type'].values[0]
 #        types = [x for x in types if not x in [np.nan, None]]
 #        print mysql_connector.tables.akt_type_dict
-        print aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
+#        print aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
+        print mysql_connector.tables().inputs_dict['V01SCH1RUM1TE01']['last1']
+        time.sleep(60)
+        mysql_connector.tables().reload_inputs()
+        print mysql_connector.tables().inputs_dict['V01SCH1RUM1TE01']['last1']
 #        print scenes_df.set_index('Name').to_dict()
 
 #    def test_tables_reload(self):
