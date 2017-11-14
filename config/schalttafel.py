@@ -1105,15 +1105,16 @@ def update_device_lists():
     global szn_lst, xs1_devs, xs1_cmds, hue_devs, hue_cmds, sns_devs, sns_cmds, tvs_devs
     global tvs_cmds, sat_devs, sat_cmds, cmd_devs
     szn_lst = sorted(szn.list_commands(gruppe=''))
-    xs1_devs = xs1.list_devices()
+    xs1_devs = msqc.tables.akt_type_dict['XS1']
     xs1_cmds = xs1.dict_commands()
-    hue_devs = hue.list_devices()
+    hue_devs = msqc.tables.akt_type_dict['HUE']
     hue_cmds = hue.dict_commands()
     sns_devs = msqc.tables.akt_type_dict['SONOS']
     sns_cmds = sn.dict_commands()
-    tvs_devs = tv.list_devices()
+    tvs_devs = msqc.tables.akt_type_dict['TV']
     tvs_cmds = tv.dict_commands()
-    sat_devs = sat.list_devices()
+    sat_devs = msqc.tables.akt_type_dict['SATELLITE']
+    sat_devs += msqc.tables.akt_type_dict['ZWave']
     sat_cmds = sat.dict_commands()
     cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 

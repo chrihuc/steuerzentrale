@@ -18,7 +18,7 @@ import constants
 from alarm_event_messaging import alarmevents
 from alarm_event_messaging import messaging
 
-from database import mysql_connector
+from database import mysql_connector as msqc
 
 from outputs import hue
 from outputs import internal
@@ -37,11 +37,12 @@ sn = sonos.Sonos()
 tv = samsung.TV()
 sat = satellites.Satellite()
 interna = internal.Internal()
-xs1_devs = xs1.list_devices()
-hue_devs = hues.list_devices()
-sns_devs = sn.list_devices()
-tvs_devs = tv.list_devices()
-sat_devs = sat.list_devices()
+xs1_devs = msqc.tables.akt_type_dict['XS1']
+hue_devs = msqc.tables.akt_type_dict['HUE']
+sns_devs = msqc.tables.akt_type_dict['SONOS']
+tvs_devs = msqc.tables.akt_type_dict['TV']
+sat_devs = msqc.tables.akt_type_dict['SATELLITE']
+sat_devs += msqc.tables.akt_type_dict['ZWave']
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
@@ -59,7 +60,7 @@ class Szenen:
         pass
     
     def list_commands(self,gruppe='default'):    
-        table = mysql_connector.mdb_get_table(constants.sql_tables.szenen.name)
+        table = msqc.mdb_get_table(constants.sql_tables.szenen.name)
         liste = {'':''}
         if not isinstance(gruppe, list):
             gruppe = [gruppe]
@@ -90,14 +91,14 @@ class Szenen:
 
     def __bedingung__(self,bedingungen, verbose = False):
         erfuellt = True
-        settings = mysql_connector.settings_r() 
+        settings = msqc.settings_r() 
         if type(bedingungen) == dict:
 #==============================================================================
 #             Deprecated
 #==============================================================================
             for bedingung in bedingungen:
                 if settings.get(bedingung) == None:
-                    mysql_connector.setting_s(bedingung, '')
+                    msqc.setting_s(bedingung, '')
                 try:
                     groesser = bedingungen.get(bedingung).find('>')
                     kleiner = bedingungen.get(bedingung).find('<')
@@ -129,7 +130,7 @@ class Szenen:
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
             for bedingung in bedingungen:
                 if settings.get(bedingung[0]) == None:
-                    mysql_connector.setting_s(bedingung, '')                
+                    msqc.setting_s(bedingung, '')                
                 item, operand, wert = bedingung
                 item = settings.get(item)
                 if verbose: print item, operand, wert
@@ -178,7 +179,7 @@ class Szenen:
     def __sub_cmds__(self, szn_id, device, commando, text):
         global kommando_dict
         try:
-            adress = mysql_connector.get_device_adress(device)
+            adress = msqc.get_device_adress(device)
         except:
             print('device not found')
             adress = device
@@ -188,7 +189,7 @@ class Szenen:
         else:
             t_list = {}
         if commando in ["man", "auto"]:
-            mysql_connector.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
+            msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
         else:
             if device in xs1_devs:
                 executed = xs1.set_device(adress, commando)
@@ -223,7 +224,7 @@ class Szenen:
                 executed = True
         if executed:
 # TODO: Return True and value and write value to table
-            mysql_connector.set_val_in_szenen(device=device, szene="Value", value=commando)
+            msqc.set_val_in_szenen(device=device, szene="Value", value=commando)
         if szn_id == None:
             return
         if executed:
@@ -248,7 +249,7 @@ class Szenen:
         toolbox.log(szene)
         if constants.passive:
             return True
-        szene_dict = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
+        szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
 #        print start_t, szene_dict.get("Beschreibung"), szene_dict.get("Follows")
         #check bedingung
@@ -285,7 +286,7 @@ class Szenen:
             aes.new_event(description=text, prio=Prio, karenz=Karenz)
             interlocks = {}           
             if str(szene_dict.get("AutoMode")) == "True":
-                interlocks = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
+                interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
             for idk, key in enumerate(szene_dict):        
                 if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                     kommandos = self.__return_enum__(szene_dict.get(key))
@@ -329,8 +330,8 @@ class Szenen:
 #                    #timer set to 0 for following actions
 #                    set_del.start() 
                     # solution above could give timing issues
-                    mysql_connector.setting_s(str(kommando), str(kommandos.get(kommando)))
-            mysql_connector.mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
+                    msqc.setting_s(str(kommando), str(kommandos.get(kommando)))
+            msqc.mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
         elif False:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = Karenz)
