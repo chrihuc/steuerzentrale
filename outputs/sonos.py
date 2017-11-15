@@ -843,12 +843,10 @@ class Sonos:
     def dict_commands(self):
         #comands = mdb_get_table(table.name)
         dicti = {}
-        itera = 1
-        dicti[''] = itera
-        liste = self.list_commands()
-        for item in liste:
-            itera +=1
-            dicti[str(item)] = itera
+        dicti[''] = 1
+        liste = sorted(self.list_commands())
+        for key, item in enumerate(liste):
+            dicti[str(item)] = key + 2
         return dicti
 
     def list_devices(self):

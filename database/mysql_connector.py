@@ -7,12 +7,8 @@ import constants
 
 import MySQLdb as mdb
 from threading import Timer
-import time
 from time import localtime, strftime
 import datetime
-
-
-#TODO: debounce
 
 
 datab = constants.sql_.DB
@@ -33,6 +29,7 @@ class tables(object):
             akt_type_dict[aktors_dict[aktor]['Device_Type']].append(aktor)
     akt_adr_dict = aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
     inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
+    db_connection.close()
     _inputs_dict = inputs_df.to_dict(orient='records')
     inputs_dict = {}
     for item in _inputs_dict:
@@ -40,16 +37,26 @@ class tables(object):
     
     @classmethod
     def reload_scenes(cls):
-        cls.scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=cls.db_connection)
+        db_connection = sql.connect(host=constants.sql_.IP, 
+                                database=constants.sql_.DB, 
+                                user=constants.sql_.USER, 
+                                password=constants.sql_.PASS)
+        cls.scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
+        db_connection.close()
 
     @classmethod
     def reload_inputs(cls):
-        cls.inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=cls.db_connection)
-        _inputs_dict = cls.inputs_df.to_dict(orient='records')
+        db_connection = sql.connect(host=constants.sql_.IP, 
+                                database=constants.sql_.DB, 
+                                user=constants.sql_.USER, 
+                                password=constants.sql_.PASS)
+        inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
+        _inputs_dict = inputs_df.to_dict(orient='records')
         cls.inputs_dict = {}
         for item in _inputs_dict:
             cls.inputs_dict[item['Name']] = item
-        
+        db_connection.close()
+
 
 #auto add entry to inputs
 #replace all dbs with constants
@@ -497,7 +504,7 @@ def inputs(device, value):
     dicti = {}
     dicti_1 = {}
     szenen = []  
-    lt = datetime.datetime.now()
+    ct = datetime.datetime.now()
     desc = None
     with con:
         cur = con.cursor()
@@ -515,10 +522,16 @@ def inputs(device, value):
                 for i in range (0,len(row)):
                     dicti_1[field_names_1[i]] = row[i] 
             last_value = dicti_1['last_Value']
+            if last_value is None: last_value = 0
             last_time = dicti_1['last1']
-            desc = dicti_1['Name']
-            if str(last_time) == 'None': last_time = lt
-            deltaT = lt - last_time
+            debounce = dicti_1['debounce']
+            desc = dicti_1['Description']
+            if str(last_time) == 'None': last_time = ct
+            if debounce is None: 
+                db_time = ct
+            else:
+                db_time = last_time + datetime.timedelta(seconds=debounce)
+            deltaT = ct - last_time
             deltaTm = deltaT.total_seconds() / 60
             if deltaTm > 0:
                 deltaX = float(value) - float(last_value)
@@ -545,16 +558,17 @@ def inputs(device, value):
                 for i in range (0,len(row)):
                     dicti[field_names[i]] = row[i]  
                 doppelklick = dicti.get("Doppelklick")
-                if str(dicti.get("last2")) <> "None":             
-                    if lt - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
-                        szenen.append(dicti.get("Dreifach")) 
-                        single = False
-                    elif lt - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
-                        szenen.append(dicti.get("Doppel"))     
-                        single = False
-                if str(doppelklick) <> "True": single = True
-                if single: szenen.append(dicti.get(setting_r("Status"))) 
-                szenen.append(dicti.get('Immer'))
+                if ct >= db_time:
+                    if str(dicti.get("last2")) <> "None":             
+                        if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
+                            szenen.append(dicti.get("Dreifach")) 
+                            single = False
+                        elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
+                            szenen.append(dicti.get("Doppel"))     
+                            single = False
+                    if str(doppelklick) <> "True": single = True
+                    if single: szenen.append(dicti.get(setting_r("Status"))) 
+                    szenen.append(dicti.get('Immer'))
 #            get stting and logging 
             hks = dicti_1['HKS']
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
@@ -566,7 +580,7 @@ def inputs(device, value):
                 cur.execute(insertstatement) 
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
                 cur.execute(insertstatement)
-            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(lt)+'" WHERE Name = "' + str(device) +'"'
+            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)               
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'

@@ -728,6 +728,8 @@ class InputsTree():
         for inpu in self.inputs:
             self.eingaenge.append(str(inpu.get('Id')))
         self.isInputs = isInputs
+#        if not cmdTable is None:
+#            cmdTable = sorted(cmdTable)
         self.cmdTable = cmdTable
         self.set_paratree()
 
@@ -1086,7 +1088,7 @@ def populate_input_tree_2(szene=''):
     tree_input_device.setParameters(tree_ipt_dev_vals.params, showTop=False)
 
 def populate_dvcs_cmds_tree():
-    cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
+    cmds=InputsTree(isInputs = False, cmdTable = (cmd_lsts[0]))
     tree_dvc_tp_cmds.setParameters(cmds.p, showTop=False)
 
 def populate_settngs_tree():
@@ -1145,7 +1147,8 @@ def update():
 
 def neuTrig():
     vals = mysql_connector.mdb_read_table_entry(db="cmd_inputs",entry=str(cBox_inpts_new.currentText()),column='Name')
-    mysql_connector.mdb_add_table_entry("cmd_inputs",vals)
+    vals2 = {value:vals[value] for value in vals if vals[value] is not None}
+    mysql_connector.mdb_add_table_entry("cmd_inputs",vals2)
 
 def change(param, changes):
     print("tree changes:")

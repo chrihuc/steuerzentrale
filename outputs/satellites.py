@@ -215,7 +215,6 @@ class Satellite:
             command = mysql_connector.mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
         data = ""
-        print command
 #        todo check if ssh command and send as ssh
         if str(satellit.get('PORT')) <> 'None':
             if str(satellit.get('PORT')) == '22':

@@ -3,17 +3,17 @@
 
 import constants
 
-from cmd_sonos import sonos
-from cmd_xs1 import myezcontrol
-from cmd_hue import hue_lights
-from cmd_samsung import TV
-from cmd_satellites import satelliten
-from cmd_szenen import szenen
-from cmd_cron import cron
-from alarmevents import alarm_event
+from outputs import sonos
+from outputs import xs1
+from outputs import hue
+from outputs import samsung
+from outputs import satellites
+from outputs import szenen
+from outputs import cron
+from alarm_event_messaging import alarmevents
 #from gui_szenen import Szenen_tree
 
-from mysql_con import mdb_read_table_entry, settings_r, mdb_read_table_column_filt,mdb_set_table
+from database import mysql_connector as msqc
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import *
@@ -36,24 +36,24 @@ from pyqtgraph.parametertree import Parameter, ParameterTree
 
 import urllib2
 
-descs = mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
+descs = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Description")
 
-aes = alarm_event()
+aes = alarmevents.AES()
 
-xs1 = myezcontrol(constants.xs1_.IP)
-hue = hue_lights()
-sn = sonos()
-tv = TV()
-sat = satelliten()
-scenes = szenen()
-crons = cron()
+xs1 = xs1.XS1(constants.xs1_.IP)
+hue = hue.Hue_lights()
+sn = sonos.Sonos()
+tv = samsung.TV()
+sat = satellites.Satellite()
+szn = szenen.Szenen()
+crons = cron.Cron()
 xs1_devs = xs1.list_devices()
 hue_devs = hue.list_devices()
 sns_devs = sn.list_devices()
 tvs_devs = tv.list_devices()
 sat_devs = sat.list_devices()
-szn_cmds = scenes.list_commands()
-szn_favs = scenes.list_commands(gruppe='Favorit')
+szn_cmds = szn.list_commands()
+szn_favs = szn.list_commands(gruppe='Favorit')
 System = None
 Device = None
 constants.redundancy_.master = True
@@ -163,7 +163,7 @@ class ListenUdpThread(QtCore.QThread):
                     idle = float(sp.check_output('xprintidle', shell=True).strip())
                     if idle > threshold and self.active:
                         self.emit(QtCore.SIGNAL('show_homepage()'))
-                        if settings_r()['Status'] == 'Wach' and constants.gui_.Feh:
+                        if msqc.settings_r()['Status'] == 'Wach' and constants.gui_.Feh:
                             print "Start feh"
 #                            exectext = 'xbindkeys -n -f xbindkeys.temp'
 #                            os.system(exectext) 
@@ -247,7 +247,7 @@ class Main(QtGui.QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(700, 500)
-        settings = settings_r()
+        settings = msqc.settings_r()
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
@@ -263,7 +263,7 @@ class Main(QtGui.QMainWindow):
         
         # Keller
         self.tab_0 = QtGui.QWidget()
-        self.tab_0.setStyleSheet("QWidget {background-image:url(./UG.png)}")
+        self.tab_0.setStyleSheet("QWidget {background-image:url(./media/UG.png)}")
         self.tab_0.setObjectName(_fromUtf8("Keller"))   
         self.tabWidget.addTab(self.tab_0, _fromUtf8(""))
         
@@ -271,13 +271,13 @@ class Main(QtGui.QMainWindow):
         self.tab = QtGui.QWidget()
         
         self.tab.setObjectName(_fromUtf8("Erdgeschoss")) 
-        self.tab.setStyleSheet("background-image:url(./EG.png)")
+        self.tab.setStyleSheet("background-image:url(./media/EG.png)")
         self.buttons = []
         for btn in eg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab))
             self.buttons[-1].setGeometry(QtCore.QRect(btn.get('pos_x'), btn.get('pos_y'), 50, 50))
             self.buttons[-1].setObjectName(btn.get('Name'))
-            self.buttons[-1].setStyleSheet("background-image:url(./EG3.png);background-color: rgb(255,255,255);border: 2px solid #222222")
+            self.buttons[-1].setStyleSheet("background-image:url(./media/EG3.png);background-color: rgb(255,255,255);border: 2px solid #222222")
             if btn.get('type') == 'dev':
                 self.buttons[-1].clicked.connect(self.make_set_popup(btn.get('Name')))
                 self.buttons[-1].setText(_fromUtf8(btn.get('desc')))
@@ -288,7 +288,7 @@ class Main(QtGui.QMainWindow):
         
         #1. Stock
         self.tab_1 = QtGui.QWidget()
-        self.tab_1.setStyleSheet("QWidget {background-image:url(./OG.png)}")
+        self.tab_1.setStyleSheet("QWidget {background-image:url(./media/OG.png)}")
         self.tab_1.setObjectName(_fromUtf8("1_Stock"))   
         for btn in og_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab_1))
@@ -304,7 +304,7 @@ class Main(QtGui.QMainWindow):
 
         #2. Stock
         self.tab_2 = QtGui.QWidget()
-        self.tab_2.setStyleSheet("QWidget {background-image:url(./DG.png)}")
+        self.tab_2.setStyleSheet("QWidget {background-image:url(./media/DG.png)}")
         self.tab_2.setObjectName(_fromUtf8("2_Stock")) 
         for btn in dg_buttons:
             self.buttons.append(QtGui.QPushButton(self.tab_2))
@@ -615,7 +615,7 @@ class Main(QtGui.QMainWindow):
 #            self.load_cam()
 
     def update_values(self):
-        settings = settings_r()
+        settings = msqc.settings_r()
         for btn in self.buttons:
             name = btn.objectName()
             if str(name) in settings:
