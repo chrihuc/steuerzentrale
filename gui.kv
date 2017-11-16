@@ -118,6 +118,14 @@
                 id: Exit
                 text: 'Exit'
                 on_press: root.close_gui()                  
+    TabbedPanelItem:
+        text: 'System'
+        GridLayout:
+            rows: 2
+            Label:
+                text: str(slider_id.value)
+            Slider:
+                id: slider_id
         
 <TemperaturLabel>:
     size_hint: None, None

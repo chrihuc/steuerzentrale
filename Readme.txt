@@ -29,6 +29,12 @@ sudo pip install gitpython
 sudo pip install pyqtgraph
 sudo pip install easygui
 sudo pip install gitpython
+sudo pip install kivy
+sudo apt-get install python-kivy
+
+sudo pip install kivy-garden
+sudo garden install graph
+
 
 python constants.py
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
