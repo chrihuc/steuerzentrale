@@ -868,7 +868,11 @@ class TreeInputsDevices(object):
 
     def add_device(self, top_object, device):
         device_id = device['Id']
-        device_desc = device['Description'] + ' ' + str(device['Status'])
+        if device['Status'] is None:
+            stat = ''
+        else:
+            stat = device['Status']
+        device_desc = device['Description'] + ' ' + stat
         dev_obj = {'title': device['HKS'], 'type': 'group', 'expanded': True,
                    'name':str(device_id), 'children':[], 'tip':device_desc}
         kind = {'title': device['HKS'], 'type': 'str', 'expanded': True,

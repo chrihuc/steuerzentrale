@@ -45,8 +45,8 @@ class Cron(object):
         liste = []
         with con:
             cur = con.cursor()
-            sql = ('SELECT * FROM '+datab+' WHERE ' + tage.get(tag) + '=True AND Time = "' +
-                   str(zeit) + '" AND Eingeschaltet =True')
+            sql = 'SELECT * FROM %s WHERE %s="True" AND Time = "%s" AND Eingeschaltet="True"' % (datab, tage.get(tag), zeit)
+            print sql
             cur.execute(sql)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]

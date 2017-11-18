@@ -43,24 +43,24 @@ import threading
 import pandas as pd
 import MySQLdb as mdb
 
-from outputs import sonos
-from outputs import xs1
-from outputs import hue
-from outputs import samsung
-from outputs import satellites
-from outputs import szenen
-from outputs import cron
+#from outputs import sonos
+#from outputs import xs1
+#from outputs import hue
+#from outputs import samsung
+#from outputs import satellites
+#from outputs import szenen
+#from outputs import cron
 
 from kivy.properties import ObjectProperty, StringProperty, OptionProperty, \
     ListProperty, NumericProperty, AliasProperty, BooleanProperty
 
-xs1 = xs1.XS1(constants.xs1_.IP)
-hue = hue.Hue_lights()
-sn = sonos.Sonos()
-tv = samsung.TV()
-sat = satellites.Satellite()
-scenes = szenen.Szenen()
-crons = cron.Cron()
+#xs1 = xs1.XS1(constants.xs1_.IP)
+#hue = hue.Hue_lights()
+#sn = sonos.Sonos()
+#tv = samsung.TV()
+#sat = satellites.Satellite()
+#scenes = szenen.Szenen()
+#crons = cron.Cron()
 
 running = True
 con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -437,31 +437,31 @@ class OpScreen(TabbedPanel):
         layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         layout.bind(minimum_height=layout.setter('height'))
-        if dev_type == 'XS1':
-            for item in xs1.list_commands():
-                btn = Button(text=str(item), size_hint_y=None, height=40)
-                btn.bind(on_press=self.send_dev_command)
-                layout.add_widget(btn)
-        elif dev_type == 'HUE':
-            for item in hue.list_commands():
-                btn = Button(text=str(item), size_hint_y=None, height=40)
-                btn.bind(on_press=self.send_dev_command)
-                layout.add_widget(btn)
-        elif dev_type == 'SONOS':
-            for item in sn.list_commands():
-                btn = Button(text=str(item), size_hint_y=None, height=40)
-                btn.bind(on_press=self.send_dev_command)
-                layout.add_widget(btn)
-        elif dev_type == 'TV':
-            for item in tv.list_commands():
-                btn = Button(text=str(item), size_hint_y=None, height=40)
-                btn.bind(on_press=self.send_dev_command)
-                layout.add_widget(btn)
-        elif dev_type == 'SATELLITE' or dev_type == 'ZWave':
-            for item in sat.list_commands(device):
-                btn = Button(text=str(item), size_hint_y=None, height=40)
-                btn.bind(on_press=lambda x, device=device, command=str(item): self.send_dev_command(device, command))
-                layout.add_widget(btn)
+#        if dev_type == 'XS1':
+#            for item in xs1.list_commands():
+#                btn = Button(text=str(item), size_hint_y=None, height=40)
+#                btn.bind(on_press=self.send_dev_command)
+#                layout.add_widget(btn)
+#        elif dev_type == 'HUE':
+#            for item in hue.list_commands():
+#                btn = Button(text=str(item), size_hint_y=None, height=40)
+#                btn.bind(on_press=self.send_dev_command)
+#                layout.add_widget(btn)
+#        elif dev_type == 'SONOS':
+#            for item in sn.list_commands():
+#                btn = Button(text=str(item), size_hint_y=None, height=40)
+#                btn.bind(on_press=self.send_dev_command)
+#                layout.add_widget(btn)
+#        elif dev_type == 'TV':
+#            for item in tv.list_commands():
+#                btn = Button(text=str(item), size_hint_y=None, height=40)
+#                btn.bind(on_press=self.send_dev_command)
+#                layout.add_widget(btn)
+#        elif dev_type == 'SATELLITE' or dev_type == 'ZWave':
+#            for item in sat.list_commands(device):
+#                btn = Button(text=str(item), size_hint_y=None, height=40)
+#                btn.bind(on_press=lambda x, device=device, command=str(item): self.send_dev_command(device, command))
+#                layout.add_widget(btn)
         root = ScrollView(size_hint=(1, 1), size=(Window.width, Window.height))
         root.add_widget(layout)
         self.popup.add_widget(root)
