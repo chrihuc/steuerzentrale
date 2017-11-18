@@ -27,6 +27,8 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.widget import Widget
 from kivy.cache import Cache
 
+from kivy.uix.slider import Slider
+
 from kivy.lang import Builder
 from kivy.cache import Cache
 from kivy.garden.graph import Graph, MeshLinePlot
@@ -41,24 +43,24 @@ import threading
 import pandas as pd
 import MySQLdb as mdb
 
-from cmd_sonos import sonos
-from cmd_xs1 import myezcontrol
-from cmd_hue import hue_lights
-from cmd_samsung import TV
-from cmd_satellites import satelliten
-from cmd_szenen import szenen
-from cmd_cron import cron
+from outputs import sonos
+from outputs import xs1
+from outputs import hue
+from outputs import samsung
+from outputs import satellites
+from outputs import szenen
+from outputs import cron
 
 from kivy.properties import ObjectProperty, StringProperty, OptionProperty, \
     ListProperty, NumericProperty, AliasProperty, BooleanProperty
 
-xs1 = myezcontrol(constants.xs1_.IP)
-hue = hue_lights()
-sn = sonos()
-tv = TV()
-sat = satelliten()
-scenes = szenen()
-crons = cron()
+xs1 = xs1.XS1(constants.xs1_.IP)
+hue = hue.Hue_lights()
+sn = sonos.Sonos()
+tv = samsung.TV()
+sat = satellites.Satellite()
+scenes = szenen.Szenen()
+crons = cron.Cron()
 
 running = True
 con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -239,23 +241,25 @@ class ScreenSaver_handler(object):
         if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=20):
             if not self.ss_on:
                 if constants.gui_.Feh and self.state_awake:
-                    exectext = 'echo 100 > /sys/class/backlight/rpi_backlight/brightness'
-                    os.system(exectext)
+                    self.backlight(100)
                     self.pic_frame.start_show()
                 else:
 #                    exectext = 'sudo /bin/su -c "echo 0 > /sys/class/backlight/rpi_backlight/brightness"'
-                    exectext = 'echo 0 > /sys/class/backlight/rpi_backlight/brightness'
-                    os.system(exectext)
+                    self.backlight(0)
                 self.ss_on = True
                 self.go_home()
 
     def on_motion(self, *args, **kwargs):
         self.last_event = datetime.datetime.now()
         self.pic_frame.dismiss()
-        exectext = 'echo 100 > /sys/class/backlight/rpi_backlight/brightness'
-        os.system(exectext)
+        self.backlight(100)
         self.ss_on = False
 
+    def backlight(self, value):
+        if not constants.gui_.KS:
+            return
+        exectext = 'echo %s > /sys/class/backlight/rpi_backlight/brightness' % (value)
+        os.system(exectext)
 
 class OpScreen(TabbedPanel):
 
@@ -272,6 +276,11 @@ class OpScreen(TabbedPanel):
         self.populate_settings()
         self.update_labels()
         self.bind(current_tab=self.tab_change)
+
+        self.some_label = Label()
+        self.my_slider = Slider()
+        self.my_slider.bind(value=self.OnSliderValueChange)
+
         if constants.gui_.KS:
             pass
 #            Window.fullscreen = True
@@ -305,6 +314,11 @@ class OpScreen(TabbedPanel):
 #        Window.fullscreen = constants.gui_.KS
         setattr(constants.gui_, _id, value)
         constants.save_config()
+
+
+    def OnSliderValueChange(self, instance,value):
+        self.some_label.text = str(value)
+
 
     def populate_szenen(self):
         favoriten = pd_szenen.loc[pd_szenen['Gruppe'] == 'Favorit']
