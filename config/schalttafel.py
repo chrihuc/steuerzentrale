@@ -1034,18 +1034,23 @@ class SettingsTree():
             kinder.append(kind)
         dicti['children'] = kinder
         inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
-                {'name': 'Speichern', 'type': 'action'}
+                {'name': 'Speichern', 'type': 'action'},
+                {'name': 'Speichern2', 'type': 'action'}
             ]}
         params.append(dicti)
         params.append(inp_dict)
         self.p = Parameter.create(name='params', type='group', children=params)
-        self.p.param('Aktionen', 'Speichern').sigActivated.connect(self.save)
+        self.p.param('Aktionen', 'Speichern').sigActivated.connect(self.set_speichern)
+        self.p.param('Aktionen', 'Speichern2').sigActivated.connect(self.printit)
 
-    def save(self):
-        global state
+    def set_speichern(self):
         print "here"
+        global state
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
+
+    def printit(self):
+        print "yup"
 
     def check_iter(self,some_object):
         try:

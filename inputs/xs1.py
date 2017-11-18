@@ -58,7 +58,7 @@ def on_receive(data):
 #####################
 #Heartbeat & Server Steuerung
 #####################
-    if (("heartbeat" == name) and (value == 0)):
+    if (("heartbeat" in name) and (value == 0)):
         heartbeat.cancel()
         heartbeat = Timer(constants.heartbt, heartbeat_sup)
         heartbeat.start()   

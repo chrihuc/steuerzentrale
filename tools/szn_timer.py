@@ -8,8 +8,8 @@ Created on Sat Feb  6 09:24:15 2016
 # TODO: unpickle
 
 from threading import Timer
-import time
-import pickle
+import datetime
+#import pickle
 
 import datetime
 import uuid
@@ -27,12 +27,14 @@ class Szenen_Timer:
         if delay == 0 and start:
             self.def_to_run(child)
             return None
+        ct = datetime.datetime.now()
         dicti = {}
         dicti["parent"] = parent
         dicti["delay"] = delay
         dicti["child"] = child
         dicti["exact"] = exact
         dicti["retrig"] = retrig
+        dicti['due'] = ct + datetime.timedelta(seconds=delay)
         hash_id = uuid.uuid4()
         dicti["hash_id"] = hash_id
         if delay < 0:
