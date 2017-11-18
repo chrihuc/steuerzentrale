@@ -24,5 +24,10 @@ class TestUM(unittest.TestCase):
 #        self.assertTrue(runs,
 #                         'Failed to pause')
 #        
+    def test_WohnziAnw0(self):
+        runs = self.sz.execute("WohnziAnw0")
+        self.assertTrue(runs,
+                         'Failed to Execute Scene')
+
 if __name__ == '__main__':
     unittest.main()

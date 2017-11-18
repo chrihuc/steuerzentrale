@@ -95,10 +95,10 @@ class Szenen_Timer:
         print self.liste
 
     def store(self):
-        pickle.dump(self.liste, open( "szn_timer.tmp", "wb" ) )
-#        file_ = open('szn_timer.tmp', 'w')
-#        file_.write(str(self.liste))
-#        file_.close()
+#        pickle.dump(self.liste, open( "szn_timer.tmp", "wb" ) )
+        file_ = open('szn_timer.tmp', 'w')
+        file_.write(str(self.liste))
+        file_.close()
 
     def entferne_eintrag(self, hash_id, child):
         for item in self.liste:

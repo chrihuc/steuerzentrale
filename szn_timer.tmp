@@ -1,2 +1,1 @@
-(lp0
-.
+[{'retrig': True, 'parent': 'WohnziAnw0', 'timer': <_Timer(Thread-94, started 140339054634752)>, 'delay': 3600.0, 'child': 'WohnziWeg', 'exact': False, 'hash_id': UUID('baaf5486-668c-4345-aceb-12ea859d6422')}]
