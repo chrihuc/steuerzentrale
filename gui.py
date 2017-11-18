@@ -774,7 +774,7 @@ class Main(QtGui.QMainWindow):
             liste = []
             for wecker in parent:
                 liste.append(parent.get(wecker))
-                mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
+                msqc.mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
         time.sleep(1)
         self.lbl.setText(self.checkWecker())
         QApplication.processEvents()
@@ -803,7 +803,7 @@ class Main(QtGui.QMainWindow):
             liste = []
             for wecker in parent:
                 liste.append(parent.get(wecker))
-                mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
+                msqc.mdb_set_table(table=constants.sql_tables.cron.name, device=parent.get(wecker).get('Name'), commands=parent.get(wecker), primary = 'Name')
         QApplication.processEvents()
         return saveSchaltUhr     
     
@@ -821,6 +821,7 @@ class weckerRow(QtGui.QWidget):
     def __init__( self ,weckerList, wecker=True):
         global weckerButtons, SchaltUhren
         super(weckerRow, self).__init__(None)
+        print weckerList
         #horizontalLayoutWidget = QtGui.QWidget(self.scrollAreaWidgetContents)
         #horizontalLayoutWidget.setGeometry(QtCore.QRect(30, 10, 391, 61))
         #horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
@@ -855,9 +856,9 @@ class weckerRow(QtGui.QWidget):
             self.checkBox.setChecked(eval(weckerList.get(tag)))
         self.comboBox = QtGui.QComboBox()
         if wecker:
-            SzenenList = scenes.list_commands("Wecker")
+            SzenenList = szn.list_commands("Wecker")
         else:
-            SzenenList = scenes.list_commands()
+            SzenenList = szn.list_commands()
         for szne in SzenenList:
             self.comboBox.addItem(szne)    
         index = self.comboBox.findText(weckerList.get('Szene'), QtCore.Qt.MatchFixedString)

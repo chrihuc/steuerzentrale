@@ -52,7 +52,7 @@ def on_receive(data):
 #Zerlegung des Empfangs
     toolbox.log(data)
     value = float(data.split(" ")[-1])
-    name = str(data.split(" ")[-3])
+    name = 'XS1.' + str(data.split(" ")[-3])
     #now = datetime.datetime.now().strftime("%H:%M:%S.%f") 
     #aes.new_event(description="Empfangen: " + name + " " + str(now), prio=0)
 #####################

@@ -868,7 +868,7 @@ class TreeInputsDevices(object):
 
     def add_device(self, top_object, device):
         device_id = device['Id']
-        device_desc = device['Description']
+        device_desc = device['Description'] + ' ' + str(device['Status'])
         dev_obj = {'title': device['HKS'], 'type': 'group', 'expanded': True,
                    'name':str(device_id), 'children':[], 'tip':device_desc}
         kind = {'title': device['HKS'], 'type': 'str', 'expanded': True,
@@ -888,20 +888,21 @@ class TreeInputsDevices(object):
 #            top_level['children'].append(floor_obj)
         for aktuator in sorted(inputs):
             aktuator_hks = aktuator['HKS']
-            level = aktuator_hks[:3]
-            if level[:1] == 'V' or level[:1] == 'A':
-                level_obj = self.get_sub_object(top_level, level)
-                raum = aktuator_hks[3:7]
-                raum_obj = self.get_sub_object(level_obj, raum)
-                furni = aktuator_hks[7:11]
-                furni_obj = self.get_sub_object(raum_obj, furni)
-                device = aktuator_hks[11:]
-                self.add_device(furni_obj, aktuator)
-            else:
-                level = 'NEW'
-                level_obj = self.get_sub_object(top_level, level)
-                if aktuator['Description'] != None and aktuator['Description'] != '':
-                    self.add_device(level_obj, aktuator)
+            if aktuator_hks is not None:
+                level = aktuator_hks[:3]
+                if level in stockwerke:
+                    level_obj = self.get_sub_object(top_level, level)
+                    raum = aktuator_hks[3:7]
+                    raum_obj = self.get_sub_object(level_obj, raum)
+                    furni = aktuator_hks[7:11]
+                    furni_obj = self.get_sub_object(raum_obj, furni)
+                    device = aktuator_hks[11:]
+                    self.add_device(furni_obj, aktuator)
+                else:
+                    level = 'NEW'
+                    level_obj = self.get_sub_object(top_level, level)
+                    if aktuator['Description'] != None and aktuator['Description'] != '':
+                        self.add_device(level_obj, aktuator)
         self.params = Parameter.create(name='params', type='group', children=[top_level])
         self.walk_param(self.params)
 
@@ -939,18 +940,20 @@ class TreeInputDevice(object):
         kinder = top_level['children']
         kinder.insert(0, {'name':'Description', 'title':'Beschreibung', 'type': 'str',
                                   'value':device['Description']})
+        kinder.insert(1, {'name':'Status', 'title':'Status', 'type': 'str',
+                                  'value':device['Status']})
         for feature, value in device.iteritems():
             if feature in ['Logging','Setting','Doppelklick']:
-                kinder.insert(1, {'name':feature, 'type': 'bool', 'value':eval(value)})
+                kinder.insert(2, {'name':feature, 'type': 'bool', 'value':eval(value)})
             elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise',
                              'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',
                              'Dreifach']:
                 kinder.append({'name':feature, 'type': 'list', 'value':value,
                                'values':sorted(szn_lst)})
-            elif feature in ['Id', 'Description']:
+            elif feature in ['Id', 'Description', 'Status']:
                 pass
             else:
-                kinder.insert(1, {'name':feature, 'type': 'str', 'value':value})
+                kinder.insert(2, {'name':feature, 'type': 'str', 'value':value})
         top_level_list = [top_level]
         action = {'name': 'Speichern', 'type': 'action'}
         top_level_list.append(action)
