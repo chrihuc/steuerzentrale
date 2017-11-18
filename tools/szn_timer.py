@@ -5,7 +5,7 @@ Created on Sat Feb  6 09:24:15 2016
 @author: christoph
 """
 
-# TODO: pickle, unittest
+# TODO: unpickle
 
 from threading import Timer
 import time
@@ -42,6 +42,7 @@ class Szenen_Timer:
             dicti["timer"] = t
             if start: t.start()
             self.liste.append(dicti)
+            self.store()
         return hash_id
 
     def start_timer(self, nr):
@@ -94,9 +95,10 @@ class Szenen_Timer:
         print self.liste
 
     def store(self):
-        file_ = open('szn_timer.tmp', 'w')
-        file_.write(str(self.liste))
-        file_.close()
+        pickle.dump(self.liste, open( "szn_timer.tmp", "wb" ) )
+#        file_ = open('szn_timer.tmp', 'w')
+#        file_.write(str(self.liste))
+#        file_.close()
 
     def entferne_eintrag(self, hash_id, child):
         for item in self.liste:
