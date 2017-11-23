@@ -993,12 +993,14 @@ class TreeInputDevice(object):
 old part
 """
 sets = []
+def printit():
+    print "yup"
 
-class SettingsTree():
+class SettingsTree(object):
     def __init__(self, isInputs = True, cmdTable = None):
         self.p = None
         self.name = None
-        self.set_paratree()
+#        self.set_paratree()
 
     def __return_enum__(self,eingabe):
         if (type(eingabe) == str):
@@ -1033,24 +1035,30 @@ class SettingsTree():
                 kind['value']  = eval(seti.get('Value'))
             kinder.append(kind)
         dicti['children'] = kinder
-        inp_dict = {'name': 'Aktionen', 'type': 'group', 'children': [
-                {'name': 'Speichern', 'type': 'action'},
-                {'name': 'Speichern2', 'type': 'action'}
-            ]}
         params.append(dicti)
-        params.append(inp_dict)
+
+        action = {'name': 'Speichern', 'type': 'action'}
+        params.append(action)
         self.p = Parameter.create(name='params', type='group', children=params)
-        self.p.param('Aktionen', 'Speichern').sigActivated.connect(self.set_speichern)
-        self.p.param('Aktionen', 'Speichern2').sigActivated.connect(self.printit)
+        self.p.child('Speichern').sigActivated.connect(self.set_speichern)          
+
+#        inp_dict = {'name': 'Aktion', 'type': 'group', 'children': [
+#                {'name': 'Speichern', 'type': 'action'},
+#                {'name': 'Speichern2', 'type': 'action'}
+#            ]}
+#        params.append(inp_dict)
+#        self.p = Parameter.create(name='params', type='group', children=params)
+#        self.p.child('Speichern').sigActivated.connect(self.set_speichern)
+#        self.p.param('Aktion', 'Speichern2').sigActivated.connect(printit)
+        
 
     def set_speichern(self):
         print "here"
-        global state
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
 
-    def printit(self):
-        print "yup"
+    def speichere_settings(self):
+        print "here"
 
     def check_iter(self,some_object):
         try:
@@ -1065,6 +1073,7 @@ class SettingsTree():
     def itera(self,some_object, only_change = False):
         dicti = {}
         if self.check_iter(some_object):
+#            print some_object, some_object.get('type')
             if some_object.get('type') == 'group':
                 seting = some_object.get('name')
                 print seting
@@ -1083,6 +1092,9 @@ class SettingsTree():
                 for item in some_object:
                     self.itera(some_object.get(item))
 
+
+seTre = SettingsTree()
+
 sz=Szenen_tree('')
 def print_vale(value):
     print value
@@ -1100,11 +1112,12 @@ def populate_input_tree_2(szene=''):
     tree_input_device.setParameters(tree_ipt_dev_vals.params, showTop=False)
 
 def populate_dvcs_cmds_tree():
-    cmds=InputsTree(isInputs = False, cmdTable = (cmd_lsts[0]))
+    cmds = InputsTree(isInputs = False, cmdTable = (cmd_lsts[0]))
     tree_dvc_tp_cmds.setParameters(cmds.p, showTop=False)
 
 def populate_settngs_tree():
-    seTre = SettingsTree()
+#    seTre = SettingsTree()
+    seTre.set_paratree()
     tree_settings.setParameters(seTre.p, showTop=False)
 
 def selected(text):

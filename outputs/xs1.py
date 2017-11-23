@@ -131,6 +131,37 @@ class XS1:
         #liste.remove("Name")
         return liste
 
+    def list_sensors(self):
+        body = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_list_sensors"""
+        f = urllib2.urlopen(body)
+        html = f.read()
+        html = html[5:]
+        html = html.replace(" ", "")
+        html = html.replace("(", "")
+        html = html.replace(")", "")
+        decoded = json.loads(html)
+        return decoded
+
+    def check_batteries(self):
+        sensors = self.list_sensors()
+        for sensor in sensors['sensor']:
+            if 'batterylow' in sensor['state']:
+                print sensor['name']
+
+    def list_actors(self):
+        body = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_list_actuators"""
+        f = urllib2.urlopen(body)
+        html = f.read()
+        html = html[5:]
+        html = html.replace(" ", "")
+        html = html.replace("(", "")
+        html = html.replace(")", "")
+        actors = json.loads(html)
+        act_list = []
+        for actor in actors['actuator']:
+            act_list.append(actor['name'])
+        return act_list
+
     def set_device(self, device, commd):
         try:
             if commd == str(-1) or commd == "toggle":

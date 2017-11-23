@@ -30,18 +30,18 @@ class TestUM(unittest.TestCase):
 #        types = [x for x in types if not x in [np.nan, None]]
 #        print mysql_connector.tables.akt_type_dict
 #        print aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
-        print mysql_connector.tables().inputs_dict['V01SCH1RUM1TE01']['last1']
+        print mysql_connector.tables().inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
 #        print scenes_df.set_index('Name').to_dict()
 
-#    def test_tables_reload(self):
-#        print mysql_connector.tables.inputs_dict['V01SCH1RUM1TE01']['last1']
-#        time.sleep(60)
-#        mysql_connector.tables.reload_inputs()
-#        print mysql_connector.tables.inputs_dict['V01SCH1RUM1TE01']['last1']        
+    def test_tables_reload(self):
+        print mysql_connector.tables.inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
+        time.sleep(60)
+        mysql_connector.tables.reload_inputs()
+        print mysql_connector.tables.inputs_dict['XS1.V01BAD1RUM1TE01']['last1']        
 
-    def test_debounce(self):
-        print mysql_connector.inputs('Test', 0)
-        print mysql_connector.inputs('Test', 0)
+#    def test_debounce(self):
+#        print mysql_connector.inputs('Test', 0)
+#        print mysql_connector.inputs('Test', 0)
 #        self.assertTrue(mysql_connector.inputs('Test', 23),
 #                         'Inputs function returning wrong scenes')        
 

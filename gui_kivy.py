@@ -43,6 +43,7 @@ import threading
 import pandas as pd
 import MySQLdb as mdb
 
+from database import kivy_mysql_connector as kmc
 #from outputs import sonos
 #from outputs import xs1
 #from outputs import hue
@@ -125,9 +126,9 @@ class AlarmClock(ScrollView):
 #            print row
             row.id = str(i)
             if self.typ == 'Wecker':
-                szenenlist = scenes.list_commands('Wecker')
+                szenenlist = kmc.list_scenes('Wecker')
             else:
-                szenenlist = scenes.list_commands(['Favorit', 'Gui'])
+                szenenlist = kmc.list_scenes(['Favorit', 'Gui'])
             spinner = Spinner(text=reihe['Szene'], values=szenenlist,
                               size_hint=(None, None), size=(140, 40))
             spinner.id = 'Szene'
@@ -351,7 +352,9 @@ class OpScreen(TabbedPanel):
                 tab.add_widget(splitter)
 
     def execute_szn(self, szene):
-        scenes.execute(szene)
+        commado = {'Szene':szene}
+        csocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+        csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))
 
     def populate_webcam(self, *args, **kwargs):
         self.ids.KamBox.clear_widgets()

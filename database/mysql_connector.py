@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import mysql.connector as sql 
 import pandas as pd
 
 import constants
@@ -14,10 +13,13 @@ import datetime
 datab = constants.sql_.DB
 
 class tables(object):
-    db_connection = sql.connect(host=constants.sql_.IP, 
-                                database=constants.sql_.DB, 
-                                user=constants.sql_.USER, 
-                                password=constants.sql_.PASS)
+# TODO: change table names to constant settings
+#    db_connection = sql.connect(host=constants.sql_.IP, 
+#                                database=constants.sql_.DB, 
+#                                user=constants.sql_.USER, 
+#                                password=constants.sql_.PASS)
+    db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER, 
+                                constants.sql_.PASS, constants.sql_.DB)
     scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
     _lines = ['Adress', 'Device_Type', 'Description', 'Auto_Mode']
     aktors_df = scenes_df.loc[scenes_df['Name'].isin(_lines)].set_index('Name')
@@ -37,19 +39,23 @@ class tables(object):
     
     @classmethod
     def reload_scenes(cls):
-        db_connection = sql.connect(host=constants.sql_.IP, 
-                                database=constants.sql_.DB, 
-                                user=constants.sql_.USER, 
-                                password=constants.sql_.PASS)
+#        db_connection = sql.connect(host=constants.sql_.IP, 
+#                                database=constants.sql_.DB, 
+#                                user=constants.sql_.USER, 
+#                                password=constants.sql_.PASS)
+        db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER, 
+                                    constants.sql_.PASS, constants.sql_.DB)
         cls.scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
         db_connection.close()
 
     @classmethod
     def reload_inputs(cls):
-        db_connection = sql.connect(host=constants.sql_.IP, 
-                                database=constants.sql_.DB, 
-                                user=constants.sql_.USER, 
-                                password=constants.sql_.PASS)
+#        db_connection = sql.connect(host=constants.sql_.IP, 
+#                                database=constants.sql_.DB, 
+#                                user=constants.sql_.USER, 
+#                                password=constants.sql_.PASS)
+        db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER, 
+                                    constants.sql_.PASS, constants.sql_.DB)
         inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
         _inputs_dict = inputs_df.to_dict(orient='records')
         cls.inputs_dict = {}

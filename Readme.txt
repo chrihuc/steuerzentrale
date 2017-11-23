@@ -16,7 +16,7 @@ cd sz
 
 
 sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip python-paramiko espeak python-pandas 
-sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui soco mysql-connector-python-rf
+sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui soco
 
 python-pyaudio (xprintidle feh) python3-pyaudio 
 

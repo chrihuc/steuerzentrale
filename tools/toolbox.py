@@ -10,7 +10,17 @@ from time import localtime,strftime
 from datetime import date
 import inspect
 #pycurl
+import urllib2
 
+def check_ext_ip():
+    ext_ip = urllib2.urlopen('http://whatismyip.org').read()
+    match = '(([0-9]{1,3}\.){3}[0-9]{1,3})'
+    m = re.search(match, ext_ip)
+    if m:
+        found = m.group(1)    
+        return found
+    return '0.0.0.0'
+    
 # TODO: unittest
 
 logfolder = constants.installation_folder + "/log/"
