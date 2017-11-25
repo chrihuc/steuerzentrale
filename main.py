@@ -4,6 +4,7 @@
 
 import threading
 import time, sys
+import os
 
 import constants
 
@@ -37,6 +38,9 @@ init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}
 for setting in init_settings:
     msqc.setting_s(setting, init_settings[setting])
 
+def start_bokeh():
+    cmd = 'bokeh serve --address=192.168.192.10 --port=5050 --allow-websocket-origin=192.168.*.*:5050 bokeh/server.py'
+    os.system(cmd)
 
 threadliste = []
 
@@ -75,6 +79,9 @@ t.start()
 aes.new_event(description="All Threads started", prio=1)
 if constants.debug:
     toolbox.log(threadliste)
+
+start_bokeh()
+
 #add supervision of threads
 toolbox.log('threads running')
 

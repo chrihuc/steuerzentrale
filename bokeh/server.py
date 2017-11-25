@@ -3,6 +3,8 @@
 Created on Mon May 29 16:55:21 2017
 
 @author: christoph
+bokeh serve --address=192.168.192.10 --port=5050 --allow-websocket-origin=192.168.*.*:5050 server.py
+bokeh serve --port=5050 server.py
 """
 
 from os.path import join, dirname
@@ -18,7 +20,7 @@ from bokeh.models import ColumnDataSource, DataRange1d, Select
 from bokeh.palettes import Blues4
 from bokeh.plotting import figure
 
-STATISTICS = ['record_min_temp', 'actual_min_temp', 'average_min_temp', 'average_max_temp', 'actual_max_temp', 'record_max_temp']
+#STATISTICS = ['record_min_temp', 'actual_min_temp', 'average_min_temp', 'average_max_temp', 'actual_max_temp', 'record_max_temp']
 
 def get_dataset(src, name):
     df = src[src.Name == name].copy()
@@ -29,15 +31,15 @@ def get_dataset(src, name):
     df['right'] = df.Date + datetime.timedelta(days=0.5)
     df = df.set_index(['Date'])
     df.sort_index(inplace=True)
-    if distribution == 'Smoothed':
-        window, order = 51, 3
-        for key in STATISTICS:
-            df[key] = savgol_filter(df[key], window, order)
+#    if distribution == 'Smoothed':
+#        window, order = 51, 3
+#        for key in STATISTICS:
+#            df[key] = savgol_filter(df[key], window, order)
 
     return ColumnDataSource(data=df)
 
 def make_plot(source, title):
-    plot = figure(x_axis_type="datetime", plot_width=800, tools="", toolbar_location=None)
+    plot = figure(x_axis_type="datetime", plot_width=800)
     plot.title.text = title
 #
 #    plot.quad(top='record_max_temp', bottom='record_min_temp', left='left', right='right',
@@ -60,16 +62,17 @@ def make_plot(source, title):
 def update_plot(attrname, old, new):
     sensor = sensor_select.value
 #    plot.title.text = "Weather data for " + cities[city]['title']
-    df = pd.read_sql('SELECT * FROM Steuerzentrale.HIS_inputs order by id desc LIMIT 50000;', con=db_connection)
+    df = pd.read_sql('SELECT * FROM Steuerzentrale.HIS_inputs order by id desc LIMIT 100000;', con=db_connection)
     src = get_dataset(df, sensors[sensor])
     source.data.update(src.data)
 
 #city = 'Austin'
 distribution = 'Discrete'
 
-sensors = {'Wohnzimmer': 'V00WOH1RUM1TE01',
+sensors = {'Wohnzimmer Temp': 'V00WOH1RUM1TE01',
            'Aussentemperatur': 'A00TER1GEN1TE01',
-           'Bad': 'V01BAD1RUM1TE01'}
+           'Bad': 'V01BAD1RUM1TE01',
+           'Wohnzimmer CO': 'V00WOH1RUM1CO01'}
 
 
 sensor_select = Select(value='Wohnzimmer', title='Sensor', options=sorted(sensors.keys()))
@@ -77,7 +80,7 @@ sensor_select = Select(value='Wohnzimmer', title='Sensor', options=sorted(sensor
 
 #df = pd.read_csv(join(dirname(__file__), 'data/Book1.csv'))
 db_connection = sql.connect(host='192.168.192.10', database='Steuerzentrale', user='customer', password='user')
-df = pd.read_sql('SELECT * FROM Steuerzentrale.HIS_inputs order by id desc LIMIT 50000;', con=db_connection)
+df = pd.read_sql('SELECT * FROM Steuerzentrale.HIS_inputs order by id desc LIMIT 100000;', con=db_connection)
 source = get_dataset(df, 'V00WOH1RUM1TE01')
 plot = make_plot(source, "Daten von")
 
