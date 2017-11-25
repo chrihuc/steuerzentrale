@@ -72,6 +72,8 @@ t = threading.Thread(name="anwesenheit",target=anw.check_handys_service, args = 
 threadliste.append(t)
 t.start()
 
+start_bokeh()
+
 t = threading.Thread(name="sound_prov",target=sp.main, args = [])
 threadliste.append(t)
 t.start()
@@ -79,8 +81,6 @@ t.start()
 aes.new_event(description="All Threads started", prio=1)
 if constants.debug:
     toolbox.log(threadliste)
-
-start_bokeh()
 
 #add supervision of threads
 toolbox.log('threads running')
