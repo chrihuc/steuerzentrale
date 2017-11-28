@@ -30,13 +30,13 @@ class TestUM(unittest.TestCase):
 #        result = self.test_mod.set_device('V01SCH1BET1LI01', 'Aus')
 #        self.assertTrue(result,
 #                         'Error sending command')  
- 
-    def test_all_commands(self):
-        list_commands = self.test_mod.list_commands()
-        list_devices = self.test_mod.list_devices()
-        for device in list_devices:
-            for command in list_commands:
-                self.test_mod.set_device(device, command)
+# 
+#    def test_all_commands(self):
+#        list_commands = self.test_mod.list_commands()
+#        list_devices = self.test_mod.list_devices()
+#        for device in list_devices:
+#            for command in list_commands:
+#                self.test_mod.set_device(device, command)
 
 
 if __name__ == '__main__':

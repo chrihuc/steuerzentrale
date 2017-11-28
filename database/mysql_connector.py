@@ -114,7 +114,10 @@ def re_calc(inpt):
                     if "calc" in str(sub):
                         lst[1][num] = re_calc(sub)
                     elif type(sub) == str:
-                        lst[1][num] = float(setting_r(lst[1][num]))
+                        value = get_input_value(lst[1])
+                        if value is None:
+                            value = setting_r(lst[1][num])
+                        lst[1][num] = float(value)
                 if lst[0] == "lin_calc":
                     return (lst[1][0] * lst[1][1]) + lst[1][2]
         except:
@@ -122,7 +125,10 @@ def re_calc(inpt):
     if "sett" in str(inpt): 
         lst = eval(str(inpt))  
         if lst[0] == "sett":
-            return float(setting_r(lst[1]))
+            value = get_input_value(lst[1])
+            if value is None:
+                value = setting_r(lst[1])
+            return float(value)
         else:
             for num, sub in enumerate(lst):
                 if "sett" in str(sub):
@@ -130,6 +136,23 @@ def re_calc(inpt):
             return lst
     else:
         return inpt
+    
+def get_input_value(hks):
+    """ returns the value from an input device
+    """
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    value = None
+    with con:
+        cur = con.cursor()
+        cur.execute("SELECT last_Value FROM %s.%s WHERE HKS = '%s'" % (datab, constants.sql_tables.inputs.name, hks))
+#        if cur.fetchone()[0] != 0:
+#            con.close()
+#            return False
+        results = cur.fetchall()
+        for row in results:
+            value = row[0]
+    con.close()            
+    return value  
        
 def setting_s(setting, wert):
     ''' set single setting

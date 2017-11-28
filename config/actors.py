@@ -64,6 +64,8 @@ furn_dict = {'SCA':'Scanner',
              'SEV':'Server', 
              'PFL':'Pflanzen',
              'BET':'Bett',
+             'TER':'Terasse',
+             'GEN':'General',
              
              
              'RUT':'Router',
@@ -132,7 +134,7 @@ class ActorScreen(GridLayout):
         first_level = self.tv.add_node(TreeViewLabel(text='Veltheim', is_open=True))
         for aktor in sorted(self.szenen.columns):
             level = aktor[:3]
-            if level[:1] == 'V':
+            if level in stockwerke_dict.keys():
                 level_obj = self.get_sub_object(first_level, level)
                 raum = aktor[3:7]
                 raum_obj = self.get_sub_object(level_obj, raum)
@@ -157,6 +159,8 @@ class ActorScreen(GridLayout):
             if obj.id == sub_object_Id:
                 return obj
         desc = self.get_description(sub_object_Id)
+        if desc is None:
+            print sub_object_Id
         child_node = TreeViewLabel(text=desc, id=sub_object_Id)
         return self.tv.add_node(child_node, top_object)
  
@@ -351,8 +355,10 @@ class DetailsScreen(GridLayout):
             exce_msql("INSERT INTO `Steuerzentrale`.`set_satellites` (`Name`) VALUES ('%s');" % (self.designation.text))
             
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `IP`='%s' WHERE `Name`='%s';" % (self.IP_add.text, self.designation.text))
-            exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `PORT`='%s' WHERE `Name`='%s';" % (self.port_bc.text, self.designation.text))
-            exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `BiPORT`='%s' WHERE `Name`='%s';" % (self.port_bid.text, self.designation.text))
+            if self.port_bc.text != 'nan':
+                exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `PORT`='%s' WHERE `Name`='%s';" % (self.port_bc.text, self.designation.text))
+            if self.port_bid.text != 'nan':            
+                exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `BiPORT`='%s' WHERE `Name`='%s';" % (self.port_bid.text, self.designation.text))
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `USER`='%s' WHERE `Name`='%s';" % (self.username.text, self.designation.text))
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `PASS`='%s' WHERE `Name`='%s';" % (self.password.text, self.designation.text))
             exce_msql("UPDATE `Steuerzentrale`.`set_satellites` SET `command_set`='%s' WHERE `Name`='%s';" % (self.table.text, self.designation.text))

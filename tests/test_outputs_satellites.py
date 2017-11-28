@@ -39,7 +39,7 @@ class TestUM(unittest.TestCase):
 #                self.test_mod.set_device(device, command)
 
     def test_set_device(self):
-        result = self.test_mod.set_device('VIRKOM1SSH1PC02', 'pi_reboot')
+        result = self.test_mod.set_device('VIRKOM1SSH1PC01', 'pi_reboot')
         self.assertTrue(result,
                          'Error sending command') 
 

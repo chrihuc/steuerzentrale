@@ -33,6 +33,10 @@ from kivy.lang import Builder
 from kivy.cache import Cache
 from kivy.garden.graph import Graph, MeshLinePlot
 
+import io
+import pygame as pg
+from urllib2 import urlopen
+
 import random
 import os
 import socket
@@ -63,6 +67,7 @@ from kivy.properties import ObjectProperty, StringProperty, OptionProperty, \
 #scenes = szenen.Szenen()
 #crons = cron.Cron()
 
+pg.init()
 running = True
 con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
 pd_szenen = pd.read_sql('SELECT * FROM set_Szenen', con=con)
@@ -270,7 +275,10 @@ class OpScreen(TabbedPanel):
         self.schaltuhr = AlarmClock('Gui')
         self.play_wc = False
         self.screnns = ScreenSaver_handler(self.go_home)
-        self.aimg = AssImage(source='http://192.168.192.36/html/cam.jpg', size_hint=(1, 1))#, nocache = True)
+        self.im_url = 'http://192.168.192.36/html/cam.jpg'
+        self.load_spy_pic()
+        self.aimg = Image(source='spy.jpg')
+#        self.aimg = AssImage(source='http://192.168.192.36/html/cam.jpg', size_hint=(1, 1))#, nocache = True)
         self.populate_szenen()
         self.populate_wecker()
         self.populate_webcam()
@@ -372,8 +380,15 @@ class OpScreen(TabbedPanel):
         except socket.error:
             pass
 
+    def load_spy_pic(self):
+        image_str = urlopen(self.im_url).read()
+        image_file = io.BytesIO(image_str)
+        image = pg.image.load(image_file)
+        pg.image.save(image, 'spy.jpg')        
+
     def update_webcam(self, *args, **kwargs):
         self.populate_webcam()
+        self.load_spy_pic()
         self.aimg.reload()
         if self.play_wc: Clock.schedule_once(self.update_webcam, 0.25)
 
