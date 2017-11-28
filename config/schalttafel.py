@@ -636,7 +636,6 @@ class Szenen_tree():
                             for child in some_object.get('children'):
                                 szn_tuple = some_object.get('children').get(child).get('children')
                                 if szn_tuple.get('Szene').get('value') <> '':
-                                    print szn_tuple.get('Verlaengerbar')
                                     set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get('Verlaengerbar').get('value'),
                                                     szn_tuple.get('Abhaengig Bedingung').get('value'),szn_tuple.get('Abhaengig Erfolg').get('value')])
                             dicti['Follows'] = set_lst

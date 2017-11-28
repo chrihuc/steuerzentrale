@@ -38,6 +38,12 @@ class TestUM(unittest.TestCase):
 #            for command in list_commands:
 #                self.test_mod.set_device(device, command)
 
+    def test_set_device(self):
+        result = self.test_mod.set_device('VIRKOM1SSH1PC02', 'pi_reboot')
+        self.assertTrue(result,
+                         'Error sending command') 
+
+
 
 if __name__ == '__main__':
     unittest.main()

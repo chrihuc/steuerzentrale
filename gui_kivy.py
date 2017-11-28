@@ -410,14 +410,17 @@ class OpScreen(TabbedPanel):
                 except Exception as serr:
                     isdict = False
                 if isdict:
-                    if data_ev['Name'] == 'Klingel':
-                        self.klingel()
-                    elif data_ev['Name'] == 'DisplayAn':
-                        self.screnns.state_awake = True
-                        self.screnns.ss_on = False
-                    elif data_ev['Name'] == 'DisplayAus':
-                        self.screnns.state_awake = False
-                        self.screnns.ss_on = False
+                    try:
+                        if data_ev['Name'] == 'Klingel':
+                            self.klingel()
+                        elif data_ev['Name'] == 'DisplayAn':
+                            self.screnns.state_awake = True
+                            self.screnns.ss_on = False
+                        elif data_ev['Name'] == 'DisplayAus':
+                            self.screnns.state_awake = False
+                            self.screnns.ss_on = False
+                    except:
+                        print data
             except socket.error, e:
                 if e.errno != 4:
                     raise
