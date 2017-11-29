@@ -33,6 +33,7 @@ from kivy.lang import Builder
 from kivy.cache import Cache
 from kivy.garden.graph import Graph, MeshLinePlot
 
+import time
 import io
 import pygame as pg
 from urllib2 import urlopen
@@ -77,10 +78,12 @@ Config.set('kivy', 'log_level', 'debug')
 
 def get_data(requ):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(10)
     data_ev = {'Request':str(requ)}
     s.connect(('192.168.192.10',5005))
     s.send(str(data_ev))
     reply = s.recv(2048)
+    s.close()
     return eval(reply)
 
 
@@ -363,6 +366,7 @@ class OpScreen(TabbedPanel):
         commado = {'Szene':szene}
         csocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
         csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))
+        csocket.close()
 
     def populate_webcam(self, *args, **kwargs):
         self.ids.KamBox.clear_widgets()
@@ -374,9 +378,9 @@ class OpScreen(TabbedPanel):
             for widg in self.ids:
                 if widg in settings:
                     if widg[11:13] == 'TE':
-                        self.ids[widg].text = '[ref='+widg+']'+settings[widg]+' degC[/ref]'
+                        self.ids[widg].text = settings[widg]+' degC'
                     elif widg[11:13] == 'CO':
-                        self.ids[widg].text = '[ref='+widg+']'+settings[widg]+'[/ref]'
+                        self.ids[widg].text = settings[widg]+' ppm'
         except socket.error:
             pass
 
@@ -387,8 +391,9 @@ class OpScreen(TabbedPanel):
         pg.image.save(image, 'spy.jpg')        
 
     def update_webcam(self, *args, **kwargs):
-        self.populate_webcam()
+#        self.populate_webcam()
         self.load_spy_pic()
+        time.sleep(0.2)
         self.aimg.reload()
         if self.play_wc: Clock.schedule_once(self.update_webcam, 0.25)
 
@@ -501,7 +506,7 @@ class OpScreen(TabbedPanel):
         App.get_running_app().stop()
         if constants.gui_.KS: exit()
 
-class TemperaturLabel(Label):
+class TemperaturLabel(Button):
     def pop_up(self, text):
         popup = Popup(title=text,
             size_hint=(None, None), size=(600, 500))
@@ -516,6 +521,8 @@ class TemperaturLabel(Label):
         except:
             x=[0]
             y=[0]
+        if not (x and y):
+            return
         graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x)+10000000000000 , y_ticks_major=5,
         y_grid_label=True, x_grid_label=True, padding=5,
         x_grid=True, y_grid=True, ymin=(min(y)-2.5), ymax=(max(y)+2.5))

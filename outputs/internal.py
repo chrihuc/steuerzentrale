@@ -8,6 +8,7 @@ Created on Tue Apr 19 13:58:42 2016
 import socket
 
 import os
+import time, datetime
 import glob
 from subprocess import call
 
@@ -16,6 +17,7 @@ import git
 from alarm_event_messaging import alarmevents
 
 from database import mysql_connector
+from outputs import simulation
 
 # TODO Tests split adress from hks
 
@@ -36,6 +38,37 @@ def bidirekt(message):
 class Internal:
     
     def __init__ (self):
+        dev_list = {'V00ESS1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
+                                       datetime.time(22, 30, 0, 0), 60, 20, 50),
+                    'V00KUE1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
+                                       datetime.time(22, 30, 0, 0), 60, 1, 10),
+                    'V00KUE1DEK1LI02':('On', 'Off', datetime.time(7, 0, 0, 0), 
+                                       datetime.time(22, 30, 0, 0), 60, 1, 10),
+                    'V00FLU1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
+                                       datetime.time(22, 30, 0, 0), 60, 1, 15),
+                    'V01FLU1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
+                                       datetime.time(22, 30, 0, 0), 60, 1, 15),
+                    'V00WOH1RUM1LI13':('Ambience', 'Aus', datetime.time(7, 0, 0, 0), 
+                                       datetime.time(23, 0, 0, 0), 60, 50, 25)}
+        min_off_dict = {'V00ESS1DEK1LI01':20,
+                        'V00KUE1DEK1LI01':10,
+                        'V00KUE1DEK1LI02':10,
+                        'V00FLU1DEK1LI01':45,
+                        'V01FLU1DEK1LI01':30,
+                        'V00WOH1RUM1LI13':5}
+        min_on_dict = {'V00ESS1DEK1LI01':10,
+                       'V00KUE1DEK1LI01':1,
+                       'V00KUE1DEK1LI02':1,
+                       'V00FLU1DEK1LI01':0,
+                       'V01FLU1DEK1LI01':0,
+                       'V00WOH1RUM1LI13':20}
+        increments = ['V00KUE1DEK1LI01',
+                      'V00KUE1DEK1LI02',
+                      'V00FLU1DEK1LI01',
+                      'V01FLU1DEK1LI01']
+        self.ghost = simulation.anwesenheits_geist(dev_list)
+        self.ghost.set_latches(min_off_dict, min_on_dict)
+        self.ghost.set_increments(increments)
         pass
 
     def list_commands(self):
@@ -47,7 +80,11 @@ class Internal:
         elif commd == 'Check_Anwesenheit':
             self.check_anwesenheit()           
         elif commd == 'convert_mts':
-            self.convert_mts()    
+            self.convert_mts() 
+        elif commd == 'geist_start':
+            self.zeitgheist_start() 
+        elif commd == 'geist_stop':
+            self.zeitgheist_stop() 
         elif commd == 'Klingel_Mail':
             aes.send_mail('Klingel', text='', url='http://192.168.192.36/html/cam.jpg')              
         
@@ -108,5 +145,8 @@ class Internal:
                         os.system(cmd)
                         os.chmod(filename[:-3]+'MP4', 0777)             
                     
-                        
-                   
+    def zeitgheist_start(self):
+        self.ghost.start()
+
+    def zeitgheist_stop(self):
+        self.ghost.stop()                  

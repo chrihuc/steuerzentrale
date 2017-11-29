@@ -19,7 +19,8 @@ class TestUM(unittest.TestCase):
         self.assertTrue(anwesenheit,
                          'Error checking Anwesenheit')
 
-
+    def test_geist_start(self):
+        self.test_mod.execute('geist_start')
 
 if __name__ == '__main__':
     unittest.main()

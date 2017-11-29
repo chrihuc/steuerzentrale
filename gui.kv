@@ -129,11 +129,10 @@
         
 <TemperaturLabel>:
     size_hint: None, None
-    size: 70, 22
-    text: u'[ref=A00TER1GEN1TE01]NN degC[/ref]'
-    markup: True
+    size: 80, 30
+    text: u'NN degC'
     hks: 'Vm1'
-    on_ref_press: root.pop_up(root.hks)
+    on_press: root.pop_up(root.hks)
     canvas.before:
         Color:
             rgb: 0, 0, 0 # your color here
