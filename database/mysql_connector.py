@@ -108,13 +108,14 @@ def re_calc(inpt):
     #['sett','Temperatur_Balkon']
     if "calc" in str(inpt):
         try:
+#        if True:
             if type(eval(str(inpt))) == list:
                 lst = eval(str(inpt))
                 for num, sub in enumerate(lst[1]):
                     if "calc" in str(sub):
                         lst[1][num] = re_calc(sub)
                     elif type(sub) == str:
-                        value = get_input_value(lst[1])
+                        value = get_input_value(lst[1][num])
                         if value is None:
                             value = setting_r(lst[1][num])
                         lst[1][num] = float(value)

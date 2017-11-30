@@ -50,7 +50,7 @@ class TestUM(unittest.TestCase):
 #        print mysql_connector.tables.scenes_df.columns
 
     def test_recalc(self):
-        print msqlc.re_calc(['sett', 'V00KUE1TUE1DI01'])
+        print msqlc.re_calc(['lin_calc',['AmbientGain','V00WOH1RUM1HE01','AmbientBias']])
         
 #    def test_get_input_value(self):
 #        print msqlc.get_input_value('V00KUE1TUE1DI01')
