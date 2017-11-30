@@ -72,7 +72,7 @@ t = threading.Thread(name="anwesenheit",target=anw.check_handys_service, args = 
 threadliste.append(t)
 t.start()
 
-start_bokeh()
+# start_bokeh()
 
 t = threading.Thread(name="sound_prov",target=sp.main, args = [])
 threadliste.append(t)

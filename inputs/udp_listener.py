@@ -111,28 +111,30 @@ def exec_data(data_ev, data):
 def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
-        data = conn.recv(SIZE)
-        toolbox.log(data)
-        if not data:
-            break
-        isdict = False
         try:
-            data_ev = eval(data)
-            if type(data_ev) is dict:
-                isdict = True
-        except Exception as serr:
+            data = conn.recv(SIZE)
+            toolbox.log(data)
+            if not data:
+                break
+            isdict = False
             try:
-                data_ev = eval(data[2:])
+                data_ev = eval(data)
                 if type(data_ev) is dict:
                     isdict = True
             except Exception as serr:
-                isdict = False
-        if isdict:
-            data = exec_data(data_ev, data)
-
-        #conn.sendall(data)
-        conn.send(data)
-        conn.close()
+                try:
+                    data_ev = eval(data[2:])
+                    if type(data_ev) is dict:
+                        isdict = True
+                except Exception as serr:
+                    isdict = False
+            if isdict:
+                data = exec_data(data_ev, data)
+    
+            #conn.sendall(data)
+            conn.send(data)
+        finally:
+            conn.close()
 
 def broadcast():
     while constants.run:
