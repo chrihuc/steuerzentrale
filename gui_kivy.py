@@ -79,11 +79,13 @@ Config.set('kivy', 'log_level', 'debug')
 def get_data(requ):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(10)
-    data_ev = {'Request':str(requ)}
-    s.connect(('192.168.192.10',5005))
-    s.send(str(data_ev))
-    reply = s.recv(2048)
-    s.close()
+    try:
+        data_ev = {'Request':str(requ)}
+        s.connect(('192.168.192.10',5005))
+        s.send(str(data_ev))
+        reply = s.recv(2048)
+    finally:
+        s.close()
     return eval(reply)
 
 
@@ -512,15 +514,18 @@ class TemperaturLabel(Button):
             size_hint=(None, None), size=(600, 500))
         popup.open()
         cmd = ('SELECT Value, Date FROM Steuerzentrale.HIS_inputs where Name like "%s" and Date >= now() - INTERVAL 1 DAY;') % text
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         try:
-            con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+            
             tag_hist = pd.read_sql(cmd, con=con)
-            con.close()
+
             x = tag_hist['Date'].values.tolist()
             y = tag_hist['Value'].values.tolist()
         except:
             x=[0]
             y=[0]
+        finally:
+            con.close()            
         if not (x and y):
             return
         graph = Graph(xlabel='Time', ylabel='degC', xmin=min(x), xmax=max(x)+10000000000000 , y_ticks_major=5,
