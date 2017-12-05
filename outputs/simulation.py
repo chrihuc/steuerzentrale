@@ -74,7 +74,7 @@ class device(object):
     def switch(self):
         now = datetime.datetime.now()
         if self.startt > now.time() or now.time() > self.endt:
-            print 'out of office hours'
+            # out of office hours
             if self.status:
                 self.set_device(self.perc_off)
                 self.last_switch = now
@@ -82,7 +82,7 @@ class device(object):
                 
         lux = msqc.setting_r('V00WOH1RUM1HE01')
         if self.min_lux > 0 and self.min_lux > lux:
-            print 'too bright'
+            # too bright
             return
                             
         if self.status:
@@ -105,9 +105,8 @@ class device(object):
                 wahrscheinlichkeit = 0
 
         zufall = random.randint(1, 99) 
-#        print self.name, zufall, wahrscheinlichkeit           
+      
         if zufall in range(wahrscheinlichkeit):
-            print now, self.name, commando
             self.set_device(commando)
             self.last_switch = now
             self.reset_increment()

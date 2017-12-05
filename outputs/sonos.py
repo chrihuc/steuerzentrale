@@ -591,7 +591,6 @@ class Sonos:
                     for track in dicti['Queue']:
                         player.add_to_queue(track)
                     if dicti['Radio']:
-        #                print dicti
                         self.setRadio(player_ip, dicti['Sender'])
                     else:
                         self.Seek(player_ip, "TRACK_NR", str(dicti['TitelNr']))
@@ -605,7 +604,6 @@ class Sonos:
 
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
-#        print player, sonos_szene
         socoplayer = soco.SoCo(player)
         if str(sonos_szene.get('Volume')) <> 'None':
             self.SetVolume(player, sonos_szene.get('Volume'))
@@ -615,7 +613,6 @@ class Sonos:
                 self.CombineZones(player, zone)
             else:
                 z_ip, _, _ = self.get_addr(str(zone))
-                print(z_ip)
                 to_att = soco.SoCo(z_ip)
                 socoplayer.join(to_att.group.coordinator)
         else:
@@ -648,12 +645,10 @@ class Sonos:
         while not success:
             try:
                 self.Status = {}
-        #        print self.Status
                 # save all zones
                 for player in players:
                     t = threading.Thread(target=self.soco_get_status, args = [player])
                     t.start()
-        #            print self.Status
                 mustend = time.time() + 5
                 while (len(self.Status) < len(players)) and (time.time() < mustend):
                     time.sleep(0.25)

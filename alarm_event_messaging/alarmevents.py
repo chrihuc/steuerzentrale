@@ -204,7 +204,6 @@ class AES:
             j = 0
             for row in results:
                 for i in range (0,len(row)):
-                   #print row[i]
                    dicti[field_names[i]] = row[i]
                 liste.append(dicti)
                 dicti = {}

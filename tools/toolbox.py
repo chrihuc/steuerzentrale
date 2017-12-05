@@ -82,6 +82,21 @@ def log(*args, **kwargs):
     #p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
     #p.communicate(msg.as_string())
 
+
+class communication(object):
+    
+    queue = []
+    callbacks = []
+    
+    @classmethod
+    def register_callback(cls, func):
+        cls.callbacks.append(func)
+        
+    @classmethod
+    def send_message(cls, payload):
+        for callback in cls.callbacks:
+            callback(payload)
+
 class meas_value:
     def __init__(self):
         self.data = []

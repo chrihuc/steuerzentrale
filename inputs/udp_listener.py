@@ -65,7 +65,6 @@ def exec_data(data_ev, data):
     if ('Name' in data_ev) and ('Value' in data_ev):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
-#        print name, value
         szns, desc = msqc.inputs(name,value)
         for szene in szns:
             if szene <> None:
@@ -115,6 +114,7 @@ def bidirekt():
             data = conn.recv(SIZE)
             toolbox.log(data)
             if not data:
+                conn.close()
                 break
             isdict = False
             try:
@@ -150,7 +150,6 @@ def broadcast():
         except Exception as serr:
             isdict = False
         if isdict:
-            #print data_ev
             exec_data(data_ev, data)
 
 def main():

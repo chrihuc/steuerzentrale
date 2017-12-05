@@ -26,7 +26,7 @@ aes = aevs.AES()
 conn = pycurl.Curl()
 last_data = ""
 ezcontrol = xs1.XS1(constants.xs1_.IP) 
-scenes = szenen.Szenen()
+#scenes = szenen.Szenen()
 
 def last_data_reset():
     last_data = ""
@@ -62,11 +62,12 @@ def on_receive(data):
         heartbeat.cancel()
         heartbeat = Timer(constants.heartbt, heartbeat_sup)
         heartbeat.start()   
-        ezcontrol.SetSwitchFunction("heartbeat", "1") 
-    szns, desc = msqc.inputs(name,value)
-    for szene in szns:
-        if szene <> None:
-            scenes.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
+        ezcontrol.SetSwitchFunction("heartbeat", "1")
+    szenen.Szenen.trigger_scenes(name, value)
+#    szns, desc = msqc.inputs(name,value)
+#    for szene in szns:
+#        if szene <> None:
+#            scenes.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
     last_data = data
     
 def heartbeat_sup():
@@ -82,7 +83,7 @@ def heartbeat_sup():
         msqc.setting_s("XS1_off", "Active")
     msqc.setting_s("NumRestart", str(count + 1))
     exectext = "sudo killall python"
-    print "connection lost"
+    print "XS1 connection lost"
     if toolbox.ping(constants.router_IP):
         os.system(exectext)
     else:

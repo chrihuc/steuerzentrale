@@ -160,7 +160,7 @@ class ActorScreen(GridLayout):
                 return obj
         desc = self.get_description(sub_object_Id)
         if desc is None:
-            print sub_object_Id
+            pass
         child_node = TreeViewLabel(text=desc, id=sub_object_Id)
         return self.tv.add_node(child_node, top_object)
  

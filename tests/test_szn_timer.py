@@ -9,12 +9,15 @@ Created on Wed Nov  8 12:17:30 2017
 import time
 import datetime
 import unittest
+
+import constants
 from tools import szn_timer
 
 class TestUM(unittest.TestCase):
 
     def setUp(self):
-        self.test_mod = szn_timer.Szenen_Timer(def_to_run=self.print_it)
+        constants.debug = True
+        self.test_mod = szn_timer.Szenen_Timer(callback=self.print_it)
         self.start_t = None
 
     def print_it(self, it):

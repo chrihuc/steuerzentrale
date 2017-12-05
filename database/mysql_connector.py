@@ -66,40 +66,7 @@ class tables(object):
 
 #auto add entry to inputs
 #replace all dbs with constants
-#rewrite defs at the end
-
-def main():
-    #print mdb_set_table(table=constants.sql_tables.cron.name, device='Wochentags1', commands={u'Do': True, u'Fr': True, 'Name': u'Wochentags1', u'Di': True, u'Eingeschaltet': True, u'Mo': True, u'Mi': True, u'So': False, 'Time': u'06:40', u'Sa': False, 'Szene': u'Wecker'}, primary = 'Name')
-    #print setting_r("Notify_Christoph")
-    #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
-    #print re_calc(['lin_calc',[1,'temp',1]])
-    #print re_calc(['sett','Temperatur_Wohnzi'])
-    # print getSzenenSources('Webcam_aus')
-    # print getSzenenSources('Webcam_aus')
-    #print maxSzenenId()-maxSzenenId()%10 +10
-    #print re_calc(10)
-    #set_automode(device="Stehlampe", mode="auto")
-    #print mdb_szene_r("Device_Typ")
-    #typ_dict = mdb_szene_r("Device_Typ")
-    #ezcontrol_devices = []
-    #TF_LEDs = []
-    #hue_devices = []
-    #for device in typ_dict:
-        #if typ_dict.get(device) == "EZControl":
-            #ezcontrol_devices.append(device)
-        #if typ_dict.get(device) == "TF_LEDs":
-            #TF_LEDs.append(device)
-        #if typ_dict.get(device) == "Hue":
-            #hue_devices.append(device)            
-    #print hue_devices
-    #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
-    #mdb_add_table_entry("test",values)
-#    print str(mdb_get_table(constants.sql_tables.Besucher.name))
-    print inputs('V01KID1RUM1TE01', 23)
-#    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
-#    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
-#    print mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
-#    print mdb_read_table_entry('Steuerzentrale.sat_TFLED', 'Ambience')    
+#rewrite defs at the end  
 
     
 def re_calc(inpt):
@@ -242,7 +209,6 @@ def mdb_read_table_entry(db, entry, column='Name',recalc=True):
                     try:
                         old_dict = eval(row[i])
                         if isinstance(old_dict, dict):
-                            print old_dict
                             new_dict = {}
                             for key, value in old_dict.iteritems(): 
                                 new_dict[key] = re_calc(value)
@@ -385,7 +351,6 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             if commando <> primary:
-#                print sql
                 cur.execute(sql)       
     con.close() 
 
@@ -437,7 +402,6 @@ def remove_entry(table, device, primary = 'Name'):
             #else:
                 #commando = cmds.get(cmd)            
             #sql = 'UPDATE '+constants.sql_tables.hue.name+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(device) + '"'
-            #print sql
             #cur.execute(sql)  
     #con.close()       
         
@@ -482,20 +446,15 @@ def get_device_adress(device):
 def getSzenenSources(szene):
     if szene in ['', None]:
         return [],[]
-    print szene, constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     ilist, slist = [], []
     with con:
-        print 'connecting'
         cur = con.cursor()
         sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+\
               '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)'
         sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)' % (constants.sql_tables.inputs.name, szene)      
-        print 'executing', sql
         cur.execute(sql)
-        print 'executed 1'
         results = cur.fetchall()
-        print results
         field_names = [i[0] for i in cur.description]
         for row in results:
             dicti = {}
@@ -505,7 +464,6 @@ def getSzenenSources(szene):
         sql = 'SELECT * FROM '+constants.sql_tables.szenen.name+' where Follows like "%'+szene+'%"'
         szene = "%" + szene + "%"
         sql = 'SELECT * FROM %s.%s where Follows like "%s"' % (datab, constants.sql_tables.szenen.name, szene)    
-        print 'executing 2' , sql
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
@@ -515,7 +473,6 @@ def getSzenenSources(szene):
                dicti[field_names[i]] = row[i]  
             slist.append(dicti)           
     con.close()   
-    print ilist, slist
     return ilist, slist
     
 def maxSzenenId():

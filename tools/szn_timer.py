@@ -15,17 +15,27 @@ import datetime
 import uuid
 
 class Szenen_Timer:
-    def __init__(self,def_to_run):
+        
+    def __init__(self,callback=None):
         self.liste = []
-        self.def_to_run = def_to_run
+        self._callback = callback
+        self.store()
         #self.index_p = {}
         #self.index_c = {}
         #exact means parent needs to be the same
         #retrig means its possible to delay, or it is just a normal timer
 
+    @property
+    def callback(self):
+        return self._callback
+    
+    @callback.setter
+    def callback(self, callback):
+        self._callback = callback
+
     def add_timer(self, parent, delay, child, exact, retrig,  start=False):
         if delay == 0 and start:
-            self.def_to_run(child)
+            self.callback(child)
             return None
         ct = datetime.datetime.now()
         dicti = {}
@@ -48,7 +58,6 @@ class Szenen_Timer:
         return hash_id
 
     def start_timer(self, nr):
-        #print self.liste, nr
         item = self.liste[nr]
         item['due'] = datetime.datetime.now() + datetime.timedelta(0,self.liste[nr].get("delay"))
         self.store()
@@ -83,7 +92,7 @@ class Szenen_Timer:
                     item.get("timer").start()
                     self.store()
                 else:
-                    self.def_to_run(child)
+                    self.callback(child)
                     self.liste.remove(item)
                     self.store()
                 found = True
@@ -106,6 +115,6 @@ class Szenen_Timer:
         for item in self.liste:
             if item.get("hash_id") == hash_id:
                 self.liste.remove(item)
-        self.def_to_run(child)
+        self.callback(child)
         self.store()
 

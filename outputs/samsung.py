@@ -103,7 +103,6 @@ class Remotecontrol:
                 + chr(len(messagepart2)) + chr(0x00) + messagepart2
                 sock.send(part2)      
             for key in skey:
-                #print key
                 if key == 'max_vol':
                     for i in range(0,100):
                         self.send_core(sock, "KEY_VOLUP")
