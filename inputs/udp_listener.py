@@ -28,12 +28,13 @@ from tools import toolbox
 hostName = socket.gethostbyname( constants.eigene_IP )
 
 biSocket = socket.socket()# socket.AF_INET, socket.SOCK_STREAM )
+biSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 biSocket.bind( (hostName, constants.udp_.biPORT) )
-biSocket.listen(5)
+biSocket.listen(10)
 
 PORT_NUMBER = constants.udp_.PORT
 broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-#broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 broadSocket.bind( (hostName, constants.udp_.broadPORT) )
 
 borad_to_guis = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
