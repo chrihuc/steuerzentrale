@@ -107,6 +107,7 @@ class Szenen_Timer:
 
     def store(self):
 #        pickle.dump(self.liste, open( "szn_timer.tmp", "wb" ) )
+        print self.liste
         file_ = open('szn_timer.tmp', 'w')
         file_.write(str(self.liste))
         file_.close()
