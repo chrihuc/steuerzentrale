@@ -74,7 +74,6 @@ class Szenen(object):
     @classmethod
     def trigger_scenes(cls, device, value):
         szns, desc, heartbt = msqc.inputs(device,value)
-        print szns, desc, heartbt
         if not heartbt is None:
             cls.timer_add(cls.execute, parent=None, device=device, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
         for szene in szns:
