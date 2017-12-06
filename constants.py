@@ -84,6 +84,7 @@ for i in range(0,3):
             run = True
             passive = False
             debug = False
+            debug_level = 9
             config.readfp(open('./main.cfg'))
             eigene_IP = config.get('Main', 'eigene_IP')
             name = config.get('Main', 'name')

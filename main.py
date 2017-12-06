@@ -29,6 +29,8 @@ if sys.argv:
     if 'debug' in sys.argv:
         toolbox.log('debug on')
         constants.debug = True
+        if '1' in sys.argv:
+            constants.debug_level = 1
     if 'passive' in sys.argv:
         toolbox.log('passive on')
         constants.passive = True

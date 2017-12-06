@@ -72,7 +72,8 @@ class Internal:
         pass
 
     def list_commands(self):
-        return ['Update', 'Check_Anwesenheit', 'convert_mts', 'Klingel_Mail']
+        return ['Update', 'Check_Anwesenheit', 'convert_mts', 'Klingel_Mail',
+                'geist_start', 'geist_stop']
         
     def execute(self, commd):
         if commd == 'Update':

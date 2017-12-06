@@ -165,6 +165,7 @@ class anwesenheits_geist(object):
         
     def start(self):
         self.running = True
+        toolbox.log('Geist gestarted')
         self.run()
         
     def run(self):

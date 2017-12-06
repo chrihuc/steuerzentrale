@@ -53,7 +53,11 @@ def ping(IP, number = 1):
 
 def log(*args, **kwargs):
     if 'level' not in kwargs:
-        level=0
+        level=9
+    else:
+        level=kwargs['level']
+    if level > constants.debug_level:
+        return
     if constants.debug:
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
