@@ -116,6 +116,7 @@ class device(object):
         
     def set_device(self, commando):
 #        scenes.threadSetDevice(self.name, commando)
+        toolbox.log(self.name, commando, level=1)
         payload = {'Device':self.name,'Command':commando}
         toolbox.communication.send_message(payload, typ='SetDevice')
         self.status = not self.status
@@ -165,7 +166,7 @@ class anwesenheits_geist(object):
         
     def start(self):
         self.running = True
-        toolbox.log('Geist gestarted')
+        toolbox.log('Ghost started', level=1)
         self.run()
         
     def run(self):
@@ -178,6 +179,7 @@ class anwesenheits_geist(object):
 
     def stop(self):
         self.running = False
+        toolbox.log('Ghost stopped', level=1)
                 
 dev_list = {'V00ESS1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
                                datetime.time(22, 30, 0, 0), 60, 20, 50),
