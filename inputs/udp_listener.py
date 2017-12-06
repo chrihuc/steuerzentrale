@@ -66,10 +66,11 @@ def exec_data(data_ev, data):
     if ('Name' in data_ev) and ('Value' in data_ev):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
-        szns, desc = msqc.inputs(name,value)
-        for szene in szns:
-            if szene <> None:
-                scenes.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
+        szenen.Szenen.trigger_scenes(name, value)
+#        szns, desc = msqc.inputs(name,value)
+#        for szene in szns:
+#            if szene <> None:
+#                scenes.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
 #    elif data_ev.get('Command')=='Update':
 #        aes.new_event(description="System update", prio=0)
 #        cmd_internal.git_update()

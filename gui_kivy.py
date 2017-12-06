@@ -384,6 +384,9 @@ class OpScreen(TabbedPanel):
                     elif widg[11:13] == 'CO':
                         self.ids[widg].text = settings[widg]+' ppm'
         except socket.error:
+            for widg in self.ids:
+                if widg in settings:
+                    self.ids[widg].text = 'NNN'
             pass
 
     def load_spy_pic(self):

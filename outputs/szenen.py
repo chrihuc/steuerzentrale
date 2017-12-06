@@ -55,6 +55,7 @@ class Szenen(object):
     
     kommando_dict = {}
     timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
+    sz_t = szn_timer.Szenen_Timer()
     
     def __init__ (self):
 #        self.sz_t = szn_timer.Szenen_Timer(callback = self.execute)
@@ -69,9 +70,13 @@ class Szenen(object):
         if ('Name' in payload) and ('Value' in payload):
             cls.trigger_scenes(payload['Name'], payload['Value'])
     
+    
     @classmethod
     def trigger_scenes(cls, device, value):
-        szns, desc = msqc.inputs(device,value)
+        szns, desc, heartbt = msqc.inputs(device,value)
+        print szns, desc, heartbt
+        if not heartbt is None:
+            cls.timer_add(cls.execute, parent=None, device=device, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
         for szene in szns:
             if szene <> None:
                 cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
@@ -421,10 +426,12 @@ class Szenen(object):
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)           
         return erfolg
 
-    sz_t = szn_timer.Szenen_Timer()
+    
 #    sz_t.callback = execute
     
     @classmethod
-    def timer_add(cls, callback, parent, delay, child, exact, retrig):
+    def timer_add(cls, callback, parent, delay, child, exact, retrig, device=None):
         cls.sz_t.callback = callback
-        cls.sz_t.retrigger_add(parent, delay, child, exact, retrig)
+        cls.sz_t.retrigger_add(parent, delay, child, exact, retrig, device)
+        
+toolbox.communication.register_callback(Szenen.callback_receiver)

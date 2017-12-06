@@ -512,6 +512,7 @@ def inputs(device, value):
             if last_value is None: last_value = 0
             last_time = dicti_1['last1']
             debounce = dicti_1['debounce']
+            heartbt = dicti_1['heartbeat']
             desc = dicti_1['Description']
             if str(last_time) == 'None': last_time = ct
             if debounce is None: 
@@ -576,7 +577,5 @@ def inputs(device, value):
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)                 
     con.close()
-    return szenen, desc
+    return szenen, desc, heartbt
         
-if __name__ == '__main__':
-    main()    

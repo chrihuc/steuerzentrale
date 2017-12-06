@@ -61,7 +61,9 @@ def log(*args, **kwargs):
     if constants.debug:
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
-        print '[%s, %s] %s' % (calframe[1][1], calframe[1][3], args) 
+        zeit =  time.time()
+        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
+        print '%s [%s, %s] %s' % (uhr, calframe[1][1], calframe[1][3], args) 
 #def restart_services():
   #lgd = logdebug(True, True)
   #lgd.debug("Heartbeat supervision")
