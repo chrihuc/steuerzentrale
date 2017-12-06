@@ -82,6 +82,10 @@ def log(*args, **kwargs):
     #p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
     #p.communicate(msg.as_string())
 
+def kw_unpack(kwargs, searched_key):
+    if searched_key in kwargs:
+        return kwargs[searched_key]
+    return False
 
 class communication(object):
     
@@ -93,9 +97,9 @@ class communication(object):
         cls.callbacks.append(func)
         
     @classmethod
-    def send_message(cls, payload):
+    def send_message(cls, payload, *args, **kwargs):
         for callback in cls.callbacks:
-            callback(payload)
+            callback(payload, *args, **kwargs)
 
 class meas_value:
     def __init__(self):

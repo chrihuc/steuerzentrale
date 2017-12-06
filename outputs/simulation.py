@@ -10,6 +10,7 @@ Created on Sat Mar 25 08:08:14 2017
 import random
 import time, datetime
 from database import mysql_connector as msqc
+from tools import toolbox
 #from outputs import szenen
 
 # TODO: class scene
@@ -115,6 +116,8 @@ class device(object):
         
     def set_device(self, commando):
 #        scenes.threadSetDevice(self.name, commando)
+        payload = {'Device':self.name,'Command':commando}
+        toolbox.communication.send_message(payload, typ='SetDevice')
         self.status = not self.status
         
 class anwesenheits_geist(object):

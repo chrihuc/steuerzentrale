@@ -63,7 +63,9 @@ class Szenen(object):
         pass
     
     @classmethod
-    def callback_receiver(cls, payload):
+    def callback_receiver(cls, payload, *args, **kwargs):
+        if toolbox.kw_unpack(kwargs,'typ') == 'SetDevice':
+            cls.threadSetDevice(payload['Device'], payload['Command'])
         if ('Name' in payload) and ('Value' in payload):
             cls.trigger_scenes(payload['Name'], payload['Value'])
     
