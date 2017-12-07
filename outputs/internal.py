@@ -20,6 +20,7 @@ from database import mysql_connector
 from outputs import simulation
 
 # TODO Tests split adress from hks
+# TODO change to commlayer
 
 HOST = constants.udp_.SERVER   # Symbolic name meaning the local host
 PORT = constants.udp_.biPORT    # Arbitrary non-privileged port
@@ -27,10 +28,13 @@ aes = alarmevents.AES()
 
 def bidirekt(message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((HOST,PORT))
-    s.send(str(message))
-    reply = s.recv(1024)
-    s.close()      
+    s.settimeout(10)
+    try:
+        s.connect((HOST,PORT))
+        s.send(str(message))
+        reply = s.recv(1024)
+    finally:
+        s.close()   
     if str(reply) == str(message):
         return True
     return False
