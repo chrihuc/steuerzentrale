@@ -37,7 +37,7 @@ from tools import toolbox
 
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
-    toolbox.communication.send_message(payload, 'typ'='InputValue')
+    toolbox.communication.send_message(payload, typ='InputValue')
 
 # tranisiton modes
 ANSTEIGEND = 0
