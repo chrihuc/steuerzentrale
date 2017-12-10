@@ -28,7 +28,7 @@ aes = alarmevents.AES()
 
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
-    toolbox.communication.send_message(payload, 'typ'='InputValue')
+    toolbox.communication.send_message(payload, typ='InputValue')
 #    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #    s.settimeout(10)
 #    try:
