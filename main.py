@@ -13,6 +13,8 @@ from inputs import udp_listener
 from inputs import xs1
 from inputs import internal
 
+from tifo import tf_connection
+
 from database import mysql_connector as msqc
 
 from alarm_event_messaging import alarmevents as aevs
@@ -29,6 +31,8 @@ if sys.argv:
     if 'debug' in sys.argv:
         toolbox.log('debug on')
         constants.debug = True
+        if '1' in sys.argv:
+            constants.debug_level = 1
     if 'passive' in sys.argv:
         toolbox.log('passive on')
         constants.passive = True
@@ -45,6 +49,11 @@ def start_bokeh():
 threadliste = []
 
 t = threading.Thread(name="xs1", target=xs1.main, args = [])
+threadliste.append(t)
+t.start()
+
+tifo = tf_connection.TiFo()
+t = threading.Thread(name="tifo", target=tifo.main, args = [])
 threadliste.append(t)
 t.start()
 
@@ -72,7 +81,7 @@ t = threading.Thread(name="anwesenheit",target=anw.check_handys_service, args = 
 threadliste.append(t)
 t.start()
 
-start_bokeh()
+# start_bokeh()
 
 t = threading.Thread(name="sound_prov",target=sp.main, args = [])
 threadliste.append(t)
@@ -91,10 +100,10 @@ try:
             if not t in threading.enumerate():
                 aes.new_event(description="Thread stopped: "+t.name, prio=1)
                 constants.run = False
-                sys.exit() 
+                sys.exit()
         time.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
-sys.exit() 
- 
-    
+sys.exit()
+
+

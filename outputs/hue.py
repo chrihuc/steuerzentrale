@@ -123,7 +123,8 @@ class Hue_lights():
         if bright <> None and bright>0:
             szene['bri'] = int(bright)
         if bright <> None and bright<=0:
-            pass            
+            pass     
+        # switch light on to be able to modify it
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
             success = h_dev.on
             retry = 1
@@ -167,6 +168,7 @@ class Hue_lights():
                     time.sleep(1)
                     success = False 
                     retry += 1
+        # switch light off
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
             success = False #not h_dev.on
             retry = 1
@@ -181,10 +183,12 @@ class Hue_lights():
                     time.sleep(1)
                     success = False 
                     retry += 1
+            if retry == max_retry:
+                print(device, ' hue timed out')
         try:
             if not h_dev.reachable:
                 success = False
-                aes.new_event(description=str(device) + " not reachable", prio=1)
+                aes.new_event(description=str(device) + " really not reachable", prio=1)
         except:
             success = False
             aes.new_event(description=str(device) + " not reachable", prio=1)            

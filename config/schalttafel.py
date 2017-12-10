@@ -980,6 +980,13 @@ class TreeInputDevice(object):
         print szene
         mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')),
                       commands=szene, primary = 'Id', translate = False)
+        inp_parameter = ['Description', 'heartbeat', 'debounce', 'Doppelklick',
+                         'Logging', 'Setting', 'HKS']
+        setngs = {para:szene[para] for para in inp_parameter if para in szene}
+        print setngs
+        mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Name')),
+                      commands=setngs, primary = 'Name', translate = False)        
+        
 
     def loeschen(self):
         for kind in self.params.children():

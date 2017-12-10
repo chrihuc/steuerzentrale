@@ -47,15 +47,6 @@ def  get_satellite(name):
             x.attr = satellite
     return x
 
-def main():
-    sats = Satellite()
-#    print sats.list_devices()
-#    print sats.dict_commands(device='V00KUE1DEK1LI01')
-#    print sats.list_commands("V00FLU1TUE1PC01")
-#    print sats.set_device('V00WOH1DEK1LI01','off')
-#    print sats.set_device('V00WOH1SRA1PC01','Update')
-    print sats.set_device('VIRKOM1SSH1PC03','KillPython')
-#    print sats.listCommandTable('alle',nameReturn = False)
 
 class Satellite:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

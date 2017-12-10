@@ -10,6 +10,7 @@ Created on Sat Mar 25 08:08:14 2017
 import random
 import time, datetime
 from database import mysql_connector as msqc
+from tools import toolbox
 #from outputs import szenen
 
 # TODO: class scene
@@ -74,7 +75,7 @@ class device(object):
     def switch(self):
         now = datetime.datetime.now()
         if self.startt > now.time() or now.time() > self.endt:
-            print 'out of office hours'
+            # out of office hours
             if self.status:
                 self.set_device(self.perc_off)
                 self.last_switch = now
@@ -82,7 +83,7 @@ class device(object):
                 
         lux = msqc.setting_r('V00WOH1RUM1HE01')
         if self.min_lux > 0 and self.min_lux > lux:
-            print 'too bright'
+            # too bright
             return
                             
         if self.status:
@@ -105,9 +106,8 @@ class device(object):
                 wahrscheinlichkeit = 0
 
         zufall = random.randint(1, 99) 
-#        print self.name, zufall, wahrscheinlichkeit           
+      
         if zufall in range(wahrscheinlichkeit):
-            print now, self.name, commando
             self.set_device(commando)
             self.last_switch = now
             self.reset_increment()
@@ -116,6 +116,9 @@ class device(object):
         
     def set_device(self, commando):
 #        scenes.threadSetDevice(self.name, commando)
+        toolbox.log(self.name, commando, level=1)
+        payload = {'Device':self.name,'Command':commando}
+        toolbox.communication.send_message(payload, typ='SetDevice')
         self.status = not self.status
         
 class anwesenheits_geist(object):
@@ -163,6 +166,7 @@ class anwesenheits_geist(object):
         
     def start(self):
         self.running = True
+        toolbox.log('Ghost started', level=1)
         self.run()
         
     def run(self):
@@ -175,6 +179,7 @@ class anwesenheits_geist(object):
 
     def stop(self):
         self.running = False
+        toolbox.log('Ghost stopped', level=1)
                 
 dev_list = {'V00ESS1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
                                datetime.time(22, 30, 0, 0), 60, 20, 50),

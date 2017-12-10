@@ -14,11 +14,11 @@ datab = constants.sql_.DB
 
 class tables(object):
 # TODO: change table names to constant settings
-#    db_connection = sql.connect(host=constants.sql_.IP, 
-#                                database=constants.sql_.DB, 
-#                                user=constants.sql_.USER, 
+#    db_connection = sql.connect(host=constants.sql_.IP,
+#                                database=constants.sql_.DB,
+#                                user=constants.sql_.USER,
 #                                password=constants.sql_.PASS)
-    db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER, 
+    db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER,
                                 constants.sql_.PASS, constants.sql_.DB)
     scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
     _lines = ['Adress', 'Device_Type', 'Description', 'Auto_Mode']
@@ -36,25 +36,25 @@ class tables(object):
     inputs_dict = {}
     for item in _inputs_dict:
         inputs_dict[item['Name']] = item
-    
+
     @classmethod
     def reload_scenes(cls):
-#        db_connection = sql.connect(host=constants.sql_.IP, 
-#                                database=constants.sql_.DB, 
-#                                user=constants.sql_.USER, 
+#        db_connection = sql.connect(host=constants.sql_.IP,
+#                                database=constants.sql_.DB,
+#                                user=constants.sql_.USER,
 #                                password=constants.sql_.PASS)
-        db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER, 
+        db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER,
                                     constants.sql_.PASS, constants.sql_.DB)
         cls.scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
         db_connection.close()
 
     @classmethod
     def reload_inputs(cls):
-#        db_connection = sql.connect(host=constants.sql_.IP, 
-#                                database=constants.sql_.DB, 
-#                                user=constants.sql_.USER, 
+#        db_connection = sql.connect(host=constants.sql_.IP,
+#                                database=constants.sql_.DB,
+#                                user=constants.sql_.USER,
 #                                password=constants.sql_.PASS)
-        db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER, 
+        db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER,
                                     constants.sql_.PASS, constants.sql_.DB)
         inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
         _inputs_dict = inputs_df.to_dict(orient='records')
@@ -68,66 +68,30 @@ class tables(object):
 #replace all dbs with constants
 #rewrite defs at the end
 
-def main():
-    #print mdb_set_table(table=constants.sql_tables.cron.name, device='Wochentags1', commands={u'Do': True, u'Fr': True, 'Name': u'Wochentags1', u'Di': True, u'Eingeschaltet': True, u'Mo': True, u'Mi': True, u'So': False, 'Time': u'06:40', u'Sa': False, 'Szene': u'Wecker'}, primary = 'Name')
-    #print setting_r("Notify_Christoph")
-    #print re_calc(['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]])
-    #print re_calc(['lin_calc',[1,'temp',1]])
-    #print re_calc(['sett','Temperatur_Wohnzi'])
-    # print getSzenenSources('Webcam_aus')
-    # print getSzenenSources('Webcam_aus')
-    #print maxSzenenId()-maxSzenenId()%10 +10
-    #print re_calc(10)
-    #set_automode(device="Stehlampe", mode="auto")
-    #print mdb_szene_r("Device_Typ")
-    #typ_dict = mdb_szene_r("Device_Typ")
-    #ezcontrol_devices = []
-    #TF_LEDs = []
-    #hue_devices = []
-    #for device in typ_dict:
-        #if typ_dict.get(device) == "EZControl":
-            #ezcontrol_devices.append(device)
-        #if typ_dict.get(device) == "TF_LEDs":
-            #TF_LEDs.append(device)
-        #if typ_dict.get(device) == "Hue":
-            #hue_devices.append(device)            
-    #print hue_devices
-    #values = {'Wach': None, 'Schlafen': None, 'Leise': None, 'Setting': 'True', 'last1': datetime.datetime(2016, 4, 11, 19, 14, 37), 'last2': datetime.datetime(2016, 4, 11, 19, 13, 48), 'Besuch': None, 'last_Value': decimal('16.90'), 'AmGehen': None, 'Description': 'Temperatur Terasse', 'Urlaub': None, 'Value_lt': None, 'Logging': 'True', 'Name': 'A00TER1GEN1TE01', 'Dreifach': None, 'Gegangen': None, 'Doppel': None, 'Value_eq': None, 'Value_gt': None, 'Abwesend': None, 'Schlummern': None, 'Id': 1L}
-    #mdb_add_table_entry("test",values)
-#    print str(mdb_get_table(constants.sql_tables.Besucher.name))
-    print inputs('V01KID1RUM1TE01', 23)
-#    mdb_add_table_entry('out_hue',{'Name':'Neuer Befehl'})
-#    print mdb_read_table_entry(constants.sql_tables.szenen.name, 'AdvFarbWechsel')
-#    print mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
-#    print mdb_read_table_entry('Steuerzentrale.sat_TFLED', 'Ambience')    
 
-    
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
     #['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]]
     #['sett','Temperatur_Balkon']
     if "calc" in str(inpt):
         try:
+#        if True:
             if type(eval(str(inpt))) == list:
                 lst = eval(str(inpt))
                 for num, sub in enumerate(lst[1]):
                     if "calc" in str(sub):
                         lst[1][num] = re_calc(sub)
                     elif type(sub) == str:
-                        value = get_input_value(lst[1])
-                        if value is None:
-                            value = setting_r(lst[1][num])
+                        value = setting_r(lst[1][num])
                         lst[1][num] = float(value)
                 if lst[0] == "lin_calc":
                     return (lst[1][0] * lst[1][1]) + lst[1][2]
         except:
             return inpt
-    if "sett" in str(inpt): 
-        lst = eval(str(inpt))  
+    if "sett" in str(inpt):
+        lst = eval(str(inpt))
         if lst[0] == "sett":
-            value = get_input_value(lst[1])
-            if value is None:
-                value = setting_r(lst[1])
+            value = setting_r(lst[1])
             return float(value)
         else:
             for num, sub in enumerate(lst):
@@ -136,7 +100,7 @@ def re_calc(inpt):
             return lst
     else:
         return inpt
-    
+
 def get_input_value(hks):
     """ returns the value from an input device
     """
@@ -151,9 +115,9 @@ def get_input_value(hks):
         results = cur.fetchall()
         for row in results:
             value = row[0]
-    con.close()            
-    return value  
-       
+    con.close()
+    return value
+
 def setting_s(setting, wert):
     ''' set single setting
     '''
@@ -170,28 +134,31 @@ def setting_s(setting, wert):
         else:
             sql = 'UPDATE '+constants.sql_tables.settings.name+' SET Value = "' + str(wert) + '" WHERE Name = "'+ str(setting) + '"'
         cur.execute(sql)
-    con.close() 
-    
+    con.close()
+
 def setting_r(setting):
-    ''' read single setting
-    '''    
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    value = 0
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
-        if cur.fetchone()[0] == 0:   
-            sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES (0,"'+ str(setting) + '")'
-            value = 0
-            cur.execute(sql)
-        else:
-            sql = 'SELECT * FROM '+constants.sql_tables.settings.name+' WHERE Name = "' + str(setting) +'"'
-            cur.execute(sql)
-            results = cur.fetchall()
-            for row in results:
-                fname = row[1]
-                value = row[2]
-    con.close()            
+    ''' try to read the setting from inputs table if not an input
+        read single setting
+    '''
+    value = get_input_value(setting)
+    if value is None:
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+        value = 0
+        with con:
+            cur = con.cursor()
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
+            if cur.fetchone()[0] == 0:
+                sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES (0,"'+ str(setting) + '")'
+                value = 0
+                cur.execute(sql)
+            else:
+                sql = 'SELECT * FROM '+constants.sql_tables.settings.name+' WHERE Name = "' + str(setting) +'"'
+                cur.execute(sql)
+                results = cur.fetchall()
+                for row in results:
+                    fname = row[1]
+                    value = row[2]
+        con.close()
     return value
 
 def settings_r():
@@ -204,19 +171,19 @@ def settings_r():
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
         for row in results:
-            dicti[row[1]] = row[2]            
-    con.close()    
-    return dicti 
+            dicti[row[1]] = row[2]
+    con.close()
+    return dicti
 
 def set_val_in_szenen(device, szene, value):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
         sql = 'SET SQL_SAFE_UPDATES = 0'
-        cur.execute(sql)        
+        cur.execute(sql)
         sql = 'UPDATE '+constants.sql_.DB+'.'+constants.sql_tables.szenen.name+' SET '+device+' = "' + str(value) + '" WHERE Name = "' + str(szene) + '"'
         cur.execute(sql)
-    con.close()                   
+    con.close()
 
 ## alle mit dicti:
 def mdb_read_table_entry(db, entry, column='Name',recalc=True):
@@ -235,24 +202,23 @@ def mdb_read_table_entry(db, entry, column='Name',recalc=True):
                 if len(cmds) == 0:
                     commando = field_names[i]
                 else:
-                    commando = cmds.get(field_names[i])  
+                    commando = cmds.get(field_names[i])
                 if recalc:
                     dicti[commando] = re_calc(row[i])
                     try:
                         old_dict = eval(row[i])
                         if isinstance(old_dict, dict):
-                            print old_dict
                             new_dict = {}
-                            for key, value in old_dict.iteritems(): 
+                            for key, value in old_dict.iteritems():
                                 new_dict[key] = re_calc(value)
                             dicti[commando] = new_dict
                     except:
                         pass
-                    
+
                 else:
-                    dicti[commando] = (row[i]) 
-    con.close()    
-    return dicti       
+                    dicti[commando] = (row[i])
+    con.close()
+    return dicti
 
 def mdb_read_table_column(db, column):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -264,8 +230,8 @@ def mdb_read_table_column(db, column):
         results = cur.fetchall()
         for row in results:
             rlist.append(row[0])
-    con.close()    
-    return rlist 
+    con.close()
+    return rlist
 
 def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc", exact=False):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -284,8 +250,8 @@ def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc", e
                 rlist.append((int(row[0].strftime("%s"))))
             else:
                 rlist.append(eval(str(row[0])))
-    con.close()    
-    return rlist 
+    con.close()
+    return rlist
 
 def mdb_add_table_entry(table, values, primary = 'Id'):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -300,12 +266,12 @@ def mdb_add_table_entry(table, values, primary = 'Id'):
     strin = strin[0:-2] +') VALUES ('
     for val in values:
         if val <> primary:
-            strin += '"'+str(values.get(val)) + '", '    
+            strin += '"'+str(values.get(val)) + '", '
     strin = strin[0:-2] + ')'
     with con:
-        cur = con.cursor()  
-        cur.execute(strin) 
-    con.close() 
+        cur = con.cursor()
+        cur.execute(strin)
+    con.close()
 
 def get_raw_cmds(db):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -318,8 +284,8 @@ def get_raw_cmds(db):
         field_names = [i[0] for i in cur.description]
         for row in results:
             for i in range (0,len(row)):
-               dicti[row[i]] = field_names[i]            
-    con.close()    
+               dicti[row[i]] = field_names[i]
+    con.close()
     return dicti
 
 def teg_raw_cmds(db):
@@ -333,11 +299,11 @@ def teg_raw_cmds(db):
         field_names = [i[0] for i in cur.description]
         for row in results:
             for i in range (0,len(row)):
-               dicti[field_names[i]] =  row[i]           
+               dicti[field_names[i]] =  row[i]
     con.close()
     return dicti
 
-           
+
 
 #kompletter table:
 def mdb_get_table(db):
@@ -352,10 +318,10 @@ def mdb_get_table(db):
         for row in results:
             dicti = {}
             for i in range (0,len(row)):
-               dicti[field_names[i]] = row[i]  
+               dicti[field_names[i]] = row[i]
             rlist.append(dicti)
-    con.close()    
-    return rlist  
+    con.close()
+    return rlist
 
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     ''' set table
@@ -371,8 +337,8 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
         sql = 'SELECT COUNT(*) FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
         cur.execute(sql)
         if cur.fetchone()[0] == 0:
-            sql = 'INSERT INTO '+table+' ('+primary+') VALUES ("'+ str(device) + '")'     
-            cur.execute(sql)   
+            sql = 'INSERT INTO '+table+' ('+primary+') VALUES ("'+ str(device) + '")'
+            cur.execute(sql)
         for cmd in commands:
             if (len(cmds) == 0) or not translate:
                 commando = cmd
@@ -384,9 +350,8 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
             if commando <> primary:
-#                print sql
-                cur.execute(sql)       
-    con.close() 
+                cur.execute(sql)
+    con.close()
 
 def remove_entry(table, device, primary = 'Name'):
     ''' remove line
@@ -399,11 +364,11 @@ def remove_entry(table, device, primary = 'Name'):
         sql = 'SELECT COUNT(*) FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
         cur.execute(sql)
         if cur.fetchone()[0] == 0:
-            con.close() 
-            return True   
+            con.close()
+            return True
         sql = 'DELETE FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
         cur.execute(sql)
-    con.close() 
+    con.close()
 #def mdb_sonos_s(player, commands):
     ##commands = Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume
     #if player in sn.Names:
@@ -420,9 +385,9 @@ def remove_entry(table, device, primary = 'Name'):
             #else:
                 #commando = cmds.get(cmd)
             #sql = 'UPDATE '+constants.sql_tables.Sonos.name+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(playern) + '"'
-            #cur.execute(sql)       
-    #con.close()          
-    
+            #cur.execute(sql)
+    #con.close()
+
 #def mdb_hue_s(device, commands):
     ##setting must be a dict
     ##{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
@@ -434,13 +399,12 @@ def remove_entry(table, device, primary = 'Name'):
             #if len(cmds) == 0:
                 #commando = cmd
             #else:
-                #commando = cmds.get(cmd)            
+                #commando = cmds.get(cmd)
             #sql = 'UPDATE '+constants.sql_tables.hue.name+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(device) + '"'
-            #print sql
-            #cur.execute(sql)  
-    #con.close()       
-        
-##to rewrite  
+            #cur.execute(sql)
+    #con.close()
+
+##to rewrite
 
 #def mdb_marantz_s(name, setting):
     ##setting must be a dict
@@ -449,9 +413,9 @@ def remove_entry(table, device, primary = 'Name'):
     #with con:
         #cur = con.cursor()
         #sql = "UPDATE Marantz SET Power = '" + str(setting.get("Power")) + "', Volume = '0" + str(setting.get("Volume")) + "', Source = '" + str(setting.get("Source")) + "', Mute = '" + str(setting.get("Mute")) + "' WHERE Name = '" + name +"'"
-        #cur.execute(sql) 
-    #con.close()        
-        
+        #cur.execute(sql)
+    #con.close()
+
 #def mdb_sideb_s(name, setting):
     ##setting must be a dict
     ##{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
@@ -459,9 +423,9 @@ def remove_entry(table, device, primary = 'Name'):
     #with con:
         #cur = con.cursor()
         #sql = "UPDATE Sideboard SET rot = '" + str(setting.get("rot")) + "', gruen = '" + str(setting.get("gruen")) + "', blau = '" + str(setting.get("blau")) + "' WHERE Name = '" + name +"'"
-        #cur.execute(sql)     
-    #con.close() 
-    
+        #cur.execute(sql)
+    #con.close()
+
 def get_device_adress(device):
     """ returns the adress with with the device is saved in each interface
     """
@@ -470,53 +434,46 @@ def get_device_adress(device):
     with con:
         cur = con.cursor()
         cur.execute("SELECT %s FROM %s.%s WHERE ID = '6'" % (device, datab, constants.sql_tables.szenen.name))
-#        if cur.fetchone()[0] != 0:   
+#        if cur.fetchone()[0] != 0:
         results = cur.fetchall()
         for row in results:
             value = row[0]
-    con.close()            
-    return value    
-    
+    con.close()
+    return value
+
 
 def getSzenenSources(szene):
     if szene in ['', None]:
         return [],[]
-    print szene, constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     ilist, slist = [], []
     with con:
-        print 'connecting'
         cur = con.cursor()
         sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+\
               '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)'
-        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)' % (constants.sql_tables.inputs.name, szene)      
-        print 'executing', sql
+        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)' % (constants.sql_tables.inputs.name, szene)
         cur.execute(sql)
-        print 'executed 1'
         results = cur.fetchall()
-        print results
         field_names = [i[0] for i in cur.description]
         for row in results:
             dicti = {}
             for i in range (0,len(row)):
-               dicti[field_names[i]] = row[i]  
+               dicti[field_names[i]] = row[i]
             ilist.append(dicti)
         sql = 'SELECT * FROM '+constants.sql_tables.szenen.name+' where Follows like "%'+szene+'%"'
         szene = "%" + szene + "%"
-        sql = 'SELECT * FROM %s.%s where Follows like "%s"' % (datab, constants.sql_tables.szenen.name, szene)    
-        print 'executing 2' , sql
+        sql = 'SELECT * FROM %s.%s where Follows like "%s"' % (datab, constants.sql_tables.szenen.name, szene)
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
         for row in results:
             dicti = {}
             for i in range (0,len(row)):
-               dicti[field_names[i]] = row[i]  
-            slist.append(dicti)           
-    con.close()   
-    print ilist, slist
+               dicti[field_names[i]] = row[i]
+            slist.append(dicti)
+    con.close()
     return ilist, slist
-    
+
 def maxSzenenId():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     value = 0
@@ -525,20 +482,20 @@ def maxSzenenId():
         sql = "SELECT Id FROM Steuerzentrale.set_Szenen ORDER BY id DESC LIMIT 0, 1"
         cur.execute(sql)
         results = cur.fetchall()
-    con.close()            
-    return results[0][0]    
-    
+    con.close()
+    return results[0][0]
+
 def inputs(device, value):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}
-    szenen = []  
+    szenen = []
     ct = datetime.datetime.now()
     desc = None
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
-        if cur.fetchone()[0] == 0:    
+        if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
             cur.execute(sql)
         else:
@@ -546,17 +503,18 @@ def inputs(device, value):
             sql = 'SELECT * FROM %s WHERE Name = "%s"' % (constants.sql_tables.inputs.name, str(device))
             cur.execute(sql)
             results_1 = cur.fetchall()
-            field_names_1 = [i[0] for i in cur.description]    
+            field_names_1 = [i[0] for i in cur.description]
             for row in results_1:
                 for i in range (0,len(row)):
-                    dicti_1[field_names_1[i]] = row[i] 
+                    dicti_1[field_names_1[i]] = row[i]
             last_value = dicti_1['last_Value']
             if last_value is None: last_value = 0
             last_time = dicti_1['last1']
             debounce = dicti_1['debounce']
+            heartbt = dicti_1['heartbeat']
             desc = dicti_1['Description']
             if str(last_time) == 'None': last_time = ct
-            if debounce is None: 
+            if debounce is None:
                 db_time = ct
             else:
                 db_time = last_time + datetime.timedelta(seconds=debounce)
@@ -568,8 +526,8 @@ def inputs(device, value):
             else:
                 gradient = float(value) - float(last_value)
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
-            cur.execute(sql)              
-            
+            cur.execute(sql)
+
             sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
             value = str(value)
             sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
@@ -577,7 +535,7 @@ def inputs(device, value):
             sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
             sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
             sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
-            sql2 = sql2 + ');' 
+            sql2 = sql2 + ');'
             cur.execute(sql + sql2)
             results = cur.fetchall()
             field_names = [i[0] for i in cur.description]
@@ -585,40 +543,38 @@ def inputs(device, value):
             for row in results:
                 single = True
                 for i in range (0,len(row)):
-                    dicti[field_names[i]] = row[i]  
+                    dicti[field_names[i]] = row[i]
                 doppelklick = dicti.get("Doppelklick")
                 if ct >= db_time:
-                    if str(dicti.get("last2")) <> "None":             
+                    if str(dicti.get("last2")) <> "None":
                         if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
-                            szenen.append(dicti.get("Dreifach")) 
+                            szenen.append(dicti.get("Dreifach"))
                             single = False
                         elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
-                            szenen.append(dicti.get("Doppel"))     
+                            szenen.append(dicti.get("Doppel"))
                             single = False
                     if str(doppelklick) <> "True": single = True
-                    if single: szenen.append(dicti.get(setting_r("Status"))) 
+                    if single: szenen.append(dicti.get(setting_r("Status")))
                     szenen.append(dicti.get('Immer'))
-#            get stting and logging 
+#            get stting and logging
             hks = dicti_1['HKS']
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
-            if cur.fetchone()[0] > 0: 
+            if cur.fetchone()[0] > 0:
                 setting_s(hks, value)
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-            if cur.fetchone()[0] > 0: 
+            if cur.fetchone()[0] > 0:
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
-                cur.execute(insertstatement) 
+                cur.execute(insertstatement)
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
                 cur.execute(insertstatement)
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
-            cur.execute(sql)               
+            cur.execute(sql)
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
-                cur.execute(sql + sql2)            
-                
+                cur.execute(sql + sql2)
+
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
-        cur.execute(sql)                 
+        cur.execute(sql)
     con.close()
-    return szenen, desc
-        
-if __name__ == '__main__':
-    main()    
+    return szenen, desc, heartbt
+

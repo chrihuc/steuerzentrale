@@ -28,12 +28,13 @@ from tools import toolbox
 hostName = socket.gethostbyname( constants.eigene_IP )
 
 biSocket = socket.socket()# socket.AF_INET, socket.SOCK_STREAM )
+biSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 biSocket.bind( (hostName, constants.udp_.biPORT) )
-biSocket.listen(5)
+biSocket.listen(10)
 
 PORT_NUMBER = constants.udp_.PORT
 broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-#broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 broadSocket.bind( (hostName, constants.udp_.broadPORT) )
 
 borad_to_guis = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
@@ -65,11 +66,11 @@ def exec_data(data_ev, data):
     if ('Name' in data_ev) and ('Value' in data_ev):
         name = data_ev.get('Name')
         value = data_ev.get('Value')
-#        print name, value
-        szns, desc = msqc.inputs(name,value)
-        for szene in szns:
-            if szene <> None:
-                scenes.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
+        szenen.Szenen.trigger_scenes(name, value)
+#        szns, desc = msqc.inputs(name,value)
+#        for szene in szns:
+#            if szene <> None:
+#                scenes.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
 #    elif data_ev.get('Command')=='Update':
 #        aes.new_event(description="System update", prio=0)
 #        cmd_internal.git_update()
@@ -111,28 +112,31 @@ def exec_data(data_ev, data):
 def bidirekt():
     while constants.run:
         conn, addr = biSocket.accept()
-        data = conn.recv(SIZE)
-        toolbox.log(data)
-        if not data:
-            break
-        isdict = False
         try:
-            data_ev = eval(data)
-            if type(data_ev) is dict:
-                isdict = True
-        except Exception as serr:
+            data = conn.recv(SIZE)
+            toolbox.log(data)
+            if not data:
+                conn.close()
+                break
+            isdict = False
             try:
-                data_ev = eval(data[2:])
+                data_ev = eval(data)
                 if type(data_ev) is dict:
                     isdict = True
             except Exception as serr:
-                isdict = False
-        if isdict:
-            data = exec_data(data_ev, data)
-
-        #conn.sendall(data)
-        conn.send(data)
-        conn.close()
+                try:
+                    data_ev = eval(data[2:])
+                    if type(data_ev) is dict:
+                        isdict = True
+                except Exception as serr:
+                    isdict = False
+            if isdict:
+                data = exec_data(data_ev, data)
+    
+            #conn.sendall(data)
+            conn.send(data)
+        finally:
+            conn.close()
 
 def broadcast():
     while constants.run:
@@ -148,7 +152,6 @@ def broadcast():
         except Exception as serr:
             isdict = False
         if isdict:
-            #print data_ev
             exec_data(data_ev, data)
 
 def main():

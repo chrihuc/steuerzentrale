@@ -51,15 +51,37 @@ mes = messaging.Messaging()
 # Add Aktor_bedingung
    
     
-class Szenen:    
+class Szenen(object):     
+    
+    kommando_dict = {}
+    timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
+    sz_t = szn_timer.Szenen_Timer()
     
     def __init__ (self):
-        self.sz_t = szn_timer.Szenen_Timer(def_to_run = self.execute)
-        self.kommando_dict = {}
-        self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
+#        self.sz_t = szn_timer.Szenen_Timer(callback = self.execute)
+#        self.kommando_dict = {}
+#        self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
         pass
     
-    def list_commands(self,gruppe='default'):    
+    @classmethod
+    def callback_receiver(cls, payload, *args, **kwargs):
+        if toolbox.kw_unpack(kwargs,'typ') == 'SetDevice':
+            cls.threadSetDevice(payload['Device'], payload['Command'])
+        if ('Name' in payload) and ('Value' in payload):
+            cls.trigger_scenes(payload['Name'], payload['Value'])
+    
+    
+    @classmethod
+    def trigger_scenes(cls, device, value):
+        szns, desc, heartbt = msqc.inputs(device,value)
+        if not heartbt is None:
+            cls.timer_add(cls.execute, parent=None, device=device, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
+        for szene in szns:
+            if szene <> None:
+                cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
+    
+    @staticmethod
+    def list_commands(gruppe='default'):    
         table = msqc.mdb_get_table(constants.sql_tables.szenen.name)
         liste = {'':''}
         if not isinstance(gruppe, list):
@@ -89,7 +111,8 @@ class Szenen:
         return (liste)
         
 
-    def __bedingung__(self,bedingungen, verbose = False):
+    @staticmethod
+    def __bedingung__(bedingungen, verbose = False):
         erfuellt = True
         settings = msqc.settings_r() 
         if type(bedingungen) == dict:
@@ -161,7 +184,8 @@ class Szenen:
         if verbose: print "Ergebniss: ",erfuellt
         return erfuellt
         
-    def __return_enum__(self,eingabe):
+    @staticmethod
+    def __return_enum__(eingabe):
         if (type(eingabe) == str):
             try:
                 if type(eval(eingabe)) == list or type(eval(eingabe)) == dict or type(eval(eingabe)) == tuple:
@@ -176,16 +200,15 @@ class Szenen:
             kommandos = [eingabe]    
         return kommandos 
 
-    def __sub_cmds__(self, szn_id, device, commando, text):
-        global kommando_dict
+    @classmethod
+    def __sub_cmds__(cls, szn_id, device, commando, text):
         try:
             adress = msqc.get_device_adress(device)
         except:
-            print('device not found')
             adress = device
         executed = False
         if szn_id != None:
-            t_list = self.kommando_dict.get(szn_id)   
+            t_list = cls.kommando_dict.get(szn_id)   
         else:
             t_list = {}
         if commando in ["man", "auto"]:
@@ -212,7 +235,6 @@ class Szenen:
     #                hue_del.start()
     #                hue_count += 1
             elif device in sat_devs:
-    #            print device, commando
                 executed = sat.set_device(adress, commando)                   
             elif device in tvs_devs:
                 executed = tv.set_device(adress, commando)                                                          
@@ -233,35 +255,36 @@ class Szenen:
                     t_list.remove(itm)
         else:
             aes.new_event(description="Failed: " + str(device) + str(commando), prio=1, karenz = 0.03)
-        self.kommando_dict[szn_id] = t_list
+        cls.kommando_dict[szn_id] = t_list
 
-    def threadSetDevice(self, device, commando):
+    @classmethod
+    def threadSetDevice(cls, device, commando):
         szn_id = None
         text = ''
-        t = threading.Thread(target=self.__sub_cmds__, args=[szn_id, device, commando, text])
+        t = threading.Thread(target=cls.__sub_cmds__, args=[szn_id, device, commando, text])
         t.start()
-        
-    def threadExecute(self, szene, check_bedingung=False, wert=0, device=None):
-        t = threading.Thread(target=self.execute, args=[szene, check_bedingung, wert, device])
+    
+    @classmethod
+    def threadExecute(cls, szene, check_bedingung=False, wert=0, device=None):
+        t = threading.Thread(target=cls.execute, args=[szene, check_bedingung, wert, device])
         t.start()         
 
-    def execute(self, szene, check_bedingung=False, wert=0, device=None):
+    @classmethod
+    def execute(cls, szene, check_bedingung=False, wert=0, device=None):
         toolbox.log(szene)
         if constants.passive:
             return True
         szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
-#        print start_t, szene_dict.get("Beschreibung"), szene_dict.get("Follows")
         #check bedingung
         bedingungen = {}
-        global kommando_dict
         erfuellt = True
         erfolg = False
         szn_id = uuid.uuid4()
-        self.kommando_dict[szn_id] = []
+        cls.kommando_dict[szn_id] = []
         if str(szene_dict.get("Bedingung")) <> "None":
             bedingungen = eval(str(szene_dict.get("Bedingung")))   
-        erfuellt = self.__bedingung__(bedingungen)
+        erfuellt = cls.__bedingung__(bedingungen)
         if str(szene_dict.get("Latching")) <> 'None':
             next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
             if start_t < next_start:
@@ -289,14 +312,14 @@ class Szenen:
                 interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
             for idk, key in enumerate(szene_dict):        
                 if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
-                    kommandos = self.__return_enum__(szene_dict.get(key))
+                    kommandos = cls.__return_enum__(szene_dict.get(key))
                     if constants.redundancy_.master:
                         delay = 0
                         for kommando in kommandos:
                             if key in cmd_devs:
-                                t_list = self.kommando_dict.get(szn_id)
+                                t_list = cls.kommando_dict.get(szn_id)
                                 t_list.append([key,kommando])
-                                self.kommando_dict[szn_id] = t_list
+                                cls.kommando_dict[szn_id] = t_list
                             text=szene_dict.get("Durchsage")
                             if kommando == 'warte_1':
                                 delay += 1
@@ -305,16 +328,15 @@ class Szenen:
                             elif kommando == 'warte_5':
                                 delay += 5
                             else:                                
-                                t = Timer(delay, self.__sub_cmds__, args=[szn_id, key, kommando, text])
+                                t = Timer(delay, cls.__sub_cmds__, args=[szn_id, key, kommando, text])
                                 t.start()  
 #==============================================================================
 # Internal                               
 #==============================================================================
             key = "intCmd"
             if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") ):#and (str(interlocks.get(key)) in ["None", "auto"])):
-                kommandos = self.__return_enum__(szene_dict.get(key))
+                kommandos = cls.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
-                    #print kommando, kommandos.get(kommando)
                     set_del = Timer(0, interna.execute, [kommando])
                     #timer set to 0 for following actions
                     set_del.start()                              
@@ -323,9 +345,8 @@ class Szenen:
 #==============================================================================
             key = "Setting"
             if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
-                kommandos = self.__return_enum__(szene_dict.get(key))
+                kommandos = cls.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
-#                    #print kommando, kommandos.get(kommando)
 #                    set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
 #                    #timer set to 0 for following actions
 #                    set_del.start() 
@@ -341,14 +362,14 @@ class Szenen:
 # cacnel timers                              
 #==============================================================================     
         if ((szene_dict.get("Cancels") <> "") and (str(szene_dict.get("Cancels")) <> "None")):
-            kommandos = self.__return_enum__(szene_dict.get("Cancels"))   
+            kommandos = cls.__return_enum__(szene_dict.get("Cancels"))   
             for kommando in kommandos:           
-                self.sz_t.cancel_timer(parent = szene, child = kommando)
+                cls.sz_t.cancel_timer(parent = szene, child = kommando)
 #==============================================================================
 # start timer with following actions                               
 #==============================================================================
         if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
-            kommandos = self.__return_enum__(szene_dict.get("Follows"))
+            kommandos = cls.__return_enum__(szene_dict.get("Follows"))
             for kommando in kommandos:
                 szn = kommando[0]
                 dlay = kommando[1]
@@ -361,30 +382,30 @@ class Szenen:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
                     if ex_re == 0:
-                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
+                        cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
-                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
+                        cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
                     elif ex_re == 2:
-                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)  
+                        cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)  
 #==============================================================================
 # Check for timeout
 #==============================================================================
-        while datetime.datetime.now() - start_t < self.timeout:
-            t_list = self.kommando_dict.get(szn_id)
+        while datetime.datetime.now() - start_t < cls.timeout:
+            t_list = cls.kommando_dict.get(szn_id)
             time.sleep(.1)
             if len(t_list) == 0:
                 erfolg = True
                 # write back to table
                 break
-        t_list = self.kommando_dict.get(szn_id)
+        t_list = cls.kommando_dict.get(szn_id)
         for item in t_list:
             aes.new_event(description="CMD Timeout: " + str(item), prio=1, karenz = 0.03)
-        del self.kommando_dict[szn_id]
+        del cls.kommando_dict[szn_id]
 #==============================================================================
 # start timer with following actions nur wenn erfolg oder nicht erfolg                              
 #==============================================================================
         if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
-            kommandos = self.__return_enum__(szene_dict.get("Follows"))
+            kommandos = cls.__return_enum__(szene_dict.get("Follows"))
             for kommando in kommandos:
                 szn = kommando[0]
                 dlay = kommando[1]
@@ -397,9 +418,19 @@ class Szenen:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and ((depErfolg == 1 and erfolg) or (depErfolg == 2 and not erfolg)):
                     if ex_re == 0:
-                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
+                        cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
-                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
+                        cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
                     elif ex_re == 2:
-                        self.sz_t.retrigger_add(parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)           
+                        cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)           
         return erfolg
+
+    
+#    sz_t.callback = execute
+    
+    @classmethod
+    def timer_add(cls, callback, parent, delay, child, exact, retrig, device=None):
+        cls.sz_t.callback = callback
+        cls.sz_t.retrigger_add(parent, delay, child, exact, retrig, device)
+        
+toolbox.communication.register_callback(Szenen.callback_receiver)

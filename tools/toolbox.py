@@ -53,11 +53,17 @@ def ping(IP, number = 1):
 
 def log(*args, **kwargs):
     if 'level' not in kwargs:
-        level=0
+        level=9
+    else:
+        level=kwargs['level']
+    if level > constants.debug_level:
+        return
     if constants.debug:
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
-        print '[%s, %s] %s' % (calframe[1][1], calframe[1][3], args) 
+        zeit =  time.time()
+        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
+        print '%s [%s, %s] %s' % (uhr, calframe[1][1], calframe[1][3], args) 
 #def restart_services():
   #lgd = logdebug(True, True)
   #lgd.debug("Heartbeat supervision")
@@ -81,6 +87,25 @@ def log(*args, **kwargs):
     #msg["Subject"] = betreff
     #p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
     #p.communicate(msg.as_string())
+
+def kw_unpack(kwargs, searched_key):
+    if searched_key in kwargs:
+        return kwargs[searched_key]
+    return False
+
+class communication(object):
+    
+    queue = []
+    callbacks = []
+    
+    @classmethod
+    def register_callback(cls, func):
+        cls.callbacks.append(func)
+        
+    @classmethod
+    def send_message(cls, payload, *args, **kwargs):
+        for callback in cls.callbacks:
+            callback(payload, *args, **kwargs)
 
 class meas_value:
     def __init__(self):
