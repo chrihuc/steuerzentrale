@@ -16,7 +16,7 @@ from database import mysql_connector as msqc
 # TODO: operationalize it, 
 # TODO Tests split adress from hks
 
-delay = 5 * 60
+delay = 3 * 60
 #scenes = szenen.Szenen()
 
 class device(object):
