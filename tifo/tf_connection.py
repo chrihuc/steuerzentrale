@@ -133,7 +133,7 @@ class TiFo:
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
                                      self.cb_connected)
         # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(constants.ownIP, PORT)
+        self.ipcon.connect('localhost', PORT)
 
     def thread_RSerror(self):
         for mastr in self.master:
