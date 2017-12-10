@@ -13,6 +13,8 @@ from inputs import udp_listener
 from inputs import xs1
 from inputs import internal
 
+from tifo import tf_connection
+
 from database import mysql_connector as msqc
 
 from alarm_event_messaging import alarmevents as aevs
@@ -47,6 +49,11 @@ def start_bokeh():
 threadliste = []
 
 t = threading.Thread(name="xs1", target=xs1.main, args = [])
+threadliste.append(t)
+t.start()
+
+tifo = tf_connection.TiFo()
+t = threading.Thread(name="tifo", target=tifo.main, args = [])
 threadliste.append(t)
 t.start()
 
@@ -93,10 +100,10 @@ try:
             if not t in threading.enumerate():
                 aes.new_event(description="Thread stopped: "+t.name, prio=1)
                 constants.run = False
-                sys.exit() 
+                sys.exit()
         time.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
-sys.exit() 
- 
-    
+sys.exit()
+
+
