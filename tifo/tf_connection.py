@@ -134,6 +134,8 @@ class TiFo:
                                      self.cb_connected)
         # Connect to brickd, will trigger cb_connected
         self.ipcon.connect('localhost', PORT)
+        while True:
+            time.sleep(10)
 
     def thread_RSerror(self):
         for mastr in self.master:
