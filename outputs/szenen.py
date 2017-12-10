@@ -43,6 +43,7 @@ sns_devs = msqc.tables.akt_type_dict['SONOS']
 tvs_devs = msqc.tables.akt_type_dict['TV']
 sat_devs = msqc.tables.akt_type_dict['SATELLITE']
 sat_devs += msqc.tables.akt_type_dict['ZWave']
+loc_devs += msqc.tables.akt_type_dict['Local']
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
