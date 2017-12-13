@@ -438,6 +438,7 @@ class OpScreen(TabbedPanel):
                     try:
                         if data_ev['Name'] == 'Klingel':
                             self.klingel()
+                            self.klingel()
                         elif data_ev['Name'] == 'DisplayAn':
                             self.screnns.state_awake = True
                             self.screnns.ss_on = False

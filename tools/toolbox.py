@@ -3,6 +3,7 @@
 import constants
 
 import os
+import threading
 from socket import gethostbyname
 import re, sys
 import time
@@ -104,8 +105,15 @@ class communication(object):
         
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
+#        print payload, args, kwargs
         for callback in cls.callbacks:
-            callback(payload, *args, **kwargs)
+            if args:
+                args_to_send =[payload].append(args)
+            else:
+                args_to_send =[payload]
+            t = threading.Thread(target=callback, args=args_to_send, kwargs=kwargs)
+            t.start()
+#            callback(payload, *args, **kwargs)
 
 class meas_value:
     def __init__(self):

@@ -126,7 +126,10 @@ class Hue_lights():
             pass     
         # switch light on to be able to modify it
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
-            success = h_dev.on
+            try:         
+                success = h_dev.on
+            except:
+                success = False
             retry = 1
             while not success and retry < max_retry:
                 try:

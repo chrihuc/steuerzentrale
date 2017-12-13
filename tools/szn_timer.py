@@ -53,7 +53,7 @@ class Szenen_Timer:
         if delay < 0:
             self.cancel_timer(parent, child)
         else:
-            t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
+            t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device])
             dicti["timer"] = t
             if start: t.start()
             self.liste.append(dicti)
@@ -90,7 +90,7 @@ class Szenen_Timer:
                     if item.get("retrig"): item.get("timer").cancel()
                     hash_id = item.get("hash_id")
                     if delay > 0:
-                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
+                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device])
                         item["timer"] = t
                         item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                         item.get("timer").start()
@@ -105,7 +105,7 @@ class Szenen_Timer:
                     if item.get("retrig"): item.get("timer").cancel()
                     hash_id = item.get("hash_id")
                     if delay > 0:
-                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child])
+                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device])
                         item["timer"] = t
                         item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                         item.get("timer").start()
@@ -133,10 +133,10 @@ class Szenen_Timer:
 #        file_.write(str(self.liste))
 #        file_.close()
 
-    def entferne_eintrag(self, hash_id, child):
+    def entferne_eintrag(self, hash_id, child, device):
         for item in self.liste:
             if item.get("hash_id") == hash_id:
                 self.liste.remove(item)
-        self.callback(child)
+        self.callback(child, device=device)
         self.store()
 

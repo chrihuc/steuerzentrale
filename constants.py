@@ -1,4 +1,5 @@
 #!  /usr/bin/python 
+# -*- coding: utf-8 -*-
 
 import ConfigParser
 import socket
@@ -137,6 +138,56 @@ for i in range(0,3):
             continue
         break
 
+szn_types = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
+stockwerke = ['Vm1','V00','A00','V01','V02','VIR','']
+
+stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
+                   'A00':'Draussen', 'VIR':'Virtuell', 'NEW':'Unassigned'}
+
+zim_dict = {'ZIM':'Zimmer',
+            'WOH':'Wohnzimmer',
+            'KUE':u'Küche',
+            'BAD':u'Badezimmer/Toilette',
+            'SCH':'Schlafzimmer',
+            'FLU':'Flur',
+            'BUE':u'Büro',
+            'KID':'Kinderzimmer',
+            'ESS':'Esszimmer',
+            'TER':'Terasse',
+            'GEN':'Generell',
+
+            'KOM':'Kommunikation',
+            'BEW':'Bewohner'}
+
+furn_dict = {'SCA':'Scanner',
+             'ADV':'Advent',
+             'EIN':'Eingang',
+             'STV':'Stromversorgung',
+             'RUM':'Raum',
+             'DEK':'Decke',
+             'SRA':'Schrank',
+             'SOF':'Sofa',
+             'TUE':u'Tür',
+             'SEV':'Server',
+             'PFL':'Pflanzen',
+             'BET':'Bett',
+             'TER':'Terasse',
+             'GEN':'Generell',
+
+             'SSH':'SecureShell',
+             'RUT':'Router',
+             'SAT':'Satellite',
+             'USB':'USBKey',
+             'IPA':'Handy'}
+
+dev_kat_dict = {'TE': 'Temperature',
+                'HU': 'Humidity',
+                'DI': 'Digital Input',
+                'DO': 'Digital Output',
+                'CO': 'Carbonmonoxide',
+                'ST': 'Set Temperature',
+                'AT': 'Actuator Temperature',
+                'SA': 'Set Temp at actuator'}
 
 class sql_object:
     def __init__(self,name,typ,columns):

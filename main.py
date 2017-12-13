@@ -12,6 +12,7 @@ from inputs import cron
 from inputs import udp_listener
 from inputs import xs1
 from inputs import internal
+from outpust import temp_control
 
 from tifo import tf_connection
 
@@ -56,6 +57,10 @@ tifo = tf_connection.TiFo()
 t = threading.Thread(name="tifo", target=tifo.main, args = [])
 threadliste.append(t)
 t.start()
+
+#t = threading.Thread(name="TempCTRL", target=temp_control.TempController.start, args = [])
+#threadliste.append(t)
+#t.start()
 
 #t = threading.Thread(name="udp",target=inp_udp.main, args = [])
 #threadliste.append(t)

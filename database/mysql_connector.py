@@ -21,15 +21,16 @@ class tables(object):
     db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER,
                                 constants.sql_.PASS, constants.sql_.DB)
     scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
-    _lines = ['Adress', 'Device_Type', 'Description', 'Auto_Mode']
+    _lines = ['Adress', 'Device_Type', 'Description', 'Auto_Mode', 'Command_Table']
     aktors_df = scenes_df.loc[scenes_df['Name'].isin(_lines)].set_index('Name')
-    akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave']
+    akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave', 'Local']
     akt_type_dict = {typ:[] for typ in akt_types}
     aktors_dict = aktors_df.to_dict()
     for aktor in aktors_dict:
         if aktors_dict[aktor]['Device_Type'] in akt_types:
             akt_type_dict[aktors_dict[aktor]['Device_Type']].append(aktor)
     akt_adr_dict = aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
+    akt_cmd_tbl_dict = aktors_df[aktors_df.index == 'Command_Table'].to_dict(orient='records')[0]
     inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
     db_connection.close()
     _inputs_dict = inputs_df.to_dict(orient='records')
@@ -148,6 +149,7 @@ def setting_r(setting):
             cur = con.cursor()
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
             if cur.fetchone()[0] == 0:
+                return False
                 sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES (0,"'+ str(setting) + '")'
                 value = 0
                 cur.execute(sql)
@@ -492,6 +494,7 @@ def inputs(device, value):
     szenen = []
     ct = datetime.datetime.now()
     desc = None
+    heartbt = None
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")

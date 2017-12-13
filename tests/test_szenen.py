@@ -13,10 +13,13 @@ from outputs.szenen import Szenen
 from tools import toolbox
 import time, datetime
 
+from tifo import tf_connection
+
 class TestUM(unittest.TestCase):
 
     def setUp(self):
         constants.debug = True
+        self.tifo = tf_connection.TiFo()
         self.sz = Szenen()
         self.start_t = None
 
@@ -30,10 +33,10 @@ class TestUM(unittest.TestCase):
 #        self.assertTrue(runs,
 #                         'Failed to Execute Scene')
         
-#    def test_test(self):
-#        runs = self.sz.execute("Test")
-#        self.assertTrue(runs,
-#                         'Failed to Execute Scene')        
+    def test_test(self):
+        runs = self.sz.execute("Test")
+        self.assertTrue(runs,
+                         'Failed to Execute Scene')        
 #
 #    def test_send_message(self):
 #        payload = {'Device':'Device_1','Command':'An'}
@@ -41,11 +44,11 @@ class TestUM(unittest.TestCase):
 #        toolbox.communication.send_message(payload)
 
 
-    def test_heartbeat_input(self):
-        payload = {'Name':'XS1.V01SCH1RUM1TE01','Value':'20.51'}
-        toolbox.communication.send_message(payload)
-        time.sleep(20)
-        toolbox.communication.send_message(payload)
+#    def test_heartbeat_input(self):
+#        payload = {'Name':'XS1.V01SCH1RUM1TE01','Value':'20.51'}
+#        toolbox.communication.send_message(payload)
+#        time.sleep(20)
+#        toolbox.communication.send_message(payload)
 
 #    def test_execute0(self):
 #        runs = self.sz.execute("RestartSatellites")

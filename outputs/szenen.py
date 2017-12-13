@@ -43,7 +43,7 @@ sns_devs = msqc.tables.akt_type_dict['SONOS']
 tvs_devs = msqc.tables.akt_type_dict['TV']
 sat_devs = msqc.tables.akt_type_dict['SATELLITE']
 sat_devs += msqc.tables.akt_type_dict['ZWave']
-#loc_devs = msqc.tables.akt_type_dict['Local']
+loc_devs = msqc.tables.akt_type_dict['Local']
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
@@ -68,6 +68,14 @@ class Szenen(object):
     def callback_receiver(cls, payload, *args, **kwargs):
         if toolbox.kw_unpack(kwargs,'typ') == 'SetDevice':
             cls.threadSetDevice(payload['Device'], payload['Command'])
+        if toolbox.kw_unpack(kwargs,'typ') == 'return':
+            if 'szn_id' in payload:
+                t_list = cls.kommando_dict.get(payload['szn_id']) 
+                if toolbox.kw_unpack(kwargs,'value') == True:
+                    for itm in t_list:
+                        if itm[0] == payload['Device'] and itm[1] == payload['Szene']:
+                            t_list.remove(itm)
+                cls.kommando_dict[payload['szn_id']] = t_list
         if ('Name' in payload) and ('Value' in payload):
             cls.trigger_scenes(payload['Name'], payload['Value'])
     
@@ -75,7 +83,7 @@ class Szenen(object):
     @classmethod
     def trigger_scenes(cls, device, value):
         szns, desc, heartbt = msqc.inputs(device,value)
-        if not heartbt is None:
+        if not ((heartbt is None) or (device is None)):
             cls.timer_add(cls.execute, parent=None, device=device, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
         for szene in szns:
             if szene <> None:
@@ -243,6 +251,12 @@ class Szenen(object):
     #                            for kommando in kommandos:
     #                                t = threading.Thread(target=interner_befehl, args=[commando])
     #                                t.start() 
+            elif device in loc_devs:
+                com_set = msqc.mdb_read_table_entry(db=msqc.tables.akt_cmd_tbl_dict[device], entry=commando)
+                payload = {'Device': device, 'Szene': commando, 'Szene_id': szn_id}
+                if com_set: payload.update(com_set)
+                system = adress.split(".")[0]
+                toolbox.communication.send_message(payload, typ='output', receiver=system, adress=adress)                
             else:
                 executed = True
         if executed:
