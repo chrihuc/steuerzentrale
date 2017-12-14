@@ -12,7 +12,7 @@ from inputs import cron
 from inputs import udp_listener
 from inputs import xs1
 from inputs import internal
-from outpust import temp_control
+from outputs import temp_control
 
 from tifo import tf_connection
 
