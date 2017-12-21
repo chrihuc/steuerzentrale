@@ -18,10 +18,10 @@ def check_ext_ip():
     match = '(([0-9]{1,3}\.){3}[0-9]{1,3})'
     m = re.search(match, ext_ip)
     if m:
-        found = m.group(1)    
+        found = m.group(1)
         return found
     return '0.0.0.0'
-    
+
 # TODO: unittest
 
 logfolder = constants.installation_folder + "/log/"
@@ -62,9 +62,12 @@ def log(*args, **kwargs):
     if constants.debug:
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
+        if constants.debug_text <> '':
+            if not constants.debug_text in calframe:
+                return
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
-        print '%s [%s, %s] %s' % (uhr, calframe[1][1], calframe[1][3], args) 
+        print '%s [%s, %s] %s' % (uhr, calframe[1][1], calframe[1][3], args)
 #def restart_services():
   #lgd = logdebug(True, True)
   #lgd.debug("Heartbeat supervision")
@@ -95,14 +98,14 @@ def kw_unpack(kwargs, searched_key):
     return False
 
 class communication(object):
-    
+
     queue = []
     callbacks = []
-    
+
     @classmethod
     def register_callback(cls, func):
         cls.callbacks.append(func)
-        
+
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
 #        print payload, args, kwargs

@@ -23,6 +23,7 @@ def main():
     periodic_supervision()
 
 def every_min(tag, zeit):
+    toolbox.log(tag, zeit)
     liste = crn.get_now2(tag, zeit)
     for szene in liste:
         toolbox.log(szene)
