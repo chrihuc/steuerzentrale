@@ -5,6 +5,7 @@
 import threading
 import time, sys
 import os
+import argparse
 
 import constants
 
@@ -27,16 +28,22 @@ from tools import toolbox
 aes = aevs.AES()
 anw = internal.Anwesenheit()
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', '--debug', nargs='?', help='debug', default=0)
+parser.add_argument('-m', '--module', nargs='?', help='debug', default='')
+parser.add_argument('-p', '--passive', nargs='?', help='debug')
 
-if sys.argv:
-    if 'debug' in sys.argv:
-        toolbox.log('debug on')
-        constants.debug = True
-        if '1' in sys.argv:
-            constants.debug_level = 1
-    if 'passive' in sys.argv:
-        toolbox.log('passive on')
-        constants.passive = True
+args = parser.parse_args()
+print args
+
+if getattr(args, 'debug') > 0:
+    constants.debug = True
+    constants.debug_level = getattr(args, 'debug')
+if getattr(args, 'module') <> '':
+    constants.debug_text = getattr(args, 'module')
+if getattr(args, 'passive') is not None:
+    toolbox.log('passive on')
+    constants.passive = True
 
 # init
 init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}

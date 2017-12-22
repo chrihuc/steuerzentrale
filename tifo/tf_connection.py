@@ -613,19 +613,16 @@ class TiFo:
                 cls.al[-1].register_callback(cls.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( cls.cb_ambLight,  device=args))
                 temp_uid = str(cls.al[-1].get_identity()[1]) +"."+ str(cls.al[-1].get_identity()[0])
 
-                if settings.inputs.get(temp_uid) <> None:
-                    found  = True
-                    thread_cb_amb = Timer(60, cls.thread_ambLight, [cls.al[-1]])
-                    thread_cb_amb.start()
+                thread_cb_amb = Timer(60, cls.thread_ambLight, [cls.al[-1]])
+                thread_cb_amb.start()
 
             if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
                 cls.co2.append(BrickletCO2(uid, cls.ipcon))
                 temp_uid = str(cls.co2[-1].get_identity()[1]) +"."+ str(cls.co2[-1].get_identity()[0])
-                if settings.inputs.get(temp_uid) <> None:
-                    found  = True
-                    thread_co2_ = Timer(5, cls.thread_CO2, [cls.co2[-1]])
-                    thread_co2_.start()
-                    cls.threadliste.append(thread_co2_)
+                thread_co2_ = Timer(5, cls.thread_CO2, [cls.co2[-1]])
+                thread_co2_.start()
+                cls.threadliste.append(thread_co2_)
+
 
             if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
                 cls.drb.append(BrickletDualRelay(uid, cls.ipcon))
@@ -640,23 +637,18 @@ class TiFo:
                 temp_uid = str(cls.md[-1].get_identity()[1]) +"."+ str(cls.md[-1].get_identity()[0])
                 cls.md[-1].register_callback(cls.md[-1].CALLBACK_MOTION_DETECTED, partial( cls.cb_md, device = cls.md[-1], uid = temp_uid ))
                 cls.md[-1].register_callback(cls.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( cls.cb_md_end, device = cls.md[-1], uid = temp_uid ))
-                if settings.inputs.get(temp_uid) <> None:
-                    found  = True
 
             if device_identifier == BrickletSoundIntensity.DEVICE_IDENTIFIER:
                 cls.si.append(BrickletSoundIntensity(uid, cls.ipcon))
                 temp_uid = str(cls.si[-1].get_identity()[1]) +"."+ str(cls.si[-1].get_identity()[0])
-# TODO: remove all ifs
-                if settings.inputs.get(temp_uid) <> None:
-                    found  = True
-                    cls.si[-1].set_debounce_period(settings.SoundInt.get(temp_uid)[0])
-                    cls.si[-1].register_callback(cls.si[-1].CALLBACK_INTENSITY_REACHED, partial( cls.cb_si, device = cls.si[-1], uid = temp_uid ))
-                    cls.si[-1].set_intensity_callback_threshold(settings.SoundInt.get(temp_uid)[1], settings.SoundInt.get(temp_uid)[2], settings.SoundInt.get(temp_uid)[3])
+
+                cls.si[-1].set_debounce_period(1000)
+                cls.si[-1].register_callback(cls.si[-1].CALLBACK_INTENSITY_REACHED, partial( cls.cb_si, device = cls.si[-1], uid = temp_uid ))
+                cls.si[-1].set_intensity_callback_threshold('>',200,0)
 
             if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
                 cls.ptc.append(BrickletPTC(uid, cls.ipcon))
                 temp_uid = str(cls.ptc[-1].get_identity()[1]) +"."+ str(cls.ptc[-1].get_identity()[0])
-                found  = True
                 thread_pt_ = Timer(5, cls.thread_pt, [cls.ptc[-1]])
                 thread_pt_.start()
                 cls.threadliste.append(thread_pt_)
