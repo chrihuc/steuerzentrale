@@ -307,6 +307,7 @@ class TiFo:
                     #working but gets overwritten but other commands
                     normpos = settings.IO16.get(io.get('addr'))[8]
                     io.get('IO').set_port_monoflop('b', cmd.get('Pin'),((~normpos)&0b11111111),settings.IO16.get(io.get('addr'))[6])
+                    toolbox.log('b', cmd.get('Pin'),((~normpos)&0b11111111),settings.IO16.get(io.get('addr'))[6])
 #                    mask = io.get('IO').get_port('b') | cmd.get('Pin')
 #                    io.get('IO').set_port('b',mask)
 #                    time.sleep(float(settings.IO16.get(io.get('addr'))[6])/1000)
