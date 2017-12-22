@@ -334,14 +334,14 @@ class TiFo:
                 if type(cmds) in (list,tuple):
                     for cmd in cmds:
                         #print cmd
-                        if cmd.get('Value') == 0: #erst alle auf Null setzen
+                        if str(cmd.get('Value')) == '0': #erst alle auf Null setzen
                             addr = cmd.get('UID')
                             for io in cls.io16list.liste:
                                 if io.get('addr') == addr:
                                     cls.set_io16_sub(cmd,io,cmd.get('Value'))
                                     success = True
                     for cmd in cmds:
-                        if cmd.get('Value') == 1: #erst alle auf Null setzen
+                        if str(cmd.get('Value')) == '1': #erst alle auf Null setzen
                             addr = cmd.get('UID')
                             for io in cls.io16list.liste:
                                 if io.get('addr') == addr:
