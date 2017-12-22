@@ -286,6 +286,7 @@ class TiFo:
     @classmethod
     def set_io16_sub(cls,cmd,io,value):
         port = cmd.get('Port')
+        toolbox.log(cmd,io,value,port)
         if port  == 'A':
             flopmask = settings.IO16.get(io.get('addr'))[4]
             if flopmask & cmd.get('Pin') > 0:
@@ -304,7 +305,7 @@ class TiFo:
             if flopmask & cmd.get('Pin') > 0:
                 if value == 1:
                     #working but gets overwritten but other commands
-                    normpos = tifo_config.IO16.get(io.get('addr'))[8]
+                    normpos = settings.IO16.get(io.get('addr'))[8]
                     io.get('IO').set_port_monoflop('b', cmd.get('Pin'),((~normpos)&0b11111111),settings.IO16.get(io.get('addr'))[6])
 #                    mask = io.get('IO').get_port('b') | cmd.get('Pin')
 #                    io.get('IO').set_port('b',mask)
@@ -323,6 +324,7 @@ class TiFo:
     def set_io16(cls,device,value):
         #koennte noch auch .set_selected_values(port, selection_mask, value_mask) umgeschrieben werden
         #monoflop tut nicht
+        toolbox.log(device,value)
         cmd_lsts = settings.IO16o.get(device)
         success = False
         for cmd in cmd_lsts:
