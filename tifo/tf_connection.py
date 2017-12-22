@@ -36,6 +36,7 @@ from tifo import settings
 from tools import toolbox
 
 def broadcast_input_value(Name, Value):
+    toolbox.log(Name, Value)
     payload = {'Name':Name,'Value':Value}
     toolbox.communication.send_message(payload, typ='InputValue')
 
@@ -547,6 +548,7 @@ class TiFo:
     @classmethod
     def set_device(cls, data_ev):
 #       TODO do threaded with stop criteria
+        toolbox.log(cls, data_ev)
         if settings.outputs.get(data_ev.get('Device')) == 'IO16o':
             return cls.set_io16(data_ev.get('Device'),data_ev.get('Value'))
         elif settings.outputs.get(data_ev.get('Device')) == 'IO16o':
