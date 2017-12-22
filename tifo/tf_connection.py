@@ -304,13 +304,13 @@ class TiFo:
             if flopmask & cmd.get('Pin') > 0:
                 if value == 1:
                     #working but gets overwritten but other commands
-#                    normpos = tifo_config.IO16.get(io.get('addr'))[8]
-#                    io.get('IO').set_port_monoflop('b', cmd.get('Pin'),((~normpos)&0b11111111),tifo_config.IO16.get(io.get('addr'))[6])
-                    mask = io.get('IO').get_port('b') | cmd.get('Pin')
-                    io.get('IO').set_port('b',mask)
-                    time.sleep(float(settings.IO16.get(io.get('addr'))[6])/1000)
-                    mask = io.get('IO').get_port('b') & (0b11111111 & ~ cmd.get('Pin'))
-                    io.get('IO').set_port('b',mask)
+                    normpos = tifo_config.IO16.get(io.get('addr'))[8]
+                    io.get('IO').set_port_monoflop('b', cmd.get('Pin'),((~normpos)&0b11111111),settings.IO16.get(io.get('addr'))[6])
+#                    mask = io.get('IO').get_port('b') | cmd.get('Pin')
+#                    io.get('IO').set_port('b',mask)
+#                    time.sleep(float(settings.IO16.get(io.get('addr'))[6])/1000)
+#                    mask = io.get('IO').get_port('b') & (0b11111111 & ~ cmd.get('Pin'))
+#                    io.get('IO').set_port('b',mask)
             else:
                 if value == 1:
                     mask = io.get('IO').get_port('b') | cmd.get('Pin')
@@ -548,7 +548,7 @@ class TiFo:
     @classmethod
     def set_device(cls, data_ev):
 #       TODO do threaded with stop criteria
-        toolbox.log(cls, data_ev)
+        toolbox.log(data_ev)
         if settings.outputs.get(data_ev.get('Device')) == 'IO16o':
             return cls.set_io16(data_ev.get('Device'),data_ev.get('Value'))
         elif settings.outputs.get(data_ev.get('Device')) == 'IO16o':
