@@ -328,7 +328,7 @@ class TiFo:
         cmd_lsts = settings.IO16o.get(device)
         success = False
         for cmd in cmd_lsts:
-            if cmd.get('Value') == value:
+            if str(cmd.get('Value')) == str(value):
                 cmds = cmd.get('Commands')
                 #print cmds
                 if type(cmds) in (list,tuple):
