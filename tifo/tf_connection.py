@@ -24,6 +24,7 @@ from tinkerforge.bricklet_co2 import BrickletCO2
 from tinkerforge.bricklet_motion_detector import BrickletMotionDetector
 from tinkerforge.bricklet_sound_intensity import BrickletSoundIntensity
 from tinkerforge.bricklet_ptc import BrickletPTC
+from tinkerforge.bricklet_temperature import BrickletTemperature
 from tinkerforge.brick_master import BrickMaster
 from threading import Timer
 import time
@@ -32,13 +33,18 @@ import datetime
 
 import constants
 
+# on server:
 from tifo import settings
 from tools import toolbox
 
 def broadcast_input_value(Name, Value):
-    toolbox.log(Name, Value)
     payload = {'Name':Name,'Value':Value}
+#    on server:
+    toolbox.log(Name, Value)
     toolbox.communication.send_message(payload, typ='InputValue')
+    
+#    on satellite:
+#    mySocket.sendto(str(payload) ,(constants.server1,constants.broadPort))
 
 # tranisiton modes
 ANSTEIGEND = 0
@@ -120,6 +126,7 @@ class TiFo:
     md = []
     si = []
     ptc = []
+    temp = []
     co2 = []
     moist = None
     unknown = []
@@ -155,15 +162,15 @@ class TiFo:
                                      cls.cb_connected)
         # Connect to brickd, will trigger cb_connected
         cls.ipcon.connect('localhost', PORT)
-        while True:
+        while constants.run:
             time.sleep(10)
 
     @classmethod
     def thread_RSerror(cls):
-        for mastr in cls.master:
-            print mastr.get_rs485_error_log()
-        thread_rs_error = Timer(60, cls.thread_RSerror, [])
-        thread_rs_error.start()
+        while constants.run:
+            for mastr in cls.master:
+                print mastr.get_rs485_error_log()
+            time.sleep(60)
 
     @staticmethod
     def cb_ambLight(illuminance,device):
@@ -174,54 +181,31 @@ class TiFo:
             thresUp = 3
         if thresUp > 9000:
             thresUp = 9000
-        #print illuminance, thresDown, thresUp
         device.set_illuminance_callback_threshold('o', thresDown, thresUp)
-        dicti = {}
-        name = settings.inputs.get(str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]))
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(illuminance))
-#        dicti['Value'] = str(illuminance)
-#        dicti['Name'] = 'TiFo.' + name
-#        #print dicti
-#        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
 
     @classmethod
     def thread_ambLight(cls, device):
-        illuminance = device.get_illuminance()
-        dicti = {}
-        name = settings.inputs.get(str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]))
-        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-        broadcast_input_value('TiFo.' + name, str(illuminance))
-#        dicti['Value'] = str(illuminance)
-#        dicti['Name'] = 'TiFo.' + name
-#        #print dicti
-#        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
-        thread_cb_amb = Timer(60, cls.thread_ambLight, [device])
-        thread_cb_amb.start()
+        while constants.run:
+            illuminance = device.get_illuminance()
+            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+            broadcast_input_value('TiFo.' + name, str(illuminance))
+            time.sleep(60)
 
     @classmethod
     def thread_CO2(cls, device):
         value = device.get_co2_concentration()
-        dicti = {}
-        name = settings.inputs.get(str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]))
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(value))
-#        dicti['Value'] = str(value)
-#        dicti['Name'] = 'TiFo.' + name
-#        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
         thread_co2_ = Timer(60, cls.thread_CO2, [device])
         thread_co2_.start()
 
     @classmethod
     def thread_pt(cls, device):
         value = device.get_temperature()
-        dicti = {}
-        name = settings.inputs.get(str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]))
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(float(value)/100))
-#        dicti['Value'] = str(float(value)/100)
-#        dicti['Name'] = 'TiFo.' + name
-#        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
         thread_pt_ = Timer(60, cls.thread_pt, [device])
         thread_pt_.start()
 
@@ -658,6 +642,14 @@ class TiFo:
                 thread_pt_.start()
                 cls.threadliste.append(thread_pt_)
 
+            if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
+                cls.temp.append(BrickletTemperature(uid, cls.ipcon))
+                temp_uid = str(cls.temp[-1].get_identity()[1]) +"."+ str(cls.temp[-1].get_identity()[0])
+                toolbox.log('Temperature Bricklet', temp_uid)
+                thread_pt_ = Timer(5, cls.thread_pt, [cls.temp[-1]])
+                thread_pt_.start()
+                cls.threadliste.append(thread_pt_)
+
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 cls.master.append(BrickMaster(uid, cls.ipcon))
                 thread_rs_error = Timer(60, cls.thread_RSerror, [])
@@ -666,6 +658,7 @@ class TiFo:
                     found  = True
 
             if not found:
+                toolbox.log(connected_uid, uid, device_identifier)
                 print connected_uid, uid, device_identifier
 
     @classmethod

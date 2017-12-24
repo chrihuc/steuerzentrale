@@ -63,7 +63,7 @@ def log(*args, **kwargs):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         if constants.debug_text <> '':
-            if not constants.debug_text in calframe:
+            if not constants.debug_text in calframe[1][1] and not constants.debug_text in calframe[1][3]:
                 return
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
