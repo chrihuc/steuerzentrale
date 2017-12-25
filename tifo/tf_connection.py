@@ -132,24 +132,32 @@ class TiFo:
     unknown = []
     threadliste = []
 
-    def __init__(self):
-        pass
-#        self.led = None
-#        self.io = []
-#        self.io16list = io16Dict()
-#        self.LEDs = []
-#        self.LEDList = LEDStrips()
-#        self.al = []
-#        self.drb = []
-#        self.master = []
-#        self.md = []
-#        self.si = []
-#        self.ptc = []
-#        self.co2 = []
-#        self.moist = None
-#        self.unknown = []
-#        self.threadliste = []
-        #self.ipcon.enumerate()
+    def __init__(self, ip):
+        self.led = None
+        self.io = []
+        self.io16list = io16Dict()
+        self.LEDs = []
+        self.LEDList = LEDStrips()
+        self.al = []
+        self.drb = []
+        self.master = []
+        self.md = []
+        self.si = []
+        self.ptc = []
+        self.temp = []
+        self.co2 = []
+        self.moist = None
+        self.unknown = []
+        self.threadliste = []
+ 
+        self.ipcon = IPConnection()       
+        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
+                                     self.cb_enumerate)
+        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
+                                     self.cb_connected) 
+        self.ipcon.connect(ip, PORT)
+        toolbox.log('TiFo started')
+#        self.ipcon.enumerate()
 
     @classmethod
     def main(cls):
@@ -165,12 +173,11 @@ class TiFo:
         while constants.run:
             time.sleep(10)
 
-    @classmethod
-    def thread_RSerror(cls):
+    def thread_RSerror(self):
         while constants.run:
-            for mastr in cls.master:
+            for mastr in self.master:
                 print mastr.get_rs485_error_log()
-            time.sleep(60)
+            toolbox.sleep(60)
 
     @staticmethod
     def cb_ambLight(illuminance,device):
@@ -185,32 +192,31 @@ class TiFo:
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(illuminance))
 
-    @classmethod
-    def thread_ambLight(cls, device):
+    @staticmethod
+    def thread_ambLight(device):
         while constants.run:
             illuminance = device.get_illuminance()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(illuminance))
-            time.sleep(60)
+            toolbox.sleep(60)
 
-    @classmethod
-    def thread_CO2(cls, device):
-        value = device.get_co2_concentration()
-        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-        broadcast_input_value('TiFo.' + name, str(value))
-        thread_co2_ = Timer(60, cls.thread_CO2, [device])
-        thread_co2_.start()
+    @staticmethod
+    def thread_CO2(device):
+        while constants.run:
+            value = device.get_co2_concentration()
+            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+            broadcast_input_value('TiFo.' + name, str(value))
+            toolbox.sleep(60)
 
-    @classmethod
-    def thread_pt(cls, device):
-        value = device.get_temperature()
-        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-        broadcast_input_value('TiFo.' + name, str(float(value)/100))
-        thread_pt_ = Timer(60, cls.thread_pt, [device])
-        thread_pt_.start()
+    @staticmethod
+    def thread_pt(device):
+        while constants.run:
+            value = device.get_temperature()
+            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+            broadcast_input_value('TiFo.' + name, str(float(value)/100))
+            toolbox.sleep(60)
 
-    @classmethod
-    def cb_interrupt(cls, port, interrupt_mask, value_mask, device, uid):
+    def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
         #print('Interrupt on port: ' + port + str(bin(interrupt_mask)))
         #print('Value: ' + str(bin(value_mask)))
         namelist = []
@@ -233,13 +239,13 @@ class TiFo:
 #        dicti['temp_uid'] = temp_uid
 #        dicti['name'] = port + str(bin(interrupt_mask))
         #print name, value
-        cls.io16list.setValues(device,value_mask,port)
+        self.io16list.setValues(device,value_mask,port)
         #print self.io16list.getTimeDiff(device,interrupt_mask, port)
         if value == nc_pos:
-            Value = cls.io16list.getTimeDiff(device,interrupt_mask, port)
+            Value = self.io16list.getTimeDiff(device,interrupt_mask, port)
         else:
             Value = 0
-            cls.io16list.setTime(device,interrupt_mask, port)
+            self.io16list.setTime(device,interrupt_mask, port)
         #print dicti
         for name in namelist:
             broadcast_input_value('TiFo.' + name, Value)
@@ -267,8 +273,7 @@ class TiFo:
 #        dicti = {'Name':'TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]),'Value':value}
 #        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
 
-    @classmethod
-    def set_io16_sub(cls,cmd,io,value):
+    def set_io16_sub(self,cmd,io,value):
         port = cmd.get('Port')
         toolbox.log(cmd,io,value,port)
         if port  == 'A':
@@ -282,7 +287,7 @@ class TiFo:
                     mask = io.get('valueA') | cmd.get('Pin')
                 else:
                     mask = io.get('valueA') & (0b11111111 & ~ cmd.get('Pin'))
-                cls.io16list.setValues(io.get('IO'),mask,'a')
+                self.io16list.setValues(io.get('IO'),mask,'a')
                 io.get('IO').set_port('a',mask)
         else:
             flopmask = settings.IO16.get(io.get('addr'))[5]
@@ -302,11 +307,10 @@ class TiFo:
                     mask = io.get('IO').get_port('b') | cmd.get('Pin')
                 else:
                     mask = io.get('IO').get_port('b') & (0b11111111 & ~ cmd.get('Pin'))
-                cls.io16list.setValues(io.get('IO'),mask,'b')
+                self.io16list.setValues(io.get('IO'),mask,'b')
                 io.get('IO').set_port('b',mask)
 
-    @classmethod
-    def set_io16(cls,device,value):
+    def set_io16(self,device,value):
         #koennte noch auch .set_selected_values(port, selection_mask, value_mask) umgeschrieben werden
         #monoflop tut nicht
         toolbox.log(device,value)
@@ -321,23 +325,23 @@ class TiFo:
                         #print cmd
                         if str(cmd.get('Value')) == '0': #erst alle auf Null setzen
                             addr = cmd.get('UID')
-                            for io in cls.io16list.liste:
+                            for io in self.io16list.liste:
                                 if io.get('addr') == addr:
-                                    cls.set_io16_sub(cmd,io,cmd.get('Value'))
+                                    self.set_io16_sub(cmd,io,cmd.get('Value'))
                                     success = True
                     for cmd in cmds:
                         if str(cmd.get('Value')) == '1': #erst alle auf Null setzen
                             addr = cmd.get('UID')
-                            for io in cls.io16list.liste:
+                            for io in self.io16list.liste:
                                 if io.get('addr') == addr:
-                                    cls.set_io16_sub(cmd,io,cmd.get('Value'))
+                                    self.set_io16_sub(cmd,io,cmd.get('Value'))
                                     success = True
                 else:
                     cmd = cmds
                     addr = cmd.get('UID')
-                    for io in cls.io16list.liste:
+                    for io in self.io16list.liste:
                         if io.get('addr') == addr:
-                            cls.set_io16_sub(cmd,io,cmd.get('Value'))
+                            self.set_io16_sub(cmd,io,cmd.get('Value'))
                             success = True
         return success
 
@@ -402,8 +406,8 @@ class TiFo:
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
                     time.sleep(wartezeit)
 
-    @classmethod
-    def set_LED(cls, **kwargs):
+
+    def set_LED(self, **kwargs):
 #        device, rot, gruen, blau, transitiontime, transition=ANSTEIGEND
         device = kwargs.get('Device')
 #        range check kwargs
@@ -465,7 +469,7 @@ class TiFo:
                 delta_pb = 0
             gradient = True
 
-        for LED in cls.LEDList.liste:
+        for LED in self.LEDList.liste:
             if LED.get('addr') == uid:
                 laenge = (ende-start)
                 if proc <> None and 0 <= proc <= 100:
@@ -495,7 +499,7 @@ class TiFo:
                             LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
                             time.sleep(wartezeit)
                     elif transition == ZUSAMMEN:
-                        cls._set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime)
+                        self._set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime)
                 else:
                     for birne in range(start,(start+laenge)):
                         LED.get('LED').set_rgb_values(birne, 1, [int(red)]*16, [int(green)]*16, [int(blue)]*16)
@@ -510,8 +514,7 @@ class TiFo:
 
         return True
 
-    @classmethod
-    def set_drb(cls, device, value):
+    def set_drb(self, device, value):
         uid_cmds = settings.DualRelay.get(device)
         uid = ''
         for cmd in uid_cmds:
@@ -519,36 +522,34 @@ class TiFo:
                 uid = cmd.get('UID')
                 state = cmd.get('state')
                 relaynr = cmd.get('relay')
-        for relay in cls.drb:
+        for relay in self.drb:
             temp_uid = str(relay.get_identity()[1]) +"."+ str(relay.get_identity()[0])
             if temp_uid == uid:
                 relay.set_selected_state(relaynr, state)
                 return True
         return False
 
-    @classmethod
-    def receive_communication(cls, payload, *args, **kwargs):
+    def receive_communication(self, payload, *args, **kwargs):
         if toolbox.kw_unpack(kwargs,'typ') == 'output' and toolbox.kw_unpack(kwargs,'receiver') == 'TiFo':
-            result = cls.set_device(payload)
+            result = self.set_device(payload)
             toolbox.communication.send_message(payload, typ='return', value=result)
 
-    @classmethod
-    def set_device(cls, data_ev):
+    def set_device(self, data_ev):
 #       TODO do threaded with stop criteria
+#        TODO change to send address and check if connected
         toolbox.log(data_ev)
         if settings.outputs.get(data_ev.get('Device')) == 'IO16o':
-            return cls.set_io16(data_ev.get('Device'),data_ev.get('Value'))
+            return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
         elif settings.outputs.get(data_ev.get('Device')) == 'IO16o':
-            return cls.set_io16(data_ev.get('Device'),data_ev.get('Value'))
+            return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
         elif settings.outputs.get(data_ev.get('Device')) == 'LEDs':
-            return cls.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
+            return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
         elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
-            return cls.set_drb(data_ev.get('Device'),data_ev.get('Value'))
+            return self.set_drb(data_ev.get('Device'),data_ev.get('Value'))
         else:
             return False
 
-    @classmethod
-    def cb_enumerate(cls, uid, connected_uid, position, hardware_version,
+    def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):
         #global self.led
         found = False
@@ -556,13 +557,14 @@ class TiFo:
            enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
             # Enumeration for LED
             if device_identifier == LEDStrip.DEVICE_IDENTIFIER:
-                cls.LEDs.append(LEDStrip(uid, cls.ipcon))
-                temp_uid = str(cls.LEDs[-1].get_identity()[1]) +"."+ str(cls.LEDs[-1].get_identity()[0])
-                cls.LEDList.addLED(cls.LEDs[-1],temp_uid)
-                cls.LEDs[-1].set_frame_duration(200)
+                self.LEDs.append(LEDStrip(uid, self.ipcon))
+                temp_uid = str(self.LEDs[-1].get_identity()[1]) +"."+ str(self.LEDs[-1].get_identity()[0])
+                toolbox.log('LEDStrip Bricklet', temp_uid)
+                self.LEDList.addLED(self.LEDs[-1],temp_uid)
+                self.LEDs[-1].set_frame_duration(200)
                 if settings.LEDs.get(temp_uid) <> None:
-                    cls.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
-                    cls.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
+                    self.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
+                    self.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
                     found  = True
                 #self.led.register_callback(self.led.CALLBACK_FRAME_RENDERED,
                 #                lambda x: __cb_frame_rendered__(self.led, x))
@@ -571,102 +573,115 @@ class TiFo:
                 #self.led.set_rgb_values(30, self.NUM_LEDS, self.r, self.g, self.b)
 
             if device_identifier == IO16.DEVICE_IDENTIFIER:
-                cls.io.append(IO16(uid, cls.ipcon))
-                temp_uid = str(cls.io[-1].get_identity()[1]) +"."+ str(cls.io[-1].get_identity()[0])
-                cls.io16list.addIO(cls.io[-1],temp_uid,16)
-                cls.io[-1].set_debounce_period(100)
+                self.io.append(IO16(uid, self.ipcon))
+                temp_uid = str(self.io[-1].get_identity()[1]) +"."+ str(self.io[-1].get_identity()[0])
+                toolbox.log('IO16 Bricklet', temp_uid)
+                self.io16list.addIO(self.io[-1],temp_uid,16)
+                self.io[-1].set_debounce_period(100)
                 if settings.IO16.get(temp_uid) <> None:
-                    cls.io[-1].set_port_interrupt('a', settings.IO16.get(temp_uid)[0])
-                    cls.io[-1].set_port_interrupt('b', settings.IO16.get(temp_uid)[1])
-                    cls.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[0],'i',True)
-                    cls.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[1],'i',True)
-                    cls.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[2],'o',False)
-                    cls.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[3],'o',False)
+                    self.io[-1].set_port_interrupt('a', settings.IO16.get(temp_uid)[0])
+                    self.io[-1].set_port_interrupt('b', settings.IO16.get(temp_uid)[1])
+                    self.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[0],'i',True)
+                    self.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[1],'i',True)
+                    self.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[2],'o',False)
+                    self.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[3],'o',False)
                     #self.io[-1].set_port_monoflop('a', tifo_config.IO16.get(temp_uid)[4],0,tifo_config.IO16.get(temp_uid)[6])
                     #self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
-                    cls.io[-1].register_callback(cls.io[-1].CALLBACK_INTERRUPT, partial( cls.cb_interrupt, device = cls.io[-1], uid = temp_uid ))
+                    self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1], uid = temp_uid ))
                     found  = True
 
             if device_identifier == AmbientLight.DEVICE_IDENTIFIER:
-                cls.al.append(AmbientLight(uid, cls.ipcon))
-                cls.al[-1].set_illuminance_callback_threshold('o', 0, 0)
-                cls.al[-1].set_debounce_period(10)
+                self.al.append(AmbientLight(uid, self.ipcon))
+                self.al[-1].set_illuminance_callback_threshold('o', 0, 0)
+                self.al[-1].set_debounce_period(10)
                 #self.al.set_illuminance_callback_threshold('<', 30, 30)
                 #self.al.set_analog_value_callback_period(10000)
                 #self.al.set_illuminance_callback_period(10000)
                 #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE, self.cb_ambLight)
                 #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE_REACHED, self.cb_ambLight)
-                args = cls.al[-1]
+                args = self.al[-1]
                 #self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, lambda event1, event2, event3, args=args: self.cb_ambLight(event1, event2, event3, args))
 
-                cls.al[-1].register_callback(cls.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( cls.cb_ambLight,  device=args))
-                temp_uid = str(cls.al[-1].get_identity()[1]) +"."+ str(cls.al[-1].get_identity()[0])
-
-                thread_cb_amb = Timer(60, cls.thread_ambLight, [cls.al[-1]])
+                self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
+                temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
+                toolbox.log('Ambient Light Bricklet', temp_uid)
+                thread_cb_amb = Timer(60, self.thread_ambLight, [self.al[-1]])
                 thread_cb_amb.start()
+                found  = True
 
             if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
-                cls.co2.append(BrickletCO2(uid, cls.ipcon))
-                temp_uid = str(cls.co2[-1].get_identity()[1]) +"."+ str(cls.co2[-1].get_identity()[0])
-                thread_co2_ = Timer(5, cls.thread_CO2, [cls.co2[-1]])
+                self.co2.append(BrickletCO2(uid, self.ipcon))
+                temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
+                toolbox.log('CO2 Bricklet', temp_uid)
+                thread_co2_ = Timer(5, self.thread_CO2, [self.co2[-1]])
                 thread_co2_.start()
-                cls.threadliste.append(thread_co2_)
+                self.threadliste.append(thread_co2_)
+                found  = True
 
 
             if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
-                cls.drb.append(BrickletDualRelay(uid, cls.ipcon))
-#
+                self.drb.append(BrickletDualRelay(uid, self.ipcon))
+                temp_uid = str(self.drb[-1].get_identity()[1]) +"."+ str(self.drb[-1].get_identity()[0])
+                toolbox.log('Dual Relay Bricklet', temp_uid)
+                found  = True
+                
 #            if device_identifier == Moisture.DEVICE_IDENTIFIER:
 #                self.moist = Moisture(uid, self.ipcon)
 #                self.moist.set_moisture_callback_period(10000)
 #                self.moist.register_callback(self.moist.CALLBACK_MOISTURE, self.cb_moisture)
 
             if device_identifier == BrickletMotionDetector.DEVICE_IDENTIFIER:
-                cls.md.append(BrickletMotionDetector(uid, cls.ipcon))
-                temp_uid = str(cls.md[-1].get_identity()[1]) +"."+ str(cls.md[-1].get_identity()[0])
-                cls.md[-1].register_callback(cls.md[-1].CALLBACK_MOTION_DETECTED, partial( cls.cb_md, device = cls.md[-1], uid = temp_uid ))
-                cls.md[-1].register_callback(cls.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( cls.cb_md_end, device = cls.md[-1], uid = temp_uid ))
+                self.md.append(BrickletMotionDetector(uid, self.ipcon))
+                temp_uid = str(self.md[-1].get_identity()[1]) +"."+ str(self.md[-1].get_identity()[0])
+                toolbox.log('Motion Detector Bricklet', temp_uid)
+                self.md[-1].register_callback(self.md[-1].CALLBACK_MOTION_DETECTED, partial( self.cb_md, device = self.md[-1], uid = temp_uid ))
+                self.md[-1].register_callback(self.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( self.cb_md_end, device = self.md[-1], uid = temp_uid ))
+                found  = True
 
             if device_identifier == BrickletSoundIntensity.DEVICE_IDENTIFIER:
-                cls.si.append(BrickletSoundIntensity(uid, cls.ipcon))
-                temp_uid = str(cls.si[-1].get_identity()[1]) +"."+ str(cls.si[-1].get_identity()[0])
-
-                cls.si[-1].set_debounce_period(1000)
-                cls.si[-1].register_callback(cls.si[-1].CALLBACK_INTENSITY_REACHED, partial( cls.cb_si, device = cls.si[-1], uid = temp_uid ))
-                cls.si[-1].set_intensity_callback_threshold('>',200,0)
+                self.si.append(BrickletSoundIntensity(uid, self.ipcon))
+                temp_uid = str(self.si[-1].get_identity()[1]) +"."+ str(self.si[-1].get_identity()[0])
+                toolbox.log('Sound Intensity Bricklet', temp_uid)
+                self.si[-1].set_debounce_period(1000)
+                self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
+                self.si[-1].set_intensity_callback_threshold('>',200,0)
+                found  = True
 
             if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
-                cls.ptc.append(BrickletPTC(uid, cls.ipcon))
-                temp_uid = str(cls.ptc[-1].get_identity()[1]) +"."+ str(cls.ptc[-1].get_identity()[0])
-                thread_pt_ = Timer(5, cls.thread_pt, [cls.ptc[-1]])
+                self.ptc.append(BrickletPTC(uid, self.ipcon))
+                temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
+                toolbox.log('PT temp Bricklet', temp_uid)
+                thread_pt_ = Timer(5, self.thread_pt, [self.ptc[-1]])
                 thread_pt_.start()
-                cls.threadliste.append(thread_pt_)
+                self.threadliste.append(thread_pt_)
+                found  = True    
 
             if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
-                cls.temp.append(BrickletTemperature(uid, cls.ipcon))
-                temp_uid = str(cls.temp[-1].get_identity()[1]) +"."+ str(cls.temp[-1].get_identity()[0])
+                self.temp.append(BrickletTemperature(uid, self.ipcon))
+                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Temperature Bricklet', temp_uid)
-                thread_pt_ = Timer(5, cls.thread_pt, [cls.temp[-1]])
+                thread_pt_ = Timer(5, self.thread_pt, [self.temp[-1]])
                 thread_pt_.start()
-                cls.threadliste.append(thread_pt_)
+                self.threadliste.append(thread_pt_)
+                found  = True
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
-                cls.master.append(BrickMaster(uid, cls.ipcon))
-                thread_rs_error = Timer(60, cls.thread_RSerror, [])
+                self.master.append(BrickMaster(uid, self.ipcon))
+                temp_uid = str(self.master[-1].get_identity()[0])
+                toolbox.log('Master Brick', temp_uid)
+                thread_rs_error = Timer(60, self.thread_RSerror, [])
                 #thread_rs_error.start()
-                if settings.inputs.get(uid) <> None:
-                    found  = True
+                found  = True
 
             if not found:
                 toolbox.log(connected_uid, uid, device_identifier)
                 print connected_uid, uid, device_identifier
 
-    @classmethod
-    def cb_connected(cls, connected_reason):
+    def cb_connected(self, connected_reason):
         # Enumerate devices again. If we reconnected, the Bricks/Bricklets
         # may have been offline and the configuration may be lost.
         # In this case we don't care for the reason of the connection
-        cls.ipcon.enumerate()
+        self.ipcon.enumerate()
 
 class volt_cur:
     def __init__(self):
@@ -769,7 +784,7 @@ class dist_us:
         # In this case we don't care for the reason of the connection
         self.ipcon.enumerate()
 
-toolbox.communication.register_callback(TiFo.receive_communication)
+
 
 if __name__ == "__main__":
     #sb = dist_us()

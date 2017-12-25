@@ -60,10 +60,13 @@ t = threading.Thread(name="xs1", target=xs1.main, args = [])
 threadliste.append(t)
 t.start()
 
-tifo = tf_connection.TiFo()
-t = threading.Thread(name="tifo", target=tifo.main, args = [])
-threadliste.append(t)
-t.start()
+tf_list = []
+for tf_con in constants.tifo:
+    tifo_inst = tf_connection.TiFo(tf_con)
+    tf_list.append(tifo_inst)
+#    t = threading.Thread(name="tifo_"+tf_con, target=tifo.main, args = [])
+#    threadliste.append(t)
+#    t.start()
 
 #t = threading.Thread(name="TempCTRL", target=temp_control.TempController.start, args = [])
 #threadliste.append(t)

@@ -24,11 +24,14 @@ class TestUM(unittest.TestCase):
 #    def test_ip(self):
 #        print toolbox.check_ext_ip()
         
-    def test_send_message(self):
-        payload = {'Device':'Device 1','Command':'An'}
-        toolbox.communication.send_message(payload, typ='SetDevice')
+#    def test_send_message(self):
+#        payload = {'Device':'Device 1','Command':'An'}
+#        toolbox.communication.send_message(payload, typ='SetDevice')
 #        toolbox.communication.send_message(payload)
         
+    def test_sleep_1(self):
+        toolbox.sleep(10)
+
 
 if __name__ == '__main__':
     unittest.main()

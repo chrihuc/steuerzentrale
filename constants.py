@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import ConfigParser
+import json
 import socket
 own_ip = socket.gethostbyname(socket.gethostname())
 
@@ -11,7 +12,7 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
         'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
-        'tts':'False','heartbt':'125'}
+        'tts':'False','heartbt':'125','TiFo':'[]'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
@@ -104,6 +105,9 @@ for i in range(0,3):
 
             #timeout for connection in seconds
             heartbt = config.getint('Main', 'heartbt')
+            
+#            tifo = config.get('Main', 'tifo')
+            tifo = json.loads(config.get('Main', 'tifo'))
 
             class xs1_:
                 STREAM_URL = xs1_IP+"/control?callback=cname&cmd=subscribe&format=txt"
@@ -264,3 +268,4 @@ class redundancy_:
     PORT = 5050
     #'Master' 'Slave' 'auto'
     typ = 'Master'
+    

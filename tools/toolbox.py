@@ -97,6 +97,12 @@ def kw_unpack(kwargs, searched_key):
         return kwargs[searched_key]
     return False
 
+def sleep(interval):
+    counter = 0
+    while constants.run and counter < interval:
+        time.sleep(1)
+        counter += 1
+
 class communication(object):
 
     queue = []

@@ -872,7 +872,7 @@ class TreeInputsDevices(object):
         else:
             stat = device['Status']
         device_desc = device['Description'] + ' ' + stat
-        dev_obj = {'title': device['HKS'], 'type': 'group', 'expanded': True,
+        dev_obj = {'title': device_desc, 'type': 'group', 'expanded': False,
                    'name':str(device_id), 'children':[], 'tip':device_desc}
         kind = {'title': device['HKS'], 'type': 'str', 'expanded': True,
                 'name':'Beschreibung', 'value':device_desc}
