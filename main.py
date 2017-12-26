@@ -116,7 +116,7 @@ try:
                 aes.new_event(description="Thread stopped: "+t.name, prio=1)
                 constants.run = False
                 sys.exit()
-        time.sleep(10)
+        toolbox.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
 sys.exit()
