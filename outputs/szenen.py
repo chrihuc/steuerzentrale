@@ -83,8 +83,9 @@ class Szenen(object):
     @classmethod
     def trigger_scenes(cls, device, value):
         szns, desc, heartbt = msqc.inputs(device,value)
+#        hearbeat supervision
         if not ((heartbt is None) or (device is None)):
-            cls.timer_add(cls.execute, parent=None, device=device, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
+            cls.timer_add(cls.execute, parent=None, device=desc, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
         for szene in szns:
             if szene <> None:
                 cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
