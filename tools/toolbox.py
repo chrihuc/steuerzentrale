@@ -99,9 +99,12 @@ def kw_unpack(kwargs, searched_key):
 
 def sleep(interval):
     counter = 0
-    while constants.run and counter < interval:
-        time.sleep(1)
-        counter += 1
+    try:
+        while constants.run and counter < interval:
+            time.sleep(1)
+            counter += 1
+    except KeyboardInterrupt:
+        constants.run = False
 
 class communication(object):
 
