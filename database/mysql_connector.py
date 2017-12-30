@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pandas as pd
+import numpy as np
 
 import constants
 
@@ -32,11 +33,15 @@ class tables(object):
     akt_adr_dict = aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
     akt_cmd_tbl_dict = aktors_df[aktors_df.index == 'Command_Table'].to_dict(orient='records')[0]
     inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
+    inputs_df.fillna(value=0, inplace=True)
     db_connection.close()
     _inputs_dict = inputs_df.to_dict(orient='records')
     inputs_dict = {}
     for item in _inputs_dict:
         inputs_dict[item['Name']] = item
+    inputs_dict_hks = {}
+    for item in _inputs_dict:
+        inputs_dict_hks[item['HKS']] = item
 
     @classmethod
     def reload_scenes(cls):

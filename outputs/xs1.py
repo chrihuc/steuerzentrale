@@ -105,7 +105,7 @@ class XS1:
 
     def list_commands(self):
         #comands = mdb_get_table(table.name)
-        liste = ['Umschalten',0,100,15,17,22.5,'func_1','func_2']
+        liste = ['Umschalten',0,100,15,17,22.5,'func_1','func_2','func_3','func_4']
         #for comand in comands:
             #liste.append(comand.get("Name"))
         #liste.remove("Name")

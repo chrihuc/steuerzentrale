@@ -22,7 +22,7 @@ class TestUM(unittest.TestCase):
     def test_get_device_adress(self):
         print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')
     
-    def test_tables_no_init(self):
+#    def test_tables_no_init(self):
 #        scenes_df = mysql_connector.tables.scenes_df
 #        print scenes_df.loc[scenes_df['Name'] == 'Adress']
 #        aktors_df = mysql_connector.tables.aktors_df
@@ -30,7 +30,7 @@ class TestUM(unittest.TestCase):
 #        types = [x for x in types if not x in [np.nan, None]]
 #        print mysql_connector.tables.akt_type_dict
 #        print aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
-        print msqlc.tables().inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
+#        print msqlc.tables().inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
 #        print scenes_df.set_index('Name').to_dict()
 
 #    def test_tables_reload(self):
@@ -49,11 +49,16 @@ class TestUM(unittest.TestCase):
 #        mysql_connector.tables.reload_scenes()
 #        print mysql_connector.tables.scenes_df.columns
 
-    def test_recalc(self):
-        print msqlc.re_calc(['lin_calc',['AmbientGain','V00WOH1RUM1HE01','AmbientBias']])
+#    def test_recalc(self):
+#        print msqlc.re_calc(['lin_calc',['AmbientGain','V00WOH1RUM1HE01','AmbientBias']])
         
 #    def test_get_input_value(self):
 #        print msqlc.get_input_value('V00KUE1TUE1DI01')
+
+    def test_get_inputs_table(self):
+#        print msqlc.settings_r()
+        msqlc.tables.reload_inputs()
+        print msqlc.tables.inputs_dict_hks
     
 if __name__ == '__main__':
     unittest.main()
