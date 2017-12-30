@@ -63,11 +63,16 @@ class tables(object):
         db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER,
                                     constants.sql_.PASS, constants.sql_.DB)
         inputs_df = pd.read_sql('SELECT * FROM cmd_inputs', con=db_connection)
+        db_connection.close()
+        inputs_df.fillna(value=0, inplace=True)
         _inputs_dict = inputs_df.to_dict(orient='records')
         cls.inputs_dict = {}
         for item in _inputs_dict:
             cls.inputs_dict[item['Name']] = item
-        db_connection.close()
+        inputs_dict_hks = {}
+        for item in _inputs_dict:
+            inputs_dict_hks[item['HKS']] = item
+        
 
 
 #auto add entry to inputs

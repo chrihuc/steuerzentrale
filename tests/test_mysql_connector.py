@@ -58,7 +58,7 @@ class TestUM(unittest.TestCase):
     def test_get_inputs_table(self):
 #        print msqlc.settings_r()
         msqlc.tables.reload_inputs()
-        print msqlc.tables.inputs_dict_hks
+        print msqlc.tables.inputs_dict_hks['V00WOH1RUM1CO01']
     
 if __name__ == '__main__':
     unittest.main()
