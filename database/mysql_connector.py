@@ -71,7 +71,7 @@ class tables(object):
             cls.inputs_dict[item['Name']] = item
         inputs_dict_hks = {}
         for item in _inputs_dict:
-            inputs_dict_hks[item['HKS']] = item
+            cls.inputs_dict_hks[item['HKS']] = item
         
 
 
