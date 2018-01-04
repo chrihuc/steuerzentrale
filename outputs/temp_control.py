@@ -14,65 +14,101 @@ from tools import toolbox
 
 from database import mysql_connector as msqc
 
-class Room(object):
+class Zone(object):
     
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, Id):
+        self.Id = Id
         self._set_temp = None
         self._act_temp = None
         self._actuator_temp = None
         self._actuator_set = None
         
-        self.act_hks = name[:11] + 'TE' + name[13:]
-        self.actu_t_hks = name[:11] + 'AT' + name[13:]
-        self.actu_s_hks = name[:11] + 'SA' + name[13:]
+        self._inputs = None
+        self._reference = None
+        self._actuator_temp_hks = None
+        self._output = None
+        self.enabled = False
         
     def __str__(self):
         varias = (self._set_temp, self._act_temp, self._actuator_temp, self._actuator_set)
         return str([str(i) for i in varias])
         
     @property
-    def set_temp(self):
-        return self._set_temp
+    def inputs(self):
+        return self._inputs
     
-    @set_temp.setter
-    def set_temp(self, value):
-        self._set_temp = float(value)
-    
-    @property
-    def act_temp(self):
+    @inputs.setter
+    def inputs(self, value):
+        try:
+            if isinstance(eval(value), list):
+                self._inputs = eval(value)
+        except:
+            pass
+
+    def get_act_temp(self):
+        counter = 0
+        summ = 0.0
+        for inpt in self._inputs:
+            summ += float(msqc.get_input_value(inpt))
+            counter += 1
+        self._act_temp = summ/counter
         return self._act_temp
     
-    @act_temp.setter
-    def act_temp(self, value):
-        self._act_temp = float(value)
-        
     @property
-    def actuator_temp(self):
+    def reference(self):
+        return self._reference
+    
+    @reference.setter
+    def reference(self, value):
+        self._reference = value
+    
+    def get_set_value(self):
+        setting = msqc.get_actor_value(self._reference)
+        if setting == 'Off':
+            self._set_temp = self._act_temp
+            self.enabled = False
+        else:
+            self._set_temp = float(setting)
+            self.enabled = True
+        return self._set_temp
+        
+    def get_actuator_temp(self):
+        self._actuator_temp = float(msqc.get_input_value(self._actuator_temp_hks))
         return self._actuator_temp
-    
-    @actuator_temp.setter
-    def actuator_temp(self, value):
-        self._actuator_temp = float(value)
         
     @property
-    def actuator_set(self):
-        return self._actuator_set
+    def actuator_temp_hks(self):
+        return self._actuator_temp_hks
     
-    @actuator_set.setter
-    def actuator_set(self, value):
-        if value == False:
-            raise ValueError('Setting not existing')
-        self._actuator_set = value
+    @actuator_temp_hks.setter
+    def actuator_temp_hks(self, value):
+        self._actuator_temp_hks = value
+        
+    @property
+    def output(self):
+        return self._output
+    
+    @output.setter
+    def output(self, value):
+        self._output = value
 
     def update_setpoint(self):
         self._actuator_set = self._actuator_temp + (self._set_temp - self._act_temp)
         return self._actuator_set
     
+    def cycle(self):
+        self.get_act_temp()
+        self.get_set_value()
+        self.get_actuator_temp()
+        self.update_setpoint()
+        if self.enabled:
+            payload = {'Device':self._output,'Command':self._actuator_set}
+            toolbox.communication.send_message(payload, typ='SetDevice')
+        return self._actuator_set
+    
 class TempController(object):
     
     zones = []
-    rooms = []
     cylcetime = 60
     running = False
     
@@ -80,39 +116,22 @@ class TempController(object):
         pass
     
     @classmethod
-    def get_zones(cls):
+    def load_zones(cls):
         cls.zones = []
-        all_sets = msqc.settings_r()
-        for setting in all_sets:
-            if setting[11:13] == 'ST':
-                cls.zones.append(setting)
-    
-    @classmethod
-    def init_rooms(cls):
-        cls.get_zones()
-        for zone in cls.zones:
-            new_room = Room(zone)
-            new_room.set_temp = msqc.setting_r(zone)
-            new_room.act_temp = msqc.setting_r(new_room.act_hks)
-            new_room.actuator_temp = msqc.setting_r(new_room.actu_t_hks)
-            cls.rooms.append(new_room)
+        sql_zones = msqc.mdb_get_table(constants.sql_tables.TempControl.name)
+        for zone in sql_zones:
+            new_zone = Zone(zone['Id'])
+            new_zone.inputs = zone['inputs']
+            new_zone.reference = zone['ref_value']
+            new_zone.actuator_temp_hks = zone['actor_reading']
+            new_zone.output = zone['output']
+            cls.zones.append(new_zone)
    
     @classmethod
     def update_rooms(cls):
-        for room in cls.rooms:
-            room.set_temp = msqc.setting_r(room.name)
-            room.act_temp = msqc.setting_r(room.act_hks)
-            room.actuator_temp = msqc.setting_r(room.actu_t_hks)
-            room.update_setpoint()
-            toolbox.log(room.actu_s_hks, room.actuator_set, level=1)
-            payload = {'Device':room.actu_s_hks,'Command':room.actuator_set}
-            toolbox.communication.send_message(payload, typ='SetDevice')
+        for room in cls.zones:
+            room.cycle()
     
-    @classmethod
-    def update_setpoints(cls):
-        for room in cls.rooms:
-            room.update_setpoint()
-            print room.actuator_set
     
     @classmethod
     def stop(cls):
@@ -126,14 +145,14 @@ class TempController(object):
     
     @classmethod
     def start_thread(cls):
-        cls.init_rooms()
+        cls.load_zones()
         cls.running = True
         t = threading.Thread(target=cls.cycling)
         t.start()
     
     @classmethod
     def start(cls):
-        cls.init_rooms()
+        cls.load_zones()
         cls.running = True
         cls.cycling()
     

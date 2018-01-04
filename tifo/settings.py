@@ -13,7 +13,7 @@ inputs = {'6De9SU':'TV','62efV1':'Sideboard','63mHZj':'spare',
           '6De9SU.m4d':'V00WOH1RUM1HE01','6De9SU.xsR':'V00WOH1RUM1CO01',
           '6De9SU.sFC':'V00WOH1RUM1MD01',
           '63mHZj.voh':'V00WOH1RUM1SI01','63mHZj.woZ':'V00WOH1RUM1TE11'}
-outputs = {'Vm1ZIM1RUM1DO01':'IO16o',#'V01ZIM1RUM1DO02':'IO16o','V01ZIM1RUM1DO03':'IO16o',
+outputs = {'V00WOH1STV01':'IO16o', 'V00WOH1STV02':'IO16o',#'V01ZIM1RUM1DO03':'IO16o',
            'V00WOH1SRA1LI01':'LEDs','V00WOH1SRA1LI02':'LEDs','V00WOH1SRA1LI03':'LEDs','V00WOH1SRA1LI04':'LEDs',
            'V00WOH1SRA1LI11':'DualRelay'}
 
@@ -24,8 +24,10 @@ IO16 = {'62efV1.gox':(0b00111111,0b00000000,0b00000000,0b00000000,0b00000000,0b0
 # assingment of homecontrol addresses to tifo addreses
 IO16i = {'62efV1.gox':{'a0b1':'V00WOH1SRA1DI01','a0b10':'V00WOH1SRA1DI02','a0b100':'V00WOH1SRA1DI03',
                        'a0b1000':'V00WOH1SRA1DI04','a0b10000':'V00WOH1SRA1DI05','a0b100000':'V00WOH1SRA1DI06'}}
-IO16o = {'Vm1ZIM1RUM1DO01':({'Value':0,'Commands':({'UID':'6QGwm1.vYN','Pin':0b10000000,'Port':'B','Value':1})},
+IO16o = {'V00WOH1STV01':({'Value':0,'Commands':({'UID':'6QGwm1.vYN','Pin':0b10000000,'Port':'B','Value':1})},
                             {'Value':1,'Commands':({'UID':'6QGwm1.vYN','Pin':0b01000000,'Port':'B','Value':1})}),
+         'V00WOH1STV02':({'Value':0,'Commands':({'UID':'6QGwm1.vYN','Pin':0b00100000,'Port':'B','Value':1})},
+                            {'Value':1,'Commands':({'UID':'6QGwm1.vYN','Pin':0b00010000,'Port':'B','Value':1})}),
 #         'Vm1ZIM1RUM1DO01':({'Value':0,'Commands':({'UID':'63mHZj.vYN','Pin':0b00000001,'Port':'B','Value':1},
 #                                                   {'UID':'63mHZj.vYN','Pin':0b00000010,'Port':'B','Value':0})},
 #                            {'Value':1,'Commands':({'UID':'63mHZj.vYN','Pin':0b00000001,'Port':'B','Value':0},

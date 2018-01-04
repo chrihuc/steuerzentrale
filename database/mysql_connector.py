@@ -204,7 +204,7 @@ def mdb_read_table_entry(db, entry, column='Name',recalc=True):
     dicti = {}
     with con:
         cur = con.cursor()
-        sql = 'SELECT * FROM ' + db + ' WHERE '+column+' = "' + str(entry) +'"'
+#        sql = 'SELECT * FROM ' + db + ' WHERE '+column+' = "' + str(entry) +'"'
         sql = 'SELECT * FROM %s WHERE %s = "%s"' % (db, column, str(entry))
         cur.execute(sql)
         results = cur.fetchall()
@@ -231,6 +231,10 @@ def mdb_read_table_entry(db, entry, column='Name',recalc=True):
                     dicti[commando] = (row[i])
     con.close()
     return dicti
+
+def get_actor_value(hks):
+    temp_res = mdb_read_table_entry(constants.sql_tables.szenen.name, 'Value')
+    return temp_res[hks]
 
 def mdb_read_table_column(db, column):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)

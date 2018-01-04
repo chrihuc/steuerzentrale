@@ -233,8 +233,9 @@ class sql_tables:
     Besucher        = sql_object("sst_Besucher", "SensData",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Handy_IP","VARCHAR(20)"),("Handy_State","INT(11)"),("USB_ID","VARCHAR(45)"),("USB_State","INT(4)"),("prod","VARCHAR(45)"),("gcm_regid","VARCHAR(255)"),("gcm_name","VARCHAR(50)")))
     Bewohner        = sql_object("sst_Bewohner", "SensData",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Handy_IP","VARCHAR(20)"),("Handy_State","INT(11)"),("USB_ID","VARCHAR(45)"),("USB_State","INT(4)"),("prod","VARCHAR(45)"),("gcm_regid","VARCHAR(255)"),("gcm_name","VARCHAR(50)")))
 
+    TempControl     = sql_object("set_heating", "Settings",(("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("Value","VARCHAR(45)")))
 
-    tables = [his_inputs,inputs,cron,settings,szenen,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner]
+    tables = [his_inputs,inputs,cron,settings,szenen,LightstripSchlafzi,Marantz,Sideboard,TuerSPi,Besucher,Bewohner,TempControl]
 #    HUE = sql_object("HUE", "HUE",('BettChris', 'Stablampe_1', 'Stablampe_2', 'Lightstrip_Eingang', 'Lightstrip_Kueche', 'Balkonlampe', 'Stehlampe', 'BettSabina', 'Buero', 'Bad', 'Monaco_Lampe'))
 #    SATELLITE = sql_object("SATELLITE", "SATELLITE",('Sideb_links', 'LightstripSchlafzi', 'Sideb_mitte', 'Sideb_rechts', 'Marantz', 'Sideb_oben', 'TuerSPi','Scanner'))
 #    XS1 = sql_object("XS1", "XS1",('Sideboard', 'Kueche', 'Diele', 'Video_Audio', 'Lattenrost', 'Wohnzimmer_Decke', 'Schlafzimmer', 'Webcams', 'Elchlampe', 'Adventslichter', 'Reduit', 'Pflanzen', 'Saugstauber', 'PC_Peripherie', 'Weihnachtsbaum', 'Esszimmer','Rauchmelder'))
