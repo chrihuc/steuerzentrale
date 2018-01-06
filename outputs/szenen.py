@@ -262,7 +262,7 @@ class Szenen(object):
                 executed = True
         if executed:
 # TODO: Return True and value and write value to table
-            if device != 'Name':
+            if device not in ['Name', 'Id']:
                 msqc.set_val_in_szenen(device=device, szene="Value", value=commando)
         if szn_id == None:
             return

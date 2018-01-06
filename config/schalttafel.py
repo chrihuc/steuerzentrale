@@ -56,7 +56,7 @@ tvs_cmds = tv.dict_commands()
 #sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 devices_types = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
-TYPES = ['XS1','SATELLITE','ZWave', 'SONOS', 'HUE', 'TV']
+TYPES = ['XS1','SATELLITE','ZWave', 'SONOS', 'HUE', 'TV', 'Local']
 cmd_devs = [device for device in devices_types if devices_types[device] in TYPES]
 szn_lst = sorted(szn.list_commands(gruppe=''))
 #for cmd_set in [xs1_cmds,hue_cmds,sns_cmds,tvs_cmds,sat_cmds]:
