@@ -117,7 +117,7 @@ class communication(object):
 
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
-        log(payload, args, kwargs)
+        log(payload, args, kwargs, level=3)
         for callback in cls.callbacks:
             if args:
                 args_to_send =[payload].append(args)
