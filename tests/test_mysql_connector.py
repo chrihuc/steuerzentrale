@@ -19,17 +19,17 @@ class TestUM(unittest.TestCase):
 #        self.assertTrue(mysql_connector.inputs('V01KID1RUM1TE01', 23),
 #                         'Inputs function returning wrong scenes')
     
-    def test_get_device_adress(self):
-        print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')
+#    def test_get_device_adress(self):
+#        print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')
     
-#    def test_tables_no_init(self):
-#        scenes_df = mysql_connector.tables.scenes_df
+    def test_tables_no_init(self):
+#        scenes_df = msqlc.tables.scenes_df
 #        print scenes_df.loc[scenes_df['Name'] == 'Adress']
-#        aktors_df = mysql_connector.tables.aktors_df
+        aktors_df = msqlc.tables.aktors_df
 #        types = aktors_df[aktors_df.index == 'Device_Type'].values[0]
 #        types = [x for x in types if not x in [np.nan, None]]
 #        print mysql_connector.tables.akt_type_dict
-#        print aktors_df[aktors_df.index == 'Adress'].to_dict(orient='records')[0]
+        print aktors_df[aktors_df.index == 'Command_Table'].to_dict(orient='records')[0]
 #        print msqlc.tables().inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
 #        print scenes_df.set_index('Name').to_dict()
 
@@ -55,10 +55,10 @@ class TestUM(unittest.TestCase):
 #    def test_get_input_value(self):
 #        print msqlc.get_input_value('V00KUE1TUE1DI01')
 
-    def test_get_inputs_table(self):
+#    def test_get_inputs_table(self):
 #        print msqlc.settings_r()
-        msqlc.tables.reload_inputs()
-        print msqlc.tables.inputs_dict_hks['V00WOH1RUM1CO01']
+#        msqlc.tables.reload_inputs()
+#        print msqlc.tables.inputs_dict_hks['V00WOH1RUM1CO01']
     
 if __name__ == '__main__':
     unittest.main()

@@ -296,12 +296,25 @@ class Szenen_tree():
         dicti['children']= liste
         return dicti
 
+    def get_commando_list(self,device):
+        table = msqc.tables.akt_cmd_tbl_dict[device]
+        itera = 1
+        dicti = {'':1}
+        liste = msqc.mdb_read_table_column(table, 'Name')
+        for item in liste:
+            itera +=1            
+            dicti[str(item)] = itera     
+        return dicti
+
     def get_commando_set(self,device):
         if devices_types[device] == 'XS1': values = xs1_cmds
         if devices_types[device] == 'HUE': values = hue_cmds
         if devices_types[device] == 'SONOS': values = sns_cmds
         if devices_types[device] == 'TV': values = tvs_cmds
         if devices_types[device] in ['SATELLITE', 'ZWave']: values = sat.dict_commands(device)
+        if devices_types[device] == 'Local': 
+            values = self.get_commando_list(device)
+            print values
         values.update({'warte_1':len(values)+1,'warte_3':len(values)+2,'warte_5':len(values)+3})
         return values
 
@@ -1149,7 +1162,8 @@ def update_device_lists():
     sat_devs = msqc.tables.akt_type_dict['SATELLITE']
     sat_devs += msqc.tables.akt_type_dict['ZWave']
     sat_cmds = sat.dict_commands()
-    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs
+    loc_devs = msqc.tables.akt_type_dict['Local']
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs + loc_devs
 
 def update_settings():
     global sets
