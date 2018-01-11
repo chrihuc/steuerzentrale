@@ -212,6 +212,8 @@ class Szenen(object):
 
     @classmethod
     def __sub_cmds__(cls, szn_id, device, commando, text):
+        if device == 'V00WOH1RUM1ST01':
+            print szn_id, device, commando, text
         try:
             adress = msqc.get_device_adress(device)
         except:
@@ -252,12 +254,12 @@ class Szenen(object):
     #                            for kommando in kommandos:
     #                                t = threading.Thread(target=interner_befehl, args=[commando])
     #                                t.start() 
-            elif device in loc_devs:
+            elif device in msqc.tables.akt_type_dict['Local']:
                 com_set = msqc.mdb_read_table_entry(db=msqc.tables.akt_cmd_tbl_dict[device], entry=commando)
                 payload = {'Device': device, 'Szene': commando, 'Szene_id': szn_id}
                 if com_set: payload.update(com_set)
                 system = adress.split(".")[0]
-                toolbox.communication.send_message(payload, typ='output', receiver=system, adress=adress)                
+                toolbox.communication.send_message(payload, typ='output', receiver=system, adress=adress)       
             else:
                 executed = True
         if executed:

@@ -19,7 +19,7 @@ class TestUM(unittest.TestCase):
 
     def setUp(self):
         constants.debug = True
-        self.tifo = tf_connection.TiFo()
+#        self.tifo = tf_connection.TiFo()
         self.sz = Szenen()
         self.start_t = None
 
@@ -33,13 +33,13 @@ class TestUM(unittest.TestCase):
 #        self.assertTrue(runs,
 #                         'Failed to Execute Scene')
         
-    def test_test(self):
-        runs = self.sz.execute("Test")
-        self.assertTrue(runs,
-                         'Failed to Execute Scene')        
+#    def test_test(self):
+#        runs = self.sz.execute("Test")
+#        self.assertTrue(runs,
+#                         'Failed to Execute Scene')        
 #
 #    def test_send_message(self):
-#        payload = {'Device':'Device_1','Command':'An'}
+#        payload = {'Device':'V00WOH1RUM1ST01','Command':'22'}
 #        toolbox.communication.send_message(payload, typ='SetDevice')
 #        toolbox.communication.send_message(payload)
 
@@ -50,10 +50,10 @@ class TestUM(unittest.TestCase):
 #        time.sleep(20)
 #        toolbox.communication.send_message(payload)
 
-#    def test_execute0(self):
-#        runs = self.sz.execute("RestartSatellites")
-#        self.assertTrue(runs,
-#                         'Failed to Execute Scene')
+    def test_execute0(self):
+        runs = self.sz.execute("HeizungTag")
+        self.assertTrue(runs,
+                         'Failed to Execute Scene')
     
 #    def test_timer_add(self):
 #        self.start_t = datetime.datetime.now()

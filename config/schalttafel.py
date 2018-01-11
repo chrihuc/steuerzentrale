@@ -21,6 +21,7 @@ from pyqtgraph.Qt import QtCore, QtGui
 #from mysql_con import settings_r, setting_s, mdb_read_table_entry, re_calc, mdb_set_table, mdb_get_table,getSzenenSources, maxSzenenId, mdb_read_table_column, mdb_add_table_entry
 from database import mysql_connector
 from database import mysql_connector as msqc
+import copy
 
 import easygui
 import socket
@@ -56,7 +57,7 @@ tvs_cmds = tv.dict_commands()
 #sat_devs = sat.list_devices()
 sat_cmds = sat.dict_commands()
 devices_types = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
-TYPES = ['XS1','SATELLITE','ZWave', 'SONOS', 'HUE', 'TV', 'Local']
+TYPES = constants.akt_types
 cmd_devs = [device for device in devices_types if devices_types[device] in TYPES]
 szn_lst = sorted(szn.list_commands(gruppe=''))
 #for cmd_set in [xs1_cmds,hue_cmds,sns_cmds,tvs_cmds,sat_cmds]:
@@ -110,7 +111,7 @@ furn_dict = {'SCA':'Scanner',
 
 
 szenen_beschreibung = mysql_connector.mdb_read_table_entry(db='set_Szenen',entry='Description')
-constants.redundancy_.master = True
+#constants.redundancy_.master = True
 
 #==============================================================================
 # TODO:
@@ -308,11 +309,11 @@ class Szenen_tree():
 
     def get_commando_set(self,device):
         if devices_types[device] == 'XS1': values = xs1_cmds
-        if devices_types[device] == 'HUE': values = hue_cmds
-        if devices_types[device] == 'SONOS': values = sns_cmds
-        if devices_types[device] == 'TV': values = tvs_cmds
-        if devices_types[device] in ['SATELLITE', 'ZWave']: values = sat.dict_commands(device)
-        if devices_types[device] == 'Local': 
+        elif devices_types[device] == 'HUE': values = hue_cmds
+        elif devices_types[device] == 'SONOS': values = sns_cmds
+        elif devices_types[device] == 'TV': values = tvs_cmds
+        elif devices_types[device] in ['SATELLITE', 'ZWave']: values = sat.dict_commands(device)
+        else: 
             values = self.get_commando_list(device)
             print values
         values.update({'warte_1':len(values)+1,'warte_3':len(values)+2,'warte_5':len(values)+3})
@@ -1159,11 +1160,12 @@ def update_device_lists():
     sns_cmds = sn.dict_commands()
     tvs_devs = msqc.tables.akt_type_dict['TV']
     tvs_cmds = tv.dict_commands()
-    sat_devs = msqc.tables.akt_type_dict['SATELLITE']
+    sat_devs = copy.copy(msqc.tables.akt_type_dict['SATELLITE'])
     sat_devs += msqc.tables.akt_type_dict['ZWave']
     sat_cmds = sat.dict_commands()
-    loc_devs = msqc.tables.akt_type_dict['Local']
-    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs + loc_devs
+    devs = copy.copy(msqc.tables.akt_type_dict['Local'])
+    devs += msqc.tables.akt_type_dict['Heating']
+    cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs + devs
 
 def update_settings():
     global sets

@@ -92,7 +92,6 @@ def exec_data(data_ev, data):
         elif data_ev.get('Request_js') == 'Inputs_hks':
             msqc.tables.reload_inputs()
             data = json.dumps(msqc.tables.inputs_dict_hks, default=handler, allow_nan=False)
-            print data
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
             data = str(msqc.settings_r())

@@ -68,9 +68,9 @@ for tf_con in constants.tifo:
 #    threadliste.append(t)
 #    t.start()
 
-#t = threading.Thread(name="TempCTRL", target=temp_control.TempController.start, args = [])
-#threadliste.append(t)
-#t.start()
+t = threading.Thread(name="TempCTRL", target=temp_control.TempController.start, args = [])
+threadliste.append(t)
+t.start()
 
 #t = threading.Thread(name="udp",target=inp_udp.main, args = [])
 #threadliste.append(t)

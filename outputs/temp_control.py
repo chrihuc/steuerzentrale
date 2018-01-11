@@ -109,7 +109,7 @@ class Zone(object):
 class TempController(object):
     
     zones = []
-    cylcetime = 60
+    cylcetime = 5*60
     running = False
     
     def __init__(self):

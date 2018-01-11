@@ -24,7 +24,7 @@ class tables(object):
     scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
     _lines = ['Adress', 'Device_Type', 'Description', 'Auto_Mode', 'Command_Table']
     aktors_df = scenes_df.loc[scenes_df['Name'].isin(_lines)].set_index('Name')
-    akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave', 'Local']
+    akt_types = constants.akt_types
     akt_type_dict = {typ:[] for typ in akt_types}
     aktors_dict = aktors_df.to_dict()
     for aktor in aktors_dict:

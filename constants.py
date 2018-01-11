@@ -143,6 +143,7 @@ for i in range(0,3):
             continue
         break
 
+akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave', 'Local', 'Heating']
 szn_types = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
 stockwerke = ['Vm1','V00','A00','V01','V02','VIR','']
 

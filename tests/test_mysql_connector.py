@@ -6,7 +6,7 @@ Created on Tue Sep 12 19:11:37 2017
 """
 
 import unittest
-from database import mysql_connector as msqlc
+from database import mysql_connector as msqc
 import numpy as np
 import time
 
@@ -25,11 +25,12 @@ class TestUM(unittest.TestCase):
     def test_tables_no_init(self):
 #        scenes_df = msqlc.tables.scenes_df
 #        print scenes_df.loc[scenes_df['Name'] == 'Adress']
-        aktors_df = msqlc.tables.aktors_df
+#        aktors_df = msqc.tables.aktors_df
 #        types = aktors_df[aktors_df.index == 'Device_Type'].values[0]
 #        types = [x for x in types if not x in [np.nan, None]]
 #        print mysql_connector.tables.akt_type_dict
-        print aktors_df[aktors_df.index == 'Command_Table'].to_dict(orient='records')[0]
+#        print aktors_df[aktors_df.index == 'Command_Table'].to_dict(orient='records')[0]
+        print msqc.tables.akt_type_dict['Local']
 #        print msqlc.tables().inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
 #        print scenes_df.set_index('Name').to_dict()
 
