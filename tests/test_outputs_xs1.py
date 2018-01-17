@@ -30,12 +30,17 @@ class TestUM(unittest.TestCase):
 #        result = self.test_mod.set_device('Adventslichter1', 'An')
 #        self.assertTrue(result,
 #                         'Error sending command')  
- 
+
+    def test_set_device_fht(self):
+        result = self.test_mod.set_device('V00KUE1RUM1ST01', 21.3)
+        self.assertTrue(result,
+                         'Error sending command')    
+    
 #    def test_list_raw_senors(self):
 #        print self.test_mod.list_sensors()
  
-    def test_list_raw_senors(self):
-        print self.test_mod.list_actors()
+#    def test_list_raw_senors(self):
+#        print self.test_mod.list_actors()
        
 #    def test_check_batteries(self):
 #        self.test_mod.check_batteries()

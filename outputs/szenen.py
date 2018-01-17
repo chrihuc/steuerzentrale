@@ -212,8 +212,6 @@ class Szenen(object):
 
     @classmethod
     def __sub_cmds__(cls, szn_id, device, commando, text):
-        if device == 'V00WOH1RUM1ST01':
-            print szn_id, device, commando, text
         try:
             adress = msqc.get_device_adress(device)
         except:
@@ -227,7 +225,7 @@ class Szenen(object):
             msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
         else:
             if device in xs1_devs:
-                executed = xs1.set_device(adress, commando)
+                executed = xs1.set_device(adress, str(commando))
             elif device == "setTask":
                 if commando[0] == 'Alle':
                     executed = mes.send_direkt(to=mes.alle, titel="Setting", text=str(commando[1]))
