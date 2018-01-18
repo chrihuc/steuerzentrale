@@ -14,6 +14,9 @@ from tools import toolbox
 
 from database import mysql_connector as msqc
 
+def myround(x, base=.5):
+    return (base * round(float(x)/base))
+
 class Zone(object):
     
     def __init__(self, Id):
@@ -94,6 +97,8 @@ class Zone(object):
 
     def update_setpoint(self):
         self._actuator_set = self._actuator_temp + (self._set_temp - self._act_temp)
+        # rounding dependend on system
+        self._actuator_set = myround(self._actuator_set)
         return self._actuator_set
     
     def cycle(self):
