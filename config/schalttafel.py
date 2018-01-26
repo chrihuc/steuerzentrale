@@ -407,7 +407,7 @@ class Szenen_tree():
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
                         else:
                             if child <> None:
-                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(mysql_connector.settings_r()), 'value': child[0]},
+                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(mysql_connector.settings_r())+sorted(mysql_connector.tables.inputs_dict_hks), 'value': child[0]},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'],'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)

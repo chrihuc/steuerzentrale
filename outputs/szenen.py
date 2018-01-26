@@ -161,11 +161,12 @@ class Szenen(object):
 #             new way
 #==============================================================================
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
-            for bedingung in bedingungen:
-                if settings.get(bedingung[0]) == None:
-                    msqc.setting_s(bedingung, '')                
+            for bedingung in bedingungen:            
                 item, operand, wert = bedingung
-                item = settings.get(item)
+                if msqc.setting_r(item) == None:
+                    msqc.setting_s(bedingung, '')  
+#                item = settings.get(item)
+                item = msqc.setting_r(item)
                 if verbose: print item, operand, wert
                 if operand == '=':
                     if not float(item) == float(wert):
@@ -174,10 +175,10 @@ class Szenen(object):
                     if not str(item) == str(wert):
                         erfuellt = False                         
                 elif operand == '<':
-                    if not float(item) < float(wert):
+                    if not float(item) < float(str(wert)):
                         erfuellt = False  
                 elif operand == '>':
-                    if not float(item) > float(wert):
+                    if not float(item) > float(str(wert)):
                         erfuellt = False   
                 elif operand == '<=':
                     if not float(item) <= float(wert):
