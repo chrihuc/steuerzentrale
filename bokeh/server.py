@@ -72,7 +72,8 @@ distribution = 'Discrete'
 sensors = {'Wohnzimmer Temp': 'V00WOH1RUM1TE01',
            'Aussentemperatur': 'A00TER1GEN1TE01',
            'Bad': 'V01BAD1RUM1TE01',
-           'Wohnzimmer CO': 'V00WOH1RUM1CO01'}
+           'Wohnzimmer CO': 'V00WOH1RUM1CO01',
+           'Pflanzen Temp': 'Vm1ZIM1PFL1TE01'}
 
 
 sensor_select = Select(value='Wohnzimmer', title='Sensor', options=sorted(sensors.keys()))
