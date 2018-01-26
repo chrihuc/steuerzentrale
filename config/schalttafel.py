@@ -695,9 +695,6 @@ class Szenen_tree():
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state, False)
         bedingungen = neu_szene.get('Bedingung')
-        for i, wert in enumerate(bedingungen):
-            for j, eintrag in enumerate(wert):
-                bedingungen[i][j]=mysql_connector.re_calc(eintrag)
         efuellt = szn.__bedingung__(bedingungen,verbose=True)
         if efuellt:
             easygui.msgbox("Szene würde ausgeführt", title="Bedingung Check")

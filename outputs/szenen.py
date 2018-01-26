@@ -161,8 +161,13 @@ class Szenen(object):
 #             new way
 #==============================================================================
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
-            for bedingung in bedingungen:            
+            for bedingung in bedingungen:   
+                print bedingung
+#                for i, wert in enumerate(bedingungen):
+#                    for j, eintrag in enumerate(wert):
+#                        bedingungen[i][j]=mysql_connector.re_calc(eintrag)                
                 item, operand, wert = bedingung
+                wert = msqc.re_calc(wert)
                 if msqc.setting_r(item) == None:
                     msqc.setting_s(bedingung, '')  
 #                item = settings.get(item)
