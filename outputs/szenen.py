@@ -162,7 +162,6 @@ class Szenen(object):
 #==============================================================================
         #[('Temperatur_Rose','>',['sett','Temperatur_Balkon'])]
             for bedingung in bedingungen:   
-                print bedingung
 #                for i, wert in enumerate(bedingungen):
 #                    for j, eintrag in enumerate(wert):
 #                        bedingungen[i][j]=mysql_connector.re_calc(eintrag)                

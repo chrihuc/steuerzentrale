@@ -225,7 +225,7 @@ class TiFo:
         bit_list = [(1 << bit) for bit in range(7, -1, -1)]
         for wert in bit_list:
             if interrupt_mask & wert > 0:
-                name = settings.IO16i.get(temp_uid).get(port + str(bin(wert)))
+#                name = settings.IO16i.get(temp_uid).get(port + str(bin(wert)))
                 name = temp_uid + "." + port + str(bin(wert))
                 if name <> None:
                     namelist.append(name)
@@ -235,7 +235,7 @@ class TiFo:
             nc_mask = settings.IO16.get(temp_uid)[8]
         value = (value_mask&interrupt_mask)/interrupt_mask
         nc_pos = (nc_mask&interrupt_mask)/interrupt_mask
-        dicti = {}
+#        dicti = {}
 #        dicti['Name'] = name
 #        dicti['temp_uid'] = temp_uid
 #        dicti['name'] = port + str(bin(interrupt_mask))
