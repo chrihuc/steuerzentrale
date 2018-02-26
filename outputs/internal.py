@@ -45,17 +45,17 @@ class Internal:
 
     def __init__ (self):
         dev_list = {'V00ESS1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0),
-                                       datetime.time(22, 30, 0, 0), 60, 20, 50),
+                                       datetime.time(22, 30, 0, 0), 30, 20, 50),
                     'V00KUE1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0),
-                                       datetime.time(22, 30, 0, 0), 60, 1, 10),
+                                       datetime.time(22, 30, 0, 0), 30, 1, 10),
                     'V00KUE1DEK1LI02':('On', 'Off', datetime.time(7, 0, 0, 0),
-                                       datetime.time(22, 30, 0, 0), 60, 1, 10),
+                                       datetime.time(22, 30, 0, 0), 30, 1, 10),
                     'V00FLU1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
-                                       datetime.time(22, 30, 0, 0), 60, 1, 30),
+                                       datetime.time(22, 30, 0, 0), 30, 1, 30),
                     'V01FLU1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
-                                       datetime.time(22, 30, 0, 0), 60, 1, 30),
+                                       datetime.time(22, 30, 0, 0), 30, 1, 30),
                     'V00WOH1RUM1LI13':('Ambience', 'Aus', datetime.time(7, 0, 0, 0), 
-                                       datetime.time(23, 0, 0, 0), 60, 50, 25)}
+                                       datetime.time(23, 0, 0, 0), 30, 50, 25)}
         min_off_dict = {'V00ESS1DEK1LI01':20,
                         'V00KUE1DEK1LI01':10,
                         'V00KUE1DEK1LI02':10,
