@@ -129,6 +129,20 @@ def get_input_value(hks):
     con.close()
     return value
 
+def inputs_r():
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    dicti = {}
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT HKS, last_Value FROM '+constants.sql_tables.inputs.name
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            dicti[row[0]] = row[1]
+    con.close()
+    return dicti
+
 def setting_s(setting, wert):
     ''' set single setting
     '''
@@ -173,7 +187,7 @@ def setting_r(setting):
         con.close()
     return value
 
-def settings_r():
+def settings_r_old():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     with con:
@@ -185,6 +199,11 @@ def settings_r():
         for row in results:
             dicti[row[1]] = row[2]
     con.close()
+    return dicti
+
+def settings_r():
+    dicti = settings_r_old()
+    dicti.update(inputs_r())
     return dicti
 
 def set_val_in_szenen(device, szene, value):
