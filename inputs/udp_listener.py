@@ -95,6 +95,8 @@ def exec_data(data_ev, data):
     elif ('Request' in data_ev):
         if data_ev.get('Request') == 'Settings':
             data = str(msqc.settings_r())
+        elif data_ev.get('Request') == 'Inputs':
+            data = str(msqc.inputs_r())            
         elif data_ev.get('Request') == 'Bewohner':
             data = str(msqc.mdb_get_table(constants.sql_tables.Bewohner.name))
         elif data_ev.get('Request') == 'Besucher':
