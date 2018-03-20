@@ -139,7 +139,7 @@ def inputs_r():
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]
         for row in results:
-            dicti[row[0]] = row[1]
+            dicti[row[0]] = str(row[1])
     con.close()
     return dicti
 
