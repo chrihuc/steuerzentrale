@@ -45,7 +45,7 @@ aes = aevs.AES()
 mes = messaging.Messaging()
 crn = cron.Cron()
 
-SIZE = 1024
+SIZE = 4096
 
 date_handler = lambda obj: (
     obj.isoformat()
@@ -96,7 +96,7 @@ def exec_data(data_ev, data):
         if data_ev.get('Request') == 'Settings':
             data = str(msqc.settings_r())
         elif data_ev.get('Request') == 'Inputs':
-            data = str(msqc.inputs_r())            
+            data = str(msqc.inputs_r())
         elif data_ev.get('Request') == 'Bewohner':
             data = str(msqc.mdb_get_table(constants.sql_tables.Bewohner.name))
         elif data_ev.get('Request') == 'Besucher':
@@ -137,7 +137,7 @@ def bidirekt():
                     isdict = False
             if isdict:
                 data = exec_data(data_ev, data)
-    
+
             #conn.sendall(data)
             conn.send(data)
         finally:
