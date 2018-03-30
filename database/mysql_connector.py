@@ -2,6 +2,7 @@
 
 import pandas as pd
 import numpy as np
+import paho.mqtt.client as mqtt
 
 import constants
 
@@ -10,7 +11,8 @@ from threading import Timer
 from time import localtime, strftime
 import datetime
 
-
+client = mqtt.Client()
+client.connect("192.168.192.10")
 datab = constants.sql_.DB
 
 class tables(object):
@@ -72,7 +74,7 @@ class tables(object):
         inputs_dict_hks = {}
         for item in _inputs_dict:
             cls.inputs_dict_hks[item['HKS']] = item
-        
+
 
 
 #auto add entry to inputs
@@ -528,6 +530,7 @@ def inputs(device, value):
     ct = datetime.datetime.now()
     desc = None
     heartbt = None
+    client.publish("Input", '{"Device":"%s","Value":"%s"}' % (device, value))
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")

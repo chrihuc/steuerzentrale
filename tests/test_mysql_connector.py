@@ -15,14 +15,14 @@ class TestUM(unittest.TestCase):
     def setUp(self):
         pass
 
-#    def test_inputs(self):
-#        self.assertTrue(msqc.inputs('Vm1ZIM1PFL1TE01', 25.9),
-#                         'Inputs function returning wrong scenes')
-#        print msqc.inputs('XS1.Temperatur_3', 25.9)
-    
+    def test_inputs(self):
+        self.assertTrue(msqc.inputs('Vm1ZIM1PFL1TE01', 25.9),
+                         'Inputs function returning wrong scenes')
+        print msqc.inputs('XS1.Temperatur_3', 25.9)
+
 #    def test_get_device_adress(self):
 #        print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')
-    
+
 #    def test_tables_no_init(self):
 #        scenes_df = msqlc.tables.scenes_df
 #        print scenes_df.loc[scenes_df['Name'] == 'Adress']
@@ -39,13 +39,13 @@ class TestUM(unittest.TestCase):
 #        print mysql_connector.tables.inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
 #        time.sleep(60)
 #        mysql_connector.tables.reload_inputs()
-#        print mysql_connector.tables.inputs_dict['XS1.V01BAD1RUM1TE01']['last1']        
+#        print mysql_connector.tables.inputs_dict['XS1.V01BAD1RUM1TE01']['last1']
 
 #    def test_debounce(self):
 #        print mysql_connector.inputs('Test', 0)
 #        print mysql_connector.inputs('Test', 0)
 #        self.assertTrue(mysql_connector.inputs('Test', 23),
-#                         'Inputs function returning wrong scenes')        
+#                         'Inputs function returning wrong scenes')
 
 #    def test_tables_reload(self):
 #        mysql_connector.tables.reload_scenes()
@@ -53,13 +53,13 @@ class TestUM(unittest.TestCase):
 
 #    def test_recalc(self):
 #        print msqlc.re_calc(['lin_calc',['AmbientGain','V00WOH1RUM1HE01','AmbientBias']])
-        
+
 #    def test_get_input_value(self):
 #        print msqc.get_input_value('V00KUE1TUE1DI01')
 
-    def test_inputs_r(self):
-        print msqc.inputs_r()
-        
+#    def test_inputs_r(self):
+#        print msqc.inputs_r()
+
 #    def test_settings_r(self):
 #        print msqc.settings_r()
 
@@ -67,6 +67,6 @@ class TestUM(unittest.TestCase):
 #        print msqlc.settings_r()
 #        msqlc.tables.reload_inputs()
 #        print msqlc.tables.inputs_dict_hks['V00WOH1RUM1CO01']
-    
+
 if __name__ == '__main__':
     unittest.main()

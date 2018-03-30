@@ -33,6 +33,11 @@ biSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 biSocket.bind( (hostName, constants.udp_.biPORT) )
 biSocket.listen(10)
 
+biSocket_n = socket.socket()# socket.AF_INET, socket.SOCK_STREAM )
+biSocket_n.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+biSocket_n.bind( (hostName, 5050) )
+biSocket_n.listen(10)
+
 PORT_NUMBER = constants.udp_.PORT
 broadSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 broadSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -168,6 +173,34 @@ def bidirekt():
             #conn.sendall(data)
             conn.send(data)
 #            send_msg(conn)
+        finally:
+            conn.close()
+
+def bidirekt_new():
+    while constants.run:
+        conn, addr = biSocket_n.accept()
+        try:
+            data = recvall(conn)
+            toolbox.log(data)
+            if not data:
+                conn.close()
+                break
+            isdict = False
+            try:
+                data_ev = eval(data)
+                if type(data_ev) is dict:
+                    isdict = True
+            except Exception as serr:
+                try:
+                    data_ev = eval(data[2:])
+                    if type(data_ev) is dict:
+                        isdict = True
+                except Exception as serr:
+                    isdict = False
+            if isdict:
+                data = exec_data(data_ev, data)
+
+            send_msg(conn, data)
         finally:
             conn.close()
 

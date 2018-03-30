@@ -1,5 +1,5 @@
-This repo is thought mainly for my own use, it's 
- - not yet cleaned up 
+This repo is thought mainly for my own use, it's
+ - not yet cleaned up
  - the installer is not ready
  - parts of it were written 10 years ago
  -> you can see my python skills developing over the years
@@ -15,10 +15,10 @@ git clone https://github.com/chrihuc/steuerzentrale.git sz
 cd sz
 
 
-sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip python-paramiko espeak python-pandas 
-sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui soco
+sudo apt-get install daemontools daemontools-run python-dev python-mysqldb python-pip python-pycurl python-pysolar python-dateutil python-pymad python-pip python-paramiko espeak python-pandas
+sudo pip install phue gcm pyephem paramiko tinkerforge gitpython pyqtgraph easygui soco paho-mqtt
 
-python-pyaudio (xprintidle feh) python3-pyaudio 
+python-pyaudio (xprintidle feh) python3-pyaudio
 
 sudo pip install phue                   #??
 sudo pip install gcm                    #??
