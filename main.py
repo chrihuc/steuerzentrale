@@ -80,6 +80,10 @@ t = threading.Thread(name="udp.bidirekt", target=udp_listener.bidirekt, args = [
 threadliste.append(t)
 t.start()
 
+t = threading.Thread(name="udp.bidirekt_new", target=udp_listener.bidirekt_new, args = [])
+threadliste.append(t)
+t.start()
+
 t = threading.Thread(name="udp.broadcast", target=udp_listener.broadcast, args = [])
 threadliste.append(t)
 t.start()

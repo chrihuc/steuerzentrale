@@ -530,7 +530,7 @@ def inputs(device, value):
     ct = datetime.datetime.now()
     desc = None
     heartbt = None
-    client.publish("Input", '{"Device":"%s","Value":"%s"}' % (device, value))
+    client.publish("Inputs", '{"Device":"%s","Value":"%s"}' % (device, value))
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")

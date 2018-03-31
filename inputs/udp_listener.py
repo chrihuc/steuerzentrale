@@ -180,7 +180,8 @@ def bidirekt_new():
     while constants.run:
         conn, addr = biSocket_n.accept()
         try:
-            data = recvall(conn)
+            data = recv_msg(conn)
+            print data
             toolbox.log(data)
             if not data:
                 conn.close()
