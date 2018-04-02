@@ -19,6 +19,7 @@ cfg_hue ={'IP':''}
 cfg_mail ={'USER':'','PASS':'','RECIP':''}
 cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
            'Bilder': ''}
+cfg_mqtt = {'Username': '', 'Password': ''}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -68,6 +69,11 @@ def init_cfg():
     for cfg in cfg_gui:
         if not config.has_option('GUI', cfg):
             config.set('GUI', cfg, cfg_gui.get(cfg))
+    if not config.has_section('MQTT'):
+        config.add_section('MQTT')
+    for cfg in cfg_mqtt:
+        if not config.has_option('MQTT', cfg):
+            config.set('MQTT', cfg, cfg_mqtt.get(cfg))
     # Writing our configuration file to 'main.cfg'
     with open('./main.cfg', 'wb') as configfile:
         config.write(configfile)
@@ -105,7 +111,7 @@ for i in range(0,3):
 
             #timeout for connection in seconds
             heartbt = config.getint('Main', 'heartbt')
-            
+
 #            tifo = config.get('Main', 'tifo')
             tifo = json.loads(config.get('Main', 'tifo'))
 
@@ -138,8 +144,12 @@ for i in range(0,3):
                 KlingelAn = config.getboolean('GUI', 'KlingelAn')
                 Feh = config.getboolean('GUI', 'Feh')
                 Bilder = config.get('GUI', 'Bilder')
+            class mqtt_:
+                user = config.get('MQTT', 'Username')
+                password = config.get('MQTT', 'Password')
         except:
             init_cfg()
+            print 'issues'
             continue
         break
 
@@ -270,4 +280,3 @@ class redundancy_:
     PORT = 5050
     #'Master' 'Slave' 'auto'
     typ = 'Master'
-    

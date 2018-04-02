@@ -12,6 +12,7 @@ from time import localtime, strftime
 import datetime
 
 client = mqtt.Client()
+client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
 client.connect("192.168.192.10")
 datab = constants.sql_.DB
 
