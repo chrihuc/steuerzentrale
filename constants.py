@@ -19,7 +19,7 @@ cfg_hue ={'IP':''}
 cfg_mail ={'USER':'','PASS':'','RECIP':''}
 cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
            'Bilder': ''}
-cfg_mqtt = {'Username': '', 'Password': ''}
+cfg_mqtt = {'Username': '', 'Password': '', 'Server': '192.168.192.10'}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -147,6 +147,7 @@ for i in range(0,3):
             class mqtt_:
                 user = config.get('MQTT', 'Username')
                 password = config.get('MQTT', 'Password')
+                server = config.get('MQTT', 'Server')
         except:
             init_cfg()
             print 'issues'

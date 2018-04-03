@@ -10,10 +10,13 @@ import MySQLdb as mdb
 from threading import Timer
 from time import localtime, strftime
 import datetime
+import json
+
+# TODO: reconnect of MQTT
 
 client = mqtt.Client()
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-client.connect("192.168.192.10")
+client.connect(constants.mqtt_.server)
 datab = constants.sql_.DB
 
 class tables(object):
@@ -81,7 +84,13 @@ class tables(object):
 #auto add entry to inputs
 #replace all dbs with constants
 #rewrite defs at the end
-
+def handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    elif isinstance(obj, datetime.timedelta):
+        return obj.seconds
+    else:
+        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
 
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
@@ -153,6 +162,8 @@ def setting_s(setting, wert):
         wert = True
     if wert in ('Aus','aus'):
         wert = False
+    data = json.dumps('{"Value":"%s"}' % (wert), default=handler, allow_nan=False)
+    client.publish("Settings/" + setting, data)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
@@ -531,7 +542,6 @@ def inputs(device, value):
     ct = datetime.datetime.now()
     desc = None
     heartbt = None
-    client.publish("Inputs", '{"Device":"%s","Value":"%s"}' % (device, value))
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
@@ -612,7 +622,8 @@ def inputs(device, value):
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
-
+            data = json.dumps('{"Value":"%s"}' % (value), default=handler, allow_nan=False)
+            client.publish("Inputs/" + hks, data)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()
