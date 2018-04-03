@@ -162,7 +162,7 @@ def setting_s(setting, wert):
         wert = True
     if wert in ('Aus','aus'):
         wert = False
-    data = json.dumps('{"Value":"%s"}' % (wert), default=handler, allow_nan=False)
+    data = json.dumps('{Value:%s}' % (wert), default=handler, allow_nan=False)
     client.publish("Settings/" + setting, data)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
@@ -622,7 +622,7 @@ def inputs(device, value):
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
-            data = json.dumps('{"Value":"%s"}' % (value), default=handler, allow_nan=False)
+            data = json.dumps('{Value:%s}' % (value), default=handler, allow_nan=False)
             client.publish("Inputs/" + hks, data)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
