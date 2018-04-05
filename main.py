@@ -56,6 +56,8 @@ def start_bokeh():
 
 threadliste = []
 
+services = {'xs1':xs1.main}
+
 t = threading.Thread(name="xs1", target=xs1.main, args = [])
 threadliste.append(t)
 t.start()
@@ -118,8 +120,11 @@ try:
         for t in threadliste:
             if not t in threading.enumerate():
                 aes.new_event(description="Thread stopped: "+t.name, prio=1)
-                constants.run = False
-                sys.exit()
+                try:
+                    t.start()
+                except:
+                    constants.run = False
+                    sys.exit()
         toolbox.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
