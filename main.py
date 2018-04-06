@@ -122,8 +122,10 @@ try:
                 aes.new_event(description="Thread stopped: "+t.name, prio=1)
                 try:
                     t.start()
+                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
                 except:
                     constants.run = False
+                    aes.new_event(description="Couldnt estart Thread, rebooting ", prio=1)
                     sys.exit()
         toolbox.sleep(10)
 except KeyboardInterrupt:

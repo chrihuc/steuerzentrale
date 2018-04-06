@@ -6,6 +6,8 @@ import smtplib
 import urllib2
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+import paho.mqtt.client as mqtt
+import json
 
 import MySQLdb as mdb
 from database import mysql_connector
@@ -39,6 +41,17 @@ import time
 # * 4.3 lights blinking red in higher alarm, same as above
 
 
+client = mqtt.Client()
+client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
+client.connect(constants.mqtt_.server)
+
+def handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    elif isinstance(obj, datetime.timedelta):
+        return obj.seconds
+    else:
+        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
 
 class sql_object:
     def __init__(self,name,typ,columns):
@@ -62,7 +75,7 @@ class AES:
         with con:
             cur = con.cursor()
             cur.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '"+table.name+"'")
-            if cur.fetchone()[0] == 0:       
+            if cur.fetchone()[0] == 0:
                 command = "CREATE TABLE "+constants.sql_.DB+"."+table.name +"("
                 for num, col in enumerate(table.columns):
                     if num == len(table.columns)-1:
@@ -71,41 +84,43 @@ class AES:
                         command +=  ");"
                     else:
                         for co in col:
-                            command += co + " "                    
+                            command += co + " "
                         command +=  ", "
                 cur.execute(command)
-                results = cur.fetchall()      
-        con.close() 
+                results = cur.fetchall()
+        con.close()
 
     def send_mail(self, subject, text='', url=None):
         server = smtplib.SMTP('smtp.gmail.com:587')
         server.ehlo()
         server.starttls()
         server.login(constants.mail_.USER,constants.mail_.PASS)
-        
+
         msg = MIMEMultipart("Steurzentrale")
         msg["From"] = constants.mail_.USER
         msg["To"] = constants.mail_.receiver
         msg["Subject"] = subject
-        
+
         if url != None:
             req = urllib2.Request(url)
             try:
                 response = urllib2.urlopen(req)
-                data = response.read() 
+                data = response.read()
                 img = MIMEImage(data)
                 msg.attach(img)
             except urllib2.URLError as e:
                 data = None
-        
-        server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())        
-        
-        
+
+        server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())
+
+
     def new_event(self, description, prio=0, durchsage="", karenz=-1):
         t = threading.Thread(target=self.new_event_t, args=[description, prio, durchsage, karenz])
-        t.start() 
-    
+        t.start()
+
     def new_event_t(self, description, prio=0, durchsage="", karenz=-1):
+        data = json.dumps('{"Description":"%s", "Durchsage":"%s"}' % (description, durchsage), default=handler, allow_nan=False)
+        client.publish("AES/Prio" + str(prio), data)
         if prio < 0: return
         if karenz == -1:
             if prio == 1:
@@ -118,7 +133,7 @@ class AES:
         for alarm in alarme:
             if description == alarm.get("description"):
                 neuer = False
-        if neuer:                
+        if neuer:
             dicti = {}
             XS1DB = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
             with XS1DB:
@@ -135,55 +150,55 @@ class AES:
             if prio == 0:
                 pass
             elif prio == 1:
-                pass            
+                pass
             elif prio == 2:
                 self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio == 3:
-                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)                
+                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio == 4:
-                self.mes.send_wach(to=self.mes.alle, titel="Hinweis", text=description)                
+                self.mes.send_wach(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio > 4 and prio < 5:
-                self.mes.send_wach(to=self.mes.alle, titel="Hinweis", text=description)              
+                self.mes.send_wach(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio == 5:
                 self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)
             elif prio > 5 and prio < 6:
-                self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)                  
+                self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)
             elif prio >= 6 and prio < 7:
                 self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description)
-                self.send_mail('Alarm', text=description)               
+                self.send_mail('Alarm', text=description)
             elif prio >= 7 and prio < 8:
-                self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)                    
-                
+                self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)
+
     def alarm_resolved(self, description, resolv_desc):
         alarme = self.alarm_events_read(unacknowledged=True,prio=1, time=24)
         for alarm in alarme:
             if description == alarm.get("description"):
                 alarm_id = alarm.get("id")
                 self.acknowledge_alarm(alarm_id)
-                self.new_event(resolv_desc, prio=0)      
-            
+                self.new_event(resolv_desc, prio=0)
+
     def acknowledge_alarm(self, alarm_id):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
-            sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE id = '+ str(alarm_id) 
+            sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE id = '+ str(alarm_id)
             cur.execute(sql)
-        con.close() 
+        con.close()
 
     def acknowledge_alarm_name(self, alarm_name):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
-            sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE description = '+ str(alarm_name) 
+            sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE description = '+ str(alarm_name)
             cur.execute(sql)
-        con.close()         
-        
+        con.close()
+
     def acknowledge_all(self):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             sql = 'UPDATE '+table.name+' SET acknowledged = CURRENT_TIMESTAMP WHERE acknowledged is NULL'
-            cur.execute(sql)        
+            cur.execute(sql)
         con.close()
         #self.mySocket.sendto('az_Hinweis_gesehen',(self.OUTPUTS_IP,self.OUTPUTS_PORT))
 
@@ -209,7 +224,7 @@ class AES:
                 dicti = {}
                 j = j + 1
             return liste
-        
+
     def check_liste(self):
         alarme = self.alarm_events_read(unacknowledged=True,prio=1)
         nachricht = " # "
@@ -217,5 +232,5 @@ class AES:
             for alarm in alarme:
                 nachricht =  nachricht + alarm.get("description") + " # "
             self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text="Es gibt " + str(len(alarme)) + " neue Alarme:" + nachricht)
-        
+
 
