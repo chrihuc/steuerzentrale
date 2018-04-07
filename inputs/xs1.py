@@ -86,7 +86,7 @@ def heartbeat_sup():
     print "XS1 connection lost"
     if toolbox.ping(constants.router_IP):
         conn.close()
-#        sys.exit("XS1 goodbye")
+        sys.exit("XS1 goodbye")
         #os.system(exectext)
     else:
         reset_wlan()
