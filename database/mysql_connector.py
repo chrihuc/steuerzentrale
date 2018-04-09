@@ -163,7 +163,7 @@ def setting_s(setting, wert):
     if wert in ('Aus','aus'):
         wert = False
     data = json.dumps('{"Value":"%s", "Key":"%s"}' % (wert, setting), default=handler, allow_nan=False)
-    client.publish("Settings/" + setting, data)
+    client.publish("Settings/" + setting, data, qos=1)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
@@ -623,7 +623,7 @@ def inputs(device, value):
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
             data = json.dumps('{"Value":"%s", "Key":"%s"}' % (value, hks), default=handler, allow_nan=False)
-            client.publish("Inputs/" + hks, data)
+            client.publish("Inputs/" + hks, data, qos=1)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()

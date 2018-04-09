@@ -126,6 +126,8 @@ try:
                 except:
                     constants.run = False
                     aes.new_event(description="Couldnt estart Thread, rebooting ", prio=1)
+                    exectext = "sudo killall python"
+                    os.system(exectext)
                     sys.exit()
         toolbox.sleep(10)
 except KeyboardInterrupt:
