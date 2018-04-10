@@ -120,16 +120,16 @@ try:
         for t in threadliste:
             if not t in threading.enumerate():
                 aes.new_event(description="Thread stopped: "+t.name, prio=1)
-#                try:
-                if True:
+                try:
+#                if True:
                     t.start()
                     aes.new_event(description="Restarted Thread: "+t.name, prio=1)
-#                except:
-#                    constants.run = False
-#                    aes.new_event(description="Couldnt estart Thread, rebooting ", prio=1)
-#                    exectext = "sudo killall python"
-#                    os.system(exectext)
-#                    sys.exit()
+                except:
+                    constants.run = False
+                    aes.new_event(description="Couldnt estart Thread, rebooting ", prio=1)
+                    exectext = "sudo killall python"
+                    os.system(exectext)
+                    sys.exit()
         toolbox.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
