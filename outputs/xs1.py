@@ -171,7 +171,7 @@ class XS1:
                 else:
                     self.SetSwitch(str(device), "100.0")
                     value=100
-            elif 'func' in commd:
+            elif 'func' in str(commd):
                 self.SetSwitchFunction(str(device), str(commd)[5:])
             else:
                 self.SetSwitch(str(device), str(commd))
