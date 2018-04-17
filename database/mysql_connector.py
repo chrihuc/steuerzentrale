@@ -623,7 +623,7 @@ def inputs(device, value):
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
             data = json.dumps('{"Value":"%s", "Key":"%s"}' % (value, hks), default=handler, allow_nan=False)
-            client.publish("Inputs/" + str(hks), data, qos=1)
+            client.publish("Inputs/" + str(hks), data)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()
