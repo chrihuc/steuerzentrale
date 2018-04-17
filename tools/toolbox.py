@@ -92,6 +92,14 @@ def log(*args, **kwargs):
     #p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
     #p.communicate(msg.as_string())
 
+def handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    elif isinstance(obj, datetime.timedelta):
+        return obj.seconds
+    else:
+        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
+
 def kw_unpack(kwargs, searched_key):
     if searched_key in kwargs:
         return kwargs[searched_key]
