@@ -11,7 +11,7 @@ import constants
 from tools import toolbox
 import json
 
-client = mqtt.Client()
+client = mqtt.Client(constants.name)
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
 client.connect(constants.mqtt_.server)
 
