@@ -95,8 +95,11 @@ class AES:
         server.ehlo()
         server.starttls()
         server.login(constants.mail_.USER,constants.mail_.PASS)
-
-        msg = MIMEMultipart("Steurzentrale")
+        
+        if url != None:
+            msg = MIMEMultipart("Steurzentrale")
+        else:
+            msg = MIMEText(text)
         msg["From"] = constants.mail_.USER
         msg["To"] = constants.mail_.receiver
         msg["Subject"] = subject

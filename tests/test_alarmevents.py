@@ -19,10 +19,8 @@ class TestUM(unittest.TestCase):
         self.assertTrue(runs,
                          'Failed to get events')
 
-#    def test_pause(self):
-#        runs = self.sn.set_device('V01KID1RUM1AV11','Pause')
-#        self.assertTrue(runs,
-#                         'Failed to pause')
+    def test_sendmail(self):
+        result = self.aes.send_mail('test', 'TEST')
         
 if __name__ == '__main__':
     unittest.main()
