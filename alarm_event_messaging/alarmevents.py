@@ -44,6 +44,7 @@ import time
 client = mqtt.Client()
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
 client.connect(constants.mqtt_.server)
+client.loop_start()
 
 def handler(obj):
     if hasattr(obj, 'isoformat'):

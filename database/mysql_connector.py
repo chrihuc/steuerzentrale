@@ -17,6 +17,7 @@ import json
 client = mqtt.Client(constants.name)
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
 client.connect(constants.mqtt_.server)
+client.loop_start()
 datab = constants.sql_.DB
 
 class tables(object):
