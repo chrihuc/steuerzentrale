@@ -1,0 +1,24 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Thu May 24 21:51:19 2018
+
+@author: christooph
+"""
+import time
+import paho.mqtt.client as mqtt
+from database import mysql_connector as msqc
+
+import constants
+
+client = mqtt.Client(constants.name)
+client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
+client.connect(constants.mqtt_.server)
+client.loop_start()
+
+while True:
+    if msqc.settings_r()['Status'] == 'Wach' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 10:
+        client.publish("Outputs/Kerze1", 1, qos=1)
+    else:
+        client.publish("Outputs/Kerze1", 0, qos=1)
+    time.sleep(5)
