@@ -17,7 +17,8 @@ client.connect(constants.mqtt_.server)
 client.loop_start()
 
 while True:
-    if msqc.settings_r()['Status'] == 'Wach' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 10:
+    print msqc.settings_r()['V00WOH1RUM1HE01']
+    if msqc.settings_r()['Status'] == 'Wach' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
         client.publish("Outputs/Kerze1", 1, qos=1)
     else:
         client.publish("Outputs/Kerze1", 0, qos=1)
