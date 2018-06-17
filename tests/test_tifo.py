@@ -19,18 +19,18 @@ class TestUM(unittest.TestCase):
         constants.debug = True
         constants.debug_level = 10
 #        constants.debug_text = 'tf_conn'
-        
+
 
 #    def test_connect_1_conns(self):
 #        self.test_mod = tf_connection.TiFo('localhost')
 
 
     def test_connect_2_conns(self):
-        self.test_mod = tf_connection.TiFo('localhost')
+        #self.test_mod = tf_connection.TiFo('localhost')
 #        toolbox.communication.register_callback(self.test_mod.receive_communication)
-        self.test_mod2 = tf_connection.TiFo('192.168.192.34')
+        self.test_mod2 = tf_connection.TiFo('192.168.192.10')
 #        toolbox.communication.register_callback(self.test_mod2.receive_communication)
-        
-        
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -25,6 +25,7 @@ from tinkerforge.bricklet_motion_detector import BrickletMotionDetector
 from tinkerforge.bricklet_sound_intensity import BrickletSoundIntensity
 from tinkerforge.bricklet_ptc import BrickletPTC
 from tinkerforge.bricklet_temperature import BrickletTemperature
+from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.brick_master import BrickMaster
 from threading import Timer
 import time
@@ -42,7 +43,7 @@ def broadcast_input_value(Name, Value):
 #    on server:
     toolbox.log(Name, Value)
     toolbox.communication.send_message(payload, typ='InputValue')
-    
+
 #    on satellite:
 #    mySocket.sendto(str(payload) ,(constants.server1,constants.broadPort))
 
@@ -112,7 +113,7 @@ class TiFo:
     r = [0]*16
     g = [0]*16
     b = [0]*16
-    
+
     ipcon = None
 
     led = None
@@ -149,12 +150,12 @@ class TiFo:
         self.moist = None
         self.unknown = []
         self.threadliste = []
- 
-        self.ipcon = IPConnection()       
+
+        self.ipcon = IPConnection()
         self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
                                      self.cb_enumerate)
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
-                                     self.cb_connected) 
+                                     self.cb_connected)
         self.ipcon.connect(ip, PORT)
         toolbox.communication.register_callback(self.receive_communication)
         toolbox.log('TiFo started')
@@ -215,6 +216,14 @@ class TiFo:
             value = device.get_temperature()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/100))
+            toolbox.sleep(60)
+
+    @staticmethod
+    def thread_cp(device):
+        while constants.run:
+            value = device.get_air_pressure()
+            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+            broadcast_input_value('TiFo.' + name, str(float(value)/1000))
             toolbox.sleep(60)
 
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
@@ -625,7 +634,7 @@ class TiFo:
                 temp_uid = str(self.drb[-1].get_identity()[1]) +"."+ str(self.drb[-1].get_identity()[0])
                 toolbox.log('Dual Relay Bricklet', temp_uid)
                 found  = True
-                
+
 #            if device_identifier == Moisture.DEVICE_IDENTIFIER:
 #                self.moist = Moisture(uid, self.ipcon)
 #                self.moist.set_moisture_callback_period(10000)
@@ -655,7 +664,7 @@ class TiFo:
                 thread_pt_ = Timer(5, self.thread_pt, [self.ptc[-1]])
                 thread_pt_.start()
                 self.threadliste.append(thread_pt_)
-                found  = True    
+                found  = True
 
             if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletTemperature(uid, self.ipcon))
@@ -664,6 +673,15 @@ class TiFo:
                 thread_pt_ = Timer(5, self.thread_pt, [self.temp[-1]])
                 thread_pt_.start()
                 self.threadliste.append(thread_pt_)
+                found  = True
+
+            if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
+                self.temp.append(BrickletBarometer(uid, self.ipcon))
+                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
+                toolbox.log('Pressure Bricklet', temp_uid)
+                thread_cp_ = Timer(5, self.thread_cp, [self.temp[-1]])
+                thread_cp_.start()
+                self.threadliste.append(thread_cp_)
                 found  = True
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
