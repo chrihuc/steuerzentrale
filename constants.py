@@ -204,7 +204,9 @@ dev_kat_dict = {'TE': 'Temperature',
                 'CO': 'Carbonmonoxide',
                 'ST': 'Set Temperature',
                 'AT': 'Actuator Temperature',
-                'SA': 'Set Temp at actuator'}
+                'SA': 'Set Temp at actuator',
+                'BA': 'Luftdruck',
+                'LS': 'Lautstaerke'}
 
 class sql_object:
     def __init__(self,name,typ,columns):

@@ -16,7 +16,7 @@ from tools import toolbox
 class TestUM(unittest.TestCase):
 
     def setUp(self):
-        constants.debug = True
+        #constants.debug = True
         constants.debug_level = 10
 #        constants.debug_text = 'tf_conn'
 

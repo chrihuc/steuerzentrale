@@ -29,6 +29,7 @@ from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.brick_master import BrickMaster
 from threading import Timer
 import time
+from time import localtime,strftime
 from math import log
 import datetime
 
@@ -36,6 +37,7 @@ import constants
 
 # on server:
 from tifo import settings
+from tifo import pattern_reco as pr
 from tools import toolbox
 
 def broadcast_input_value(Name, Value):
@@ -278,10 +280,22 @@ class TiFo:
 
     @staticmethod
     def cb_si(value, device, uid):
-#        dicti = {'Name':settings.inputs.get(uid),'Value':value}
-        broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), value)
-#        dicti = {'Name':'TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]),'Value':value}
-#        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
+        time0 = time.time()
+        data = []
+        nr_cycles = int(5 / pr.cycle_time)
+        for i in range(0, nr_cycles):
+            sample = device.get_intensity()
+            data.append(sample)
+            time.sleep(pr.cycle_time)
+        zeit =  time.time()
+        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
+        print uhr
+        print time.time() - time0
+        print data
+        result = pr.analyze(data)
+        print result
+        for res in result:
+            broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), res)
 
     def set_io16_sub(self,cmd,io,value):
         port = cmd.get('Port')
@@ -652,7 +666,7 @@ class TiFo:
                 self.si.append(BrickletSoundIntensity(uid, self.ipcon))
                 temp_uid = str(self.si[-1].get_identity()[1]) +"."+ str(self.si[-1].get_identity()[0])
                 toolbox.log('Sound Intensity Bricklet', temp_uid)
-                self.si[-1].set_debounce_period(1000)
+                self.si[-1].set_debounce_period(10000)
                 self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
                 self.si[-1].set_intensity_callback_threshold('>',200,0)
                 found  = True
