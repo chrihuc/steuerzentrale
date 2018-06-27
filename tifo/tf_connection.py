@@ -666,7 +666,7 @@ class TiFo:
                 self.si.append(BrickletSoundIntensity(uid, self.ipcon))
                 temp_uid = str(self.si[-1].get_identity()[1]) +"."+ str(self.si[-1].get_identity()[0])
                 toolbox.log('Sound Intensity Bricklet', temp_uid)
-                self.si[-1].set_debounce_period(10000)
+                self.si[-1].set_debounce_period(60000)
                 self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
                 self.si[-1].set_intensity_callback_threshold('>',200,0)
                 found  = True

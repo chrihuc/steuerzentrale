@@ -10,29 +10,31 @@ from random import randint
 
 cycle_time = 0.05
 
-patterns = [{'repeat'  :  9,
-               'high'    : 250,
-               'low'     :  10,
-               'beeptime_min':  0.2,
-               'beeptime_max':  3,
-               'mutetime_min':  0.1,
-               'mutetime_max':  3,   # includes the last one
-               'name': 100},
-            {'repeat'  :  11,
-               'high'    : 250,
-               'low'     :  50,
-               'beeptime_min':  0.1,
-               'beeptime_max':  2,
-               'mutetime_min':  0.1,
-               'mutetime_max':  2,
-               'name': 200}]
+patterns = [{'count_min'   :   9,
+             'count_max'   :  10,
+             'high'        : 110,
+             'low'         :  90,
+             'beeptime_min': 0.2,
+             'beeptime_max':   3,
+             'mutetime_min': 0.1,
+             'mutetime_max':   3,   # includes the last one
+             'name':         111},
+            {'count_min'   :   9,
+             'count_max'   :  10,
+             'high'        : 250,
+             'low'         :  10,
+             'beeptime_min': 0.2,
+             'beeptime_max':   3,
+             'mutetime_min': 0.1,
+             'mutetime_max':   3,   # includes the last one
+             'name':         222}]
 
 def callback():
     # record 10 sec worth of data
     time0 = time.time()
     data = []
     for i in range(0, 100):
-        sample = randint(0, 30)
+        sample = randint(0, 30) * 10
         data.append(sample)
         time.sleep(cycle_time)
     print time.time() - time0
@@ -46,7 +48,7 @@ def analyze(timeseries):
         result = []
         if compare(result_1, pattern):
             result.append(pattern['name'])
-        return result
+    return result
 
 def analyze_one_pattern(timeseries, pattern):
     beeptime = []
@@ -80,7 +82,7 @@ def analyze_one_pattern(timeseries, pattern):
 
 
 def compare(found_pattern, pattern):
-    if pattern['repeat'] <> found_pattern[0]:
+    if (pattern['count_min'] > found_pattern[0]) or (pattern['count_max'] < found_pattern[0]):
         return False
     else:
         b_min_true = [dauer >= pattern['beeptime_min'] for dauer in found_pattern[1]]
