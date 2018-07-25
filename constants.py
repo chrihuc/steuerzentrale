@@ -16,7 +16,7 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
-cfg_mail ={'USER':'','PASS':'','RECIP':''}
+cfg_mail ={'USER':'','PASS':'','RECIP':'[]'}
 cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
            'Bilder': ''}
 cfg_mqtt = {'Username': '', 'Password': '', 'Server': '192.168.192.10'}
@@ -137,7 +137,7 @@ for i in range(0,3):
                 # constants.sql_.IP
                 USER = config.get('MAIL', 'USER')
                 PASS = config.get('MAIL', 'PASS')
-                receiver = config.get('MAIL', 'RECIP')
+                receiver = json.loads(config.get('MAIL', 'RECIP'))
             class gui_:
                 KS = config.getboolean('GUI', 'KommandoStation')
                 Home = config.getint('GUI', 'KSHome')

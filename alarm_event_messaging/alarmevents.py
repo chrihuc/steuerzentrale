@@ -102,7 +102,7 @@ class AES:
         else:
             msg = MIMEText(text)
         msg["From"] = constants.mail_.USER
-        msg["To"] = constants.mail_.receiver
+        
         msg["Subject"] = subject
 
         if url != None:
@@ -115,7 +115,9 @@ class AES:
             except urllib2.URLError as e:
                 data = None
 
-        server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())
+        for recipient in constants.mail_.receiver:
+            msg["To"] = recipient
+            server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())
 
 
     def new_event(self, description, prio=0, durchsage="", karenz=-1):
