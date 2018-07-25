@@ -92,7 +92,7 @@ for i in range(0,3):
             run = True
             passive = False
             debug = False
-            debug_level = 9
+            debug_level = 2
             debug_text = ''
             config.readfp(open('./main.cfg'))
             eigene_IP = config.get('Main', 'eigene_IP')

@@ -67,7 +67,7 @@ def log(*args, **kwargs):
                 return
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
-        print '%s [%s, %s] %s' % (uhr, calframe[1][1], calframe[1][3], args)
+        print '%s [%s, %s] %s %s' % (uhr, calframe[1][1], calframe[1][3], level, args)
 #def restart_services():
   #lgd = logdebug(True, True)
   #lgd.debug("Heartbeat supervision")

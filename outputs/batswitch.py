@@ -15,54 +15,71 @@ client = mqtt.Client(constants.name)
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
 client.connect(constants.mqtt_.server)
 client.loop_start()
-
+"""
+ 0 Aus  5min
+ 1 An   5min
+ 2 Aus  10min
+ 3 An   10min
+ 4 Aus  30min
+ 5 An   30min
+ 6 Aus  2 h
+""" 
 def main():
     while constants.run:
         try:
-            print msqc.settings_r()['V00WOH1RUM1HE01']
             if False:
                 # AUS und 5 min Warten
                 client.publish("Outputs/Kerze1", 0, qos=1)
-#                print '0'
+
             elif msqc.settings_r()['Status'] != 'Schlafen' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 5:
                 # AN und 5 min Warten
                 client.publish("Outputs/Kerze1", 1, qos=1)
-#                print '1'
+                # Nachtlicht Aus und 5 min Warten
+                client.publish("Outputs/Nachtlicht", 0, qos=1)
             elif msqc.settings_r()['Status'] != 'Schlafen' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
                 # AN und 10 min Warten
                 client.publish("Outputs/Kerze1", 3, qos=1)
-#                print '3'
+                # Nachtlicht Aus und 10 min Warten
+                client.publish("Outputs/Nachtlicht", 2, qos=1)                
             elif msqc.settings_r()['Status'] != 'Schlafen' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 300:
                 # AUS und 10 min Warten
                 client.publish("Outputs/Kerze1", 2, qos=1)
-#                print '2'
+                # Nachtlicht Aus und 30 min Warten
+                client.publish("Outputs/Nachtlicht", 4, qos=1)  
             elif msqc.settings_r()['Status'] != 'Schlafen':
                 # AUS und 30 min Warten
                 client.publish("Outputs/Kerze1", 4, qos=1)
-#                print '4'
+                # Nachtlicht Aus und 30 min Warten
+                client.publish("Outputs/Nachtlicht", 4, qos=1)  
     #        elif False:
     #            # AN und 30 min Warten
     #            client.publish("Outputs/Kerze1", 5, qos=1)
-    #            print '5'
+
     #        elif False:
     #            # AUS und 2 h Warten
     #            client.publish("Outputs/Kerze1", 6, qos=1)
-    #            print '6'
+
     #        elif False:
     #            # AN und 2 h Warten
     #            client.publish("Outputs/Kerze1", 7, qos=1)
-    #            print '7'
+
+            elif msqc.settings_r()['Status'] == 'Schlafen' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
+                # AUS und 6 h Warten
+                client.publish("Outputs/Kerze1", 8, qos=1)
+                # Nachtlicht An und 10 min Warten
+                client.publish("Outputs/Nachtlicht", 3, qos=1)  
             elif msqc.settings_r()['Status'] == 'Schlafen':
                 # AUS und 6 h Warten
                 client.publish("Outputs/Kerze1", 8, qos=1)
-#                print '8'
+                # Nachtlicht Aus und 10 min Warten
+                client.publish("Outputs/Nachtlicht", 2, qos=1)                  
     #        elif False:
     #            # AN und 6 h Warten
     #            client.publish("Outputs/Kerze1", 9, qos=1)
-    #            print '9'
+
             else:
                 client.publish("Outputs/Kerze1", 10, qos=1)
-#                print '10'
+
             time.sleep(5)
         except:
             print 'Batswitch mqtt next try'
