@@ -6,9 +6,10 @@ Created on Sat Feb  6 09:24:15 2016
 """
 
 # TODO: unpickle
-
+import json
 from threading import Timer
 import datetime
+import ast
 #import pickle
 
 from tools import toolbox
@@ -16,12 +17,20 @@ from tools import toolbox
 import datetime
 import uuid
 
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
 class Szenen_Timer:
         
     def __init__(self,callback=None):
         self.liste = []
         self._callback = callback
-        self.store()
+        self.load()
         #self.index_p = {}
         #self.index_c = {}
         #exact means parent needs to be the same
@@ -125,13 +134,36 @@ class Szenen_Timer:
         print self.liste
 
     def store(self):
-#        pickle.dump(self.liste, open( "szn_timer.tmp", "wb" ) )
-#        toolbox.log(self.liste, level=1) 
+        write_list = []
+        for dicti in self.liste:
+            new_dict = {}
+            for key, value in dicti.iteritems():
+                if key not in ['timer', 'hash_id']:
+                    new_dict[key] = value
+            write_list.append(new_dict)
         with open('szn_timer.tmp', 'w') as f:
             f.write(str(self.liste))
-#        file_ = open('szn_timer.tmp', 'w')
-#        file_.write(str(self.liste))
-#        file_.close()
+        with open('szn_timer.jsn', 'w') as fout:
+            json.dump(write_list, fout, default=json_serial)
+
+    def load(self):
+        with open('szn_timer.jsn') as f:
+            full = f.read()
+        try:
+            alte = json.loads(full)
+            for eintrag in alte:
+                due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')
+                ct = datetime.datetime.now()
+                if due > ct:
+                    delay = (due - ct).seconds + 1
+                    parent = eintrag['parent']
+                    child = eintrag['child']
+                    exact = eintrag['exact']
+                    retrig = eintrag['retrig'] 
+                    device = eintrag['device']
+                    self.add_timer(parent, delay, child, exact, retrig, device, start=True)
+        except:
+            toolbox.log('Laden der Szenen fehlgeschlagen', level=1)
 
     def entferne_eintrag(self, hash_id, child, device):
         for item in self.liste:

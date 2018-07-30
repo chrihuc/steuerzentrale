@@ -12,7 +12,7 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
         'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
-        'tts':'False','heartbt':'125','TiFo':'[]'}
+        'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
@@ -92,7 +92,7 @@ for i in range(0,3):
             run = True
             passive = False
             debug = False
-            debug_level = 2
+#            debug_level = 2
             debug_text = ''
             config.readfp(open('./main.cfg'))
             eigene_IP = config.get('Main', 'eigene_IP')
@@ -114,6 +114,8 @@ for i in range(0,3):
 
 #            tifo = config.get('Main', 'tifo')
             tifo = json.loads(config.get('Main', 'tifo'))
+            
+            debug_level = config.getint('Main', 'loglevel')
 
             class xs1_:
                 STREAM_URL = xs1_IP+"/control?callback=cname&cmd=subscribe&format=txt"
@@ -283,3 +285,5 @@ class redundancy_:
     PORT = 5050
     #'Master' 'Slave' 'auto'
     typ = 'Master'
+
+print name, debug_level

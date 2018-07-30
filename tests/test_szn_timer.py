@@ -20,7 +20,7 @@ class TestUM(unittest.TestCase):
         self.test_mod = szn_timer.Szenen_Timer(callback=self.print_it)
         self.start_t = None
 
-    def print_it(self, it):
+    def print_it(self, it, device):
         print datetime.datetime.now() - self.start_t, it
 
     def test_list_devices(self):
