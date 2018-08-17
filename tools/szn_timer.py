@@ -147,9 +147,9 @@ class Szenen_Timer:
             json.dump(write_list, fout, default=json_serial)
 
     def load(self):
-        with open('szn_timer.jsn') as f:
-            full = f.read()
         try:
+            with open('szn_timer.jsn') as f:
+                full = f.read()            
             alte = json.loads(full)
             for eintrag in alte:
                 due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')

@@ -26,6 +26,7 @@ from tinkerforge.bricklet_sound_intensity import BrickletSoundIntensity
 from tinkerforge.bricklet_ptc import BrickletPTC
 from tinkerforge.bricklet_temperature import BrickletTemperature
 from tinkerforge.bricklet_barometer import BrickletBarometer
+from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.brick_master import BrickMaster
 from threading import Timer
 import time
@@ -228,6 +229,14 @@ class TiFo:
             broadcast_input_value('TiFo.' + name, str(float(value)/1000))
             toolbox.sleep(60)
 
+    @staticmethod
+    def thread_hum(device):
+        while constants.run:
+            value = device.get_humidity()
+            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+            broadcast_input_value('TiFo.' + name, str(float(value)))
+            toolbox.sleep(60)
+
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
         #print('Interrupt on port: ' + port + str(bin(interrupt_mask)))
         #print('Value: ' + str(bin(value_mask)))
@@ -282,6 +291,7 @@ class TiFo:
     def cb_si(value, device, uid):
         time0 = time.time()
         data = []
+        return
         nr_cycles = int(5 / pr.cycle_time)
         for i in range(0, nr_cycles):
             sample = device.get_intensity()
@@ -697,6 +707,15 @@ class TiFo:
                 thread_cp_.start()
                 self.threadliste.append(thread_cp_)
                 found  = True
+
+            if device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
+                self.temp.append(BrickletHumidityV2(uid, self.ipcon))
+                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
+                toolbox.log('Humidity Bricklet', temp_uid)
+                thread_hum_ = Timer(5, self.thread_hum, [self.temp[-1]])
+                thread_hum_.start()
+                self.threadliste.append(thread_hum_)
+                found  = True                
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))
