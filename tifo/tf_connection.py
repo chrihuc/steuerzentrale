@@ -234,7 +234,9 @@ class TiFo:
         while constants.run:
             value = device.get_humidity()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-            broadcast_input_value('TiFo.' + name + '.hu', str(float(value)))
+            broadcast_input_value('TiFo.' + name + '.HU', str(float(value)/100))
+            value = device.get_temperature()
+            broadcast_input_value('TiFo.' + name + '.TE', str(float(value)/100))
             toolbox.sleep(60)
 
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
