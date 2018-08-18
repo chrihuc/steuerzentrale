@@ -234,7 +234,7 @@ class TiFo:
         while constants.run:
             value = device.get_humidity()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-            broadcast_input_value('TiFo.' + name, str(float(value)))
+            broadcast_input_value('TiFo.' + name + '.hu', str(float(value)))
             toolbox.sleep(60)
 
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
@@ -715,7 +715,7 @@ class TiFo:
                 thread_hum_ = Timer(5, self.thread_hum, [self.temp[-1]])
                 thread_hum_.start()
                 self.threadliste.append(thread_hum_)
-                found  = True                
+                found  = True
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))
