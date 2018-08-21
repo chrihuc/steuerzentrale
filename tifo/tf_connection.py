@@ -239,6 +239,26 @@ class TiFo:
             broadcast_input_value('TiFo.' + name + '.TE', str(float(value)/100))
             toolbox.sleep(60)
 
+    @staticmethod
+    def thread_volc(device):
+        while constants.run:
+            value = device.get_voltage()
+            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+            broadcast_input_value('TiFo.' + name + '.U', str(float(value)/100))
+            value = device.get_current()
+            broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
+            toolbox.sleep(60)
+
+    @staticmethod
+    def cb_volc_vol(value, device, uid):
+        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+        broadcast_input_value('TiFo.' + name + '.U', str(float(value)/100))
+
+    @staticmethod
+    def cb_volc_cur(value, device, uid):
+        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+        broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
+
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
         #print('Interrupt on port: ' + port + str(bin(interrupt_mask)))
         #print('Value: ' + str(bin(value_mask)))
@@ -718,6 +738,20 @@ class TiFo:
                 thread_hum_.start()
                 self.threadliste.append(thread_hum_)
                 found  = True
+        
+            if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
+                self.temp.append(BrickletVoltageCurrent(uid, self.ipcon))
+                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
+                toolbox.log('Vol Curr Bricklet', temp_uid)
+                thread_volc_ = Timer(5, self.thread_volc, [self.temp[-1]])
+                thread_volc_.start()
+                self.threadliste.append(thread_volc_)
+                self.temp[-1].set_debounce_period(10000)
+                self.temp[-1].register_callback(self.temp[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.temp[-1], uid = temp_uid ))
+                self.temp[-1].set_voltage_callback_threshold("<", 0, 23*1000) 
+                self.temp[-1].register_callback(self.temp[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.temp[-1], uid = temp_uid ))
+                self.temp[-1].set_current_callback_threshold(">", 3.8*1000, 0)                  
+                found  = True
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))
@@ -730,60 +764,6 @@ class TiFo:
             if not found:
                 toolbox.log(connected_uid, uid, device_identifier)
                 print connected_uid, uid, device_identifier
-
-    def cb_connected(self, connected_reason):
-        # Enumerate devices again. If we reconnected, the Bricks/Bricklets
-        # may have been offline and the configuration may be lost.
-        # In this case we don't care for the reason of the connection
-        self.ipcon.enumerate()
-
-class volt_cur:
-    def __init__(self):
-        self.vc = None
-
-        # Create IP Connection
-        self.ipcon = IPConnection()
-
-        # Register IP Connection callbacks
-        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
-                                     self.cb_enumerate)
-        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
-                                     self.cb_connected)
-
-        # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(constants.ownIP, PORT)
-        #self.ipcon.enumerate()
-
-
-    def cb_reached_vc(self):
-        voltage = self.vc.get_voltage()
-        dicti = {}
-        dicti['value'] = str(voltage)
-        dicti['name'] = 'Voltage'
-        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort))
-        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort))
-        current = self.vc.get_current()
-        dicti = {}
-        dicti['value'] = str(current)
-        dicti['name'] = 'Current'
-        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort))
-        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort))
-        thread_cb_reached = Timer(60, self.cb_reached_vc, [])
-        thread_cb_reached.start()
-
-
-    # Callback handles device connections and configures possibly lost
-    # configuration of lcd and temperature callbacks, backlight etc.
-    def cb_enumerate(self, uid, connected_uid, position, hardware_version,
-                     firmware_version, device_identifier, enumeration_type):
-
-        if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
-           enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
-
-            # Enumeration for V/C
-            if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
-                self.vc = BrickletVoltageCurrent(uid, self.ipcon)
-                self.cb_reached_vc()
 
     def cb_connected(self, connected_reason):
         # Enumerate devices again. If we reconnected, the Bricks/Bricklets
