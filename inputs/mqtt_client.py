@@ -4,51 +4,68 @@
 @author: christoph
 """
 
-import paho.mqtt.client as mqtt  #import the client1
-import time
-import json
+import paho.mqtt.client as mqtt
+import sys
+import logging
 import constants
 
-def on_connect(client, userdata, flags, rc):
-    if rc==0:
-        client.connected_flag=True #set flag
-        print("connected OK")
-        client.subscribe("Inputs/ESP/#")
+
+def connect(ipaddress, port):
+    global client
+    client = mqtt.Client()
+    assign_handlers(on_connect, on_message)
+    client.connect(ipaddress, port, 60)
+    client.loop_forever()
+
+
+def assign_handlers(connect, message):
+    """
+
+    :param mqtt.Client client:
+    :param connect:
+    :param message:
+    :return:
+    """
+
+    global client
+    client.on_connect = connect
+    client.on_message = message
+
+
+def on_connect(client_data, userdata, flags, rc):
+    global client, topic
+    log.debug("Connected! Subscribing to topic %r" % topic)
+    client.subscribe(topic)
+
+
+def on_message(client_data, userdata, msg):
+    global client, topic
+
+    log.debug("Event received: %r :  %r" % (msg.topic, msg.payload))
+
+client = None
+topic = ""
+ipaddress = ""
+port = ""
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(__name__)
+
+
+def main():
+    global client, topic, ipaddress, port
+
+    if len(sys.argv) == 3:
+        address = sys.argv[1]
+        ipaddress = address.split(":")[0]
+        port = address.split(":")[1]
+        topic = sys.argv[2]
     else:
-        print("Bad connection Returned code=",rc)
+        print "Usage : %r [ipaddress:port] [topic]" % sys.argv[0]
+        exit(1)
 
-def on_message(client, userdata, msg):
-    print(msg.topic + " " + str(msg.payload))    
-    try:
-        m_in=(json.loads(msg.payload)) #decode json data
-        print m_in
-        if 'Value' in m_in:
-            name = msg.topic[7:]
-            print 'Name: ', name            
-            #print 'Value: ', float(m_in['Value'])
-    except ValueError:
-        print("no json code")
+    log.debug("Connecting to %r:%r" % (ipaddress, port))
+    connect(ipaddress, port)
 
-    
-mqtt.Client.connected_flag=False#create flag in class
-broker=constants.mqtt_.server
-client = mqtt.Client(constants.name)
-client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-client.connect(constants.mqtt_.server)           #create new instance 
-client.on_connect=on_connect  #bind call back function
-client.on_message = on_message
-client.loop_start()
-print("Connecting to broker ",broker)
-client.connect(broker)      #connect to broker
-while not client.connected_flag: #wait in loop
-    print("In wait loop")
-    time.sleep(1)
-print("in Main Loop")
 
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    pass
-client.loop_stop()    #Stop loop 
-client.disconnect() # disconnect
+if __name__ == "__main__":
+    main()
