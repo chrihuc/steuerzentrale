@@ -28,7 +28,8 @@ from tinkerforge.bricklet_temperature import BrickletTemperature
 from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.brick_master import BrickMaster
-from threading import Timer
+import threading
+#from threading import Timer
 import time
 from time import localtime,strftime
 from math import log
@@ -164,8 +165,7 @@ class TiFo:
         toolbox.log('TiFo started')
 #        self.ipcon.enumerate()
 
-    @classmethod
-    def main(cls):
+    def main(self, cls):
         # Create IP Connection
         cls.ipcon = IPConnection()
         # Register IP Connection callbacks
@@ -176,6 +176,12 @@ class TiFo:
         # Connect to brickd, will trigger cb_connected
         cls.ipcon.connect('localhost', PORT)
         while constants.run:
+            for t in self.threadliste:
+                if not t in threading.enumerate():  
+                    new_t = threading.Thread(name=t.name, target=t.target, args = t.args)
+                    new_t.start()
+                    self.threadliste.remove(t)
+                    self.threadliste.append(new_t)                 
             time.sleep(10)
 
     def thread_RSerror(self):
@@ -184,8 +190,7 @@ class TiFo:
                 print mastr.get_rs485_error_log()
             toolbox.sleep(60)
 
-    @staticmethod
-    def cb_ambLight(illuminance,device):
+    def cb_ambLight(self, illuminance,device):
         thresUp = illuminance * 4/3
         thresDown = illuminance * 4 / 5
         if thresDown == 0:
@@ -197,40 +202,35 @@ class TiFo:
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(illuminance))
 
-    @staticmethod
-    def thread_ambLight(device):
+    def thread_ambLight(self, device):
         while constants.run:
             illuminance = device.get_illuminance()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(illuminance))
             toolbox.sleep(60)
 
-    @staticmethod
-    def thread_CO2(device):
+    def thread_CO2(self, device):
         while constants.run:
             value = device.get_co2_concentration()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(value))
             toolbox.sleep(60)
 
-    @staticmethod
-    def thread_pt(device):
+    def thread_pt(self, device):
         while constants.run:
             value = device.get_temperature()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/100))
             toolbox.sleep(60)
 
-    @staticmethod
-    def thread_cp(device):
+    def thread_cp(self, device):
         while constants.run:
             value = device.get_air_pressure()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/1000))
             toolbox.sleep(60)
 
-    @staticmethod
-    def thread_hum(device):
+    def thread_hum(self, device):
         while constants.run:
             value = device.get_humidity()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
@@ -239,8 +239,7 @@ class TiFo:
             broadcast_input_value('TiFo.' + name + '.TE', str(float(value)/100))
             toolbox.sleep(60)
 
-    @staticmethod
-    def thread_volc(device):
+    def thread_volc(self, device):
         while constants.run:
             value = device.get_voltage()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
@@ -249,13 +248,11 @@ class TiFo:
             broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
             toolbox.sleep(60)
 
-    @staticmethod
-    def cb_volc_vol(value, device, uid):
+    def cb_volc_vol(self, value, device, uid):
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.U', str(float(value)/100))
 
-    @staticmethod
-    def cb_volc_cur(value, device, uid):
+    def cb_volc_cur(self, value, device, uid):
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
 
@@ -295,22 +292,19 @@ class TiFo:
 #            dicti['Name'] = 'TiFo.' + name
 #            mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
 
-    @staticmethod
-    def cb_md(device, uid):
+    def cb_md(self, device, uid):
 #        dicti = {'Name':settings.inputs.get(uid),'Value':1}
         broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), 1)
 #        dicti = {'Name':'TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]),'Value':1}
 #        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
 
-    @staticmethod
-    def cb_md_end(device, uid):
+    def cb_md_end(self, device, uid):
 #        dicti = {'Name':settings.inputs.get(uid),'Value':0}
         broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), 0)
 #        dicti = {'Name':'TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]),'Value':0}
 #        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
 
-    @staticmethod
-    def cb_si(value, device, uid):
+    def cb_si(self, value, device, uid):
         time0 = time.time()
         data = []
         return
@@ -401,8 +395,7 @@ class TiFo:
                             success = True
         return success
 
-    @staticmethod
-    def _set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime):
+    def _set_LED_zusammen(self, LED,start,ende,red,green,blue,transitiontime):
         laenge = (ende-start)
         o_r, o_g, o_b = LED.get('LED').get_rgb_values(start, 1)
         steps = abs(red-o_r) + abs(green-o_g) + abs(blue-o_b)
@@ -661,7 +654,7 @@ class TiFo:
                 self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
                 temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
                 toolbox.log('Ambient Light Bricklet', temp_uid)
-                thread_cb_amb = Timer(60, self.thread_ambLight, [self.al[-1]])
+                thread_cb_amb = threading.Timer(60, self.thread_ambLight, [self.al[-1]])
                 thread_cb_amb.start()
                 found  = True
 
@@ -669,7 +662,7 @@ class TiFo:
                 self.co2.append(BrickletCO2(uid, self.ipcon))
                 temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
                 toolbox.log('CO2 Bricklet', temp_uid)
-                thread_co2_ = Timer(5, self.thread_CO2, [self.co2[-1]])
+                thread_co2_ = threading.Timer(5, self.thread_CO2, [self.co2[-1]])
                 thread_co2_.start()
                 self.threadliste.append(thread_co2_)
                 found  = True
@@ -707,7 +700,7 @@ class TiFo:
                 self.ptc.append(BrickletPTC(uid, self.ipcon))
                 temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
                 toolbox.log('PT temp Bricklet', temp_uid)
-                thread_pt_ = Timer(5, self.thread_pt, [self.ptc[-1]])
+                thread_pt_ = threading.Timer(5, self.thread_pt, [self.ptc[-1]])
                 thread_pt_.start()
                 self.threadliste.append(thread_pt_)
                 found  = True
@@ -716,7 +709,7 @@ class TiFo:
                 self.temp.append(BrickletTemperature(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Temperature Bricklet', temp_uid)
-                thread_pt_ = Timer(5, self.thread_pt, [self.temp[-1]])
+                thread_pt_ = threading.Timer(5, self.thread_pt, [self.temp[-1]])
                 thread_pt_.start()
                 self.threadliste.append(thread_pt_)
                 found  = True
@@ -725,7 +718,7 @@ class TiFo:
                 self.temp.append(BrickletBarometer(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Pressure Bricklet', temp_uid)
-                thread_cp_ = Timer(5, self.thread_cp, [self.temp[-1]])
+                thread_cp_ = threading.Timer(5, self.thread_cp, [self.temp[-1]])
                 thread_cp_.start()
                 self.threadliste.append(thread_cp_)
                 found  = True
@@ -734,7 +727,7 @@ class TiFo:
                 self.temp.append(BrickletHumidityV2(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Humidity Bricklet', temp_uid)
-                thread_hum_ = Timer(5, self.thread_hum, [self.temp[-1]])
+                thread_hum_ = threading.Timer(5, self.thread_hum, [self.temp[-1]])
                 thread_hum_.start()
                 self.threadliste.append(thread_hum_)
                 found  = True
@@ -743,7 +736,7 @@ class TiFo:
                 self.temp.append(BrickletVoltageCurrent(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Vol Curr Bricklet', temp_uid)
-                thread_volc_ = Timer(5, self.thread_volc, [self.temp[-1]])
+                thread_volc_ = threading.Timer(5, self.thread_volc, [self.temp[-1]])
                 thread_volc_.start()
                 self.threadliste.append(thread_volc_)
                 self.temp[-1].set_debounce_period(10000)
@@ -757,7 +750,7 @@ class TiFo:
                 self.master.append(BrickMaster(uid, self.ipcon))
                 temp_uid = str(self.master[-1].get_identity()[0])
                 toolbox.log('Master Brick', temp_uid)
-                thread_rs_error = Timer(60, self.thread_RSerror, [])
+                thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
                 #thread_rs_error.start()
                 found  = True
 
