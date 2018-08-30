@@ -14,7 +14,7 @@ import json
 
 # TODO: reconnect of MQTT
 
-client = mqtt.Client(constants.name)
+client = mqtt.Client(constants.name + '_mysql_con')
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
 client.connect(constants.mqtt_.server)
 client.loop_start()
@@ -623,8 +623,9 @@ def inputs(device, value):
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
-            data = json.dumps('{"Value":"%s", "Key":"%s"}' % (value, hks), default=handler, allow_nan=False)
-            client.publish("Inputs/" + str(hks), data, qos=1)
+            if str(hks) <> str(device):
+                data = json.dumps('{"Value":"%s", "Key":"%s"}' % (value, hks), default=handler, allow_nan=False)
+                client.publish("Inputs/" + str(hks), data, qos=1)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()

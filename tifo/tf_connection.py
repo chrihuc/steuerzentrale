@@ -250,7 +250,7 @@ class TiFo:
 
     def cb_volc_vol(self, value, device, uid):
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-        broadcast_input_value('TiFo.' + name + '.U', str(float(value)/100))
+        broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
 
     def cb_volc_cur(self, value, device, uid):
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
