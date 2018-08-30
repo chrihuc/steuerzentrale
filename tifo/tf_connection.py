@@ -243,7 +243,7 @@ class TiFo:
         while constants.run:
             value = device.get_voltage()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-            broadcast_input_value('TiFo.' + name + '.U', str(float(value)/100))
+            broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
             value = device.get_current()
             broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
             toolbox.sleep(60)
