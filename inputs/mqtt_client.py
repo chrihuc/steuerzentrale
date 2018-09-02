@@ -50,23 +50,23 @@ def on_connect(client_data, userdata, flags, rc):
     elif client.connected_flag:
         pass
     else:
-        print("Bad connection Returned code=",rc)    
+        print("Bad connection Returned code=",rc)
 #    print "connected"
 #    client.subscribe(topic)
 
 def dis_con (*args, **kargs):
     print "disconnected"
-    
+
 def on_message(client, userdata, msg):
-    print(msg.topic + " " + str(msg.payload))    
+    print(msg.topic + " " + str(msg.payload))
     try:
         m_in=(json.loads(msg.payload)) #decode json data
         print m_in
         if 'Value' in m_in:
             name = msg.topic[7:]
-            print 'Name: ', name            
+            print 'Name: ', name
             #print 'Value: ', float(m_in['Value'])
-            broadcast_input_value(name, float(m_in['Value']))
+            broadcast_input_value('MQTT.' + name, float(m_in['Value']))
     except ValueError:
         print("no json code")
 

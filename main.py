@@ -15,6 +15,7 @@ from inputs import xs1
 from inputs import internal
 from outputs import temp_control
 from outputs import batswitch
+from inputs import mqtt_client
 
 from tifo import tf_connection
 
@@ -110,6 +111,10 @@ threadliste.append(t)
 t.start()
 
 t = threading.Thread(name="mqtt_batswitch",target=batswitch.main, args = [])
+threadliste.append(t)
+t.start()
+
+t = threading.Thread(name="mqtt_inputs",target=mqtt_client.main, args = [])
 threadliste.append(t)
 t.start()
 
