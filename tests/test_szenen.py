@@ -32,11 +32,11 @@ class TestUM(unittest.TestCase):
 #        runs = self.sz.execute("WohnziAnw1")
 #        self.assertTrue(runs,
 #                         'Failed to Execute Scene')
-        
+
 #    def test_test(self):
 #        runs = self.sz.execute("Test")
 #        self.assertTrue(runs,
-#                         'Failed to Execute Scene')        
+#                         'Failed to Execute Scene')
 #
 #    def test_send_message(self):
 #        payload = {'Device':'V00WOH1RUM1ST01','Command':'22'}
@@ -51,10 +51,10 @@ class TestUM(unittest.TestCase):
 #        toolbox.communication.send_message(payload)
 
     def test_execute0(self):
-        runs = self.sz.execute("HeizungTag")
+        runs = self.sz.execute("PflanzenTag")
         self.assertTrue(runs,
                          'Failed to Execute Scene')
-    
+
 #    def test_timer_add(self):
 #        self.start_t = datetime.datetime.now()
 #        self.sz.timer_add(self.print_it, parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True)
