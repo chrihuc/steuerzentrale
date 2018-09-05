@@ -180,8 +180,8 @@ class TiFo:
         while constants.run:
             for t in self.threadliste:
                 if not t in threading.enumerate(): 
-                    print dir(t), t.function, t.args
-                    new_t = threading.Thread(target=t.function, args = t.args)
+                    print t.args
+                    new_t = threading.Timer(60, function=t.function, args = t.args)
                     new_t.start()
                     self.threadliste.remove(t)
                     self.threadliste.append(new_t)                 
