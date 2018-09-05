@@ -179,7 +179,8 @@ class TiFo:
         toolbox.communication.register_callback(self.receive_communication)
         while constants.run:
             for t in self.threadliste:
-                if not t in threading.enumerate():  
+                if not t in threading.enumerate(): 
+                    print dir(t)
                     new_t = threading.Thread(target=t.target, args = t.args)
                     print t.target, 'neustart'
                     new_t.start()
