@@ -154,6 +154,7 @@ class TiFo:
         self.moist = None
         self.unknown = []
         self.threadliste = []
+        self.ip = ip
 
         self.ipcon = IPConnection()
         self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
@@ -165,16 +166,17 @@ class TiFo:
         toolbox.log('TiFo started')
 #        self.ipcon.enumerate()
 
-    def main(self, cls):
+    def main(self):
         # Create IP Connection
-        cls.ipcon = IPConnection()
+        self.ipcon = IPConnection()
         # Register IP Connection callbacks
-        cls.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
-                                     cls.cb_enumerate)
-        cls.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
-                                     cls.cb_connected)
+        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
+                                     self.cb_enumerate)
+        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
+                                     self.cb_connected)
         # Connect to brickd, will trigger cb_connected
-        cls.ipcon.connect('localhost', PORT)
+        self.ipcon.connect(self.ip, PORT)
+        toolbox.communication.register_callback(self.receive_communication)
         while constants.run:
             for t in self.threadliste:
                 if not t in threading.enumerate():  

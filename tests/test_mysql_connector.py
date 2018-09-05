@@ -60,8 +60,8 @@ class TestUM(unittest.TestCase):
 #    def test_inputs_r(self):
 #        print msqc.inputs_r()
 
-#    def test_settings_r(self):
-#        print msqc.settings_r()
+    def test_settings_r(self):
+        print msqc.settings_r()['Nacht'] == 'True'
 
 #    def test_get_inputs_table(self):
 #        print msqlc.settings_r()

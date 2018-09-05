@@ -1,4 +1,5 @@
 [Dolphin]
-Timestamp=2016,10,31,21,3,38
-Version=3
+Timestamp=2018,9,3,10,53,47
+Version=4
+ViewMode=1
 VisibleRoles=Details_text,Details_size,Details_date,Details_type,CustomizedDetails
