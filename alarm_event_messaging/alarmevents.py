@@ -126,7 +126,7 @@ class AES:
 
     def new_event_t(self, description, prio=0, durchsage="", karenz=-1):
         data = json.dumps('{"Description":"%s", "Durchsage":"%s"}' % (description, durchsage), default=handler, allow_nan=False)
-        client.publish("AES/Prio" + str(prio), data)
+        client.publish("AES/Prio" + str(prio), data, qos=1, retain=True)
         if prio < 0: return
         if karenz == -1:
             if prio == 1:
