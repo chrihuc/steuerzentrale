@@ -180,7 +180,8 @@ class TiFo:
         while constants.run:
             for t in self.threadliste:
                 if not t in threading.enumerate():  
-                    new_t = threading.Thread(name=t.name, target=t.target, args = t.args)
+                    new_t = threading.Thread(target=t.target, args = t.args)
+                    print t.target, 'neustart'
                     new_t.start()
                     self.threadliste.remove(t)
                     self.threadliste.append(new_t)                 
@@ -711,7 +712,7 @@ class TiFo:
                 self.temp.append(BrickletTemperature(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Temperature Bricklet', temp_uid)
-                thread_pt_ = threading.Timer(5, self.thread_pt, [self.temp[-1]])
+                thread_pt_ = threading.Timer(10, self.thread_pt, [self.temp[-1]])
                 thread_pt_.start()
                 self.threadliste.append(thread_pt_)
                 found  = True
@@ -720,7 +721,7 @@ class TiFo:
                 self.temp.append(BrickletBarometer(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Pressure Bricklet', temp_uid)
-                thread_cp_ = threading.Timer(5, self.thread_cp, [self.temp[-1]])
+                thread_cp_ = threading.Timer(15, self.thread_cp, [self.temp[-1]])
                 thread_cp_.start()
                 self.threadliste.append(thread_cp_)
                 found  = True
@@ -729,7 +730,7 @@ class TiFo:
                 self.temp.append(BrickletHumidityV2(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Humidity Bricklet', temp_uid)
-                thread_hum_ = threading.Timer(5, self.thread_hum, [self.temp[-1]])
+                thread_hum_ = threading.Timer(20, self.thread_hum, [self.temp[-1]])
                 thread_hum_.start()
                 self.threadliste.append(thread_hum_)
                 found  = True
@@ -738,7 +739,7 @@ class TiFo:
                 self.temp.append(BrickletVoltageCurrent(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 toolbox.log('Vol Curr Bricklet', temp_uid)
-                thread_volc_ = threading.Timer(5, self.thread_volc, [self.temp[-1]])
+                thread_volc_ = threading.Timer(25, self.thread_volc, [self.temp[-1]])
                 thread_volc_.start()
                 self.threadliste.append(thread_volc_)
                 self.temp[-1].set_debounce_period(10000)
