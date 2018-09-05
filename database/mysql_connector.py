@@ -625,7 +625,7 @@ def inputs(device, value):
                 cur.execute(sql + sql2)
             if str(hks) <> str(device):
                 data = json.dumps('{"Value":"%s", "Key":"%s"}' % (value, hks), default=handler, allow_nan=False)
-                client.publish("Inputs/" + str(hks), data, qos=1)
+                client.publish("Inputs/" + str(hks), data, qos=1, retain=True)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()

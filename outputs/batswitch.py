@@ -29,28 +29,28 @@ def main():
         try:
             if False:
                 # AUS und 5 min Warten
-                client.publish("Outputs/Kerze1", 0, qos=1)
+                client.publish("Outputs/Kerze1", 0, qos=1, retain=True)
 
             elif msqc.settings_r()['Nacht'] != 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 5:
                 # AN und 5 min Warten
-                client.publish("Outputs/Kerze1", 1, qos=1)
+                client.publish("Outputs/Kerze1", 1, qos=1, retain=True)
                 # Nachtlicht Aus und 5 min Warten
-                client.publish("Outputs/Nachtlicht", 0, qos=1)
+                client.publish("Outputs/Nachtlicht", 0, qos=1, retain=True)
             elif msqc.settings_r()['Nacht'] != 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
                 # AN und 10 min Warten
-                client.publish("Outputs/Kerze1", 3, qos=1)
+                client.publish("Outputs/Kerze1", 3, qos=1, retain=True)
                 # Nachtlicht Aus und 10 min Warten
-                client.publish("Outputs/Nachtlicht", 2, qos=1)                
+                client.publish("Outputs/Nachtlicht", 2, qos=1, retain=True)                
             elif msqc.settings_r()['Nacht'] != 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 300:
                 # AUS und 10 min Warten
-                client.publish("Outputs/Kerze1", 2, qos=1)
+                client.publish("Outputs/Kerze1", 2, qos=1, retain=True)
                 # Nachtlicht Aus und 30 min Warten
-                client.publish("Outputs/Nachtlicht", 4, qos=1)  
+                client.publish("Outputs/Nachtlicht", 4, qos=1, retain=True)  
             elif msqc.settings_r()['Nacht'] != 'True':
                 # AUS und 30 min Warten
-                client.publish("Outputs/Kerze1", 4, qos=1)
+                client.publish("Outputs/Kerze1", 4, qos=1, retain=True)
                 # Nachtlicht Aus und 30 min Warten
-                client.publish("Outputs/Nachtlicht", 4, qos=1)  
+                client.publish("Outputs/Nachtlicht", 4, qos=1, retain=True)  
     #        elif False:
     #            # AN und 30 min Warten
     #            client.publish("Outputs/Kerze1", 5, qos=1)
@@ -65,20 +65,20 @@ def main():
 
             elif msqc.settings_r()['Nacht'] == 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
                 # AUS und 6 h Warten
-                client.publish("Outputs/Kerze1", 4, qos=1)
+                client.publish("Outputs/Kerze1", 4, qos=1, retain=True)
                 # Nachtlicht An und 10 min Warten
-                client.publish("Outputs/Nachtlicht", 3, qos=1)  
+                client.publish("Outputs/Nachtlicht", 3, qos=1, retain=True)  
             elif msqc.settings_r()['Nacht'] == 'True':
                 # AUS und 6 h Warten
-                client.publish("Outputs/Kerze1", 4, qos=1)
+                client.publish("Outputs/Kerze1", 4, qos=1, retain=True)
                 # Nachtlicht Aus und 10 min Warten
-                client.publish("Outputs/Nachtlicht", 2, qos=1)                  
+                client.publish("Outputs/Nachtlicht", 2, qos=1, retain=True)                  
     #        elif False:
     #            # AN und 6 h Warten
     #            client.publish("Outputs/Kerze1", 9, qos=1)
 
             else:
-                client.publish("Outputs/Kerze1", 10, qos=1)
+                client.publish("Outputs/Kerze1", 10, qos=1, retain=True)
 
             time.sleep(5)
         except:
