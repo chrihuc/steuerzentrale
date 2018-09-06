@@ -13,6 +13,37 @@ import inspect
 #pycurl
 import urllib2
 
+from threading import Thread, Event
+#
+class OwnTimer(Thread):
+    """Call a function after a specified number of seconds:
+
+            t = Timer(30.0, f, args=[], kwargs={})
+            t.start()
+            t.cancel()     # stop the timer's action if it's still waiting
+
+    """
+
+    def __init__(self, interval, function, name, args=[], kwargs={}):
+        Thread.__init__(self)
+        self.interval = interval
+        self.function = function
+        self.name = name
+        self.args = args
+        self.kwargs = kwargs
+        self.finished = Event()
+
+    def cancel(self):
+        """Stop the timer if it hasn't finished yet"""
+        self.finished.set()
+
+    def run(self):
+        self.finished.wait(self.interval)
+        if not self.finished.is_set():
+            self.function(*self.args, **self.kwargs)
+        self.finished.set()  
+
+
 def check_ext_ip():
     ext_ip = urllib2.urlopen('http://whatismyip.org').read()
     match = '(([0-9]{1,3}\.){3}[0-9]{1,3})'

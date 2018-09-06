@@ -12,10 +12,15 @@ from tools import toolbox
 import json
 
 client = mqtt.Client(constants.name)
-client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-client.connect(constants.mqtt_.server)
+#client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
+#client.connect(constants.mqtt_.server)
+client.connect('127.0.0.1')
 
-wert = 'test'
-setting = 1
-data = json.dumps('{"Value":"%s", "Key":"%s"}' % (wert, setting), default=toolbox.handler, allow_nan=False)
-client.publish("Inputs/" + wert, data, qos=1)
+key = "test"
+wert = '1'
+dicti = {'Key':key, 'Value':wert}
+#data = json.dumps('{Value:%s, Key:%s}' % (wert, key), default=toolbox.handler, allow_nan=False)
+data = json.dumps(dicti, default=toolbox.handler, allow_nan=False)
+print data
+#data = '{"Value":"%s", "Key":"%s"}' % (wert, key)
+client.publish("Inputs/" + key, data, qos=1)

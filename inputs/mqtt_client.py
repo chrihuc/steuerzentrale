@@ -64,8 +64,8 @@ def on_message(client, userdata, msg):
         print m_in
         if 'Value' in m_in:
             name = msg.topic[7:]
-            print 'Name: ', name
-            #print 'Value: ', float(m_in['Value'])
+#            print 'Name: ', name
+#            print 'Value: ', float(m_in['Value'])
             broadcast_input_value('MQTT.' + name, float(m_in['Value']))
     except ValueError:
         print("no json code")
@@ -94,4 +94,6 @@ def main():
 
 
 if __name__ == "__main__":
+    topic = "Inputs/#"
+    ipaddress = '127.0.0.1'
     main()
