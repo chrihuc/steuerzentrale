@@ -178,14 +178,15 @@ class TiFo:
         self.ipcon.connect(self.ip, PORT)
         toolbox.communication.register_callback(self.receive_communication)
         while constants.run:
-#            for t in self.threadliste:
-#                if not t in threading.enumerate(): 
-#                    print t.args
-#                    new_t = threading.Timer(60, function=t.function, args = t.args)
-#                    new_t.start()
-#                    self.threadliste.remove(t)
-#                    self.threadliste.append(new_t)                 
-            time.sleep(10)
+            time.sleep(3600)
+            for t in self.threadliste:
+                if not t in threading.enumerate():
+                    print t.args
+                    new_t = threading.Timer(60, function=t.function, args = t.args)
+                    new_t.start()
+                    self.threadliste.remove(t)
+                    self.threadliste.append(new_t)
+
 
     def thread_RSerror(self):
         while constants.run:
@@ -734,7 +735,7 @@ class TiFo:
                 thread_hum_.start()
                 self.threadliste.append(thread_hum_)
                 found  = True
-        
+
             if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletVoltageCurrent(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
@@ -744,9 +745,9 @@ class TiFo:
                 self.threadliste.append(thread_volc_)
                 self.temp[-1].set_debounce_period(10000)
                 self.temp[-1].register_callback(self.temp[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.temp[-1], uid = temp_uid ))
-                self.temp[-1].set_voltage_callback_threshold("<", 0, 23*1000) 
+                self.temp[-1].set_voltage_callback_threshold("<", 0, 23*1000)
                 self.temp[-1].register_callback(self.temp[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.temp[-1], uid = temp_uid ))
-                self.temp[-1].set_current_callback_threshold(">", 3.8*1000, 0)                  
+                self.temp[-1].set_current_callback_threshold(">", 3.8*1000, 0)
                 found  = True
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
