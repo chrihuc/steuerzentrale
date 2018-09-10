@@ -158,15 +158,15 @@ class TiFo:
         self.threadliste = []
         self.ip = ip
 
-#        self.ipcon = IPConnection()
-#        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
-#                                     self.cb_enumerate)
-#        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
-#                                     self.cb_connected)
-#        self.ipcon.connect(ip, PORT)
+        self.ipcon = IPConnection()
+        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
+                                     self.cb_enumerate)
+        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
+                                     self.cb_connected)
+        self.ipcon.connect(ip, PORT)
         toolbox.communication.register_callback(self.receive_communication)
         toolbox.log('TiFo started')
-#        self.ipcon.enumerate()
+        self.ipcon.enumerate()
 
     def main(self):
         # Create IP Connection
