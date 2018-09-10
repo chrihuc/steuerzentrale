@@ -10,14 +10,15 @@ import MySQLdb as mdb
 from threading import Timer
 from time import localtime, strftime
 import datetime
-import json
+from outputs.mqtt_publish import mqtt_pub
+#import json
 
 # TODO: reconnect of MQTT
 
-client = mqtt.Client(constants.name + '_mysql_con')
-client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-client.connect(constants.mqtt_.server)
-client.loop_start()
+#client = mqtt.Client(constants.name + '_mysql_con')
+#client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
+#client.connect(constants.mqtt_.server)
+#client.loop_start()
 datab = constants.sql_.DB
 
 class tables(object):
@@ -85,13 +86,13 @@ class tables(object):
 #auto add entry to inputs
 #replace all dbs with constants
 #rewrite defs at the end
-def handler(obj):
-    if hasattr(obj, 'isoformat'):
-        return obj.isoformat()
-    elif isinstance(obj, datetime.timedelta):
-        return obj.seconds
-    else:
-        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
+#def handler(obj):
+#    if hasattr(obj, 'isoformat'):
+#        return obj.isoformat()
+#    elif isinstance(obj, datetime.timedelta):
+#        return obj.seconds
+#    else:
+#        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
 
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
@@ -163,8 +164,8 @@ def setting_s(setting, wert):
         wert = True
     if wert in ('Aus','aus'):
         wert = False
-    data = json.dumps('{"Value":"%s", "Key":"%s"}' % (wert, setting), default=handler, allow_nan=False)
-    client.publish("Settings/" + setting, data, qos=1)
+    data = {'Value':wert, 'Setting':setting}
+    mqtt_pub("Settings/" + setting, data)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
@@ -535,7 +536,7 @@ def maxSzenenId():
     con.close()
     return results[0][0]
 
-def inputs(device, value):
+def inputs(device, value, mqtt=True):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}
@@ -623,10 +624,9 @@ def inputs(device, value):
             if str(dicti.get("last1")) <> "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
-            if str(hks) <> str(device):
-                data = {"Value":value, "Key":hks}
-                data = json.dumps(data, default=handler, allow_nan=False)
-                client.publish("Inputs/" + str(hks), data, qos=1, retain=True)
+            if str(hks) <> str(device) and mqtt:
+                data = {"Value":value, "HKS":hks}
+                mqtt_pub("Inputs/" + str(hks), data)                
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()

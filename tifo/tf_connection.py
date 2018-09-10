@@ -181,16 +181,16 @@ class TiFo:
         toolbox.communication.register_callback(self.receive_communication)
         while constants.run:
             time.sleep(600)
-            for t in self.threadliste:
-                if not t in threading.enumerate():
-#                    print t.args
-#                    new_t = threading.Timer(60, function=t.function, args = t.args)
-                    aes.new_event(description="Thread stopped: "+t.name, prio=1)
-                    new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
-                    new_t.start()
-                    self.threadliste.remove(t)
-                    self.threadliste.append(new_t)
-                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
+#            for t in self.threadliste:
+#                if not t in threading.enumerate():
+##                    print t.args
+##                    new_t = threading.Timer(60, function=t.function, args = t.args)
+#                    aes.new_event(description="Thread stopped: "+t.name, prio=1)
+#                    new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
+#                    new_t.start()
+#                    self.threadliste.remove(t)
+#                    self.threadliste.append(new_t)
+#                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
 
 
 

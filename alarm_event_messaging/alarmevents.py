@@ -6,12 +6,14 @@ import smtplib
 import urllib2
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
-import paho.mqtt.client as mqtt
-import json
+
+#import paho.mqtt.client as mqtt
+#import json
 
 import MySQLdb as mdb
 from database import mysql_connector
 from alarm_event_messaging import messaging
+from outputs.mqtt_publish import mqtt_pub
 
 from threading import Timer
 import threading
@@ -41,18 +43,18 @@ import time
 # * 4.3 lights blinking red in higher alarm, same as above
 
 
-client = mqtt.Client()
-client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-client.connect(constants.mqtt_.server)
-client.loop_start()
+#client = mqtt.Client()
+#client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
+#client.connect(constants.mqtt_.server)
+#client.loop_start()
 
-def handler(obj):
-    if hasattr(obj, 'isoformat'):
-        return obj.isoformat()
-    elif isinstance(obj, datetime.timedelta):
-        return obj.seconds
-    else:
-        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
+#def handler(obj):
+#    if hasattr(obj, 'isoformat'):
+#        return obj.isoformat()
+#    elif isinstance(obj, datetime.timedelta):
+#        return obj.seconds
+#    else:
+#        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
 
 class sql_object:
     def __init__(self,name,typ,columns):
@@ -126,8 +128,7 @@ class AES:
 
     def new_event_t(self, description, prio=0, durchsage="", karenz=-1):
         data = {"Description":description, "Durchsage":durchsage}
-        data = json.dumps(data, default=handler, allow_nan=False)
-        client.publish("AES/Prio" + str(prio), data, qos=1, retain=True)
+        mqtt_pub("AES/Prio" + str(prio), data)        
         if prio < 0: return
         if karenz == -1:
             if prio == 1:
