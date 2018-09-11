@@ -29,7 +29,7 @@ class TestUM(unittest.TestCase):
         #self.test_mod = tf_connection.TiFo('localhost')
 #        toolbox.communication.register_callback(self.test_mod.receive_communication)
         self.test_mod2 = tf_connection.TiFo('192.168.192.10')
-        self.test_mod2.main()
+#        self.test_mod2.main()
 #        toolbox.communication.register_callback(self.test_mod2.receive_communication)
 
 
