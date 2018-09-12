@@ -183,7 +183,7 @@ class TiFo:
         self.ipcon.enumerate()
         toolbox.communication.register_callback(self.receive_communication)
         while constants.run:
-            time.sleep(600)
+            toolbox.sleep(600)
 #            for t in self.threadliste:
 #                if not t in threading.enumerate():
 ##                    print t.args
