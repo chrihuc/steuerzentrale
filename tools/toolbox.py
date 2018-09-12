@@ -14,6 +14,7 @@ import inspect
 import urllib2
 
 from threading import Thread, Event
+from outputs.mqtt_publish import mqtt_pub
 #
 class OwnTimer(Thread):
     """Call a function after a specified number of seconds:
@@ -83,21 +84,25 @@ def ping(IP, number = 1):
                     pass
         return pinged
 
-def log(*args, **kwargs):
+def log(*args, **kwargs):     
     if 'level' not in kwargs:
         level=9
     else:
         level=kwargs['level']
+    curframe = inspect.currentframe()
+    calframe = inspect.getouterframes(curframe, 2)     
+    if constants.debug_text <> '':
+        if not constants.debug_text in calframe[1][1] and not constants.debug_text in calframe[1][3]:
+            return    
+    zeit =  time.time()
+    uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
+    data = {"Description":args, "ts":uhr}
+    data['Func1'] = calframe[1][1]
+    data['Func2'] = calframe[1][3] 
+    mqtt_pub("log/Prio" + str(level), data)          
     if level > constants.debug_level:
         return
     if constants.debug:
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        if constants.debug_text <> '':
-            if not constants.debug_text in calframe[1][1] and not constants.debug_text in calframe[1][3]:
-                return
-        zeit =  time.time()
-        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
         print '%s [%s, %s] %s %s' % (uhr, calframe[1][1], calframe[1][3], level, args)
 #def restart_services():
   #lgd = logdebug(True, True)

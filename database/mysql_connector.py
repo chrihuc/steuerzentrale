@@ -616,6 +616,9 @@ def inputs(device, value, mqtt=True):
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
             if cur.fetchone()[0] > 0:
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
+                ist = "IF NOT EXISTS( SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s' AND table_schema = '%s' AND column_name = '%s')  THEN  ALTER TABLE `%s` ADD `%s` int(1) NOT NULL default '0'; END IF;" % (constants.sql_tables.inputs.name, datab, hks, constants.sql_tables.inputs.name, hks)
+                #cur.execute(ist)
+                #insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
                 cur.execute(insertstatement)
                 insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
                 cur.execute(insertstatement)

@@ -201,6 +201,7 @@ class TiFo:
             toolbox.sleep(60)
 
     def cb_ambLight(self, illuminance,device):
+        toolbox.log(device) 
         thresUp = illuminance * 4/3
         thresDown = illuminance * 4 / 5
         if thresDown == 0:
@@ -214,6 +215,7 @@ class TiFo:
 
     def thread_ambLight(self, device):
         while constants.run:
+            toolbox.log(device) 
             illuminance = device.get_illuminance()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(illuminance))
@@ -221,6 +223,7 @@ class TiFo:
 
     def thread_CO2(self, device):
         while constants.run:
+            toolbox.log(device) 
             value = device.get_co2_concentration()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(value))
@@ -228,6 +231,8 @@ class TiFo:
 
     def thread_pt(self, device):
         while constants.run:
+            toolbox.log(device) 
+            toolbox.log("thread_pt", device) 
             value = device.get_temperature()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/100))
@@ -235,6 +240,7 @@ class TiFo:
 
     def thread_cp(self, device):
         while constants.run:
+            toolbox.log(device) 
             value = device.get_air_pressure()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/1000))
@@ -242,6 +248,7 @@ class TiFo:
 
     def thread_hum(self, device):
         while constants.run:
+            toolbox.log(device) 
             value = device.get_humidity()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name + '.HU', str(float(value)/100))
@@ -251,6 +258,7 @@ class TiFo:
 
     def thread_volc(self, device):
         while constants.run:
+            toolbox.log(device) 
             value = device.get_voltage()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
@@ -259,14 +267,17 @@ class TiFo:
             toolbox.sleep(60)
 
     def cb_volc_vol(self, value, device, uid):
+        toolbox.log(device) 
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
 
     def cb_volc_cur(self, value, device, uid):
+        toolbox.log(device) 
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
 
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
+        toolbox.log(device)
         #print('Interrupt on port: ' + port + str(bin(interrupt_mask)))
         #print('Value: ' + str(bin(value_mask)))
         namelist = []
@@ -315,6 +326,7 @@ class TiFo:
 #        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
 
     def cb_si(self, value, device, uid):
+        toolbox.log(device)
         time0 = time.time()
         data = []
         return
@@ -625,6 +637,7 @@ class TiFo:
                     self.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
                     self.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
                     found  = True
+                toolbox.log("LEDStrip", temp_uid)                    
                 #self.led.register_callback(self.led.CALLBACK_FRAME_RENDERED,
                 #                lambda x: __cb_frame_rendered__(self.led, x))
                 #self.led.set_rgb_values(0, self.NUM_LEDS, self.r, self.g, self.b)
@@ -648,6 +661,7 @@ class TiFo:
                     #self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
                     self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1], uid = temp_uid ))
                     found  = True
+                toolbox.log("IO16", temp_uid)                      
 
             if device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                 self.al.append(AmbientLight(uid, self.ipcon))
@@ -669,6 +683,7 @@ class TiFo:
                 self.threadliste.append(t)
                 t.start()
                 found  = True
+                toolbox.log("AmbientLight", temp_uid)                   
 
             if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
                 self.co2.append(BrickletCO2(uid, self.ipcon))
@@ -681,6 +696,7 @@ class TiFo:
                 self.threadliste.append(t)
                 t.start()                
                 found  = True
+                toolbox.log("BrickletCO2", temp_uid)                   
 
 
             if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
@@ -688,6 +704,7 @@ class TiFo:
                 temp_uid = str(self.drb[-1].get_identity()[1]) +"."+ str(self.drb[-1].get_identity()[0])
                 toolbox.log('Dual Relay Bricklet', temp_uid)
                 found  = True
+                toolbox.log("BrickletDualRelay", temp_uid)                   
 
 #            if device_identifier == Moisture.DEVICE_IDENTIFIER:
 #                self.moist = Moisture(uid, self.ipcon)
@@ -701,6 +718,7 @@ class TiFo:
                 self.md[-1].register_callback(self.md[-1].CALLBACK_MOTION_DETECTED, partial( self.cb_md, device = self.md[-1], uid = temp_uid ))
                 self.md[-1].register_callback(self.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( self.cb_md_end, device = self.md[-1], uid = temp_uid ))
                 found  = True
+                toolbox.log("BrickletMotionDetector", temp_uid)                   
 
             if device_identifier == BrickletSoundIntensity.DEVICE_IDENTIFIER:
                 self.si.append(BrickletSoundIntensity(uid, self.ipcon))
@@ -710,6 +728,7 @@ class TiFo:
                 self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
                 self.si[-1].set_intensity_callback_threshold('>',200,0)
                 found  = True
+                toolbox.log("BrickletSoundIntensity", temp_uid)                   
 
             if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
                 self.ptc.append(BrickletPTC(uid, self.ipcon))
@@ -722,6 +741,7 @@ class TiFo:
                 self.threadliste.append(t)
                 t.start()                    
                 found  = True
+                toolbox.log("BrickletPTC", temp_uid)                   
 
             if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletTemperature(uid, self.ipcon))
@@ -734,6 +754,7 @@ class TiFo:
                 self.threadliste.append(t)
                 t.start()                  
                 found  = True
+                toolbox.log("BrickletTemperature", temp_uid)                   
 
             if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletBarometer(uid, self.ipcon))
@@ -746,6 +767,7 @@ class TiFo:
                 self.threadliste.append(t)
                 t.start()                  
                 found  = True
+                toolbox.log("BrickletBarometer", temp_uid)                   
 
             if device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletHumidityV2(uid, self.ipcon))
@@ -758,6 +780,7 @@ class TiFo:
                 self.threadliste.append(t)
                 t.start()                  
                 found  = True
+                toolbox.log("BrickletHumidityV2", temp_uid)                   
 
             if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletVoltageCurrent(uid, self.ipcon))
@@ -775,6 +798,7 @@ class TiFo:
                 self.temp[-1].register_callback(self.temp[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.temp[-1], uid = temp_uid ))
                 self.temp[-1].set_current_callback_threshold(">", 3.8*1000, 0)
                 found  = True
+                toolbox.log("BrickletVoltageCurrent", temp_uid)                   
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))
@@ -783,6 +807,7 @@ class TiFo:
                 thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
                 #thread_rs_error.start()
                 found  = True
+                toolbox.log("BrickMaster", temp_uid)                   
 
             if not found:
                 toolbox.log(connected_uid, uid, device_identifier)

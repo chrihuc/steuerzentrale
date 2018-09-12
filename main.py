@@ -161,8 +161,10 @@ try:
         toolbox.sleep(10)
 except KeyboardInterrupt:
     constants.run = False
+    time.sleep(5)
     for t in threadliste:
-        print t.name
+        if t in threading.enumerate():
+            print t.name, ' läuft noch'
 sys.exit()
 
 
