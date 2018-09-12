@@ -23,7 +23,7 @@ def handler(obj):
     elif isinstance(obj, datetime.timedelta):
         return obj.seconds
     else:
-        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
+        return 'non Json'
 
 def mqtt_pub(channel, data):
     zeit =  time.time()
