@@ -33,6 +33,7 @@ def last_data_reset():
 
 def on_receive(data):
     if not constants.run:
+        conn.close()
         sys.exit("Error message")
     global heartbeat
     global last_data

@@ -69,13 +69,11 @@ tf_list = []
 for tf_con in constants.tifo:
     tifo_inst = tf_connection.TiFo(tf_con)
     tf_list.append(tifo_inst)
-#    t = threading.Thread(name="TiFo" + tf_con, target=tifo_inst.main, args = [])
-#    t = toolbox.OwnTimer(0, function=tifo_inst.main, args = [], name="TiFo" + tf_con)
-#    threadliste.append(t)
-#    t.start()
-#    t = threading.Thread(name="tifo_"+tf_con, target=tifo.main, args = [])
-#    threadliste.append(t)
-#    t.start()
+    t = threading.Thread(name="TiFo" + tf_con, target=tifo_inst.main, args = [])
+    t = toolbox.OwnTimer(0, function=tifo_inst.main, args = [], name="TiFo" + tf_con)
+    threadliste.append(t)
+    t.start()
+
 
 #t = threading.Thread(name="TempCTRL", target=temp_control.TempController.start, args = [])
 t = toolbox.OwnTimer(0, function=temp_control.TempController.start, args = [], name="TempCTRL")

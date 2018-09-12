@@ -16,7 +16,7 @@ from tools import toolbox
 class TestUM(unittest.TestCase):
 
     def setUp(self):
-        #constants.debug = True
+        constants.debug = True
         constants.debug_level = 10
 #        constants.debug_text = 'tf_conn'
 
@@ -26,10 +26,11 @@ class TestUM(unittest.TestCase):
 
 
     def test_connect_2_conns(self):
+        toolbox.log('test')
         #self.test_mod = tf_connection.TiFo('localhost')
 #        toolbox.communication.register_callback(self.test_mod.receive_communication)
         self.test_mod2 = tf_connection.TiFo('192.168.192.10')
-#        self.test_mod2.main()
+        self.test_mod2.main()
 #        toolbox.communication.register_callback(self.test_mod2.receive_communication)
 
 
