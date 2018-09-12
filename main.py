@@ -164,7 +164,7 @@ except KeyboardInterrupt:
     time.sleep(5)
     for t in threadliste:
         if t in threading.enumerate():
-            print t.name, ' läuft noch'
+            print t.name, ' still running'
 sys.exit()
 
 
