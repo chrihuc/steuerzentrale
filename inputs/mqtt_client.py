@@ -7,6 +7,8 @@
 import paho.mqtt.client as mqtt
 import json
 import constants
+import time
+from time import localtime,strftime
 from tools import toolbox
 
 def broadcast_input_value(Name, Value):
@@ -18,7 +20,9 @@ def broadcast_input_value(Name, Value):
 
 def connect(ipaddress, port):
     global client
-    client = mqtt.Client(constants.name + '_client', clean_session=False)
+    zeit =  time.time()
+    uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
+    client = mqtt.Client(constants.name +'_sz_' + uhr, clean_session=False)
     assign_handlers(on_connect, dis_con, on_message)
     client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
     client.connect(ipaddress, port, 60)
