@@ -615,18 +615,23 @@ def inputs(device, value, mqtt=True):
                 setting_s(hks, value)
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
             if cur.fetchone()[0] > 0 and str(hks) <> str(device):
-                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
-                ist = "IF NOT EXISTS( SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s')  THEN  ALTER TABLE `%s` ADD `%s` int(1) NOT NULL default '0'; END IF;" % (constants.sql_tables.his_inputs.name, datab, hks, constants.sql_tables.inputs.name, hks)
-                ist = "SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s'" % (constants.sql_tables.his_inputs.name, datab, hks)
-                cur.execute(ist)
-                if not cur.fetchall():
+                try:
+                    insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
+                    cur.execute(insertstatement)
+                except:
                     ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(5,2)" % (constants.sql_tables.his_inputs.name, hks)
-                    print ist
                     cur.execute(ist)
-                insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-                cur.execute(insertstatement)
-                #insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '_grad",' + str(gradient) + ', NOW())'
-                #cur.execute(insertstatement)
+                    insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
+                    cur.execute(insertstatement)
+
+#                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
+#                ist = "SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s'" % (constants.sql_tables.his_inputs.name, datab, hks)
+#                cur.execute(ist)
+#                if not cur.fetchall():
+#                    ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(5,2)" % (constants.sql_tables.his_inputs.name, hks)
+#                    cur.execute(ist)
+
+
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)
             if str(dicti.get("last1")) <> "None":
