@@ -71,6 +71,7 @@ for tf_con in constants.tifo:
     tf_list.append(tifo_inst)
     t = threading.Thread(name="TiFo" + tf_con, target=tifo_inst.main, args = [])
     t = toolbox.OwnTimer(0, function=tifo_inst.main, args = [], name="TiFo" + tf_con)
+    toolbox.log('tifo thread started ' + tf_con)
     threadliste.append(t)
     t.start()
 
