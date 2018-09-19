@@ -67,14 +67,16 @@ t.start()
 
 tf_list = []
 for tf_con in constants.tifo:
-    tifo_inst = tf_connection.TiFo(tf_con)
-    tf_list.append(tifo_inst)
-    t = threading.Thread(name="TiFo" + tf_con, target=tifo_inst.main, args = [])
-    t = toolbox.OwnTimer(0, function=tifo_inst.main, args = [], name="TiFo" + tf_con)
-    toolbox.log('tifo thread started ' + tf_con)
-    threadliste.append(t)
-    t.start()
-
+    if toolbox.ping(tf_con, number=3):
+        tifo_inst = tf_connection.TiFo(tf_con)
+        tf_list.append(tifo_inst)
+        t = threading.Thread(name="TiFo" + tf_con, target=tifo_inst.main, args = [])
+        t = toolbox.OwnTimer(0, function=tifo_inst.main, args = [], name="TiFo" + tf_con)
+        toolbox.log('tifo thread started ' + tf_con)
+        threadliste.append(t)
+        t.start()
+    else:
+        toolbox.log(tf_con, ' nicht erreichbar')
 
 #t = threading.Thread(name="TempCTRL", target=temp_control.TempController.start, args = [])
 t = toolbox.OwnTimer(0, function=temp_control.TempController.start, args = [], name="TempCTRL")
