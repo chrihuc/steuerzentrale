@@ -1,12 +1,14 @@
 #!  /usr/bin/python
 # -*- coding: utf-8 -*-
 
-import ConfigParser
+# Python3 ready
+
+import configparser
 import json
 import socket
 own_ip = socket.gethostbyname(socket.gethostname())
 
-config = ConfigParser.RawConfigParser()
+config = configparser.RawConfigParser()
 
 cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
@@ -27,7 +29,7 @@ def init_cfg():
     for cfg in cfg_main:
         if not config.has_option('Main', cfg):
             if cfg_main.get(cfg) == '':
-                value = raw_input(cfg+': ')
+                value = input(cfg+': ')
             else:
                 value = cfg_main.get(cfg)
             config.set('Main', cfg, value)
@@ -43,7 +45,7 @@ def init_cfg():
     for cfg in cfg_sql:
         if not config.has_option('SQL', cfg):
             if cfg_sql.get(cfg) == '':
-                value = raw_input('SQL ' +cfg+': ')
+                value = input('SQL ' +cfg+': ')
             else:
                 value = cfg_sql.get(cfg)
             config.set('SQL', cfg, value)
@@ -53,7 +55,7 @@ def init_cfg():
     for cfg in cfg_hue:
         if not config.has_option('HUE', cfg):
             if cfg_hue.get(cfg) == '':
-                value = raw_input('HUE ' +cfg+': ')
+                value = input('HUE ' +cfg+': ')
             else:
                 value = cfg_hue.get(cfg)
             config.set('HUE', cfg, value)
@@ -94,7 +96,7 @@ for i in range(0,3):
             debug = False
 #            debug_level = 2
             debug_text = ''
-            config.readfp(open('./main.cfg'))
+            config.read_file(open('./main.cfg'))
             eigene_IP = config.get('Main', 'eigene_IP')
             name = config.get('Main', 'name')
 
@@ -152,7 +154,6 @@ for i in range(0,3):
                 server = config.get('MQTT', 'Server')
         except:
             init_cfg()
-            print 'issues'
             continue
         break
 
@@ -286,4 +287,4 @@ class redundancy_:
     #'Master' 'Slave' 'auto'
     typ = 'Master'
 
-print name, debug_level
+print(name, debug_level)

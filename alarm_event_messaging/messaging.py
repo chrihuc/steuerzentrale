@@ -2,7 +2,7 @@
 
 import constants
 
-from gcm import GCM
+#from gcm import GCM
 from database import mysql_connector as msqc
 
 import MySQLdb as mdb
@@ -12,7 +12,7 @@ table = constants.sql_tables.Bewohner
     
 class Messaging:
     def __init__(self):
-        self.gcm = GCM(constants.gcm_ID)
+        #self.gcm = GCM(constants.gcm_ID)
         self.chris_vorname = "Christoph"
         self.sabina_vorname = "Sabina"
         self.chris = ['Christoph']
@@ -47,11 +47,12 @@ class Messaging:
         data = {'titel': titel, 'message': text}
         gcm_users = msqc.mdb_get_table(table.name)
         for user in gcm_users:
-            if user.get('Name') <> None:
+            if user.get('Name') != None:
                 if (user.get('Name') in to) and constants.redundancy_.master:
-                    response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
-                    if response <> {}:
-                        success = False
+                    pass
+#                    response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
+#                    if response != {}:
+#                        success = False
         return success
         #response = self.gcm.json_request(registration_ids=to, data=data)
 
@@ -60,13 +61,14 @@ class Messaging:
         data = {'titel': titel, 'message': text}
         gcm_users = msqc.mdb_get_table(table.name)
         for user in gcm_users:
-            if user.get('Name') <> None:
+            if user.get('Name') != None:
                 if (user.get('Name') in to) and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(msqc.setting_r(user.get('Name')) == "True"):
-                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)            
-                        if response <> {}:
-                            success = False
+                        pass
+#                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)            
+#                        if response != {}:
+#                            success = False
         return success
                         
     def send_abwesend(self, to, titel, text):
@@ -74,13 +76,14 @@ class Messaging:
         data = {'titel': titel, 'message': text}
         gcm_users = msqc.mdb_get_table(table.name)
         for user in gcm_users:
-            if user.get('Name') <> None:
+            if user.get('Name') != None:
                 if (user.get('Name') in to) and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(msqc.setting_r(user.get('Name')) == "False"):
-                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)                     
-                        if response <> {}:
-                            success = False
+                        pass
+#                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)                     
+#                        if response != {}:
+#                            success = False
         return success
                         
     def send_wach(self, to, titel, text):
@@ -98,10 +101,10 @@ class Messaging:
             if user_desc['Name'] == user['Name']:
                 found = True
                 commands = {}
-                if str(user_desc['Android_id']) <> str(user['gcm_name']):
+                if str(user_desc['Android_id']) != str(user['gcm_name']):
                     commands['gcm_name'] = user_desc['Android_id']
                     update = True
-                if str(user_desc['Reg_id']) <> str(user['gcm_regid']):
+                if str(user_desc['Reg_id']) != str(user['gcm_regid']):
                     commands['gcm_regid'] = user_desc['Reg_id']
                     update = True                    
                 if update:

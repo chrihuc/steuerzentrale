@@ -2,7 +2,7 @@
 
 import constants
 
-import urllib2
+import urllib.request
 import json
 from database import mysql_connector
 
@@ -19,18 +19,18 @@ class XS1:
 
     def SetSwitch(self,Switch,Wert):
         body = """http://""" + self.ip_add + """/control?callback=cname&cmd=set_state_actuator&name=""" + str(Switch) + """&value=""" + str(Wert)
-        f = urllib2.urlopen(body)
+        f = urllib.request.urlopen(body)
         f.close()
 
     def SetSwitchFunction(self,Switch,Function):
         body = """http://""" + self.ip_add + """/control?callback=cname&cmd=set_state_actuator&name=""" + str(Switch) + """&Function=""" + str(Function)
         toolbox.log(body)
-        f = urllib2.urlopen(body)
+        f = urllib.request.urlopen(body)
         f.close()
 
     def GetSwitch(self,Switch):
         url = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_state_actuator&name=""" + str(Switch)
-        f = urllib2.urlopen(url)
+        f = urllib.request.urlopen(url)
         html = f.read()
         position1 = html.find ('"value":')
         position2 = html.find ('"newvalue":')
@@ -40,7 +40,7 @@ class XS1:
 
     def GetBattery(self,name):
         body = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_state_sensor&name=""" + str(name)
-        f = urllib2.urlopen(body)
+        f = urllib.request.urlopen(body)
         html = f.read()
         html = html[5:]
         html = html.replace(" ", "")
@@ -55,7 +55,7 @@ class XS1:
 
     def GetSensor(self,Switch):
         url = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_state_sensor&name=""" + str(Switch)
-        f = urllib2.urlopen(url)
+        f = urllib.request.urlopen(url)
         html = f.read()
         position1 = html.find ('"value":')
         position2 = html.find ('"newvalue":')
@@ -65,7 +65,7 @@ class XS1:
 
     def GetSensor_neu(self,Switch):
         url = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_state_sensor&name=""" + str(Switch)
-        f = urllib2.urlopen(url)
+        f = urllib.request.urlopen(url)
         html = f.read()
         position1 = html.find ('"value":')
         position2 = html.find ('"state":')
@@ -75,7 +75,7 @@ class XS1:
 
     def GetTimer(self,name):
         body = """http://""" + self.ip_add + """/control?user=""" + self.usern + """&pwd=""" + self.password + """&cmd=get_config_timer&name=""" +name + """&callback=cname"""
-        f = urllib2.urlopen(body)
+        f = urllib.request.urlopen(body)
         html = f.read()
         html = html[5:]
         html = html.replace(" ", "")
@@ -101,7 +101,7 @@ class XS1:
         body4 = """&offset=""" + offset + """&random=""" + random + """&earliest=""" + earliest + """&latest=""" + latest
         body5 = """&actuator.name=""" + actname + """&actuator.function=""" + function + """&callback=JSON133"""
         body = body1 + body2 + body3 + body4 + body5
-        f = urllib2.urlopen(body)
+        f = urllib.request.urlopen(body)
 
     def list_commands(self):
         #comands = mdb_get_table(table.name)
@@ -133,7 +133,7 @@ class XS1:
 
     def list_sensors(self):
         body = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_list_sensors"""
-        f = urllib2.urlopen(body)
+        f = urllib.request.urlopen(body)
         html = f.read()
         html = html[5:]
         html = html.replace(" ", "")
@@ -146,11 +146,11 @@ class XS1:
         sensors = self.list_sensors()
         for sensor in sensors['sensor']:
             if 'batterylow' in sensor['state']:
-                print sensor['name']
+                print(sensor['name'])
 
     def list_actors(self):
         body = """http://""" + self.ip_add + """/control?callback=cname&cmd=get_list_actuators"""
-        f = urllib2.urlopen(body)
+        f = urllib.request.urlopen(body)
         html = f.read()
         html = html[5:]
         html = html.replace(" ", "")

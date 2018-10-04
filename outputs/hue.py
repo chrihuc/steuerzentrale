@@ -34,7 +34,7 @@ try:
     hbridge = Bridge(constants.hue_.IP)
     hbridge.connect()
 except:
-    print "Hue not connecting, press button."
+    print("Hue not connecting, press button.")
     try:
         import easygui
         easygui.msgbox("Hue not connecting", title="press button")
@@ -120,9 +120,9 @@ class Hue_lights():
             else:
                 szene['on'] = True
         bright = szene.get('bri')
-        if bright <> None and bright>0:
+        if bright != None and bright>0:
             szene['bri'] = int(bright)
-        if bright <> None and bright<=0:
+        if bright != None and bright<=0:
             pass     
         # switch light on to be able to modify it
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
@@ -144,7 +144,7 @@ class Hue_lights():
             time.sleep(0.5)
         command = {}
         for key in keys:
-            if ((szene.get(key) <> "") and (str(szene.get(key)) <> "None")):
+            if ((szene.get(key) != "") and (str(szene.get(key)) != "None")):
                 command[key] = int(szene.get(key))
         # first get status then execute command
         t_sucess = False
@@ -160,7 +160,7 @@ class Hue_lights():
                 retry += 1
         if retry == max_retry:
             print(device, ' hue timed out')
-        if command <> {} and t_h_dev:
+        if command != {} and t_h_dev:
             success = False
             retry = 1
             while not success and retry < max_retry:

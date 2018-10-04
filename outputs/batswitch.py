@@ -82,4 +82,4 @@ def main():
 
             time.sleep(5)
         except:
-            print 'Batswitch mqtt next try'
+            print('Batswitch mqtt next try')

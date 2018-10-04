@@ -131,13 +131,13 @@ class Szenen_Timer:
             return self.add_timer_start(parent, delay, child, exact, retrig, device)
 
     def zeige(self):
-        print self.liste
+        print(self.liste)
 
     def store(self):
         write_list = []
         for dicti in self.liste:
             new_dict = {}
-            for key, value in dicti.iteritems():
+            for key, value in dicti.items():
                 if key not in ['timer', 'hash_id']:
                     new_dict[key] = value
             write_list.append(new_dict)

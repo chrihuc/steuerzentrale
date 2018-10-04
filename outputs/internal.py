@@ -100,7 +100,7 @@ class Internal:
         g.reset('--hard')
         g.pull()
 
-        print "Update done, exiting"
+        print("Update done, exiting")
         aes.new_event(description="Update performed, restarting", prio=1)
         constants.run = False
 
@@ -153,7 +153,7 @@ class Internal:
                     if True: #not os.path.isfile(filename[:-3]+'MP4'):
                         cmd = 'ffmpeg -i "' + filename + '" -s 800x450 -c:a aac -q:a 2 -b:v 1000k -strict experimental "' + filename[:-3]+'MP4"'
                         os.system(cmd)
-                        os.chmod(filename[:-3]+'MP4', 0777)
+                        os.chmod(filename[:-3]+'MP4', 777)
 
     def zeitgheist_start(self):
         self.ghost.start()

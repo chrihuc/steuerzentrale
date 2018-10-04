@@ -32,6 +32,7 @@ def last_data_reset():
     last_data = ""
 
 def on_receive(data):
+    data = data.decode()
     if not constants.run:
         conn.close()
         sys.exit("Error message")
@@ -84,7 +85,7 @@ def heartbeat_sup():
         msqc.setting_s("XS1_off", "Active")
     msqc.setting_s("NumRestart", str(count + 1))
     exectext = "sudo killall python"
-    print "XS1 connection lost"
+    print("XS1 connection lost")
     if toolbox.ping(constants.router_IP):
         conn.close()
         sys.exit("XS1 goodbye")

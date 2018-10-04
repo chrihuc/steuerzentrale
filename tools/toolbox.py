@@ -11,7 +11,7 @@ from time import localtime,strftime
 from datetime import date
 import inspect
 #pycurl
-import urllib2
+import urllib3
 
 from threading import Thread, Event
 from outputs.mqtt_publish import mqtt_pub
@@ -91,7 +91,7 @@ def log(*args, **kwargs):
         level=kwargs['level']
     curframe = inspect.currentframe()
     calframe = inspect.getouterframes(curframe, 2)     
-    if constants.debug_text <> '':
+    if constants.debug_text != '':
         if not constants.debug_text in calframe[1][1] and not constants.debug_text in calframe[1][3]:
             return    
     zeit =  time.time()
@@ -103,7 +103,7 @@ def log(*args, **kwargs):
     if level > constants.debug_level:
         return
     if constants.debug:
-        print '%s [%s, %s] %s %s' % (uhr, calframe[1][1], calframe[1][3], level, args)
+        print('%s [%s, %s] %s %s' % (uhr, calframe[1][1], calframe[1][3], level, args))
 #def restart_services():
   #lgd = logdebug(True, True)
   #lgd.debug("Heartbeat supervision")
@@ -134,7 +134,7 @@ def handler(obj):
     elif isinstance(obj, datetime.timedelta):
         return obj.seconds
     else:
-        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
+        raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
 
 def kw_unpack(kwargs, searched_key):
     if searched_key in kwargs:

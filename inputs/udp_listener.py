@@ -90,7 +90,7 @@ def handler(obj):
     elif isinstance(obj, datetime.timedelta):
         return obj.seconds
     else:
-        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
+        raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
 
 def exec_data(data_ev, data):
     if ('Name' in data_ev) and ('Value' in data_ev):
@@ -181,7 +181,7 @@ def bidirekt_new():
         conn, addr = biSocket_n.accept()
         try:
             data = recv_msg(conn)
-            print data
+            print(data)
             toolbox.log(data)
             if not data:
                 conn.close()

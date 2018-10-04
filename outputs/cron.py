@@ -104,7 +104,7 @@ class Cron(object):
         if morgen == 7:
             morgen = 0
         for eintrag in liste:
-            if str(eintrag.get("Eingeschaltet")) <> "True":
+            if str(eintrag.get("Eingeschaltet")) != "True":
                 continue
 #            if datab == "Wecker":
 #                time = eintrag.get("Time") - eintrag.get("Offset")
@@ -249,20 +249,20 @@ class Cron(object):
         for eintrag in liste:
             dynamic = False
             for setting in eintrag:
-                if setting == "Sonne" and str(eintrag.get("Sonne")) <> "None":
+                if setting == "Sonne" and str(eintrag.get("Sonne")) != "None":
                     dynamic = True
                     if str(eintrag.get("Sonne")) == "rise":
                         time = sunrise.replace(second=0)
                     else:
                         time = sunset.replace(second=0)
-                elif setting == "Rohtime" and str(eintrag.get("Rohtime")) <> "None":
+                elif setting == "Rohtime" and str(eintrag.get("Rohtime")) != "None":
                     dynamic = True
                     time = eintrag.get("Rohtime")
             for setting in eintrag:
-                if setting == "offset" and str(eintrag.get("offset")) <> "None":
+                if setting == "offset" and str(eintrag.get("offset")) != "None":
                     time = time + datetime.timedelta(hours=0, minutes=int(eintrag.get("offset")),
                                                      seconds=0)
-                if setting == "Zufall" and str(eintrag.get("Zufall")) <> "None":
+                if setting == "Zufall" and str(eintrag.get("Zufall")) != "None":
                     time = (time +
                             datetime.timedelta(hours=0,
                                                minutes=random.randrange(int(eintrag.get("Zufall"))),
@@ -288,10 +288,10 @@ class Cron(object):
             text = "Kein Wecker fuer " + str(horizont) + " Stunden."
         else:
             text = "Wecker um " + str(liste[0].get("Time")).rsplit(':')[0] + " Uhr"
-            if str(liste[0].get("Time")).rsplit(':')[1] <> "00":
+            if str(liste[0].get("Time")).rsplit(':')[1] != "00":
                 text = text + " " + str(liste[0].get("Time")).rsplit(':')[1]
             text = text + ", das ist in " + str(liste[0].get("delta")).rsplit(':')[0] + " Stunden"
-            if str(liste[0].get("delta")).rsplit(':')[1] <> "00":
+            if str(liste[0].get("delta")).rsplit(':')[1] != "00":
                 text = text + " und " + str(liste[0].get("delta")).rsplit(':')[1] + " Minuten."
             else:
                 text = text + "."

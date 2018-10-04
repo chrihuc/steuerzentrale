@@ -3,7 +3,7 @@
 import constants
 
 import smtplib
-import urllib2
+import urllib3
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 

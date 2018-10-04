@@ -36,12 +36,11 @@ parser.add_argument('-m', '--module', nargs='?', help='debug', default='')
 parser.add_argument('-p', '--passive', nargs='?', help='debug')
 
 args = parser.parse_args()
-print args
 
 if getattr(args, 'debug') > 0:
     constants.debug = True
     constants.debug_level = getattr(args, 'debug')
-if getattr(args, 'module') <> '':
+if getattr(args, 'module') != '':
     constants.debug_text = getattr(args, 'module')
 if getattr(args, 'passive') is not None:
     toolbox.log('passive on')
@@ -162,7 +161,7 @@ except KeyboardInterrupt:
     time.sleep(5)
     for t in threadliste:
         if t in threading.enumerate():
-            print t.name, ' still running'
+            print(t.name + ' still running')
 sys.exit()
 
 

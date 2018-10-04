@@ -202,7 +202,7 @@ class TiFo:
     def thread_RSerror(self):
         while constants.run:
             for mastr in self.master:
-                print mastr.get_rs485_error_log()
+                print(mastr.get_rs485_error_log())
             toolbox.sleep(60)
 
     def cb_ambLight(self, illuminance,device):
@@ -294,7 +294,7 @@ class TiFo:
             if interrupt_mask & wert > 0:
 #                name = settings.IO16i.get(temp_uid).get(port + str(bin(wert)))
                 name = temp_uid + "." + port + str(bin(wert))
-                if name <> None:
+                if name != None:
                     namelist.append(name)
         if port == 'a':
             nc_mask = settings.IO16.get(temp_uid)[7]
@@ -344,11 +344,11 @@ class TiFo:
             time.sleep(pr.cycle_time)
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
-        print uhr
-        print time.time() - time0
-        print data
+        print(uhr)
+        print(time.time() - time0)
+        print(data)
         result = pr.analyze(data)
-        print result
+        print(result)
         for res in result:
             broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), res)
 
@@ -429,7 +429,7 @@ class TiFo:
         o_r, o_g, o_b = LED.get('LED').get_rgb_values(start, 1)
         steps = abs(red-o_r) + abs(green-o_g) + abs(blue-o_b)
         wartezeit = float(transitiontime) / steps
-        while o_r <> red or o_g <> green or o_b <> blue:
+        while o_r != red or o_g != green or o_b != blue:
             while (laenge) > 16:
                 laenge = 16
                 if (red-o_r) > 0:
@@ -550,9 +550,9 @@ class TiFo:
         for LED in self.LEDList.liste:
             if LED.get('addr') == uid:
                 laenge = (ende-start)
-                if proc <> None and 0 <= proc <= 100:
+                if proc != None and 0 <= proc <= 100:
                     laenge = int(float(proc)/100 * laenge)
-                elif proc <> None and proc < 0:
+                elif proc != None and proc < 0:
                     laenge = 0
                 if (transitiontime == None or transitiontime <= 0) and not gradient:
                     while (laenge) > 16:
@@ -640,7 +640,7 @@ class TiFo:
                 toolbox.log('LEDStrip Bricklet', temp_uid)
                 self.LEDList.addLED(self.LEDs[-1],temp_uid)
                 self.LEDs[-1].set_frame_duration(200)
-                if settings.LEDs.get(temp_uid) <> None:
+                if settings.LEDs.get(temp_uid) != None:
                     self.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
                     self.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
                     found  = True
@@ -654,10 +654,9 @@ class TiFo:
             if device_identifier == IO16.DEVICE_IDENTIFIER:
                 self.io.append(IO16(uid, self.ipcon))
                 temp_uid = str(self.io[-1].get_identity()[1]) +"."+ str(self.io[-1].get_identity()[0])
-                toolbox.log('IO16 Bricklet', temp_uid)
                 self.io16list.addIO(self.io[-1],temp_uid,16)
                 self.io[-1].set_debounce_period(100)
-                if settings.IO16.get(temp_uid) <> None:
+                if settings.IO16.get(temp_uid) != None:
                     self.io[-1].set_port_interrupt('a', settings.IO16.get(temp_uid)[0])
                     self.io[-1].set_port_interrupt('b', settings.IO16.get(temp_uid)[1])
                     self.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[0],'i',True)
@@ -684,7 +683,6 @@ class TiFo:
 
                 self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
                 temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
-                toolbox.log('Ambient Light Bricklet', temp_uid)
 #                thread_cb_amb = threading.Timer(60, self.thread_ambLight, [self.al[-1]])
                 t = toolbox.OwnTimer(self.delay, function=self.thread_ambLight, args = [self.al[-1]], name="Ambient Light")
                 self.threadliste.append(t)
@@ -818,7 +816,7 @@ class TiFo:
 
             if not found:
                 toolbox.log(connected_uid, uid, device_identifier)
-                print connected_uid, uid, device_identifier
+                print(connected_uid, uid, device_identifier)
             else:
                 self.delay += 5
 

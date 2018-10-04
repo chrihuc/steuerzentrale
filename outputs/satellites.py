@@ -207,7 +207,7 @@ class Satellite:
         command["Device"]=device
         data = ""
 #        todo check if ssh command and send as ssh
-        if str(satellit.get('PORT')) <> 'None':
+        if str(satellit.get('PORT')) != 'None':
             if str(satellit.get('PORT')) == '22':
                 _name = device
                 _IP = satellit.get('IP')
@@ -223,7 +223,7 @@ class Satellite:
                     return True
                 except:
                     pass
-        if str(satellit.get('BiPORT')) <> 'None':
+        if str(satellit.get('BiPORT')) != 'None':
             for i in range(0,3):
                 try:
                     Satellite.mysocket.settimeout(10)

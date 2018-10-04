@@ -12,7 +12,7 @@ from threading import Thread
 import constants
 from tools import toolbox
 
-from SocketServer import TCPServer
+from socketserver import TCPServer
 
 try:
     # python 2

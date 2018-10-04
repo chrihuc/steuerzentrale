@@ -87,7 +87,7 @@ class Szenen(object):
         if not ((heartbt is None) or (device is None)):
             cls.timer_add(cls.execute, parent=None, device=desc, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
         for szene in szns:
-            if szene <> None:
+            if szene != None:
                 cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
 
     @staticmethod
@@ -99,22 +99,22 @@ class Szenen(object):
         for eintrag in gruppe:
             if eintrag == "default":
                 for szene in table:
-                    if szene.get("Gruppe") <>"Intern":
-                        if str(szene.get("Beschreibung")) <> "None":
+                    if szene.get("Gruppe") !="Intern":
+                        if str(szene.get("Beschreibung")) != "None":
                             liste[szene.get("Name")] = szene.get("Beschreibung")
                         else:
                             liste[szene.get("Name")] = szene.get("Name")
             elif eintrag == "alle" or eintrag == "":
                 for szene in table:
                     if int(szene.get("Id")) > 19:
-                        if str(szene.get("Beschreibung")) <> "None":
+                        if str(szene.get("Beschreibung")) != "None":
                             liste[szene.get("Name")] = szene.get("Beschreibung")
                         else:
                             liste[szene.get("Name")] = szene.get("Name")
             else:
                 for szene in table:
                     if szene.get("Gruppe") == eintrag:
-                        if str(szene.get("Beschreibung")) <> "None":
+                        if str(szene.get("Beschreibung")) != "None":
                             liste[szene.get("Name")] = szene.get("Beschreibung")
                         else:
                             liste[szene.get("Name")] = szene.get("Name")
@@ -171,7 +171,7 @@ class Szenen(object):
                     msqc.setting_s(bedingung, '')
 #                item = settings.get(item)
                 item = msqc.setting_r(item)
-                if verbose: print item, operand, wert
+                if verbose: print(item, operand, wert)
                 if operand == '=':
                     if not float(item) == float(wert):
                         erfuellt = False
@@ -196,7 +196,7 @@ class Szenen(object):
                 elif operand == 'in':
                     if not (item) in (wert):
                         erfuellt = False
-        if verbose: print "Ergebniss: ",erfuellt
+        if verbose: print( "Ergebniss: ",erfuellt)
         return erfuellt
 
     @staticmethod
@@ -304,14 +304,14 @@ class Szenen(object):
         erfolg = False
         szn_id = uuid.uuid4()
         cls.kommando_dict[szn_id] = []
-        if str(szene_dict.get("Bedingung")) <> "None":
+        if str(szene_dict.get("Bedingung")) != "None":
             bedingungen = eval(str(szene_dict.get("Bedingung")))
         erfuellt = cls.__bedingung__(bedingungen)
-        if str(szene_dict.get("Latching")) <> 'None':
+        if str(szene_dict.get("Latching")) != 'None':
             next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
             if start_t < next_start:
                 erfuellt = False
-        if str(szene_dict.get("Karenz")) <> 'None':
+        if str(szene_dict.get("Karenz")) != 'None':
             Karenz = (szene_dict.get("Karenz"))
         else:
             Karenz = 0.03
@@ -322,7 +322,7 @@ class Szenen(object):
 # commandos to devices and internal commands
 #==============================================================================
         if erfuellt:
-            if (str(szene_dict.get("Delay")) <> "None"):
+            if (str(szene_dict.get("Delay")) != "None"):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 text = '%s = %s, Szene: %s' % (device, wert, szene)
@@ -333,7 +333,7 @@ class Szenen(object):
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
             for idk, key in enumerate(szene_dict):
-                if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
+                if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                     kommandos = cls.__return_enum__(szene_dict.get(key))
                     if constants.redundancy_.master:
                         delay = 0
@@ -356,7 +356,7 @@ class Szenen(object):
 # Internal
 #==============================================================================
             key = "intCmd"
-            if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") ):#and (str(interlocks.get(key)) in ["None", "auto"])):
+            if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") ):#and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = cls.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
                     set_del = Timer(0, interna.execute, [kommando])
@@ -366,7 +366,7 @@ class Szenen(object):
 # change settings table
 #==============================================================================
             key = "Setting"
-            if ((szene_dict.get(key) <> "") and (str(szene_dict.get(key)) <> "None") and (str(interlocks.get(key)) in ["None", "auto"])):
+            if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = cls.__return_enum__(szene_dict.get(key))
                 for kommando in kommandos:
 #                    set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
@@ -383,14 +383,14 @@ class Szenen(object):
 #==============================================================================
 # cacnel timers
 #==============================================================================
-        if ((szene_dict.get("Cancels") <> "") and (str(szene_dict.get("Cancels")) <> "None")):
+        if ((szene_dict.get("Cancels") != "") and (str(szene_dict.get("Cancels")) != "None")):
             kommandos = cls.__return_enum__(szene_dict.get("Cancels"))
             for kommando in kommandos:
                 cls.sz_t.cancel_timer(parent = szene, child = kommando)
 #==============================================================================
 # start timer with following actions
 #==============================================================================
-        if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
+        if ((szene_dict.get("Follows") != "") and (str(szene_dict.get("Follows")) != "None")):
             kommandos = cls.__return_enum__(szene_dict.get("Follows"))
             for kommando in kommandos:
                 szn = kommando[0]
@@ -426,7 +426,7 @@ class Szenen(object):
 #==============================================================================
 # start timer with following actions nur wenn erfolg oder nicht erfolg
 #==============================================================================
-        if ((szene_dict.get("Follows") <> "") and (str(szene_dict.get("Follows")) <> "None")):
+        if ((szene_dict.get("Follows") != "") and (str(szene_dict.get("Follows")) != "None")):
             kommandos = cls.__return_enum__(szene_dict.get("Follows"))
             for kommando in kommandos:
                 szn = kommando[0]

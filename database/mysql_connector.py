@@ -256,7 +256,7 @@ def mdb_read_table_entry(db, entry, column='Name',recalc=True):
                         old_dict = eval(row[i])
                         if isinstance(old_dict, dict):
                             new_dict = {}
-                            for key, value in old_dict.iteritems():
+                            for key, value in old_dict.items():
                                 new_dict[key] = re_calc(value)
                             dicti[commando] = new_dict
                     except:
@@ -310,13 +310,13 @@ def mdb_add_table_entry(table, values, primary = 'Id'):
     listValues = []
     strin = 'INSERT INTO %s (' % (table)
     for val in values:
-        if val <> primary:
+        if val != primary:
             strin += '%s, ' % (val)
             listNames.append(val)
             listValues.append(values.get(val))
     strin = strin[0:-2] +') VALUES ('
     for val in values:
-        if val <> primary:
+        if val != primary:
             strin += '"'+str(values.get(val)) + '", '
     strin = strin[0:-2] + ')'
     with con:
@@ -400,7 +400,7 @@ def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
             else:
                 #sql = 'UPDATE '+table+' SET '+str(commando)+' = "'+str(commands.get(cmd))+ '" WHERE Name = "' + str(device) + '"'
                 sql = 'UPDATE %s SET %s="%s" WHERE %s="%s"' % (table, (commando), commands.get(cmd), primary, (device))
-            if commando <> primary:
+            if commando != primary:
                 cur.execute(sql)
     con.close()
 
@@ -598,14 +598,14 @@ def inputs(device, value, mqtt=True):
                     dicti[field_names[i]] = row[i]
                 doppelklick = dicti.get("Doppelklick")
                 if ct >= db_time:
-                    if str(dicti.get("last2")) <> "None":
+                    if str(dicti.get("last2")) != "None":
                         if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                             szenen.append(dicti.get("Dreifach"))
                             single = False
                         elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
                             szenen.append(dicti.get("Doppel"))
                             single = False
-                    if str(doppelklick) <> "True": single = True
+                    if str(doppelklick) != "True": single = True
                     if single: szenen.append(dicti.get(setting_r("Status")))
                     szenen.append(dicti.get('Immer'))
 #            get stting and logging
@@ -614,7 +614,7 @@ def inputs(device, value, mqtt=True):
             if cur.fetchone()[0] > 0:
                 setting_s(hks, value)
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-            if cur.fetchone()[0] > 0 and str(hks) <> str(device):
+            if cur.fetchone()[0] > 0 and str(hks) != str(device):
                 try:
                     insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
                     cur.execute(insertstatement)
@@ -634,10 +634,10 @@ def inputs(device, value, mqtt=True):
 
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)
-            if str(dicti.get("last1")) <> "None":
+            if str(dicti.get("last1")) != "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
-            if str(hks) <> str(device) and mqtt:
+            if str(hks) != str(device) and mqtt:
                 data = {"Value":value, "HKS":hks}
                 mqtt_pub("Inputs/" + str(hks), data)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'

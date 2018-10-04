@@ -13,9 +13,9 @@ from tools import decorators
 
 from random import choice
 
-from urllib import quote
+from urllib.parse import quote
 
-import httplib
+import http.client
 import requests
 import time
 from time import localtime,strftime
@@ -575,12 +575,12 @@ class Sonos:
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
         tries = 1
-        while (dicti <> self.soco_get_status(player, store=False)) and tries < 3:
+        while (dicti != self.soco_get_status(player, store=False)) and tries < 3:
             tries += 1
             try:
                 player_ip = player.ip_address
                 self.SetVolume(player_ip, dicti.get('Volume'))
-                if dicti['MasterZone'] <> '':
+                if dicti['MasterZone'] != '':
                     master = self.get_player(dicti['MasterZone'])
                     player.join(master)
         #            self.CombineZones(player_ip, dicti['MasterZone'])
@@ -594,7 +594,7 @@ class Sonos:
                         self.setRadio(player_ip, dicti['Sender'])
                     else:
                         self.Seek(player_ip, "TRACK_NR", str(dicti['TitelNr']))
-                        if str(dicti['Time']) <> 'None':
+                        if str(dicti['Time']) != 'None':
                             self.Seek(player_ip, "REL_TIME", dicti['Time'])
                     if not dicti['Pause']:
                         player.play()
@@ -605,10 +605,10 @@ class Sonos:
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
         socoplayer = soco.SoCo(player)
-        if str(sonos_szene.get('Volume')) <> 'None':
+        if str(sonos_szene.get('Volume')) != 'None':
             self.SetVolume(player, sonos_szene.get('Volume'))
         zone = sonos_szene.get('MasterZone')
-        if (str(zone) <> "None") and (str(zone) <> "Own"):
+        if (str(zone) != "None") and (str(zone) != "Own"):
             if 'RINCON' in str(zone):
                 self.CombineZones(player, zone)
             else:
@@ -619,19 +619,19 @@ class Sonos:
             zoneown = socoplayer.uid #self.sonos_zonen.get(str(player))
             if str(sonos_szene.get('Radio')) == '1':
                 self.setRadio(player, str(sonos_szene.get('Sender')))
-            elif str(zone) <> "None":
+            elif str(zone) != "None":
                 self.ClearZones(player)
                 self.ClearList(player)
                 if isinstance(sonos_szene.get('PlayListNr'), int):
                     self.PlayListNr(player, str(sonos_szene.get('PlayListNr')))
-                elif str(sonos_szene.get('PlayListNr')) <> 'None':
+                elif str(sonos_szene.get('PlayListNr')) != 'None':
                     playlistItem = socoplayer.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
                     socoplayer.add_to_queue(playlistItem)
 #                    self.PlayListNr(player, str())
 #                    playlist via soco
                 self.ActivateList(player, zoneown)
                 self.Seek(player, "TRACK_NR", str(sonos_szene.get('TitelNr')))
-                if str(sonos_szene.get('Time')) <> 'None':
+                if str(sonos_szene.get('Time')) != 'None':
                     self.Seek(player, "REL_TIME", sonos_szene.get('Time'))
             if (sonos_szene.get('Pause') == 1) or hergestellt:
                 self.SetPause(player)
@@ -708,7 +708,7 @@ class Sonos:
 
     def isolate(self,player_ip):
         player = soco.SoCo(player_ip)
-        if len(player.group.members) <> 1:
+        if len(player.group.members) != 1:
             for device in player.group.members:
                 device.unjoin()
         return True
@@ -767,7 +767,7 @@ class Sonos:
             lt = localtime()
             stunde = int(strftime("%H", lt))
             minute = int(strftime("%M", lt))
-            if (minute <> 0) and (minute <> 30):
+            if (minute != 0) and (minute != 30):
                 text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
                 laenge = downloadAudioFile(text)
                 self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
@@ -821,7 +821,7 @@ class Sonos:
             self.StreamInput(player, self.WohnZiZone)
         elif (str(command) == "Isolieren"):
             self.isolate(player)
-        elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
+        elif ((str(command) != "resume") and (str(command) != "An") and (str(command) != "None")):
             sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
             self.sonos_read_szene(player, sonos_szene)
         return True

@@ -177,7 +177,7 @@ class StockRaum():
         self.name = name
         self.dicti = {'name': 'Zimmer', 'type': 'group', 'expanded': False}
         self.dicti['name'] = self.get_description(name)
-        print name, self.dicti['name']
+        print(name, self.dicti['name'])
         self.children = []
         self.expanded = False
 #        self.namen = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock','A00':'Draussen',
@@ -315,7 +315,7 @@ class Szenen_tree():
         elif devices_types[device] in ['SATELLITE', 'ZWave']: values = sat.dict_commands(device)
         else: 
             values = self.get_commando_list(device)
-            print values
+            print(values)
         values.update({'warte_1':len(values)+1,'warte_3':len(values)+2,'warte_5':len(values)+3})
         return values
 
@@ -338,7 +338,7 @@ class Szenen_tree():
     def getValueFromValues(self,value, values):
         for num, val in enumerate(values):
             if str(val) == str(value):
-                print val, num
+                print(val, num)
                 return num + 1
 
     def set_paratree(self):
@@ -357,7 +357,7 @@ class Szenen_tree():
                     zimmer_list.append(name[0:6])
         stock_list = list(set(stock_list))
         zimmer_list = list(set(zimmer_list))
-        print stock_list, zimmer_list
+        print(stock_list, zimmer_list)
         for stock in stock_list:
             stockwerke.append(StockRaum(stock))
         for zim in zimmer_list:
@@ -369,7 +369,7 @@ class Szenen_tree():
                 szene['Id'] = mysql_connector.maxSzenenId()-mysql_connector.maxSzenenId()%10 +10
                 self.neue_szene = False
             szn_dict = {}
-            if str(szene.get('Beschreibung')) <> 'None':
+            if str(szene.get('Beschreibung')) != 'None':
                 self.name = szene.get('Beschreibung')
             else:
                 self.name = 'Szenen Name: '+str(szene.get('Name'))
@@ -406,7 +406,7 @@ class Szenen_tree():
                             szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
                         else:
-                            if child <> None:
+                            if child != None:
                                 szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(mysql_connector.settings_r())+sorted(mysql_connector.tables.inputs_dict_hks), 'value': child[0]},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'],'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
                     szn_d_child['children']= szn_d_child_l
@@ -415,7 +415,7 @@ class Szenen_tree():
                     szn_d_child = {'name': 'Befehl an Handys', 'type': 'action', 'expanded': True}
                     kinder = self.__return_enum__(szene.get(item))
                     for kind in kinder:
-                        if kind <> None:
+                        if kind != None:
                             szn_d_child_l.append({'name': 'Befehl %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'An wen', 'type': 'str', 'value': kind[0]},
                         {'name': 'Befehl', 'type': 'str', 'value': kind[1]}]})
                     szn_d_child['children']= szn_d_child_l
@@ -424,7 +424,7 @@ class Szenen_tree():
                     szn_d_child = {'name': 'Szene folgt', 'type': 'action', 'expanded': True}
                     kinder = self.__return_enum__(szene.get(item))
                     for kind in kinder:
-                        if kind <> None:
+                        if kind != None:
                             if len(kind)<4:
                                 immer = True
                             else:
@@ -442,7 +442,7 @@ class Szenen_tree():
                     szn_d_child = {'name': 'Folgende stoppen', 'type': 'action', 'expanded': True}
                     kinder = self.__return_enum__(szene.get(item))
                     for kind in kinder:
-                        if kind <> None:
+                        if kind != None:
                             szn_d_child_l.append({'name': 'Stops %d' % (len(szn_d_child_l)+1), 'type': 'list','value': kind, 'values':szn_lst})
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)
@@ -450,7 +450,7 @@ class Szenen_tree():
                     szn_d_child['name'] = str(item)
                     szn_d_child['type'] = 'bool'
                     szn_d_child['expanded'] = False
-                    if str(szene.get(item)) <> "None":
+                    if str(szene.get(item)) != "None":
                         szn_d_child['value'] = eval(szene.get(item))
                     else:
                         szn_d_child['value'] = False
@@ -460,7 +460,7 @@ class Szenen_tree():
                     if str(item) in ['Delay']:
                         szn_d_child['type'] = 'float'
                         szn_d_child['step'] = 0.1
-                        if str(szene.get(item)) <> "None":
+                        if str(szene.get(item)) != "None":
                             szn_d_child['value'] = float(szene.get(item))
                         else:
                             szn_d_child['value'] = None
@@ -468,23 +468,23 @@ class Szenen_tree():
                         szn_d_child['type'] ='list'
                         szn_d_child['values'] = {'Kein Event':-1,'Normales Event':0,'Problem ohne Hinweis':1,'Hinweis wenn zuhause':2,'immer Hinweis':3,'Hinweis wenn wach':4,
                                                  'Achtung wenn wach':5,'Alarm':6,'Debug':7}
-                        if str(szene.get(item)) <> "None":
+                        if str(szene.get(item)) != "None":
                             szn_d_child['value'] = float(szene.get(item))
                     elif str(item) in ['Gruppe']:
                         szn_d_child['type'] ='list'
                         szn_d_child['values'] = szn_typs
-                        if str(szene.get(item)) <> "None":
+                        if str(szene.get(item)) != "None":
                             szn_d_child['value'] = str(szene.get(item))
                         else:
                             szn_d_child['value'] = ''
                     else:
                         szn_d_child['type'] = 'str'
-                        if str(szene.get(item)) <> "None":
+                        if str(szene.get(item)) != "None":
                             szn_d_child['value'] = str(szene.get(item))
                         else:
                             szn_d_child['value'] = ''
                         try:
-                            if tipps[str(item)] <> None:
+                            if tipps[str(item)] != None:
                                 szn_d_child['tip'] = str(tipps[str(item)])
                         except:
                             pass
@@ -573,11 +573,11 @@ class Szenen_tree():
     def check_iter(self,some_object):
         try:
             iter(some_object)
-            if type(some_object) <> str:
+            if type(some_object) != str:
                 return True
             else:
                 return False
-        except TypeError, te:
+        except TypeError:
             return False
 
     def return_list(self,some_object):
@@ -586,11 +586,11 @@ class Szenen_tree():
             dicti = some_object.get(item)
             sub_dicti = dicti.get('values')
             wert = dicti.get('value')
-            if sub_dicti <> None:
+            if sub_dicti != None:
                 for jtem in sub_dicti:
                     if sub_dicti[jtem] == wert:
                         wert_str = jtem
-                if wert_str <> '':
+                if wert_str != '':
                     liste.append(wert_str)
         if len(liste) > 0:
             return liste
@@ -604,14 +604,14 @@ class Szenen_tree():
         if self.check_iter(some_object):
             if True:
             #try:
-                if type(some_object) == list: print some_object
+                if type(some_object) == list: print(some_object)
                 if some_object.get('type') == 'group' or some_object.get('type') == 'action':
                     device  = some_object.get('name')
                     if device in self.szenen[0]:
                         if device in ['Setting']:
                             set_dict = {}
                             for sub in some_object.get('children'):
-                                if some_object.get('children').get(sub).get('value') <> '':
+                                if some_object.get('children').get(sub).get('value') != '':
                                     try:
                                         set_dict[some_object.get('children').get(sub).get('name')]  = eval(some_object.get('children').get(sub).get('value'))
                                     except:
@@ -621,7 +621,7 @@ class Szenen_tree():
                             set_lst = []
                             for child in some_object.get('children'):
                                 bed_tuple = some_object.get('children').get(child).get('children')
-                                if bed_tuple.get('Setting').get('value') <> '':
+                                if bed_tuple.get('Setting').get('value') != '':
                                     #check if list:
                                     try:
                                         set_lst.append([bed_tuple.get('Setting').get('value'), bed_tuple.get('Operand').get('value'), eval(bed_tuple.get('Bedingung').get('value'))])
@@ -633,7 +633,7 @@ class Szenen_tree():
                             if str(device) == "Id":
                                 dicti[device] = kommandos
                             elif only_change:
-                                if self.szenen[0].get(device) <> kommandos:
+                                if self.szenen[0].get(device) != kommandos:
                                     dicti[device] = kommandos
                             else:
                                 dicti[device] = kommandos
@@ -642,21 +642,21 @@ class Szenen_tree():
                             set_lst = []
                             for child in some_object.get('children'):
                                 tsk_tuple = some_object.get('children').get(child).get('children')
-                                if tsk_tuple.get('An wen').get('value') <> '':
+                                if tsk_tuple.get('An wen').get('value') != '':
                                     set_lst.append([tsk_tuple.get('An wen').get('value'), tsk_tuple.get('Befehl').get('value')])
                             dicti['setTask'] = set_lst
                         elif device == 'Szene folgt':
                             set_lst = []
                             for child in some_object.get('children'):
                                 szn_tuple = some_object.get('children').get(child).get('children')
-                                if szn_tuple.get('Szene').get('value') <> '':
+                                if szn_tuple.get('Szene').get('value') != '':
                                     set_lst.append([szn_tuple.get('Szene').get('value'), szn_tuple.get('nach [s]').get('value'), szn_tuple.get('Verlaengerbar').get('value'),
                                                     szn_tuple.get('Abhaengig Bedingung').get('value'),szn_tuple.get('Abhaengig Erfolg').get('value')])
                             dicti['Follows'] = set_lst
                         elif device == 'Folgende stoppen':
                             set_lst = []
                             for child in some_object.get('children'):
-                                if some_object.get('children').get(child).get('value') <> '':
+                                if some_object.get('children').get(child).get('value') != '':
                                     szen = some_object.get('children').get(child).get('value')
                                     set_lst.append(szen)
                             dicti['Cancels'] = set_lst
@@ -664,20 +664,20 @@ class Szenen_tree():
                             #strucutre group only if name not ambivalent
                             dicti.update(self.itera(some_object.get('children')))
                 else:
-                    if some_object.get('name') <> None:
+                    if some_object.get('name') != None:
                         if some_object.get('name') in self.szenen[0]:
                             device  = some_object.get('name')
                             value = some_object.get('value')
                             if value == '': value = None
                             if only_change:
-                                if self.szenen[0].get(device) <> value:
+                                if self.szenen[0].get(device) != value:
                                     dicti[some_object.get('name')] =  value
                             else:
                                 dicti[some_object.get('name')] =  value
                     else:
                         #ordered dict:
                         for item in some_object:
-                            if some_object.get(item).get('name') <> 'Sources':
+                            if some_object.get(item).get('name') != 'Sources':
                                 dicti.update(self.itera(some_object.get(item)))
     #        except Exception,e:
     #            print e
@@ -687,7 +687,7 @@ class Szenen_tree():
         global state
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
-        print neu_szene
+        print(neu_szene)
         mysql_connector.mdb_set_table(table='set_Szenen', device=neu_szene.get('Id'), commands=neu_szene, primary = 'Id')
 
 
@@ -751,7 +751,7 @@ class InputsTree():
             inp_dict = {'name': u'Befehle', 'type': 'group', 'expanded': True}
         inp_kinder = []
         for aktuator in sorted(self.inputs):
-            if (aktuator.get('Description') <> None and self.inputsGroup in aktuator.get('Name') and self.isInputs) or (not self.isInputs and not aktuator.get('Name') in ['Name']):
+            if (aktuator.get('Description') != None and self.inputsGroup in aktuator.get('Name') and self.isInputs) or (not self.isInputs and not aktuator.get('Name') in ['Name']):
                 if self.isInputs:
                     title = aktuator.get('Description')
                 else:
@@ -815,11 +815,11 @@ class InputsTree():
     def check_iter(self,some_object):
         try:
             iter(some_object)
-            if type(some_object) <> str:
+            if type(some_object) != str:
                 return True
             else:
                 return False
-        except TypeError, te:
+        except TypeError:
             return False
 
     def itera(self,some_object):
@@ -827,13 +827,13 @@ class InputsTree():
         if self.check_iter(some_object):
             if some_object.get('type') == 'group':
                 eingang = some_object.get('name')
-                if eingang in self.eingaenge and eingang <> None:
+                if eingang in self.eingaenge and eingang != None:
                     for aktuator in self.inputs:
                         if str(aktuator.get('Id')) == str(eingang):
                             for kind in some_object.get('children'):
                                 wert = some_object.get('children').get(kind).get('value')
                                 if wert == '': wert = None
-                                if wert <> aktuator.get(kind):
+                                if wert != aktuator.get(kind):
                                     dicti[kind] = wert
                             if self.isInputs:
                                 mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(aktuator.get('Id')), commands=dicti, primary = 'Id')
@@ -956,7 +956,7 @@ class TreeInputDevice(object):
                                   'value':device['Description']})
         kinder.insert(1, {'name':'Status', 'title':'Status', 'type': 'str',
                                   'value':device['Status']})
-        for feature, value in device.iteritems():
+        for feature, value in device.items():
             if feature in ['Logging','Setting','Doppelklick']:
                 kinder.insert(2, {'name':feature, 'type': 'bool', 'value':eval(value)})
             elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise',
@@ -979,7 +979,7 @@ class TreeInputDevice(object):
 
     def speichern(self):
         szene = {}
-        print "doing"
+        print("doing")
         for kind in self.params.children():
             if kind.isType('group'):
                 szene['Id'] = kind.name()
@@ -988,13 +988,13 @@ class TreeInputDevice(object):
                         szene[enkel.name()] = enkel.value()
                     else:
                         szene[enkel.name()] = None
-        print szene
+        print(szene)
         mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Id')),
                       commands=szene, primary = 'Id', translate = False)
         inp_parameter = ['Description', 'heartbeat', 'debounce', 'Doppelklick',
                          'Logging', 'Setting', 'HKS']
         setngs = {para:szene[para] for para in inp_parameter if para in szene}
-        print setngs
+        print(setngs)
         mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Name')),
                       commands=setngs, primary = 'Name', translate = False)        
         
@@ -1011,7 +1011,7 @@ old part
 """
 sets = []
 def printit():
-    print "yup"
+    print("yup")
 
 class SettingsTree(object):
     def __init__(self, isInputs = True, cmdTable = None):
@@ -1070,21 +1070,21 @@ class SettingsTree(object):
         
 
     def set_speichern(self):
-        print "here"
+        print("here")
         self.state = self.p.saveState()
         neu_szene = self.itera(self.state)
 
     def speichere_settings(self):
-        print "here"
+        print("here")
 
     def check_iter(self,some_object):
         try:
             iter(some_object)
-            if type(some_object) <> str:
+            if type(some_object) != str:
                 return True
             else:
                 return False
-        except TypeError, te:
+        except TypeError:
             return False
 
     def itera(self,some_object, only_change = False):
@@ -1093,15 +1093,15 @@ class SettingsTree(object):
 #            print some_object, some_object.get('type')
             if some_object.get('type') == 'group':
                 seting = some_object.get('name')
-                print seting
-                if seting <> None:
+                print(seting)
+                if seting != None:
                     for seti in sets:
                         for kind in some_object.get('children').get('Settings').get('children'):
                             wert = some_object.get('children').get('Settings').get('children').get(kind).get('value')
                             if wert == '': wert = None
                             dicti[kind] = wert
                     for setting in dicti:
-                        print setting,dicti.get(setting)
+                        print(setting,dicti.get(setting))
                         mysql_connector.setting_s(setting,dicti.get(setting))
                 else:
                     self.itera(some_object.get('children'))
@@ -1114,7 +1114,7 @@ seTre = SettingsTree()
 
 sz=Szenen_tree('')
 def print_vale(value):
-    print value
+    print(value)
 
 def populate_input_tree_1():
     ipts = mysql_connector.mdb_get_table(db='cmd_inputs')
@@ -1141,7 +1141,7 @@ def selected(text):
     global lastSelected
     lastSelected = text
     sz.update(lastSelected)
-    print 'selected'
+    print('selected')
     tree_szenen.setParameters(sz.p, showTop=False)
     sz.p.sigTreeStateChanged.connect(change_sz)
 
@@ -1185,7 +1185,7 @@ def update():
     cBox_inpts_new.clear()
     inpts = sorted(mysql_connector.mdb_read_table_column(db="cmd_inputs", column = 'Name'))
     for inpt in inpts:
-        if str(inpt) <> "":
+        if str(inpt) != "":
             cBox_inpts_new.addItem(str(inpt))
     sz.p.sigTreeStateChanged.connect(change_sz)
 
@@ -1198,7 +1198,7 @@ def change(param, changes):
     print("tree changes:")
     for param, change, data in changes:
         path = inp.p.childPath(param)
-        print path
+        print(path)
         if path is not None:
             childName = '.'.join(path)
         else:
@@ -1207,7 +1207,7 @@ def change(param, changes):
         print('  change:    %s'% change)
         print('  data:      %s'% str(data))
         print('  ----------')
-        if data <> '':
+        if data != '':
             if path[-1] in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
                 selected(str(data))
 
@@ -1225,13 +1225,13 @@ def change_sz(param, changes):
         print('  change:    %s'% change)
         print('  data:      %s'% str(data))
         print('  ----------')
-        if data <> '':
+        if data != '':
             if path[-2] in ['Szenen']:
                 selected(str(path[-1]))
-#        if data <> '':
+#        if data != '':
 #            if path[-2] in ['Inputs']:
 #                showInputs(str(path[-1]))
-        if data <> '':
+        if data != '':
             if path[0] in ['Save/Restore functionality'] and path[1] == 'Neue Szene':
                 selected('LeereVorlage')
             if path[0] in ['Save/Restore functionality'] and path[1] == 'Dupliziere Szene':
@@ -1261,29 +1261,29 @@ win = QtGui.QWidget()
 tree_w_szenes = ParameterTree()
 #sz=Szenen_tree("Alles_ein")
 inp=InputsTree(isInputs = True, inputsGroup = 'V00')
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
             # 0.747
 
 #t.setParameters(sz.p, showTop=False)
 #t.setWindowTitle('Szenen Setup:')
 tree_w_inputs = ParameterTree()
 tree_select_input = ParameterTree()
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
             # 0.7
 #tree_w_inputs.setParameters(inp.p, showTop=False)
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
             # 16.69
 
 t3 = ParameterTree()
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
 cmds=InputsTree(isInputs = False, cmdTable = cmd_lsts[0])
 #t3.setParameters(cmds.p, showTop=False)
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
 t4 = ParameterTree()
 #seTre = SettingsTree()
 #t4.setParameters(seTre.p, showTop=False)
 
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
 inp.p.sigTreeStateChanged.connect(change)
 
 
@@ -1315,7 +1315,7 @@ cBox_Stockwerke = QtGui.QComboBox(win)
 #cBox_Stockwerke.setCurrentIndex(1)
 #cBox_Stockwerke.activated[str].connect(updInputs)
 
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
 update()
 #selected('Gehen')
 
@@ -1354,7 +1354,7 @@ layout.addWidget(tree_settings, 3, 3, 2, 1)
 win.setWindowTitle('Schalttafel')
 win.show()
 win.resize(1400,1200)
-print timeit.default_timer() - start
+print(timeit.default_timer() - start)
 #==============================================================================
 # till here
 #==============================================================================
