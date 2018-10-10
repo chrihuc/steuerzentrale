@@ -21,7 +21,7 @@ from alarm_event_messaging import messaging
 from database import mysql_connector as msqc
 
 from outputs import hue
-from outputs import tradfri
+#from outputs import tradfri
 from outputs import internal
 from outputs import samsung
 from outputs import satellites
@@ -41,13 +41,13 @@ sat = satellites.Satellite()
 interna = internal.Internal()
 xs1_devs = msqc.tables.akt_type_dict['XS1']
 hue_devs = msqc.tables.akt_type_dict['HUE']
-trads_devs = msqc.tables.akt_type_dict['TRADFRI']
+#trads_devs = msqc.tables.akt_type_dict['TRADFRI']
 sns_devs = msqc.tables.akt_type_dict['SONOS']
 tvs_devs = msqc.tables.akt_type_dict['TV']
 sat_devs = msqc.tables.akt_type_dict['SATELLITE']
 sat_devs += msqc.tables.akt_type_dict['ZWave']
 loc_devs = msqc.tables.akt_type_dict['Local']
-cmd_devs = xs1_devs + hue_devs + trads_devs + sns_devs + tvs_devs + sat_devs
+cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs # + trads_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
 
@@ -254,8 +254,8 @@ class Szenen(object):
     #                hue_del = Timer(hue_delay, hue.set_device, [key, commando])
     #                hue_del.start()
     #                hue_count += 1
-            elif device in trads_devs:
-                executed = trads.set_device(adress, commando)    
+#            elif device in trads_devs:
+#                executed = trads.set_device(adress, commando)    
             elif device in sat_devs:
                 executed = sat.set_device(adress, commando)
             elif device in tvs_devs:
