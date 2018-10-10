@@ -12,7 +12,7 @@ from database import mysql_connector as msqc
 import constants
 
 client = mqtt.Client(constants.name)
-client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
+client.username_pw_set(username=constants.mqtt_.user+'_led',password=constants.mqtt_.password)
 client.connect(constants.mqtt_.server)
 client.loop_start()
 """
@@ -80,6 +80,6 @@ def main():
             else:
                 client.publish("Outputs/Kerze1", 10, qos=1, retain=True)
 
-            time.sleep(5)
+            time.sleep(20)
         except:
             print('Batswitch mqtt next try')

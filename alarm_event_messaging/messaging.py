@@ -4,6 +4,7 @@ import constants
 
 #from gcm import GCM
 from database import mysql_connector as msqc
+from outputs.mqtt_publish import mqtt_pub
 
 import MySQLdb as mdb
 
@@ -49,8 +50,8 @@ class Messaging:
         for user in gcm_users:
             if user.get('Name') != None:
                 if (user.get('Name') in to) and constants.redundancy_.master:
-                    pass
 #                    response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
+                    mqtt_pub("Message/" + str(user.get('Name')), data)                    
 #                    if response != {}:
 #                        success = False
         return success
@@ -65,8 +66,8 @@ class Messaging:
                 if (user.get('Name') in to) and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(msqc.setting_r(user.get('Name')) == "True"):
-                        pass
-#                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)            
+#                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)   
+                        mqtt_pub("Message/" + str(user.get('Name')), data)                        
 #                        if response != {}:
 #                            success = False
         return success
@@ -80,7 +81,7 @@ class Messaging:
                 if (user.get('Name') in to) and constants.redundancy_.master:
                 #if user.get('gcm_regid') in to:
                     if str(msqc.setting_r(user.get('Name')) == "False"):
-                        pass
+                        mqtt_pub("Message/" + str(user.get('Name')), data)
 #                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)                     
 #                        if response != {}:
 #                            success = False

@@ -11,18 +11,30 @@ import time
 from time import localtime,strftime
 from tools import toolbox
 
+from alarm_event_messaging import alarmevents
+aes = alarmevents.AES()
+
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
 #    on server:
     toolbox.log(Name, Value)
     toolbox.communication.send_message(payload, typ='InputValue')
 
+def broadcast_exec_szn(szene):
+    payload = {'Szene':szene}
+#    on server:
+    toolbox.communication.send_message(payload, typ='ExecSzene')
+
+def broadcast_exec_comm(device, command):
+    payload = {'Device':device, 'Command':command}
+#    on server:
+    toolbox.communication.send_message(payload, typ='SetDevice')
 
 def connect(ipaddress, port):
     global client
     zeit =  time.time()
     uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
-    client = mqtt.Client(constants.name +'_sz_' + uhr, clean_session=False)
+    client = mqtt.Client(constants.name +'_sub_' + uhr, clean_session=False)
     assign_handlers(on_connect, dis_con, on_message)
     client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
     client.connect(ipaddress, port, 60)
@@ -46,11 +58,12 @@ def assign_handlers(connect, disconnect, message):
 
 
 def on_connect(client_data, userdata, flags, rc):
-    global client, topic
+    global client, topics
     if rc==0 and not client.connected_flag:
         client.connected_flag=True #set flag
         print("connected OK")
-        client.subscribe(topic)
+        for topic in topics:
+            client.subscribe(topic)
     elif client.connected_flag:
         pass
     else:
@@ -62,21 +75,32 @@ def dis_con (*args, **kargs):
     print("disconnected")
 
 def on_message(client, userdata, msg):
-    print(msg.topic + " " + str(msg.payload))
+#    print(msg.topic + " " + str(msg.payload))
     try:
         m_in=(json.loads(msg.payload)) #decode json data
-        print(m_in)
-        if 'Value' in m_in:
+#        print(m_in)
+        if 'Inputs' in msg.topic:
             name = msg.topic[7:]
-#            print 'Name: ', name
-#            print 'Value: ', float(m_in['Value'])
             broadcast_input_value('MQTT.' + name, float(m_in['Value']))
+        elif 'Command' in msg.topic:
+            if 'Szene' in msg.topic:
+                szene = msg.topic.split('/')[2]
+                broadcast_exec_szn(szene)
+            if 'Device' in msg.topic:
+#                device = msg.topic.split('/')[2]
+                device = m_in['Device']
+                command = m_in['Command']
+                broadcast_exec_comm(device, command)                
+        elif 'AlarmOk' in msg.topic:
+            aes.alarm_liste.delAlarm(m_in['uuid'])
+#            name = msg.topic[7:]
+#            broadcast_input_value('MQTT.' + name, float(m_in['Value']))            
     except ValueError:
         print("no json code")
 
 mqtt.Client.connected_flag=False
 client = None
-topic = "Inputs/ESP/#"
+topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk"]
 ipaddress = constants.mqtt_.server
 port = 1883
 
@@ -98,6 +122,6 @@ def main():
 
 
 if __name__ == "__main__":
-    topic = "Inputs/#"
+    topics = ["Inputs/#"]
     ipaddress = '127.0.0.1'
     main()

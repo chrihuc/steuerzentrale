@@ -20,6 +20,8 @@ import threading
 from email.mime.text import MIMEText
 from subprocess import Popen, PIPE
 import time
+from time import localtime,strftime
+import uuid
 
 # 4 prios at the moment
 # 0 no action
@@ -64,7 +66,29 @@ class sql_object:
 
 table    = sql_object("HIS_alarmevents", "Historic", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"), ("Description","TEXT"),("Prio","DECIMAL(2,0)"),("Date","DATETIME"),("Acknowledged","DATETIME")))
 
+class AlarmListe:
+    
+    liste = {}
+    
+    def __init__(self):
+        pass
+        
+    def addAlarm(self, titel, text):
+        zeit =  time.time()
+        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit))) 
+        hash_id = uuid.uuid4()     
+        newAlarm = {'Titel':titel, 'Text':text, 'ts':uhr, 'uuid':hash_id}
+        AlarmListe.liste[hash_id] = newAlarm
+        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+
+    def delAlarm(self, uuid):
+        del AlarmListe.liste[uuid]
+        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+
 class AES:
+    
+    alarm_liste = AlarmListe()
+    
     def __init__(self):
         self.__init_table__()
         self.mes = messaging.Messaging()
@@ -108,13 +132,13 @@ class AES:
         msg["Subject"] = subject
 
         if url != None:
-            req = urllib2.Request(url)
+            req = urllib3.Request(url)
             try:
-                response = urllib2.urlopen(req)
+                response = urllib3.urlopen(req)
                 data = response.read()
                 img = MIMEImage(data)
                 msg.attach(img)
-            except urllib2.URLError as e:
+            except urllib3.URLError as e:
                 data = None
 
         for recipient in constants.mail_.receiver:
@@ -176,6 +200,8 @@ class AES:
                 self.send_mail('Alarm', text=description)
             elif prio >= 7 and prio < 8:
                 self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)
+            if prio > 1 and prio <7:
+                AES.alarm_liste.addAlarm('Alarm', description)
 
     def alarm_resolved(self, description, resolv_desc):
         alarme = self.alarm_events_read(unacknowledged=True,prio=1, time=24)

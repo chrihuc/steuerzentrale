@@ -22,6 +22,7 @@ cfg_mail ={'USER':'','PASS':'','RECIP':'[]'}
 cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
            'Bilder': ''}
 cfg_mqtt = {'Username': '', 'Password': '', 'Server': '192.168.192.10'}
+cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': ''}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -76,8 +77,13 @@ def init_cfg():
     for cfg in cfg_mqtt:
         if not config.has_option('MQTT', cfg):
             config.set('MQTT', cfg, cfg_mqtt.get(cfg))
+    if not config.has_section('TRADFRI'):
+        config.add_section('TRADFRI')
+    for cfg in cfg_tradfri:
+        if not config.has_option('TRADFRI', cfg):
+            config.set('TRADFRI', cfg, cfg_tradfri.get(cfg))            
     # Writing our configuration file to 'main.cfg'
-    with open('./main.cfg', 'wb') as configfile:
+    with open('./main.cfg', 'w') as configfile:
         config.write(configfile)
 
 def save_config():
@@ -85,7 +91,7 @@ def save_config():
     config.set('GUI', 'KSHome', gui_.Home)
     config.set('GUI', 'KlingelAn', gui_.KlingelAn)
     config.set('GUI', 'Feh', gui_.Feh)
-    with open('./main.cfg', 'wb') as configfile:
+    with open('./main.cfg', 'w') as configfile:
         config.write(configfile)
 
 for i in range(0,3):
@@ -152,6 +158,10 @@ for i in range(0,3):
                 user = config.get('MQTT', 'Username')
                 password = config.get('MQTT', 'Password')
                 server = config.get('MQTT', 'Server')
+            class tradfri_:
+                identity = config.get('TRADFRI', 'Identity')
+                psk = config.get('TRADFRI', 'PSK')
+                host = config.get('TRADFRI', 'Host')                
         except:
             init_cfg()
             continue
