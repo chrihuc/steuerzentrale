@@ -34,7 +34,7 @@ from tools import toolbox
 
 xs1 = xs1.XS1()
 hues = hue.Hue_lights()
-trads = tradfri.Tradfri_lights()
+#trads = tradfri.Tradfri_lights()
 sn = sonos.Sonos()
 tv = samsung.TV()
 sat = satellites.Satellite()

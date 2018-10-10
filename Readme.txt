@@ -44,7 +44,7 @@ needed packages python3
 ###################################
 
 python3-pandas python3-paho-mq python3-mysqldb python3-ephem python3-urllib3 python3-git python3-paramiko python3-pycurl
-pip3 phue pytradfri paho-mqtt
+pip3 phue pytradfri paho-mqtt soco
 
 pyqtgraph easygui
 
