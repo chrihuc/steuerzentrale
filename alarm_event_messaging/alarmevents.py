@@ -21,6 +21,7 @@ from email.mime.text import MIMEText
 from subprocess import Popen, PIPE
 import time
 from time import localtime,strftime
+
 import uuid
 
 # 4 prios at the moment
@@ -67,16 +68,16 @@ class sql_object:
 table    = sql_object("HIS_alarmevents", "Historic", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"), ("Description","TEXT"),("Prio","DECIMAL(2,0)"),("Date","DATETIME"),("Acknowledged","DATETIME")))
 
 class AlarmListe:
-    
+
     liste = {}
-    
+
     def __init__(self):
         pass
-        
+
     def addAlarm(self, titel, text):
         zeit =  time.time()
-        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit))) 
-        hash_id = uuid.uuid4()     
+        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
+        hash_id = uuid.uuid4()
         newAlarm = {'Titel':titel, 'Text':text, 'ts':uhr, 'uuid':hash_id}
         AlarmListe.liste[hash_id] = newAlarm
         mqtt_pub("Message/Alarmliste", AlarmListe.liste)
@@ -86,9 +87,9 @@ class AlarmListe:
         mqtt_pub("Message/Alarmliste", AlarmListe.liste)
 
 class AES:
-    
+
     alarm_liste = AlarmListe()
-    
+
     def __init__(self):
         self.__init_table__()
         self.mes = messaging.Messaging()
@@ -122,13 +123,13 @@ class AES:
         server.ehlo()
         server.starttls()
         server.login(constants.mail_.USER,constants.mail_.PASS)
-        
+
         if url != None:
             msg = MIMEMultipart("Steurzentrale")
         else:
             msg = MIMEText(text)
         msg["From"] = constants.mail_.USER
-        
+
         msg["Subject"] = subject
 
         if url != None:
@@ -152,7 +153,7 @@ class AES:
 
     def new_event_t(self, description, prio=0, durchsage="", karenz=-1):
         data = {"Description":description, "Durchsage":durchsage}
-        mqtt_pub("AES/Prio" + str(prio), data)        
+        mqtt_pub("AES/Prio" + str(prio), data)
         if prio < 0: return
         if karenz == -1:
             if prio == 1:
@@ -202,6 +203,7 @@ class AES:
                 self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)
             if prio > 1 and prio <7:
                 AES.alarm_liste.addAlarm('Alarm', description)
+
 
     def alarm_resolved(self, description, resolv_desc):
         alarme = self.alarm_events_read(unacknowledged=True,prio=1, time=24)
