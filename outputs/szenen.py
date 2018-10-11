@@ -78,6 +78,8 @@ class Szenen(object):
                 cls.kommando_dict[payload['szn_id']] = t_list
         if ('Name' in payload) and ('Value' in payload):
             cls.trigger_scenes(payload['Name'], payload['Value'])
+        if toolbox.kw_unpack(kwargs,'typ') == 'ExecSzene':
+            cls.threadExecute(payload['Szene'])            
 
 
     @classmethod

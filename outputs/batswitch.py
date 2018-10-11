@@ -8,10 +8,14 @@ Created on Thu May 24 21:51:19 2018
 import time
 import paho.mqtt.client as mqtt
 from database import mysql_connector as msqc
+from time import localtime,strftime
+
 
 import constants
 
-client = mqtt.Client(constants.name)
+zeit =  time.time()
+uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
+client = mqtt.Client(constants.name +'_pub_' + uhr)
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
 client.connect(constants.mqtt_.server)
 client.loop_start()

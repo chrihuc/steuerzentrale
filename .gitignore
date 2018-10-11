@@ -11,3 +11,4 @@
 *.log
 .spy*
 /old/*
+szn_timer*
