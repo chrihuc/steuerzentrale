@@ -12,6 +12,8 @@ import MySQLdb as mdb
 from database import mysql_connector
 from alarm_event_messaging import alarmevents
 
+from outputs.mqtt_publish import mqtt_pub
+
 from tools import toolbox
 #toolbox.log(device, commd)
 
@@ -205,6 +207,7 @@ class Satellite:
         else:
             command = mysql_connector.mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
+        mqtt_pub("Command/Satellite/" + device, command)
         data = ""
 #        todo check if ssh command and send as ssh
         if str(satellit.get('PORT')) != 'None':

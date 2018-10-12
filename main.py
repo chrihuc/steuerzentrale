@@ -31,7 +31,7 @@ aes = aevs.AES()
 anw = internal.Anwesenheit()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--debug', nargs='?', help='debug', default=0)
+parser.add_argument('-d', '--debug', type=int, nargs='?', help='debug', default=0)
 parser.add_argument('-m', '--module', nargs='?', help='debug', default='')
 parser.add_argument('-p', '--passive', nargs='?', help='debug')
 

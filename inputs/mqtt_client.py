@@ -38,7 +38,7 @@ def connect(ipaddress, port):
     assign_handlers(on_connect, dis_con, on_message)
     client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
     client.connect(ipaddress, port, 60)
-    client.loop_start()
+#    client.loop_start()
     client.loop_forever()
 
 
@@ -81,7 +81,8 @@ def on_message(client, userdata, msg):
 #        print(m_in)
         if 'Inputs' in msg.topic:
             name = msg.topic[7:]
-            broadcast_input_value('MQTT.' + name, float(m_in['Value']))
+            if 'Value' in m_in.keys:            
+                broadcast_input_value('MQTT.' + name, float(m_in['Value']))
         elif 'Command' in msg.topic:
             if 'Szene' in msg.topic:
                 szene = msg.topic.split('/')[2]
