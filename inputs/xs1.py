@@ -33,6 +33,7 @@ def last_data_reset():
 
 def on_receive(data):
     if not constants.run:
+        return -1
         conn.close()
         sys.exit("Error message")
     global heartbeat
@@ -88,7 +89,7 @@ def heartbeat_sup():
     if toolbox.ping(constants.router_IP):
         conn.close()
         sys.exit("XS1 goodbye")
-        #os.system(exectext)
+        os.system(exectext)
     else:
         reset_wlan()
         sys.exit("XS1 goodbye")

@@ -80,20 +80,21 @@ def on_message(client, userdata, msg):
 #        print(m_in)
         if 'Inputs' in msg.topic:
             name = msg.topic[7:]
-            broadcast_input_value('MQTT.' + name, float(m_in['Value']))
+            if 'Value' in m_in.keys:
+                broadcast_input_value('MQTT.' + name, float(m_in['Value']))
         elif 'Command' in msg.topic:
             if 'Szene' in msg.topic:
                 szene = msg.topic.split('/')[2]
                 broadcast_exec_szn(szene)
             if 'Device' in msg.topic:
-#                device = msg.topic.split('/')[2]
+
                 device = m_in['Device']
                 command = m_in['Command']
                 broadcast_exec_comm(device, command)                
         elif 'AlarmOk' in msg.topic:
-            aes.alarm_liste.delAlarm(m_in['uuid'])
-#            name = msg.topic[7:]
-#            broadcast_input_value('MQTT.' + name, float(m_in['Value']))            
+            if 'uuid' in m_in.keys:
+                aes.alarm_liste.delAlarm(m_in['uuid'])
+         
     except ValueError:
         print("no json code")
 

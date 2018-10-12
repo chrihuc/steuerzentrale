@@ -574,8 +574,8 @@ class Sonos:
 
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
-        tries = 1
-        while (dicti <> self.soco_get_status(player, store=False)) and tries < 3:
+        tries = 0
+        while (dicti <> self.soco_get_status(player, store=False)) and tries < 5:
             tries += 1
             try:
                 player_ip = player.ip_address
@@ -599,6 +599,7 @@ class Sonos:
                     if not dicti['Pause']:
                         player.play()
             except:
+                time.sleep(tries)
                 pass
 
 

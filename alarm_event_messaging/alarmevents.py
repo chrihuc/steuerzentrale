@@ -188,13 +188,13 @@ class AES:
             elif prio == 3:
                 self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio == 4:
-                self.mes.send_wach(to=self.mes.alle, titel="Hinweis", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio > 4 and prio < 5:
-                self.mes.send_wach(to=self.mes.alle, titel="Hinweis", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)
             elif prio == 5:
-                self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Achtung", text=description)
             elif prio > 5 and prio < 6:
-                self.mes.send_wach(to=self.mes.alle, titel="Achtung", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Achtung", text=description)
             elif prio >= 6 and prio < 7:
                 self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description)
                 self.send_mail('Alarm', text=description)
