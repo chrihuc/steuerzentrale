@@ -80,7 +80,7 @@ def on_message(client, userdata, msg):
 #        print(m_in)
         if 'Inputs' in msg.topic:
             name = msg.topic[7:]
-            if 'Value' in m_in.keys:
+            if 'Value' in m_in.keys():
                 broadcast_input_value('MQTT.' + name, float(m_in['Value']))
         elif 'Command' in msg.topic:
             if 'Szene' in msg.topic:
