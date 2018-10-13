@@ -80,7 +80,7 @@ def on_message(client, userdata, msg):
 #        print(m_in)
         if 'Inputs' in msg.topic:
             name = msg.topic[7:]
-            if 'Value' in m_in.keys:
+            if 'Value' in m_in.keys():
                 broadcast_input_value('MQTT.' + name, float(m_in['Value']))
         elif 'Command' in msg.topic:
             if 'Szene' in msg.topic:
@@ -90,11 +90,11 @@ def on_message(client, userdata, msg):
 
                 device = m_in['Device']
                 command = m_in['Command']
-                broadcast_exec_comm(device, command)                
+                broadcast_exec_comm(device, command)
         elif 'AlarmOk' in msg.topic:
             if 'uuid' in m_in.keys:
                 aes.alarm_liste.delAlarm(m_in['uuid'])
-         
+
     except ValueError:
         print("no json code")
 
