@@ -1,1 +1,1 @@
-[]
+[{'retrig': True, 'parent': 'WohnziAnw1_1', 'due': datetime.datetime(2018, 10, 13, 8, 39, 14, 713311), 'timer': <_Timer(Thread-210, started daemon 140539005478656)>, 'delay': 300.0, 'child': 'WohnziWeg', 'device': None, 'exact': False, 'hash_id': UUID('66b98f5a-5cf1-4099-a0e1-bd5189b5d02b')}]
