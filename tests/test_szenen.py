@@ -19,7 +19,9 @@ class TestUM(unittest.TestCase):
 
     def setUp(self):
         constants.debug = True
-#        self.tifo = tf_connection.TiFo()
+        constants.debug_level = 10
+        self.tifo = tf_connection.TiFo('192.168.192.34')
+        self.tifo.connect()
         self.sz = Szenen()
         self.start_t = None
 
@@ -51,7 +53,7 @@ class TestUM(unittest.TestCase):
 #        toolbox.communication.send_message(payload)
 
     def test_execute0(self):
-        runs = self.sz.execute("PflanzenTag")
+        runs = self.sz.execute("SideBorAus")
         self.assertTrue(runs,
                          'Failed to Execute Scene')
 

@@ -11,6 +11,7 @@ import time
 import constants
 from tifo import tf_connection
 from tools import toolbox
+import uuid
 
 
 class TestUM(unittest.TestCase):
@@ -18,20 +19,21 @@ class TestUM(unittest.TestCase):
     def setUp(self):
         constants.debug = True
         constants.debug_level = 10
+        self.test_mod2 = tf_connection.TiFo('192.168.192.34')
+        self.test_mod2.connect()
+
 #        constants.debug_text = 'tf_conn'
 
 
-#    def test_connect_1_conns(self):
+    def test_connect_1_conns(self):
+        data = {'Name': 'Hell', 'red_1': None, 'red_2': '0', 'transitiontime': None, 'green_2': '0', 'green_1': None, 'Szene': 'Hell', 'blue': '255', 'Szene_id': uuid.uuid4(), 'transition': None, 'blue_2': '0', 'blue_1': None, 'green': '255', 'Device': 'V00WOH1SRA1LI01', 'percentage': None, 'Id': 1L, 'red': '255'}
+        self.test_mod2.set_device(data)
 #        self.test_mod = tf_connection.TiFo('localhost')
 
 
-    def test_connect_2_conns(self):
-        toolbox.log('test')
-        #self.test_mod = tf_connection.TiFo('localhost')
-#        toolbox.communication.register_callback(self.test_mod.receive_communication)
-        self.test_mod2 = tf_connection.TiFo('192.168.193.102')
-        self.test_mod2.main()
-#        toolbox.communication.register_callback(self.test_mod2.receive_communication)
+#    def test_connect_2_conns(self):
+#        toolbox.log('test')
+#        self.test_mod2.main()
 
 
 if __name__ == '__main__':

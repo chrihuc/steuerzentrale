@@ -72,7 +72,8 @@ class AlarmListe:
     liste = {}
 
     def __init__(self):
-        pass
+        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+
 
     def addAlarm(self, titel, text):
         zeit =  time.time()
@@ -203,7 +204,6 @@ class AES:
                 self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)
             if prio > 1 and prio <7:
                 AES.alarm_liste.addAlarm('Alarm', description)
-
 
     def alarm_resolved(self, description, resolv_desc):
         alarme = self.alarm_events_read(unacknowledged=True,prio=1, time=24)
