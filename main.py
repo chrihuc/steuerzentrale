@@ -28,6 +28,8 @@ from tools import toolbox
 #toolbox.log('debug on')
 
 aes = aevs.AES()
+aes.new_event(description="Starting", prio=1)
+
 anw = internal.Anwesenheit()
 
 parser = argparse.ArgumentParser()
