@@ -177,7 +177,7 @@ class TiFo:
     def connect(self):
         # Create IP Connection
         self.ipcon = IPConnection()
-        self.ipcon.set_timeout(5)        
+        self.ipcon.set_timeout(10)        
         # Register IP Connection callbacks
         self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
                                      self.cb_enumerate)
