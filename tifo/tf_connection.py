@@ -222,10 +222,10 @@ class TiFo:
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(illuminance))
 
-    def cb_value(self, value,device):
+    def cb_value(self, value,device,div=1.0):
         toolbox.log(device) 
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-        broadcast_input_value('TiFo.' + name, str(value))
+        broadcast_input_value('TiFo.' + name, str(value/div))
 
     def thread_ambLight(self, device):
         while constants.run:
@@ -753,13 +753,15 @@ class TiFo:
             if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
                 self.ptc.append(BrickletPTC(uid, self.ipcon))
                 temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
-                toolbox.log('PT temp Bricklet', temp_uid)
+                self.ptc[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
+                args = [self.ptc[-1], 100.0]
+                self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=args))
 #                thread_pt_ = threading.Timer(5, self.thread_pt, [self.ptc[-1]])
 #                thread_pt_.start()
 #                self.threadliste.append(thread_pt_)
-                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.ptc[-1]], name="PT temp Bricklet")
-                self.threadliste.append(t)
-                t.start()
+#                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.ptc[-1]], name="PT temp Bricklet")
+#                self.threadliste.append(t)
+#                t.start()
                 found  = True
                 toolbox.log("BrickletPTC", temp_uid)                   
 
