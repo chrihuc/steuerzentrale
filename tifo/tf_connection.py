@@ -755,7 +755,7 @@ class TiFo:
                 temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
                 self.ptc[-1].set_temperature_callback_period(45000)
                 args = [self.ptc[-1], 100.0]
-                self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=args))
+                self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.ptc[-1], div=100.0))
 #                thread_pt_ = threading.Timer(5, self.thread_pt, [self.ptc[-1]])
 #                thread_pt_.start()
 #                self.threadliste.append(thread_pt_)
