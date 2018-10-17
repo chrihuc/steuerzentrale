@@ -34,6 +34,7 @@ import time
 from time import localtime,strftime
 from math import log
 import datetime
+import uuid
 
 import constants
 
@@ -169,10 +170,8 @@ class TiFo:
 
 #        self.ipcon.enumerate()
 
-        toolbox.communication.register_callback(self.receive_communication)
-        toolbox.log('TiFo started')
 
-    def main(self):
+    def connect(self):
         # Create IP Connection
         self.ipcon = IPConnection()
         # Register IP Connection callbacks
@@ -182,8 +181,13 @@ class TiFo:
                                      self.cb_connected)
         # Connect to brickd, will trigger cb_connected
         self.ipcon.connect(self.ip, PORT)
-#        self.ipcon.enumerate()
         toolbox.communication.register_callback(self.receive_communication)
+        time.sleep(5)
+        toolbox.log('TiFo started')
+
+    def main(self):
+        # Create IP Connection
+        self.connect()
         while constants.run:
             toolbox.sleep(600)
             for t in self.threadliste:
@@ -524,6 +528,7 @@ class TiFo:
         uid = LEDDict.get('UID')
         start = LEDDict.get('Start')
         ende = LEDDict.get('Ende')
+        toolbox.log(uid, start, ende)
 #        TODO vectorize
         delta_r = 0
         delta_g = 0
@@ -554,6 +559,7 @@ class TiFo:
 
         for LED in self.LEDList.liste:
             if LED.get('addr') == uid:
+                toolbox.log('Bricklet found')
                 laenge = (ende-start)
                 if proc != None and 0 <= proc <= 100:
                     laenge = int(float(proc)/100 * laenge)
@@ -613,7 +619,9 @@ class TiFo:
         return False
 
     def receive_communication(self, payload, *args, **kwargs):
+        toolbox.log(toolbox.kw_unpack(kwargs,'typ') == 'output', toolbox.kw_unpack(kwargs,'receiver') == 'TiFo')
         if toolbox.kw_unpack(kwargs,'typ') == 'output' and toolbox.kw_unpack(kwargs,'receiver') == 'TiFo':
+            toolbox.log(payload)
             result = self.set_device(payload)
             toolbox.communication.send_message(payload, typ='return', value=result)
 
