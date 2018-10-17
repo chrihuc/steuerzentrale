@@ -153,7 +153,10 @@ class TiFo:
         self.si = []
         self.ptc = []
         self.temp = []
+        self.baro = []   
+        self.humi = []         
         self.co2 = []
+        self.volcu = []
         self.moist = None
         self.unknown = []
         self.threadliste = []
@@ -188,18 +191,18 @@ class TiFo:
     def main(self):
         # Create IP Connection
         self.connect()
-        while constants.run:
-            toolbox.sleep(600)
-            for t in self.threadliste:
-                if not t in threading.enumerate():
-#                    print t.args
-#                    new_t = threading.Timer(60, function=t.function, args = t.args)
-                    aes.new_event(description="Thread stopped: "+t.name, prio=1)
-                    new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
-                    new_t.start()
-                    self.threadliste.remove(t)
-                    self.threadliste.append(new_t)
-                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
+#        while constants.run:
+#            toolbox.sleep(600)
+#            for t in self.threadliste:
+#                if not t in threading.enumerate():
+##                    print t.args
+##                    new_t = threading.Timer(60, function=t.function, args = t.args)
+#                    aes.new_event(description="Thread stopped: "+t.name, prio=1)
+#                    new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
+#                    new_t.start()
+#                    self.threadliste.remove(t)
+#                    self.threadliste.append(new_t)
+#                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
 
 
 
@@ -222,10 +225,10 @@ class TiFo:
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(illuminance))
 
-    def cb_value(self, value,device,div=1.0):
+    def cb_value(self, value,device,div=1.0,ext=''):
         toolbox.log(device) 
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-        broadcast_input_value('TiFo.' + name, str(value/div))
+        broadcast_input_value('TiFo.' + name + ext, str(value/div))
 
     def thread_ambLight(self, device):
         while constants.run:
@@ -768,57 +771,63 @@ class TiFo:
             if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletTemperature(uid, self.ipcon))
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
-                toolbox.log('Temperature Bricklet', temp_uid)
+                self.temp[-1].set_temperature_callback_period(45000)
+                self.temp[-1].register_callback(self.temp[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.temp[-1], div=100.0))
 #                thread_pt_ = threading.Timer(10, self.thread_pt, [self.temp[-1]])
 #                thread_pt_.start()
 #                self.threadliste.append(thread_pt_)
-                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.temp[-1]], name="Temperature Bricklet")
-                self.threadliste.append(t)
-                t.start()
+#                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.temp[-1]], name="Temperature Bricklet")
+#                self.threadliste.append(t)
+#                t.start()
                 found  = True
                 toolbox.log("BrickletTemperature", temp_uid)                   
 
             if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
-                self.temp.append(BrickletBarometer(uid, self.ipcon))
-                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
-                toolbox.log('Pressure Bricklet', temp_uid)
+                self.baro.append(BrickletBarometer(uid, self.ipcon))
+                temp_uid = str(self.baro[-1].get_identity()[1]) +"."+ str(self.baro[-1].get_identity()[0])
+                self.baro[-1].set_air_pressure_callback_period(45000)
+                self.baro[-1].register_callback(self.baro[-1].CALLBACK_AIR_PRESSURE, partial( self.cb_value,  device=self.baro[-1], div=1000.0))
 #                thread_cp_ = threading.Timer(15, self.thread_cp, [self.temp[-1]])
 #                thread_cp_.start()
 #                self.threadliste.append(thread_cp_)
-                t = toolbox.OwnTimer(self.delay, function=self.thread_cp, args = [self.temp[-1]], name="Pressure Bricklet")
-                self.threadliste.append(t)
-                t.start()
+#                t = toolbox.OwnTimer(self.delay, function=self.thread_cp, args = [self.temp[-1]], name="Pressure Bricklet")
+#                self.threadliste.append(t)
+#                t.start()
                 found  = True
                 toolbox.log("BrickletBarometer", temp_uid)                   
 
             if device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
-                self.temp.append(BrickletHumidityV2(uid, self.ipcon))
-                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
-                toolbox.log('Humidity Bricklet', temp_uid)
+                self.humi.append(BrickletHumidityV2(uid, self.ipcon))
+                temp_uid = str(self.humi[-1].get_identity()[1]) +"."+ str(self.humi[-1].get_identity()[0])
+                self.humi[-1].set_humidity_callback_configuration(45000, False, "x", 0, 0)
+                self.humi[-1].register_callback(self.humi[-1].CALLBACK_HUMIDITY, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.HU'))
+                self.humi[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
+                self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))                
 #                thread_hum_ = threading.Timer(20, self.thread_hum, [self.temp[-1]])
 #                thread_hum_.start()
 #                self.threadliste.append(thread_hum_)
-                t = toolbox.OwnTimer(self.delay, function=self.thread_hum, args = [self.temp[-1]], name="Humidity Bricklet")
-                self.threadliste.append(t)
-                t.start()
+#                t = toolbox.OwnTimer(self.delay, function=self.thread_hum, args = [self.temp[-1]], name="Humidity Bricklet")
+#                self.threadliste.append(t)
+#                t.start()
                 found  = True
                 toolbox.log("BrickletHumidityV2", temp_uid)                   
 
             if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
-                self.temp.append(BrickletVoltageCurrent(uid, self.ipcon))
-                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
-                toolbox.log('Vol Curr Bricklet', temp_uid)
+                self.volcu.append(BrickletVoltageCurrent(uid, self.ipcon))
+                temp_uid = str(self.volcu[-1].get_identity()[1]) +"."+ str(self.volcu[-1].get_identity()[0])
 #                thread_volc_ = threading.Timer(25, self.thread_volc, [self.temp[-1]])
 #                thread_volc_.start()
 #                self.threadliste.append(thread_volc_)
-                t = toolbox.OwnTimer(self.delay, function=self.thread_volc, args = [self.temp[-1]], name="Vol Curr Bricklet")
-                self.threadliste.append(t)
-                t.start()
-                self.temp[-1].set_debounce_period(10000)
-                self.temp[-1].register_callback(self.temp[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.temp[-1], uid = temp_uid ))
-                self.temp[-1].set_voltage_callback_threshold("<", 0, 23*1000)
-                self.temp[-1].register_callback(self.temp[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.temp[-1], uid = temp_uid ))
-                self.temp[-1].set_current_callback_threshold(">", 3.8*1000, 0)
+#                t = toolbox.OwnTimer(self.delay, function=self.thread_volc, args = [self.temp[-1]], name="Vol Curr Bricklet")
+#                self.threadliste.append(t)
+#                t.start()
+                self.volcu[-1].set_debounce_period(1000)
+                self.volcu[-1].set_voltage_callback_period(1000)
+                self.volcu[-1].set_current_callback_period(1000)
+                self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.volcu[-1], uid = temp_uid ))
+                self.volcu[-1].set_voltage_callback_threshold(">", 0, 0)
+                self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.volcu[-1], uid = temp_uid ))
+                self.volcu[-1].set_current_callback_threshold(">", 0, 0)
                 found  = True
                 toolbox.log("BrickletVoltageCurrent", temp_uid)                   
 
