@@ -753,7 +753,7 @@ class TiFo:
             if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
                 self.ptc.append(BrickletPTC(uid, self.ipcon))
                 temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
-                self.ptc[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
+                self.ptc[-1].set_temperature_callback_period(45000)
                 args = [self.ptc[-1], 100.0]
                 self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=args))
 #                thread_pt_ = threading.Timer(5, self.thread_pt, [self.ptc[-1]])
