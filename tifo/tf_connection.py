@@ -192,8 +192,8 @@ class TiFo:
     def main(self):
         # Create IP Connection
         self.connect()
-#        while constants.run:
-#            toolbox.sleep(600)
+        while constants.run:
+            toolbox.sleep(600)
 #            for t in self.threadliste:
 #                if not t in threading.enumerate():
 ##                    print t.args
