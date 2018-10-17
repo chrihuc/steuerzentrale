@@ -151,10 +151,10 @@ try:
 #                if True:
 #                    new_t = threading.Thread(name=t.name, target=t.target, args = t.args)
                     new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
-                    new_t.start()
-                    threadliste.remove(t)
-                    threadliste.append(new_t)
-                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
+#                    new_t.start()
+#                    threadliste.remove(t)
+#                    threadliste.append(new_t)
+#                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
                 except:
                     constants.run = False
                     aes.new_event(description="Couldn't restart Thread, rebooting ", prio=1)
