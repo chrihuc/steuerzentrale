@@ -207,7 +207,7 @@ class Satellite:
         else:
             command = mysql_connector.mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
-        mqtt_pub("Command/Satellite/" + device, command)        
+        mqtt_pub("Command/Satellite/" +satellit + "/" + device, command)        
         data = ""
 #        todo check if ssh command and send as ssh
         if str(satellit.get('PORT')) <> 'None':

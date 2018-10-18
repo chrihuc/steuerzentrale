@@ -108,16 +108,6 @@ port = 1883
 
 def main():
     global client, topic, ipaddress, port
-
-#    if len(sys.argv) == 3:
-#        address = sys.argv[1]
-#        ipaddress = address.split(":")[0]
-#        port = address.split(":")[1]
-#        topic = sys.argv[2]
-#    else:
-#        print "Usage : %r [ipaddress:port] [topic]" % sys.argv[0]
-#        exit(1)
-
     connect(ipaddress, port)
 
 
