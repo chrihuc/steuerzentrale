@@ -209,6 +209,7 @@ class Satellite:
         command["Device"]=device
         mqtt_pub("Command/Satellite/" +satellit + "/" + device, command)
 
+
         data = ""
 #        todo check if ssh command and send as ssh
         if str(satellit.get('PORT')) != 'None':
