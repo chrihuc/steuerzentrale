@@ -200,7 +200,7 @@ class Satellite:
             system = adress.split(".")[0]
             device = adress.split(".")[1]
         except:
-            system = adress
+            system = "Satellite"
             device = adress
 
         toolbox.log(device, commd)
