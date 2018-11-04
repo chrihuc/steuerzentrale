@@ -54,18 +54,18 @@ class Satellite:
     mysocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     mysocket_old = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
     mysocket_old.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    
+
     def __init__ (self):
         self.__init_table__()
         self.device_type_list = self.list_devices_type(devices=None)
         #self.__check_table__()
-    
+
     def __init_table__(self):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             cur.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '"+table.name+"'")
-            if cur.fetchone()[0] == 0:       
+            if cur.fetchone()[0] == 0:
                 command = "CREATE TABLE "+constants.sql_.DB+"."+table.name +"("
                 for num, col in enumerate(table.columns):
                     if num == len(table.columns)-1:
@@ -74,12 +74,12 @@ class Satellite:
                         command +=  ");"
                     else:
                         for co in col:
-                            command += co + " "                    
+                            command += co + " "
                         command +=  ", "
                 cur.execute(command)
-                results = cur.fetchall()      
-        con.close() 
-        
+                results = cur.fetchall()
+        con.close()
+
     def __check_table__(self):
         for sat in self.list_devices():
             con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -87,22 +87,22 @@ class Satellite:
                 cur = con.cursor()
                 cur.execute("SELECT COUNT(*) FROM "+constants.sql_.DB+"."+table.name+" WHERE Name = '"+sat+"'")
                 if cur.fetchone()[0] == 0:
-                    sql = 'INSERT INTO '+table.name+' (Name, command_set) VALUES ("'+ str(sat) + '","'+'sat_'+ str(sat) + '")'     
+                    sql = 'INSERT INTO '+table.name+' (Name, command_set) VALUES ("'+ str(sat) + '","'+'sat_'+ str(sat) + '")'
                     cur.execute(sql)
-            con.close() 
-            
+            con.close()
+
     def __check_table_exists__(self,table):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
         with con:
             cur = con.cursor()
             cur.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '"+table+"'")
-            if cur.fetchone()[0] == 0:   
+            if cur.fetchone()[0] == 0:
                 return False
                 command = "CREATE TABLE "+constants.sql_.DB+"."+table +"(`id` int(11) NOT NULL AUTO_INCREMENT, `Name` varchar(50),PRIMARY KEY (`id`));"
                 cur.execute(command)
-                results = cur.fetchall()      
+                results = cur.fetchall()
         con.close()
-        return True         
+        return True
 
     def list_devices(self):
         comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
@@ -113,7 +113,7 @@ class Satellite:
             elif comands.get(comand) == "ZWave":
                 liste.append(comand)
         #liste.remove("Name")
-        return liste    
+        return liste
 
     def list_devices_type(self, devices=None):
         comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
@@ -124,14 +124,14 @@ class Satellite:
             elif comands.get(comand) == "ZWave" and (devices== None or comand in devices):
                 liste[comand] = 'ZWave'
         #liste.remove("Name")
-        return liste 
-        
+        return liste
+
     def get_type(self,device):
         alle = self.device_type_list
         return alle[device]
-        
+
     def list_commands(self,device='alle'):
-        liste = [] 
+        liste = []
         list_cmds_of = []
         if device == 'alle':
             list_cmds_of = self.list_devices()
@@ -142,19 +142,19 @@ class Satellite:
                 cmds_table=mysql_connector.mdb_read_table_entry(table.name,sates).get('command_set')
             elif self.get_type(sates) == 'ZWave':
                 cmds_table=mysql_connector.mdb_read_table_entry(table.name,'ZWave').get('command_set')
-            if self.__check_table_exists__(cmds_table):           
+            if self.__check_table_exists__(cmds_table):
                 comands = mysql_connector.mdb_get_table(cmds_table)
                 for comand in comands:
                     liste.append(comand.get("Name"))
-        return liste        
+        return liste
 
     def listCommandTable(self,device='alle', nameReturn = True):
-        liste = [] 
+        liste = []
         list_cmds_of = []
         if device == 'alle':
             list_cmds_of = self.list_devices()
         elif device=="forSave":
-            list_cmds_of = mysql_connector.mdb_read_table_column(table.name,"Name")            
+            list_cmds_of = mysql_connector.mdb_read_table_column(table.name,"Name")
         else:
             list_cmds_of.append(device)
         for sates in list_cmds_of:
@@ -162,7 +162,7 @@ class Satellite:
                 cmds_table=mysql_connector.mdb_read_table_entry(table.name,sates)
             elif self.get_type(sates) == 'ZWave':
                 cmds_table=mysql_connector.mdb_read_table_entry(table.name,'ZWave')
-            if self.__check_table_exists__(cmds_table.get('command_set')):           
+            if self.__check_table_exists__(cmds_table.get('command_set')):
                 if nameReturn:
                     liste.append(cmds_table.get('Name'))
                 else:
@@ -181,20 +181,26 @@ class Satellite:
             cmds_table=mysql_connector.mdb_read_table_entry(table.name,sates).get('command_set')
             if cmds_table == None:
                 cmds_table=mysql_connector.mdb_read_table_entry(table.name,'ZWave').get('command_set')
-            if self.__check_table_exists__(cmds_table):           
+            if self.__check_table_exists__(cmds_table):
                 comands = mysql_connector.mdb_get_table(cmds_table)
                 for comand in comands:
                     itera +=1
-                    liste[comand.get("Name")] = itera 
+                    liste[comand.get("Name")] = itera
             elif cmds_table == 'server':
                 comands = mysql_connector.mdb_read_table_column(constants.sql_tables.szenen.name, 'Name')
                 for comand in comands:
                     itera +=1
-                    liste[comand] = itera                 
-        return liste        
+                    liste[comand] = itera
+        return liste
 
 
-    def set_device(self, device, commd):     
+    def set_device(self, adress, commd):
+        try:
+            system = adress.split(".")[0]
+            device = adress.split(".")[1]
+        except:
+            system = adress
+            device = adress
         toolbox.log(device, commd)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.get_type(device) == 'SATELLITE':
@@ -207,7 +213,7 @@ class Satellite:
         else:
             command = mysql_connector.mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
-        mqtt_pub("Command/Satellite/" + device, command)        
+        mqtt_pub("Command/"+ system + "/" + device, command)
         data = ""
 #        todo check if ssh command and send as ssh
         if str(satellit.get('PORT')) <> 'None':
@@ -220,7 +226,7 @@ class Satellite:
                 ssh_sat = sputnik(_name,_IP,_PORT,_USER,_PASS)
                 if ssh_sat.send_ssh_cmd(command.get('Command')):
                     return True
-            else:   
+            else:
                 try:
                     Satellite.mysocket_old.sendto(str(command),(satellit.get('IP'),satellit.get('PORT')))
                     return True
@@ -242,11 +248,11 @@ class Satellite:
             return True
         else:
             return False
-             
-        
+
+
 class sputnik:
     mysocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-    
+
     def __init__ (self, name, IP, PORT, USER, PASS, Type=None, command_set=None):
         self.name = name
         self.IP = IP
@@ -272,8 +278,8 @@ class sputnik:
                 success = True
 #            except socket_error as serr:
 #                success = False
-#            except: 
-#                success = False        
+#            except:
+#                success = False
 #        if success:
 #            aes.new_event(description=self.name + " " + text, prio=0)
 #        else:
@@ -282,21 +288,21 @@ class sputnik:
 
     def reboot(self):
         return self.send_ssh_cmd("sudo reboot","neugestarted")
-    
+
     def kill_python(self):
-        return self.send_ssh_cmd("sudo killall python","python killed")  
-    
+        return self.send_ssh_cmd("sudo killall python","python killed")
+
     def open_fw(self, dev_ip):
         return self.send_ssh_cmd("iptables -D FORWARD -s 0/0 -d " + dev_ip + " -j DROP", "Firewall opened 1 " +dev_ip)
-        return self.send_ssh_cmd("iptables -D FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall opened 2 " +dev_ip)   
+        return self.send_ssh_cmd("iptables -D FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall opened 2 " +dev_ip)
 
     def close_fw(self, dev_ip):
         return self.send_ssh_cmd("iptables -I FORWARD -s 0/0 -d " + dev_ip + " -j DROP", "Firewall closed 1 " +dev_ip)
-        return self.send_ssh_cmd("iptables -I FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall closed 2 " +dev_ip) 
+        return self.send_ssh_cmd("iptables -I FORWARD -s " + dev_ip + " -d 0/0 -j DROP", "Firewall closed 2 " +dev_ip)
 
     def send_udp_cmd(self, command):
         if constants.redundancy_.master:
             sputnik.mysocket.sendto(str(command),(self.IP,self.PORT))
 
 if __name__ == '__main__':
-    main()  
+    main()
