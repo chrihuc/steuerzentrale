@@ -194,7 +194,15 @@ class Satellite:
         return liste
 
 
-    def set_device(self, device, commd):
+
+    def set_device(self, adress, commd):
+        try:
+            system = adress.split(".")[0]
+            device = adress.split(".")[1]
+        except:
+            system = adress
+            device = adress
+
         toolbox.log(device, commd)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.get_type(device) == 'SATELLITE':
@@ -207,8 +215,7 @@ class Satellite:
         else:
             command = mysql_connector.mdb_read_table_entry(satellit.get('command_set'),commd)
         command["Device"]=device
-        mqtt_pub("Command/Satellite/" +satellit + "/" + device, command)
-
+        mqtt_pub("Command/"+ system + "/" + device, command)
 
         data = ""
 #        todo check if ssh command and send as ssh
