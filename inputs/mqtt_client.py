@@ -100,7 +100,7 @@ def on_message(client, userdata, msg):
 
 mqtt.Client.connected_flag=False
 client = None
-topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk"]
+topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#"]
 ipaddress = constants.mqtt_.server
 port = 1883
 
