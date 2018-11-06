@@ -12,6 +12,8 @@ PORT = 4223
 
 from functools import partial
 
+import socket
+
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.bricklet_io16 import IO16
 from tinkerforge.bricklet_led_strip import LEDStrip
@@ -28,6 +30,8 @@ from tinkerforge.bricklet_temperature import BrickletTemperature
 from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.brick_master import BrickMaster
+from tinkerforge.ip_connection import Error
+
 import threading
 #from threading import Timer
 import time
@@ -153,8 +157,8 @@ class TiFo:
         self.si = []
         self.ptc = []
         self.temp = []
-        self.baro = []   
-        self.humi = []         
+        self.baro = []
+        self.humi = []
         self.co2 = []
         self.volcu = []
         self.moist = None
@@ -162,7 +166,7 @@ class TiFo:
         self.threadliste = []
         self.ip = ip
         self.delay = 5
-        self.timeoutTime = 60
+        self.timeoutTime = 600
         self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
 
 #        self.ipcon = IPConnection()
@@ -179,15 +183,15 @@ class TiFo:
         self.timeout.cancel()
         self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
         self.timeout.start()
-        
+
     def timedOut(self):
         aes.new_event(description="Tifo timedout stopped: "+self.ip, prio=2)
-        self.connect()        
+        self.connect()
 
     def connect(self):
         # Create IP Connection
         self.ipcon = IPConnection()
-        self.ipcon.set_timeout(10)        
+        self.ipcon.set_timeout(10)
         # Register IP Connection callbacks
         self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
                                      self.cb_enumerate)
@@ -195,6 +199,16 @@ class TiFo:
                                      self.cb_connected)
         # Connect to brickd, will trigger cb_connected
         self.ipcon.connect(self.ip, PORT)
+        while True:
+            try:
+                self.ipcon.connect(self.ip, PORT)
+                break
+            except Error as e:
+                toolbox.log('Connection Error: ' + str(e.description))
+                time.sleep(1)
+            except socket.error as e:
+                toolbox.log('Socket error: ' + str(e))
+                time.sleep(1)
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
         toolbox.log('TiFo started')
@@ -224,7 +238,7 @@ class TiFo:
             toolbox.sleep(60)
 
     def cb_ambLight(self, illuminance,device):
-        toolbox.log(device) 
+        toolbox.log(device)
         thresUp = illuminance * 4/3
         thresDown = illuminance * 4 / 5
         if thresDown == 0:
@@ -238,14 +252,14 @@ class TiFo:
         self.timeout_reset()
 
     def cb_value(self, value,device,div=1.0,ext=''):
-        toolbox.log(device) 
+        toolbox.log(device)
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + ext, str(value/div))
         self.timeout_reset()
 
     def thread_ambLight(self, device):
         while constants.run:
-            toolbox.log(device) 
+            toolbox.log(device)
             illuminance = device.get_illuminance()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(illuminance))
@@ -253,7 +267,7 @@ class TiFo:
 
     def thread_CO2(self, device):
         while constants.run:
-            toolbox.log(device) 
+            toolbox.log(device)
             value = device.get_co2_concentration()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(value))
@@ -261,8 +275,8 @@ class TiFo:
 
     def thread_pt(self, device):
         while constants.run:
-            toolbox.log(device) 
-            toolbox.log("thread_pt", device) 
+            toolbox.log(device)
+            toolbox.log("thread_pt", device)
             value = device.get_temperature()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/100))
@@ -270,7 +284,7 @@ class TiFo:
 
     def thread_cp(self, device):
         while constants.run:
-            toolbox.log(device) 
+            toolbox.log(device)
             value = device.get_air_pressure()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/1000))
@@ -278,7 +292,7 @@ class TiFo:
 
     def thread_hum(self, device):
         while constants.run:
-            toolbox.log(device) 
+            toolbox.log(device)
             value = device.get_humidity()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name + '.HU', str(float(value)/100))
@@ -289,23 +303,23 @@ class TiFo:
 
     def thread_volc(self, device):
         while constants.run:
-            toolbox.log(device) 
+            toolbox.log(device)
             value = device.get_voltage()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
-            toolbox.sleep(10)            
+            toolbox.sleep(10)
             value = device.get_current()
             broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
             toolbox.sleep(60)
 
     def cb_volc_vol(self, value, device, uid):
-        toolbox.log(device) 
+        toolbox.log(device)
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
         self.timeout_reset()
 
     def cb_volc_cur(self, value, device, uid):
-        toolbox.log(device) 
+        toolbox.log(device)
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
         self.timeout_reset()
@@ -679,7 +693,7 @@ class TiFo:
                     self.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
                     self.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
                     found  = True
-                toolbox.log("LEDStrip", temp_uid)                    
+                toolbox.log("LEDStrip", temp_uid)
                 #self.led.register_callback(self.led.CALLBACK_FRAME_RENDERED,
                 #                lambda x: __cb_frame_rendered__(self.led, x))
                 #self.led.set_rgb_values(0, self.NUM_LEDS, self.r, self.g, self.b)
@@ -702,7 +716,7 @@ class TiFo:
                     #self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
                     self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1], uid = temp_uid ))
                     found  = True
-                toolbox.log("IO16", temp_uid)                      
+                toolbox.log("IO16", temp_uid)
 
             if device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                 self.al.append(AmbientLight(uid, self.ipcon))
@@ -723,14 +737,14 @@ class TiFo:
                 #self.threadliste.append(t)
                 #t.start()
                 found  = True
-                toolbox.log("AmbientLight", temp_uid)                   
+                toolbox.log("AmbientLight", temp_uid)
 
             if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
                 self.co2.append(BrickletCO2(uid, self.ipcon))
                 temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
                 self.co2[-1].set_co2_concentration_callback_period(45000)
                 args = self.co2[-1]
-                self.co2[-1].register_callback(self.co2[-1].CALLBACK_CO2_CONCENTRATION, partial( self.cb_value,  device=args))                
+                self.co2[-1].register_callback(self.co2[-1].CALLBACK_CO2_CONCENTRATION, partial( self.cb_value,  device=args))
 #                thread_co2_ = threading.Timer(5, self.thread_CO2, [self.co2[-1]])
 #                thread_co2_.start()
 #                self.threadliste.append(thread_co2_)
@@ -738,7 +752,7 @@ class TiFo:
 #                self.threadliste.append(t)
 #                t.start()
                 found  = True
-                toolbox.log("BrickletCO2", temp_uid)                   
+                toolbox.log("BrickletCO2", temp_uid)
 
 
             if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
@@ -746,7 +760,7 @@ class TiFo:
                 temp_uid = str(self.drb[-1].get_identity()[1]) +"."+ str(self.drb[-1].get_identity()[0])
                 toolbox.log('Dual Relay Bricklet', temp_uid)
                 found  = True
-                toolbox.log("BrickletDualRelay", temp_uid)                   
+                toolbox.log("BrickletDualRelay", temp_uid)
 
 #            if device_identifier == Moisture.DEVICE_IDENTIFIER:
 #                self.moist = Moisture(uid, self.ipcon)
@@ -760,7 +774,7 @@ class TiFo:
                 self.md[-1].register_callback(self.md[-1].CALLBACK_MOTION_DETECTED, partial( self.cb_md, device = self.md[-1], uid = temp_uid ))
                 self.md[-1].register_callback(self.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( self.cb_md_end, device = self.md[-1], uid = temp_uid ))
                 found  = True
-                toolbox.log("BrickletMotionDetector", temp_uid)                   
+                toolbox.log("BrickletMotionDetector", temp_uid)
 
             if device_identifier == BrickletSoundIntensity.DEVICE_IDENTIFIER:
                 self.si.append(BrickletSoundIntensity(uid, self.ipcon))
@@ -770,7 +784,7 @@ class TiFo:
                 self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
                 self.si[-1].set_intensity_callback_threshold('>',200,0)
                 found  = True
-                toolbox.log("BrickletSoundIntensity", temp_uid)                   
+                toolbox.log("BrickletSoundIntensity", temp_uid)
 
             if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
                 self.ptc.append(BrickletPTC(uid, self.ipcon))
@@ -785,7 +799,7 @@ class TiFo:
 #                self.threadliste.append(t)
 #                t.start()
                 found  = True
-                toolbox.log("BrickletPTC", temp_uid)                   
+                toolbox.log("BrickletPTC", temp_uid)
 
             if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
                 self.temp.append(BrickletTemperature(uid, self.ipcon))
@@ -799,7 +813,7 @@ class TiFo:
 #                self.threadliste.append(t)
 #                t.start()
                 found  = True
-                toolbox.log("BrickletTemperature", temp_uid)                   
+                toolbox.log("BrickletTemperature", temp_uid)
 
             if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
                 self.baro.append(BrickletBarometer(uid, self.ipcon))
@@ -813,7 +827,7 @@ class TiFo:
 #                self.threadliste.append(t)
 #                t.start()
                 found  = True
-                toolbox.log("BrickletBarometer", temp_uid)                   
+                toolbox.log("BrickletBarometer", temp_uid)
 
             if device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
                 self.humi.append(BrickletHumidityV2(uid, self.ipcon))
@@ -821,7 +835,7 @@ class TiFo:
                 self.humi[-1].set_humidity_callback_configuration(45000, False, "x", 0, 0)
                 self.humi[-1].register_callback(self.humi[-1].CALLBACK_HUMIDITY, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.HU'))
                 self.humi[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
-                self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))                
+                self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))
 #                thread_hum_ = threading.Timer(20, self.thread_hum, [self.temp[-1]])
 #                thread_hum_.start()
 #                self.threadliste.append(thread_hum_)
@@ -829,7 +843,7 @@ class TiFo:
 #                self.threadliste.append(t)
 #                t.start()
                 found  = True
-                toolbox.log("BrickletHumidityV2", temp_uid)                   
+                toolbox.log("BrickletHumidityV2", temp_uid)
 
             if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
                 self.volcu.append(BrickletVoltageCurrent(uid, self.ipcon))
@@ -848,7 +862,7 @@ class TiFo:
                 self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.volcu[-1], uid = temp_uid ))
                 self.volcu[-1].set_current_callback_threshold(">", 0, 0)
                 found  = True
-                toolbox.log("BrickletVoltageCurrent", temp_uid)                   
+                toolbox.log("BrickletVoltageCurrent", temp_uid)
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))
@@ -857,7 +871,7 @@ class TiFo:
                 thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
                 #thread_rs_error.start()
                 found  = True
-                toolbox.log("BrickMaster", temp_uid)                   
+                toolbox.log("BrickMaster", temp_uid)
 
             if not found:
                 toolbox.log(connected_uid, uid, device_identifier)
@@ -869,7 +883,14 @@ class TiFo:
         # Enumerate devices again. If we reconnected, the Bricks/Bricklets
         # may have been offline and the configuration may be lost.
         # In this case we don't care for the reason of the connection
-        self.ipcon.enumerate()
+        while True:
+            try:
+                self.ipcon.enumerate()
+                break
+            except Error as e:
+                toolbox.log('Enumerate Error: ' + str(e.description))
+                time.sleep(1)
+
 
 class dist_us:
     def __init__(self):
@@ -916,7 +937,13 @@ class dist_us:
         # Enumerate devices again. If we reconnected, the Bricks/Bricklets
         # may have been offline and the configuration may be lost.
         # In this case we don't care for the reason of the connection
-        self.ipcon.enumerate()
+        while True:
+            try:
+                self.ipcon.enumerate()
+                break
+            except Error as e:
+                toolbox.log('Enumerate Error: ' + str(e.description))
+                time.sleep(1)
 
 
 
