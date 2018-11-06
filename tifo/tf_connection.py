@@ -162,6 +162,8 @@ class TiFo:
         self.threadliste = []
         self.ip = ip
         self.delay = 5
+        self.timeoutTime = 60
+        self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
 
 #        self.ipcon = IPConnection()
 
@@ -173,6 +175,14 @@ class TiFo:
 
 #        self.ipcon.enumerate()
 
+    def timeout_reset(self):
+        self.timeout.cancel()
+        self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
+        self.timeout.start()
+        
+    def timedOut(self):
+        aes.new_event(description="Tifo timedout stopped: "+self.ip, prio=2)
+        self.connect()        
 
     def connect(self):
         # Create IP Connection
@@ -225,11 +235,13 @@ class TiFo:
         device.set_illuminance_callback_threshold('o', thresDown, thresUp)
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name, str(illuminance))
+        self.timeout_reset()
 
     def cb_value(self, value,device,div=1.0,ext=''):
         toolbox.log(device) 
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + ext, str(value/div))
+        self.timeout_reset()
 
     def thread_ambLight(self, device):
         while constants.run:
@@ -290,11 +302,13 @@ class TiFo:
         toolbox.log(device) 
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
+        self.timeout_reset()
 
     def cb_volc_cur(self, value, device, uid):
         toolbox.log(device) 
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
+        self.timeout_reset()
 
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
         toolbox.log(device)
@@ -332,18 +346,21 @@ class TiFo:
             broadcast_input_value('TiFo.' + name, Value)
 #            dicti['Name'] = 'TiFo.' + name
 #            mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
+        self.timeout_reset()
 
     def cb_md(self, device, uid):
 #        dicti = {'Name':settings.inputs.get(uid),'Value':1}
         broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), 1)
 #        dicti = {'Name':'TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]),'Value':1}
 #        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
+        self.timeout_reset()
 
     def cb_md_end(self, device, uid):
 #        dicti = {'Name':settings.inputs.get(uid),'Value':0}
         broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), 0)
 #        dicti = {'Name':'TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]),'Value':0}
 #        mySocket.sendto(str(dicti) ,(constants.server1,constants.broadPort))
+        self.timeout_reset()
 
     def cb_si(self, value, device, uid):
         toolbox.log(device)
@@ -364,6 +381,7 @@ class TiFo:
         print(result)
         for res in result:
             broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), res)
+        self.timeout_reset()
 
     def set_io16_sub(self,cmd,io,value):
         port = cmd.get('Port')
