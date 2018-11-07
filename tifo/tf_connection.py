@@ -166,7 +166,7 @@ class TiFo:
         self.threadliste = []
         self.ip = ip
         self.delay = 5
-        self.timeoutTime = 600
+        self.timeoutTime = 3600
         self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
 
 #        self.ipcon = IPConnection()
@@ -198,7 +198,6 @@ class TiFo:
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
                                      self.cb_connected)
         # Connect to brickd, will trigger cb_connected
-        self.ipcon.connect(self.ip, PORT)
         while True:
             try:
                 self.ipcon.connect(self.ip, PORT)
