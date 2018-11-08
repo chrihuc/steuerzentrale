@@ -87,7 +87,6 @@ def on_message(client, userdata, msg):
                 szene = msg.topic.split('/')[2]
                 broadcast_exec_szn(szene)
             if 'Device' in msg.topic:
-
                 device = m_in['Device']
                 command = m_in['Command']
                 broadcast_exec_comm(device, command)
