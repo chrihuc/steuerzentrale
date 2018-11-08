@@ -11,6 +11,7 @@ from outputs import cron
 from outputs import szenen
 
 from tools import toolbox
+from outputs.mqtt_publish import mqtt_pub
 #toolbox.log('debug on')
 
 # TODO: unittest?
@@ -77,6 +78,9 @@ def periodic_supervision():
             for j in range(min1,2):
                 for i in range(min2,30):
                     #executed every min
+                    zeit =  time.time()
+                    uhr = str(strftime("%H:%M",localtime(zeit)))  
+                    mqtt_pub("Time", {'Value':uhr})
                     l += 1
                     if l == 2:
                         t = threading.Thread(target=every_2_min)

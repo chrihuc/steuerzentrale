@@ -166,18 +166,17 @@ class TiFo:
         self.threadliste = []
         self.ip = ip
         self.delay = 5
-        self.timeoutTime = 3600
+        self.timeoutTime = 600
         self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
 
-#        self.ipcon = IPConnection()
+        self.ipcon = IPConnection()
+        self.ipcon.set_timeout(10)
 
-#        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
-#                                     self.cb_enumerate)
-#        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
-#                                     self.cb_connected)
-#        self.ipcon.connect(ip, PORT)
+        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
+                                     self.cb_enumerate)
+        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
+                                     self.cb_connected)
 
-#        self.ipcon.enumerate()
 
     def timeout_reset(self):
         self.timeout.cancel()
@@ -185,22 +184,20 @@ class TiFo:
         self.timeout.start()
 
     def timedOut(self):
-        aes.new_event(description="Tifo timedout stopped: "+self.ip, prio=2)
+        aes.new_event(description="Tifo timedout stopped: "+self.ip, prio=7)
         self.connect()
 
     def connect(self):
-        # Create IP Connection
-        self.ipcon = IPConnection()
-        self.ipcon.set_timeout(10)
-        # Register IP Connection callbacks
-        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
-                                     self.cb_enumerate)
-        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
-                                     self.cb_connected)
+        try:
+            self.ipcon.disconnect()
+            aes.new_event(description="Tifo disconnected: "+self.ip, prio=7)
+        except:
+            pass
         # Connect to brickd, will trigger cb_connected
         while True:
             try:
                 self.ipcon.connect(self.ip, PORT)
+                aes.new_event(description="Tifo connected: "+self.ip, prio=7)
                 break
             except Error as e:
                 toolbox.log('Connection Error: ' + str(e.description))

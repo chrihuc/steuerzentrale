@@ -28,7 +28,7 @@ from tools import toolbox
 #toolbox.log('debug on')
 
 aes = aevs.AES()
-aes.new_event(description="Starting", prio=1)
+aes.new_event(description="Starting", prio=7)
 
 anw = internal.Anwesenheit()
 
@@ -68,7 +68,7 @@ t.start()
 
 tf_list = []
 for tf_con in constants.tifo:
-    if toolbox.ping(tf_con, number=3):
+    if True:#toolbox.ping(tf_con, number=3):
         tifo_inst = tf_connection.TiFo(tf_con)
         tf_list.append(tifo_inst)
         t = threading.Thread(name="TiFo" + tf_con, target=tifo_inst.main, args = [])
@@ -134,7 +134,7 @@ t = toolbox.OwnTimer(0, function=mqtt_client.main, args = [], name="mqtt_inputs"
 threadliste.append(t)
 t.start()
 
-aes.new_event(description="All Threads started", prio=1)
+aes.new_event(description="All Threads started", prio=7)
 if constants.debug:
     toolbox.log(threadliste)
 
