@@ -41,6 +41,8 @@ from math import log
 import datetime
 import uuid
 
+from distutils.version import LooseVersion
+
 import constants
 
 # on server:
@@ -876,6 +878,8 @@ class TiFo:
                 temp_uid = str(self.master[-1].get_identity()[0])
                 toolbox.log('Master Brick', temp_uid)
                 thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
+                if LooseVersion(firmware_version) >= LooseVersion("2.3.2"):
+                    self.master[-1].disable_status_led()
                 #thread_rs_error.start()
                 found  = True
                 toolbox.log("BrickMaster", temp_uid)
