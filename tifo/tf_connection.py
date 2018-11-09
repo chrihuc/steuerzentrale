@@ -18,6 +18,7 @@ from tinkerforge.ip_connection import IPConnection
 from tinkerforge.bricklet_io16 import IO16
 from tinkerforge.bricklet_led_strip import LEDStrip
 from tinkerforge.bricklet_ambient_light import AmbientLight
+from tinkerforge.bricklet_ambient_light_v2 import BrickletAmbientLightV2
 from tinkerforge.bricklet_moisture import Moisture
 from tinkerforge.bricklet_voltage_current import BrickletVoltageCurrent
 from tinkerforge.bricklet_distance_us import BrickletDistanceUS
@@ -184,13 +185,11 @@ class TiFo:
         self.timeout.start()
 
     def timedOut(self):
-        aes.new_event(description="Tifo timedout stopped: "+self.ip, prio=7)
         self.connect()
 
     def connect(self):
         try:
             self.ipcon.disconnect()
-            aes.new_event(description="Tifo disconnected: "+self.ip, prio=7)
         except:
             pass
         # Connect to brickd, will trigger cb_connected
@@ -735,6 +734,17 @@ class TiFo:
                 found  = True
                 toolbox.log("AmbientLight", temp_uid)
 
+
+            if device_identifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER:
+                self.al.append(BrickletAmbientLightV2(uid, self.ipcon))
+                self.al[-1].set_illuminance_callback_threshold('o', 0, 0)
+                self.al[-1].set_debounce_period(5000)
+                args = self.al[-1]
+                self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
+                temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
+                found  = True
+                toolbox.log("AmbientLight", temp_uid)
+
             if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
                 self.co2.append(BrickletCO2(uid, self.ipcon))
                 temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
@@ -831,6 +841,7 @@ class TiFo:
                 self.humi[-1].set_humidity_callback_configuration(45000, False, "x", 0, 0)
                 self.humi[-1].register_callback(self.humi[-1].CALLBACK_HUMIDITY, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.HU'))
                 self.humi[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
+                self.humi[-1].set_status_led_config(BrickletHumidityV2.STATUS_LED_CONFIG_OFF)
                 self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))
 #                thread_hum_ = threading.Timer(20, self.thread_hum, [self.temp[-1]])
 #                thread_hum_.start()
