@@ -104,7 +104,7 @@ def periodic_supervision():
                         zeit = str(k) + ":" + str(j*30+i+1)
                     if tag == 7:
                         tag = 0
-                    t = threading.Thread(target=every_min, args=[tag,zeit])
+                    t = threading.Thread(target=every_min, args=[tag,uhr])
                     t.start()
                     lt = localtime()
                     sekunde = int(strftime("%S", lt))
