@@ -10,7 +10,7 @@ import argparse
 import constants
 
 from inputs import cron
-from inputs import udp_listener
+#from inputs import udp_listener
 from inputs import xs1
 from inputs import internal
 from outputs import temp_control
