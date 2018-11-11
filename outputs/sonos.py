@@ -575,7 +575,7 @@ class Sonos:
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
         tries = 0
-        while (dicti <> self.soco_get_status(player, store=False)) and tries < 7:
+        while (dicti != self.soco_get_status(player, store=False)) and tries < 7:
             tries += 1
             try:
                 player_ip = player.ip_address
