@@ -7,7 +7,7 @@ from database import mysql_connector as msqc
 from outputs.mqtt_publish import mqtt_pub
 
 import MySQLdb as mdb
-from outputs.mqtt_publish import mqtt_pub
+
 
 
 table = constants.sql_tables.Bewohner

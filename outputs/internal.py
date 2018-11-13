@@ -106,42 +106,58 @@ class Internal:
 
     def check_anwesenheit(self):
         bewohner = mysql_connector.mdb_get_table(constants.sql_tables.Bewohner.name)
-        alle_da = True
-        alle_weg = True
-        alle_da_act = eval(mysql_connector.setting_r('Alle_Bewohner_anwesend'))
-        alle_weg_act = eval(mysql_connector.setting_r('Alle_Bewohner_abwesend'))
+#        alle_da = True
+#        alle_weg = True
+#        alle_da_act = eval(mysql_connector.setting_r('Alle_Bewohner_anwesend'))
+#        alle_weg_act = eval(mysql_connector.setting_r('Alle_Bewohner_abwesend'))
         for person in bewohner:
+            anwesend = False
             ip_adress = person['Handy_IP']
             if ip_adress == None:
                 continue
             state = person['Handy_State']
-            name = 'Bew_' + str(person['Name'])
-            akt_stat = eval(mysql_connector.setting_r(person['Name']))
             if state == None:
                 state = 0
             else:
                 state = int(state)
-                if state > 1:
-                    new_state = True
-                elif state < 2:
-                    new_state = False
-            alle_da = alle_da & new_state
-            alle_weg = alle_weg & (not new_state)
-            if akt_stat != new_state:
-                mysql_connector.setting_s(person['Name'], new_state)
-                broadcast_input_value(name, int(new_state))
-#                command = {'Name':name, 'Value': int(new_state)}
-#                bidirekt(command)
-        if alle_da_act != alle_da:
-            mysql_connector.setting_s('Alle_Bewohner_anwesend', alle_da)
-            broadcast_input_value('Bew_alle_da', int(alle_da))
-#            command = {'Name':'Bew_alle_da', 'Value': int(alle_da)}
-#            bidirekt(command)
-        if alle_weg_act != alle_weg:
-            mysql_connector.setting_s('Alle_Bewohner_abwesend', alle_weg)
-            broadcast_input_value('Bew_alle_weg', int(alle_weg))
-#            command = {'Name':'Bew_alle_weg', 'Value': int(alle_weg)}
-#            bidirekt(command)
+            if toolbox.ping(ip_adress):
+                person['Handy_State'] = 5
+                anwesend = True
+            else:
+                person['Handy_State'] = state - 1
+            cmd = {'Handy_State':person['Handy_State']}
+            mysql_connector.mdb_set_table(constants.sql_tables.Bewohner.name, person['Name'], cmd)  
+            broadcast_input_value('Bewohner.'+person['Name']+'.Handy', int(state))
+#            TODO: Table anpassend und Zeilen einkommentieren
+#            akt_state_usb = eval(mysql_connector.setting_r(person['HKS_USB']))
+#            if akt_state_usb == 1:
+#                anwesend = True
+            broadcast_input_value('Bewohner.'+person['Name']+'.Anwesend', int(anwesend))
+            
+#            name = 'Bew_' + str(person['Name'])
+#            akt_stat = eval(mysql_connector.setting_r(person['Name']))
+#            if state == None:
+#                state = 0
+#            else:
+#                state = int(state)
+#                if state > 1:
+#                    new_state = True
+#                elif state < 2:
+#                    new_state = False
+#            alle_da = alle_da & new_state
+#            alle_weg = alle_weg & (not new_state)
+#            if akt_stat != new_state:
+#                mysql_connector.setting_s(person['Name'], new_state)
+#                broadcast_input_value(name, int(new_state))
+
+#        if alle_da_act != alle_da:
+#            mysql_connector.setting_s('Alle_Bewohner_anwesend', alle_da)
+#            broadcast_input_value('Bew_alle_da', int(alle_da))
+#
+#        if alle_weg_act != alle_weg:
+#            mysql_connector.setting_s('Alle_Bewohner_abwesend', alle_weg)
+#            broadcast_input_value('Bew_alle_weg', int(alle_weg))
+
         return True
 
 

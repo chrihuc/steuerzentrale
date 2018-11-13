@@ -73,20 +73,20 @@ class AlarmListe:
 
     def __init__(self):
         pass
-#        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
 
 
     def addAlarm(self, titel, text):
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
-        hash_id = uuid.uuid4()
+        hash_id = str(uuid.uuid4())
         newAlarm = {'Titel':titel, 'Text':text, 'ts':uhr, 'uuid':hash_id}
         AlarmListe.liste[hash_id] = newAlarm
-#        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
 
     def delAlarm(self, uuid):
         del AlarmListe.liste[uuid]
-#        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
 
 class AES:
 

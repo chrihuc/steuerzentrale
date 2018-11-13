@@ -12,7 +12,10 @@ from time import localtime,strftime
 from tools import toolbox
 
 from alarm_event_messaging import alarmevents
+from outputs import cron
+from outputs.mqtt_publish import mqtt_pub
 aes = alarmevents.AES()
+crn = cron.Cron()
 
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
@@ -93,13 +96,15 @@ def on_message(client, userdata, msg):
         elif 'AlarmOk' in msg.topic:
             if 'uuid' in m_in.keys:
                 aes.alarm_liste.delAlarm(m_in['uuid'])
-
+        elif 'DataRequest' in msg.topic:
+            if 'Wecker' in msg.topic:
+                mqtt_pub("DataRequest/Answer/Wecker", crn.get_all(wecker=True))
     except ValueError:
         print("no json code")
 
 mqtt.Client.connected_flag=False
 client = None
-topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#"]
+topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#"]
 ipaddress = constants.mqtt_.server
 port = 1883
 
