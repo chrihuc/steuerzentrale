@@ -21,6 +21,8 @@ from outputs.mqtt_publish import mqtt_pub
 #client.loop_start()
 datab = constants.sql_.DB
 
+validTimers = {}
+
 class tables(object):
 # TODO: change table names to constant settings
 #    db_connection = sql.connect(host=constants.sql_.IP,
@@ -544,6 +546,8 @@ def inputs(device, value, mqtt=True):
     ct = datetime.datetime.now()
     desc = None
     heartbt = None
+    if 'MQTT' in device:
+        mqtt = False
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
@@ -587,6 +591,7 @@ def inputs(device, value, mqtt=True):
             sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
             sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
             sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
+            sql2 = sql2 + ' AND (enabled = "True" OR enabled is NULL )'            
             sql2 = sql2 + ');'
             cur.execute(sql + sql2)
             results = cur.fetchall()
@@ -637,6 +642,14 @@ def inputs(device, value, mqtt=True):
 
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)
+            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET valid = "True" WHERE Name = "' + str(device) +'"'
+            cur.execute(sql)
+            if not heartbt is None:
+                if hks in validTimers:
+                    validTimers[hks].cancel()
+                thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
+                thread_pt_.start() 
+                validTimers[hks] = thread_pt_
             if str(dicti.get("last1")) != "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
@@ -648,3 +661,6 @@ def inputs(device, value, mqtt=True):
     con.close()
     return szenen, desc, heartbt
 
+def invalidTimers(hks):
+    commands = {'Valid': 'False'}
+    mdb_set_table(constants.sql_tables.inputs.name, hks, commands)
