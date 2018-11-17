@@ -546,7 +546,7 @@ def inputs(device, value, mqtt=True):
     ct = datetime.datetime.now()
     desc = None
     heartbt = None
-    print(device,value)
+#    print(device,value)
     if 'MQTT' in device:
         mqtt = False
     with con:
