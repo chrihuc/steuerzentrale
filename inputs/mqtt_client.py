@@ -79,7 +79,7 @@ def dis_con (*args, **kargs):
 def on_message(client, userdata, msg):
 #    print(msg.topic + " " + str(msg.payload))
     try:
-        m_in=(json.loads(str(msg.payload))) #decode json data
+        m_in=(json.loads(msg.payload)) #decode json data
         print(m_in)
         if 'Inputs' in msg.topic:
             name = msg.topic[7:]
