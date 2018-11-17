@@ -546,6 +546,7 @@ def inputs(device, value, mqtt=True):
     ct = datetime.datetime.now()
     desc = None
     heartbt = None
+    print(device,value)
     if 'MQTT' in device:
         mqtt = False
     with con:
@@ -591,7 +592,7 @@ def inputs(device, value, mqtt=True):
             sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
             sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
             sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
-            sql2 = sql2 + ' AND (enabled = "True" OR enabled is NULL )'            
+            sql2 = sql2 + ' AND (enabled = "True" OR enabled is NULL )'
             sql2 = sql2 + ');'
             cur.execute(sql + sql2)
             results = cur.fetchall()
@@ -648,7 +649,7 @@ def inputs(device, value, mqtt=True):
                 if hks in validTimers:
                     validTimers[hks].cancel()
                 thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
-                thread_pt_.start() 
+                thread_pt_.start()
                 validTimers[hks] = thread_pt_
             if str(dicti.get("last1")) != "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
