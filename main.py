@@ -89,9 +89,9 @@ t.start()
 #t.start()
 
 #t = threading.Thread(name="udp.bidirekt", target=udp_listener.bidirekt, args = [])
-t = toolbox.OwnTimer(0, function=udp_listener.bidirekt, args = [], name="udp.bidirekt")
-threadliste.append(t)
-t.start()
+#t = toolbox.OwnTimer(0, function=udp_listener.bidirekt, args = [], name="udp.bidirekt")
+#threadliste.append(t)
+#t.start()
 
 #t = threading.Thread(name="udp.bidirekt_new", target=udp_listener.bidirekt_new, args = [])
 #t = toolbox.OwnTimer(0, function=udp_listener.bidirekt_new, args = [], name="udp.bidirekt_new")
