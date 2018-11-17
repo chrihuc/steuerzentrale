@@ -863,7 +863,7 @@ class TiFo:
 #                t = toolbox.OwnTimer(self.delay, function=self.thread_volc, args = [self.temp[-1]], name="Vol Curr Bricklet")
 #                self.threadliste.append(t)
 #                t.start()
-                self.volcu[-1].set_debounce_period(1000)
+                self.volcu[-1].set_debounce_period(10000)
                 self.volcu[-1].set_voltage_callback_period(10000)
                 self.volcu[-1].set_current_callback_period(10000)
                 self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.volcu[-1], uid = temp_uid ))

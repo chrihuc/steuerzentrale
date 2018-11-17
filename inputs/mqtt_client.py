@@ -77,10 +77,10 @@ def dis_con (*args, **kargs):
     print("disconnected")
 
 def on_message(client, userdata, msg):
-#    print(msg.topic + " " + str(msg.payload))
+    print(msg.topic + " " + str(msg.payload))
     try:
         m_in=(json.loads(msg.payload)) #decode json data
-#        print(m_in)
+        print(m_in)
         if 'Inputs' in msg.topic:
             name = msg.topic[7:]
             if 'Value' in m_in.keys():
