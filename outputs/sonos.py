@@ -37,7 +37,7 @@ table = constants.sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KE
 
 #Envelope for all AVTrans actions the same
 def Envelope(self, Player, body, SOAPAction):
-    blen = len(body)
+    blen = len(body.encode())
     requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
     requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
     requestor.putheader("HOST", Player)
@@ -45,14 +45,14 @@ def Envelope(self, Player, body, SOAPAction):
     requestor.putheader("Content-Length", str(blen))
     requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
     requestor.endheaders()
-    requestor.send(body)
+    requestor.send(body.encode())
     (status_code, message, reply_headers) = requestor.getreply()
     reply_body = requestor.getfile().read()
     return reply_body
 
 #Envelope for all RendCont actions the same
 def EnvelopeRC(self, Player, body, SOAPAction):
-    blen = len(body)
+    blen = len(body.encode())
     requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
     requestor.putrequest("POST", "/MediaRenderer/RenderingControl/Control HTTP/1.1")
     requestor.putheader("Host", Player)
@@ -60,7 +60,7 @@ def EnvelopeRC(self, Player, body, SOAPAction):
     requestor.putheader("Content-Length", str(blen))
     requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
     requestor.endheaders()
-    requestor.send(body)
+    requestor.send(body.encode())
     (status_code, message, reply_headers) = requestor.getreply()
     reply_body = requestor.getfile().read()
     return reply_body
@@ -171,7 +171,7 @@ class Sonos:
         return zones
 
     def Envelope(self, Player, body, SOAPAction):
-        blen = len(body)
+        blen = len(body.encode())
         requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
         requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
         requestor.putheader("HOST", Player)
@@ -179,7 +179,7 @@ class Sonos:
         requestor.putheader("Content-Length", str(blen))
         requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
         requestor.endheaders()
-        requestor.send(body)
+        requestor.send(body.encode())
         (status_code, message, reply_headers) = requestor.getreply()
         reply_body = requestor.getfile().read()
         return reply_body
@@ -466,7 +466,7 @@ class Sonos:
             <u:ListAlarms xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1" />
             </s:Body>
             </s:Envelope>"""
-        blen = len(body)
+        blen = len(body.encode())
         requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
         requestor.putrequest("POST", "/AlarmClock/Control HTTP/1.1")
         requestor.putheader("Host", Player)
@@ -474,7 +474,7 @@ class Sonos:
         requestor.putheader("Content-Length", str(blen))
         requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:AlarmClock:1#ListAlarms")
         requestor.endheaders()
-        requestor.send(body)
+        requestor.send(body.encode())
         (status_code, message, reply_headers) = requestor.getreply()
         ReturnV =[]
         try:
