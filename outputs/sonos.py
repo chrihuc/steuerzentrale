@@ -47,7 +47,7 @@ def Envelope(self, Player, body, SOAPAction):
     requestor.endheaders()
     requestor.send(body.encode())
     status = requestor.getresponse()
-    reply_body = requestor.getfile().read()
+    reply_body = requestor.read()
     return reply_body
 
 #Envelope for all RendCont actions the same
@@ -62,7 +62,7 @@ def EnvelopeRC(self, Player, body, SOAPAction):
     requestor.endheaders()
     requestor.send(body.encode())
     status = requestor.getresponse()
-    reply_body = requestor.getfile().read()
+    reply_body = requestor.read()
     return reply_body
 
 def send_command(self, player, endpoint, action, body):
@@ -181,7 +181,7 @@ class Sonos:
         requestor.endheaders()
         requestor.send(body.encode())
         status = requestor.getresponse()
-        reply_body = requestor.getfile().read()
+        reply_body = requestor.read()
         return reply_body
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList)
@@ -478,7 +478,7 @@ class Sonos:
         status = requestor.getresponse()
         ReturnV =[]
         try:
-            reply_body = requestor.getfile().read()
+            reply_body = requestor.read()
             Alarm = 0
             Alarms = []
             while reply_body.find ('StartTime',Alarm+1) >0:
