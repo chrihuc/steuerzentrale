@@ -38,7 +38,7 @@ table = constants.sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KE
 #Envelope for all AVTrans actions the same
 def Envelope(self, Player, body, SOAPAction):
     blen = len(body)
-    requestor = http.client.HTTP(Player, self.SERVER_PORT)
+    requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
     requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
     requestor.putheader("HOST", Player)
     requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
@@ -53,7 +53,7 @@ def Envelope(self, Player, body, SOAPAction):
 #Envelope for all RendCont actions the same
 def EnvelopeRC(self, Player, body, SOAPAction):
     blen = len(body)
-    requestor = http.client.HTTP(Player, self.SERVER_PORT)
+    requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
     requestor.putrequest("POST", "/MediaRenderer/RenderingControl/Control HTTP/1.1")
     requestor.putheader("Host", Player)
     requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
@@ -172,7 +172,7 @@ class Sonos:
 
     def Envelope(self, Player, body, SOAPAction):
         blen = len(body)
-        requestor = http.client.HTTP(Player, self.SERVER_PORT)
+        requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
         requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
         requestor.putheader("HOST", Player)
         requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
@@ -467,7 +467,7 @@ class Sonos:
             </s:Body>
             </s:Envelope>"""
         blen = len(body)
-        requestor = http.client.HTTP(Player, self.SERVER_PORT)
+        requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
         requestor.putrequest("POST", "/AlarmClock/Control HTTP/1.1")
         requestor.putheader("Host", Player)
         requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
