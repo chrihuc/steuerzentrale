@@ -46,7 +46,7 @@ def Envelope(self, Player, body, SOAPAction):
     requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
     requestor.endheaders()
     requestor.send(body.encode())
-    (status_code, message, reply_headers) = requestor.getreply()
+    (status_code, message, reply_headers) = requestor.getresponse()
     reply_body = requestor.getfile().read()
     return reply_body
 
@@ -61,7 +61,7 @@ def EnvelopeRC(self, Player, body, SOAPAction):
     requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
     requestor.endheaders()
     requestor.send(body.encode())
-    (status_code, message, reply_headers) = requestor.getreply()
+    (status_code, message, reply_headers) = requestor.getresponse()
     reply_body = requestor.getfile().read()
     return reply_body
 
@@ -180,7 +180,7 @@ class Sonos:
         requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
         requestor.endheaders()
         requestor.send(body.encode())
-        (status_code, message, reply_headers) = requestor.getreply()
+        (status_code, message, reply_headers) = requestor.getresponse()
         reply_body = requestor.getfile().read()
         return reply_body
 
@@ -475,7 +475,7 @@ class Sonos:
         requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:AlarmClock:1#ListAlarms")
         requestor.endheaders()
         requestor.send(body.encode())
-        (status_code, message, reply_headers) = requestor.getreply()
+        (status_code, message, reply_headers) = requestor.getresponse()
         ReturnV =[]
         try:
             reply_body = requestor.getfile().read()
