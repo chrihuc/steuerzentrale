@@ -615,24 +615,25 @@ class Sonos:
             zonemaster, _, _, _ = self.get_addr(str(zone))
             player.join(zonemaster.group.coordinator)
         else:
-            if str(sonos_szene.get('Radio')) == '1':
-                player.play_uri(uri=str(sonos_szene.get('Sender')), start=False, force_radio=True)
-            elif str(zone) != "None":
+            if str(zone) != "None":
                 player.unjoin()
                 player.clear_queue()
-                if isinstance(sonos_szene.get('PlayListNr'), int):
-                    playlistItem = player.get_sonos_playlist_by_attr('item_id', 'SQ:'+ str(sonos_szene.get('PlayListNr')))
-                    player.add_to_queue(playlistItem)
-                elif str(sonos_szene.get('PlayListNr')) != 'None':
-                    playlistItem = player.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
-                    player.add_to_queue(playlistItem)
-                player.play_from_queue(sonos_szene.get('TitelNr'), start=False)
-                if str(sonos_szene.get('Time')) != 'None':
-                    player.seek(sonos_szene.get('Time'))
+                if str(sonos_szene.get('Radio')) == '1':
+                    player.play_uri(uri=str(sonos_szene.get('Sender')), start=False, force_radio=True)  
+                else:
+                    if isinstance(sonos_szene.get('PlayListNr'), int):
+                        playlistItem = player.get_sonos_playlist_by_attr('item_id', 'SQ:'+ str(sonos_szene.get('PlayListNr')))
+                        player.add_to_queue(playlistItem)
+                    elif str(sonos_szene.get('PlayListNr')) != 'None':
+                        playlistItem = player.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
+                        player.add_to_queue(playlistItem)
+                    player.play_from_queue(sonos_szene.get('TitelNr'), start=False)
+                    if str(sonos_szene.get('Time')) != 'None':
+                        player.seek(sonos_szene.get('Time'))
             if (sonos_szene.get('Pause') == 1) or overrde_play:
-                player.pause()
+                player.group.coordinator.pause()
             elif sonos_szene.get('Pause') == 0:
-                player.play()
+                player.group.coordinator.play()
         return True        
 
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
@@ -806,18 +807,18 @@ class Sonos:
             if (minute != 0) and (minute != 30):
                 text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
                 laenge = downloadAudioFile(text)
-                self.soco_read_szene(player_ip, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
+                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
                 time.sleep(laenge + 1)
-                self.soco_read_szene(player_ip, mysql_connector.mdb_read_table_entry(table.name,playerName))
+                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
         elif str(command) == "Durchsage":
             self.durchsage(text)
         elif str(command) == "Ansage":
             self.play_local_file(playerName, text)
         elif str(command) == "Return":
-            self.soco_read_szene(player_ip, mysql_connector.mdb_read_table_entry(table.name,playerName), overrde_play=True)
+            self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName), overrde_play=True)
         elif ((str(command) == "resume") ):
             time.sleep(60)
-            self.soco_read_szene(player_ip, mysql_connector.mdb_read_table_entry(table.name,playerName))
+            self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
         elif (str(command) == "lauter"):
             ActVol = player.volume
             increment = 8
@@ -850,7 +851,7 @@ class Sonos:
             mysql_connector.setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
             text = mysql_connector.setting_r("Durchsage")
             laenge = downloadAudioFile(text)
-            self.soco_read_szene(player_ip, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
+            self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
             time.sleep(laenge + 1)
             self.SetPause(player_ip)
         elif (str(command) == "EingangWohnzi"):
@@ -859,7 +860,7 @@ class Sonos:
             self.isolate(player_ip)
         elif ((str(command) != "resume") and (str(command) != "An") and (str(command) != "None")):
             sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
-            self.soco_read_szene(player_ip, sonos_szene)
+            self.soco_read_szene(player, sonos_szene)
         return True
 
     def list_commands(self):

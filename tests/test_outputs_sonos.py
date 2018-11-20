@@ -7,6 +7,7 @@ Created on Tue Sep 12 19:11:37 2017
 
 import unittest
 from outputs import sonos
+import time
 
 class TestUM(unittest.TestCase):
 
@@ -33,10 +34,11 @@ class TestUM(unittest.TestCase):
 
 #
     def test_set_device(self):
-        result = self.test_mod.set_device('Kinderzimmer', 'Play')
+        result = self.test_mod.set_device('Bad', 'DRS3')
         self.assertTrue(result,
                          'Error sending command')
-        result = self.test_mod.set_device('Kinderzimmer', 'Pause')
+        time.sleep(5)
+        result = self.test_mod.set_device('Bad', 'Pause')
         self.assertTrue(result,
                          'Error sending command')
 #
