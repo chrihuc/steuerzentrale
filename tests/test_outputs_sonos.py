@@ -34,11 +34,11 @@ class TestUM(unittest.TestCase):
 
 #
     def test_set_device(self):
-        result = self.test_mod.set_device('Bad', 'DRS3')
-        self.assertTrue(result,
-                         'Error sending command')
-        time.sleep(5)
-        result = self.test_mod.set_device('Bad', 'Pause')
+#        result = self.test_mod.set_device('Bad', 'DRS3')
+#        self.assertTrue(result,
+#                         'Error sending command')
+#        time.sleep(5)
+        result = self.test_mod.set_device('Bad', 'MasterWohnZi')
         self.assertTrue(result,
                          'Error sending command')
 #

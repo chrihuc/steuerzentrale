@@ -95,9 +95,10 @@ class Hue_lights():
         keys = ['bri', 'hue', 'sat', 'transitiontime']
         szene = mysql_connector.mdb_read_table_entry(table.name,commd)
         success = False
-        if szene.get('bri')<=0:
-            szene['bri'] = 0
-            szene['on'] = False
+        if szene.get('bri')!= None:
+            if int(szene.get('bri'))<=0:
+                szene['bri'] = 0
+                szene['on'] = False
         elif commd == 'Save': 
             hue = hbridge.get_light(device, 'hue')
             bri = hbridge.get_light(device, 'bri')
@@ -120,10 +121,12 @@ class Hue_lights():
             else:
                 szene['on'] = True
         bright = szene.get('bri')
-        if bright != None and bright>0:
-            szene['bri'] = int(bright)
-        if bright != None and bright<=0:
-            pass     
+        if bright != None:
+            if int(bright)>0:
+                szene['bri'] = int(bright)
+        if bright != None:
+            if int(bright)>0:
+                pass     
         # switch light on to be able to modify it
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
             try:         
