@@ -133,13 +133,19 @@ class TV:
     def __init__(self):
         #self.tv_remote = remotecontrol('192.168.192.10','192.168.192.26','00:30:1b:a0:2f:05')
 #        own_ip = constants.eigene_IP
-        self.tv_remote_lan = samsungctl.Remote(config) #Remotecontrol(own_ip,'192.168.192.29','00:30:1b:a0:2f:05')         
+        self.tv_remote_lan = None  #Remotecontrol(own_ip,'192.168.192.29','00:30:1b:a0:2f:05')         
         
-    def set_device(self,device, commd):       
-        if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
-            return True
-        else:
-            return False
+    def set_device(self,device, commd):
+        for i in range(0,90):
+            if ping("192.168.192.29"):
+                self.tv_remote_lan = samsungctl.Remote(config)
+                if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
+                    return True
+                else:
+                    return False
+            else:
+                time.sleep(1.0)  
+
      
     def list_commands(self):
         #comands = mdb_get_table(table.name)
