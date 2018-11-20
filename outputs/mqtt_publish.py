@@ -35,4 +35,4 @@ def mqtt_pub(channel, data):
         data = json.dumps(data, default=handler, allow_nan=False)
         client.publish(channel, data, qos=1, retain=True)
     else:
-        raise TypeError('Data is not a dictionary')
+        client.publish(channel, data, qos=1, retain=True)
