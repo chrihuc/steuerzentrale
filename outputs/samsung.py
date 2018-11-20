@@ -52,13 +52,15 @@ class Remotecontrol:
         # First configure the connection  
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((self.tv_ip, 55000))
-        ipencoded = base64.b64encode(self.my_ip)
-        macencoded = base64.b64encode(self.my_mac)
-        messagepart1 = chr(0x64) + chr(0x00) + chr(len(ipencoded)) \
-        + chr(0x00) + ipencoded + chr(len(macencoded)) + chr(0x00) \
-        + macencoded + chr(len(base64.b64encode(self.remotename))) + chr(0x00) \
-        + base64.b64encode(self.remotename)
-     
+        ipencoded = base64.b64encode(self.my_ip.encode('utf-8'))
+        macencoded = base64.b64encode(self.my_mac.encode('utf-8'))
+        messagepart1_1 = chr(0x64) + chr(0x00) + chr(len(ipencoded)) 
+        print(messagepart1_1)
+        messagepart1_2 = chr(0x00) + ipencoded + chr(len(macencoded)) + chr(0x00) 
+        messagepart1_3 = macencoded + chr(len(base64.b64encode(self.remotename))) + chr(0x00) 
+        messagepart1_4 = base64.b64encode(self.remotename.encode('utf-8'))
+        
+        messagepart1 = messagepart1_1 + messagepart1_2 + messagepart1_3 + messagepart1_4
         part1 = chr(0x00) + chr(len(self.appstring)) + chr(0x00) + self.appstring \
         + chr(len(messagepart1)) + chr(0x00) + messagepart1
         sock.send(part1)
@@ -115,14 +117,26 @@ class Remotecontrol:
         except socket_error as serr:
             return False   
 
+import samsungctl
+
+config = {
+    "name": "samsungctl",
+    "description": "PC",
+    "id": "00:30:1b:a0:2f:05",
+    "host": "192.168.192.29",
+    "port": 55000,
+    "method": "legacy",
+    "timeout": 0,
+}
+
 class TV:
     def __init__(self):
         #self.tv_remote = remotecontrol('192.168.192.10','192.168.192.26','00:30:1b:a0:2f:05')
-        own_ip = constants.eigene_IP
-        self.tv_remote_lan = Remotecontrol(own_ip,'192.168.192.29','00:30:1b:a0:2f:05')         
+#        own_ip = constants.eigene_IP
+        self.tv_remote_lan = samsungctl.Remote(config) #Remotecontrol(own_ip,'192.168.192.29','00:30:1b:a0:2f:05')         
         
     def set_device(self,device, commd):       
-        if self.tv_remote_lan.sendKey([str(commd)]): # or self.tv_remote.sendKey([str(commd)]):
+        if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
             return True
         else:
             return False
@@ -213,6 +227,9 @@ class TV:
      #KEY_PROGUP
      #KEY_PROG_UP
 
+if __name__ == '__main__':
+    tv = Remotecontrol(constants.eigene_IP,'192.168.192.29','00:30:1b:a0:2f:05')
+    tv.authenti()
 
     
 '''
