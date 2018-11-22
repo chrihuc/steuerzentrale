@@ -8,6 +8,7 @@ import constants
 
 import MySQLdb as mdb
 from threading import Timer
+import time
 from time import localtime, strftime
 import datetime
 from outputs.mqtt_publish import mqtt_pub
@@ -22,6 +23,7 @@ from outputs.mqtt_publish import mqtt_pub
 datab = constants.sql_.DB
 
 validTimers = {}
+locklist = []
 
 class tables(object):
 # TODO: change table names to constant settings
@@ -153,7 +155,7 @@ def inputs_r():
         sql = 'SELECT HKS, last_Value FROM '+constants.sql_tables.inputs.name
         cur.execute(sql)
         results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
+#        field_names = [i[0] for i in cur.description]
         for row in results:
             dicti[row[0]] = str(row[1])
     con.close()
@@ -200,7 +202,7 @@ def setting_r(setting):
                 cur.execute(sql)
                 results = cur.fetchall()
                 for row in results:
-                    fname = row[1]
+#                    fname = row[1]
                     value = row[2]
         con.close()
     return value
@@ -213,7 +215,7 @@ def settings_r_old():
         sql = 'SELECT * FROM '+constants.sql_tables.settings.name
         cur.execute(sql)
         results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
+#        field_names = [i[0] for i in cur.description]
         for row in results:
             dicti[row[1]] = row[2]
     con.close()
@@ -538,7 +540,13 @@ def maxSzenenId():
     con.close()
     return results[0][0]
 
-def inputs(device, value, mqtt=True):
+def inputs(device, value, add_to_mqtt=True):
+    i = 0
+    while device in locklist and i < 10:
+        time.sleep(0.5)
+        i += 1
+    if not device in locklist:
+        locklist.append(device)
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}
@@ -548,7 +556,7 @@ def inputs(device, value, mqtt=True):
     heartbt = None
 #    print(device,value)
     if 'MQTT' in device:
-        mqtt = False
+        add_to_mqtt = False
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
@@ -654,12 +662,14 @@ def inputs(device, value, mqtt=True):
             if str(dicti.get("last1")) != "None":
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
                 cur.execute(sql + sql2)
-            if str(hks) != str(device) and mqtt:
+            if str(hks) != str(device) and add_to_mqtt:
                 data = {"Value":value, "HKS":hks}
                 mqtt_pub("Inputs/" + str(hks), data)
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()
+    while device in locklist:
+        locklist.remove(device)
     return szenen, desc, heartbt
 
 def invalidTimers(hks):

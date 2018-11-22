@@ -11,7 +11,8 @@ from time import localtime,strftime
 from datetime import date
 import inspect
 #pycurl
-import urllib3
+#import urllib3
+from urllib.request import urlopen
 
 from threading import Thread, Event
 from outputs.mqtt_publish import mqtt_pub
@@ -45,15 +46,6 @@ class OwnTimer(Thread):
         self.finished.set()  
 
 
-def check_ext_ip():
-    ext_ip = urllib2.urlopen('http://whatismyip.org').read()
-    match = '(([0-9]{1,3}\.){3}[0-9]{1,3})'
-    m = re.search(match, ext_ip)
-    if m:
-        found = m.group(1)
-        return found
-    return '0.0.0.0'
-
 # TODO: unittest
 
 logfolder = constants.installation_folder + "/log/"
@@ -62,6 +54,7 @@ selfsupervision = True
 
 
 def main():
+    print(check_ext_ip())
     print (ping("127.0.0.1"))
 
 def ping(IP, number = 1):

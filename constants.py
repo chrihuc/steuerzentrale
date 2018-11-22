@@ -14,7 +14,7 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
         'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
-        'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0}
+        'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0, 'Ext_IP':'0.0.0.0'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
@@ -104,6 +104,7 @@ for i in range(0,3):
             debug_text = ''
             config.read_file(open('./main.cfg'))
             eigene_IP = config.get('Main', 'eigene_IP')
+            ext_IP = config.get('Main', 'Ext_IP')
             name = config.get('Main', 'name')
 
             xs1_IP = config.get('Main', 'xs1_IP')

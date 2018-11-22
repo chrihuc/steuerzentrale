@@ -3,7 +3,7 @@
 import constants
 
 import smtplib
-import urllib3
+from urllib.request import urlopen
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
@@ -135,13 +135,14 @@ class AES:
         msg["Subject"] = subject
 
         if url != None:
-            req = urllib3.Request(url)
+#            req = urllib3.Request(url)
             try:
-                response = urllib3.urlopen(req)
-                data = response.read()
-                img = MIMEImage(data)
+#                response = urllib3.urlopen(req)
+                response = urlopen(url)
+#                data = response.read()
+                img = MIMEImage(response)
                 msg.attach(img)
-            except urllib3.URLError as e:
+            except Exception as e:
                 data = None
 
         for recipient in constants.mail_.receiver:

@@ -9,6 +9,8 @@ import re
 import sys, os
 from socket import error as socket_error
 
+import threading
+
 from database import mysql_connector
 
 # TODO Tests split adress from hks
@@ -133,19 +135,26 @@ class TV:
     def __init__(self):
         #self.tv_remote = remotecontrol('192.168.192.10','192.168.192.26','00:30:1b:a0:2f:05')
 #        own_ip = constants.eigene_IP
-        self.tv_remote_lan = None  #Remotecontrol(own_ip,'192.168.192.29','00:30:1b:a0:2f:05')         
+        self.tv_remote_lan = None  #Remotecontrol(own_ip,'192.168.192.29','00:30:1b:a0:2f:05')  
+        self.registered = False
+        thread_regist = threading.Timer(0.1, self.register)
+        thread_regist.start()        
         
     def set_device(self,device, commd):
-        for i in range(0,90):
-            if ping("192.168.192.29"):
-                self.tv_remote_lan = samsungctl.Remote(config)
-                if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
-                    return True
-                else:
-                    return False
+        if self.registered:
+            if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
+                return True
             else:
-                time.sleep(1.0)  
-
+                return False
+        else:
+            return False            
+  
+    def register(self):
+        while not ping("192.168.192.29"):
+            time.sleep(5.0) 
+        time.sleep(5.0)
+        self.tv_remote_lan = samsungctl.Remote(config)
+        self.registered = True
      
     def list_commands(self):
         #comands = mdb_get_table(table.name)

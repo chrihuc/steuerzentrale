@@ -7,13 +7,14 @@ Created on Tue Apr 19 13:58:42 2016
 
 import socket
 
-import os
+import os, sys
 import time, datetime
 import glob
 from subprocess import call
 
 import constants
 import git
+import requests
 from alarm_event_messaging import alarmevents
 
 from database import mysql_connector
@@ -78,8 +79,8 @@ class Internal:
         pass
 
     def list_commands(self):
-        return ['Update', 'Check_Anwesenheit', 'convert_mts', 'Klingel_Mail',
-                'geist_start', 'geist_stop']
+        return ['Restart','Update', 'Check_Anwesenheit', 'convert_mts', 'Klingel_Mail',
+                'geist_start', 'geist_stop', 'check_ext_ip']
 
     def execute(self, commd):
         if commd == 'Update':
@@ -94,6 +95,17 @@ class Internal:
             self.zeitgheist_stop()
         elif commd == 'Klingel_Mail':
             aes.send_mail('Klingel', text='', url='http://192.168.192.36/html/cam.jpg')
+        elif commd == 'Restart':
+            self.restart()
+        elif commd == 'check_ext_ip':
+            self.check_ext_ip()            
+
+    def restart(self):
+        exectext = "sudo killall python"
+        constants.run = False
+        time.sleep(10)
+        sys.exit("XS1 goodbye")
+        os.system(exectext)        
 
     def git_update(self):
         g = git.cmd.Git()
@@ -176,3 +188,10 @@ class Internal:
 
     def zeitgheist_stop(self):
         self.ghost.stop()
+        
+    def check_ext_ip(self):
+        ip = requests.get('https://api.ipify.org').text
+        if ip != constants.ext_IP:
+            constants.ext_IP = ip
+            aes.new_event(description="New IP "+ip, prio=7)
+            constants.save_config()
