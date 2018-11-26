@@ -94,6 +94,8 @@ class Internal:
             self.zeitgheist_stop()
         elif commd == 'Klingel_Mail':
             aes.send_mail('Klingel', text='', url='http://192.168.192.36/html/cam.jpg')
+        elif commd == 'restart': 
+            self.restart()
 
     def git_update(self):
         g = git.cmd.Git()
@@ -102,6 +104,11 @@ class Internal:
 
         print "Update done, exiting"
         aes.new_event(description="Update performed, restarting", prio=1)
+        constants.run = False
+
+    def restart(self):
+        aes.new_event(description="Restarting in 60 sec", prio=7)
+        time.sleep(60)
         constants.run = False
 
     def check_anwesenheit(self):

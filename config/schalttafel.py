@@ -303,8 +303,8 @@ class Szenen_tree():
         dicti = {'':1}
         liste = msqc.mdb_read_table_column(table, 'Name')
         for item in liste:
-            itera +=1            
-            dicti[str(item)] = itera     
+            itera +=1
+            dicti[str(item)] = itera
         return dicti
 
     def get_commando_set(self,device):
@@ -313,7 +313,7 @@ class Szenen_tree():
         elif devices_types[device] == 'SONOS': values = sns_cmds
         elif devices_types[device] == 'TV': values = tvs_cmds
         elif devices_types[device] in ['SATELLITE', 'ZWave']: values = sat.dict_commands(device)
-        else: 
+        else:
             values = self.get_commando_list(device)
             print values
         values.update({'warte_1':len(values)+1,'warte_3':len(values)+2,'warte_5':len(values)+3})
@@ -958,6 +958,8 @@ class TreeInputDevice(object):
                                   'value':device['Status']})
         for feature, value in device.iteritems():
             if feature in ['Logging','Setting','Doppelklick']:
+                if value == None:
+                    value = "False"
                 kinder.insert(2, {'name':feature, 'type': 'bool', 'value':eval(value)})
             elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise',
                              'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',
@@ -996,8 +998,8 @@ class TreeInputDevice(object):
         setngs = {para:szene[para] for para in inp_parameter if para in szene}
         print setngs
         mysql_connector.mdb_set_table(table=constants.sql_tables.inputs.name, device=str(szene.get('Name')),
-                      commands=setngs, primary = 'Name', translate = False)        
-        
+                      commands=setngs, primary = 'Name', translate = False)
+
 
     def loeschen(self):
         for kind in self.params.children():
@@ -1057,7 +1059,7 @@ class SettingsTree(object):
         action = {'name': 'Speichern', 'type': 'action'}
         params.append(action)
         self.p = Parameter.create(name='params', type='group', children=params)
-        self.p.child('Speichern').sigActivated.connect(self.set_speichern)          
+        self.p.child('Speichern').sigActivated.connect(self.set_speichern)
 
 #        inp_dict = {'name': 'Aktion', 'type': 'group', 'children': [
 #                {'name': 'Speichern', 'type': 'action'},
@@ -1067,7 +1069,7 @@ class SettingsTree(object):
 #        self.p = Parameter.create(name='params', type='group', children=params)
 #        self.p.child('Speichern').sigActivated.connect(self.set_speichern)
 #        self.p.param('Aktion', 'Speichern2').sigActivated.connect(printit)
-        
+
 
     def set_speichern(self):
         print "here"
