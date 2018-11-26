@@ -467,7 +467,7 @@ class Szenen_tree():
                     elif str(item) in ['Prio']:
                         szn_d_child['type'] ='list'
                         szn_d_child['values'] = {'Kein Event':-1,'Normales Event':0,'Problem ohne Hinweis':1,'Hinweis wenn zuhause':2,'immer Hinweis':3,'Hinweis wenn wach':4,
-                                                 'Achtung wenn wach':5,'Alarm':6,'Debug':7}
+                                                 'Klingeln Hinweis':5,'Alarm':6,'Debug':7}
                         if str(szene.get(item)) != "None":
                             szn_d_child['value'] = float(szene.get(item))
                     elif str(item) in ['Gruppe']:

@@ -188,22 +188,22 @@ class AES:
             elif prio == 1:
                 pass
             elif prio == 2:
-                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description)
+                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
             elif prio == 3:
-                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
             elif prio == 4:
-                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
             elif prio > 4 and prio < 5:
-                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
             elif prio == 5:
-                self.mes.send_direkt(to=self.mes.alle, titel="Achtung", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Achtung", text=description, prio=prio)
             elif prio > 5 and prio < 6:
-                self.mes.send_direkt(to=self.mes.alle, titel="Achtung", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Achtung", text=description, prio=prio)
             elif prio >= 6 and prio < 7:
-                self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description)
+                self.mes.send_direkt(to=self.mes.alle, titel="Alarm", text=description, prio=prio)
                 self.send_mail('Alarm', text=description)
             elif prio >= 7 and prio < 8:
-                self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description)
+                self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description, prio=prio)
             if prio > 1 and prio <7:
                 AES.alarm_liste.addAlarm('Alarm', description)
 

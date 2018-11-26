@@ -634,7 +634,7 @@ def inputs(device, value, add_to_mqtt=True):
                     cur.execute(insertstatement)
                 except:
                     try:
-                        ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(5,2)" % (constants.sql_tables.his_inputs.name, hks)
+                        ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % (constants.sql_tables.his_inputs.name, hks)
                         cur.execute(ist)
                         insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
                         cur.execute(insertstatement)

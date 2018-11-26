@@ -44,9 +44,9 @@ class Messaging:
                 results = cur.fetchall()
         con.close()
 
-    def send_direkt(self, to, titel, text):
+    def send_direkt(self, to, titel, text, prio=2):
         success = True
-        data = {'titel': titel, 'message': text}
+        data = {'titel': titel, 'message': text, 'prio':prio}
         gcm_users = msqc.mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') != None:
@@ -58,9 +58,9 @@ class Messaging:
         return success
         #response = self.gcm.json_request(registration_ids=to, data=data)
 
-    def send_zuhause(self, to, titel, text):
+    def send_zuhause(self, to, titel, text, prio=2):
         success = True
-        data = {'titel': titel, 'message': text}
+        data = {'titel': titel, 'message': text, 'prio':prio}
         gcm_users = msqc.mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') != None:
@@ -73,9 +73,9 @@ class Messaging:
 #                            success = False
         return success
 
-    def send_abwesend(self, to, titel, text):
+    def send_abwesend(self, to, titel, text, prio=2):
         success = True
-        data = {'titel': titel, 'message': text}
+        data = {'titel': titel, 'message': text, 'prio':prio}
         gcm_users = msqc.mdb_get_table(table.name)
         for user in gcm_users:
             if user.get('Name') != None:
