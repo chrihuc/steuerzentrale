@@ -12,7 +12,7 @@ from datetime import date
 import inspect
 #pycurl
 #import urllib3
-from urllib.request import urlopen
+#from urllib.request import urlopen
 
 from threading import Thread, Event
 from outputs.mqtt_publish import mqtt_pub

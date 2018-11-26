@@ -13,9 +13,14 @@ from tools import decorators
 
 from random import choice
 
-from urllib.parse import quote
+import sys
+if sys.version_info >= (3, 0):
+    from urllib.parse import quote
+    import http.client
+else:
+    from urllib import quote
 
-import http.client
+
 import requests
 import time
 from time import localtime,strftime

@@ -2,7 +2,12 @@
 
 import constants
 
-import urllib.request
+import sys
+if sys.version_info >= (3, 0):
+    import urllib.request
+else:
+    import urllib2
+
 import json
 from database import mysql_connector
 

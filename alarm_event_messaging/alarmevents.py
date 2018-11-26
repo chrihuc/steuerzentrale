@@ -3,7 +3,9 @@
 import constants
 
 import smtplib
-from urllib.request import urlopen
+import sys
+if sys.version_info >= (3, 0):
+    from urllib.request import urlopen
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
@@ -157,6 +159,8 @@ class AES:
     def new_event_t(self, description, prio=0, durchsage="", karenz=-1):
         data = {"Description":description, "Durchsage":durchsage}
         mqtt_pub("AES/Prio" + str(prio), data)
+        if prio == None:
+            prio = 0
         if prio < 0: return
         if karenz == -1:
             if prio == 1:
