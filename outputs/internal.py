@@ -103,7 +103,7 @@ class Internal:
     def restart(self):
         exectext = "sudo killall python"
         constants.run = False
-        time.sleep(10)
+        time.sleep(60)
         sys.exit("XS1 goodbye")
         os.system(exectext)        
 

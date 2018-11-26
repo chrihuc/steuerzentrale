@@ -150,11 +150,16 @@ class TV:
             return False            
   
     def register(self):
-        while not ping("192.168.192.29"):
-            time.sleep(5.0) 
-        time.sleep(5.0)
-        self.tv_remote_lan = samsungctl.Remote(config)
-        self.registered = True
+        while True:
+            self.tv_remote_lan = None
+            while not ping("192.168.192.29"):
+                time.sleep(5.0) 
+            time.sleep(5.0)
+            self.tv_remote_lan = samsungctl.Remote(config)
+            self.registered = True
+            while ping("192.168.192.29"):
+                time.sleep(5.0) 
+            time.sleep(5.0)            
      
     def list_commands(self):
         #comands = mdb_get_table(table.name)
