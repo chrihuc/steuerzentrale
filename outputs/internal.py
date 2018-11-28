@@ -104,7 +104,7 @@ class Internal:
         exectext = "sudo killall python"
         constants.run = False
         time.sleep(60)
-        sys.exit("XS1 goodbye")
+#        sys.exit("XS1 goodbye")
         os.system(exectext)        
 
     def git_update(self):

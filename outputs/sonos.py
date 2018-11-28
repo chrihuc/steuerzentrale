@@ -797,11 +797,9 @@ class Sonos:
             player, player_ip, p_uid, playerName = self.get_addr(player)
         # playerName = self.Names.get(player)
         if str(command) == "Pause":
-            # works only on master
-            player.pause()
+            player.group.coordinator.pause()
         elif str(command) == "Play":
-            # works only on master
-            player.play()
+            player.group.coordinator.play()
         elif str(command) == "Save":
             player.soco_get_status()
         elif str(command) == "Announce_Time":

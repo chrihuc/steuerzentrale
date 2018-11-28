@@ -33,6 +33,7 @@ class tables(object):
 #                                password=constants.sql_.PASS)
     db_connection = mdb.connect(constants.sql_.IP, constants.sql_.USER,
                                 constants.sql_.PASS, constants.sql_.DB)
+#    warnings.filterwarnings('ignore', 'Unknown table .*')
     scenes_df = pd.read_sql('SELECT * FROM set_Szenen', con=db_connection)
     _lines = ['Adress', 'Device_Type', 'Description', 'Auto_Mode', 'Command_Table']
     aktors_df = scenes_df.loc[scenes_df['Name'].isin(_lines)].set_index('Name')
@@ -555,8 +556,8 @@ def inputs(device, value, add_to_mqtt=True):
     desc = None
     heartbt = None
 #    print(device,value)
-    if 'MQTT' in device:
-        add_to_mqtt = False
+#    if 'MQTT' in device:
+#        add_to_mqtt = False
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")

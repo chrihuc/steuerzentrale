@@ -91,12 +91,12 @@ def heartbeat_sup():
     if toolbox.ping(constants.router_IP):
         constants.run = False
         time.sleep(10)
-        sys.exit("XS1 goodbye")
+#        sys.exit("XS1 goodbye")
         os.system(exectext)
     else:
         reset_wlan()
         constants.run = False
-        sys.exit("XS1 goodbye")
+#        sys.exit("XS1 goodbye")
         os.system(exectext)
 
 def reset_wlan():

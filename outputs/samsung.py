@@ -155,8 +155,13 @@ class TV:
             while not ping("192.168.192.29"):
                 time.sleep(5.0) 
             time.sleep(5.0)
-            self.tv_remote_lan = samsungctl.Remote(config)
-            self.registered = True
+            while self.tv_remote_lan == None:
+                try:
+                    self.tv_remote_lan = samsungctl.Remote(config)
+                    self.registered = True
+                except:
+                    self.tv_remote_lan = None
+                    time.sleet(1)
             while ping("192.168.192.29"):
                 time.sleep(5.0) 
             time.sleep(5.0)            
