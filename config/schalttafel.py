@@ -36,6 +36,7 @@ from outputs import hue
 from outputs import samsung
 from outputs import satellites
 from outputs import szenen
+from outputs.mqtt_publish import mqtt_pub
 import timeit
 
 #from gui_inp import SzenenTreeInputs
@@ -712,8 +713,9 @@ class Szenen_tree():
 
     def execute_on_server(self):
         commado = {'Szene':str(self.szene_to_read)}
-        csocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-        csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))
+        mqtt_pub('Command/Szene/'+str(self.szene_to_read),commado,retain=False)
+#        csocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+#        csocket.sendto(str(commado),(constants.udp_.SERVER,constants.udp_.broadPORT))
 
     def newSzene(self):
         global szenen

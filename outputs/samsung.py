@@ -141,7 +141,7 @@ class TV:
         thread_regist.start()        
         
     def set_device(self,device, commd):
-        if self.registered:
+        if not self.tv_remote_lan == None:
             if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
                 return True
             else:
@@ -161,7 +161,7 @@ class TV:
                     self.registered = True
                 except:
                     self.tv_remote_lan = None
-                    time.sleet(1)
+                    time.sleep(1)
             while ping("192.168.192.29"):
                 time.sleep(5.0) 
             time.sleep(5.0)            

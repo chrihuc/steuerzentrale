@@ -544,7 +544,7 @@ def maxSzenenId():
 def inputs(device, value, add_to_mqtt=True):
     i = 0
     while device in locklist and i < 10:
-        time.sleep(0.5)
+        time.sleep(0.2)
         i += 1
     if not device in locklist:
         locklist.append(device)

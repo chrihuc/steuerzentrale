@@ -101,10 +101,12 @@ class Internal:
             self.check_ext_ip()            
 
     def restart(self):
-        exectext = "sudo killall python"
         constants.run = False
+        aes.new_event(description="Restarting in 60", prio=7)
         time.sleep(60)
 #        sys.exit("XS1 goodbye")
+        exectext = "sudo killall python"
+        aes.new_event(description="Restarting", prio=7)
         os.system(exectext)        
 
     def git_update(self):
