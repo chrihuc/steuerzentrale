@@ -792,80 +792,83 @@ class Sonos:
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
         print(player, command)
-        player, player_ip, p_uid, playerName = self.get_addr(player)
-        if player in self.Devices:
-            player = self.Devices.get(str(player))
+        try:
             player, player_ip, p_uid, playerName = self.get_addr(player)
-        # playerName = self.Names.get(player)
-        if str(command) == "Pause":
-            player.group.coordinator.pause()
-        elif str(command) == "Play":
-            player.group.coordinator.play()
-        elif str(command) == "Save":
-            player.soco_get_status()
-        elif str(command) == "Announce_Time":
-            player.soco_get_status()
-            lt = localtime()
-            stunde = int(strftime("%H", lt))
-            minute = int(strftime("%M", lt))
-            if (minute != 0) and (minute != 30):
-                text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
+            if player in self.Devices:
+                player = self.Devices.get(str(player))
+                player, player_ip, p_uid, playerName = self.get_addr(player)
+            # playerName = self.Names.get(player)
+            if str(command) == "Pause":
+                player.group.coordinator.pause()
+            elif str(command) == "Play":
+                player.group.coordinator.play()
+            elif str(command) == "Save":
+                player.soco_get_status()
+            elif str(command) == "Announce_Time":
+                player.soco_get_status()
+                lt = localtime()
+                stunde = int(strftime("%H", lt))
+                minute = int(strftime("%M", lt))
+                if (minute != 0) and (minute != 30):
+                    text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
+                    laenge = downloadAudioFile(text)
+                    self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
+                    time.sleep(laenge + 1)
+                    self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
+            elif str(command) == "Durchsage":
+                self.durchsage(text)
+            elif str(command) == "Ansage":
+                self.play_local_file(playerName, text)
+            elif str(command) == "Return":
+                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName), overrde_play=True)
+            elif ((str(command) == "resume") ):
+                time.sleep(60)
+                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
+            elif (str(command) == "lauter"):
+                ActVol = player.volume
+                increment = 8
+                VOLUME = ActVol + increment
+                player.volume = VOLUME
+                return
+            elif (str(command) == "leiser"):
+                ActVol = player.volume
+                increment = 8
+                VOLUME = ActVol - increment
+                player.volume = VOLUME
+                return
+            elif (str(command) == "inc_lauter"):
+                ActVol = player.volume
+                if ActVol >= 20: increment = 8
+                if ActVol < 20: increment = 4
+                if ActVol < 8: increment = 2
+                VOLUME = ActVol + increment
+                player.volume = VOLUME
+            elif (str(command) == "inc_leiser"):
+                ActVol = player.volume
+                if ActVol >= 20: increment = 8
+                if ActVol < 20: increment = 4
+                if ActVol < 8: increment = 2
+                VOLUME = ActVol - increment
+                player.volume = VOLUME
+            elif (str(command) == "WeckerAnsage"):
+                self.SetPause(player_ip)
+                self.SetVolume(player_ip, 20)
+                mysql_connector.setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
+                text = mysql_connector.setting_r("Durchsage")
                 laenge = downloadAudioFile(text)
                 self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
                 time.sleep(laenge + 1)
-                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
-        elif str(command) == "Durchsage":
-            self.durchsage(text)
-        elif str(command) == "Ansage":
-            self.play_local_file(playerName, text)
-        elif str(command) == "Return":
-            self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName), overrde_play=True)
-        elif ((str(command) == "resume") ):
-            time.sleep(60)
-            self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
-        elif (str(command) == "lauter"):
-            ActVol = player.volume
-            increment = 8
-            VOLUME = ActVol + increment
-            player.volume = VOLUME
-            return
-        elif (str(command) == "leiser"):
-            ActVol = player.volume
-            increment = 8
-            VOLUME = ActVol - increment
-            player.volume = VOLUME
-            return
-        elif (str(command) == "inc_lauter"):
-            ActVol = player.volume
-            if ActVol >= 20: increment = 8
-            if ActVol < 20: increment = 4
-            if ActVol < 8: increment = 2
-            VOLUME = ActVol + increment
-            player.volume = VOLUME
-        elif (str(command) == "inc_leiser"):
-            ActVol = player.volume
-            if ActVol >= 20: increment = 8
-            if ActVol < 20: increment = 4
-            if ActVol < 8: increment = 2
-            VOLUME = ActVol - increment
-            player.volume = VOLUME
-        elif (str(command) == "WeckerAnsage"):
-            self.SetPause(player_ip)
-            self.SetVolume(player_ip, 20)
-            mysql_connector.setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
-            text = mysql_connector.setting_r("Durchsage")
-            laenge = downloadAudioFile(text)
-            self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
-            time.sleep(laenge + 1)
-            self.SetPause(player_ip)
-        elif (str(command) == "EingangWohnzi"):
-            self.StreamInput(player_ip, self.WohnZiZone)
-        elif (str(command) == "Isolieren"):
-            self.isolate(player_ip)
-        elif ((str(command) != "resume") and (str(command) != "An") and (str(command) != "None")):
-            sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
-            self.soco_read_szene(player, sonos_szene)
-        return True
+                self.SetPause(player_ip)
+            elif (str(command) == "EingangWohnzi"):
+                self.StreamInput(player_ip, self.WohnZiZone)
+            elif (str(command) == "Isolieren"):
+                self.isolate(player_ip)
+            elif ((str(command) != "resume") and (str(command) != "An") and (str(command) != "None")):
+                sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
+                self.soco_read_szene(player, sonos_szene)
+            return True
+        except:
+            return False
 
     def list_commands(self):
         comands = mysql_connector.mdb_get_table(table.name)

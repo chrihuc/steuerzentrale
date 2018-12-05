@@ -65,7 +65,7 @@ def on_connect(client_data, userdata, flags, rc):
         client.connected_flag=True #set flag
         print("connected OK")
         for topic in topics:
-            client.subscribe(topic)
+            client.subscribe(topic, retained=False)
     elif client.connected_flag:
         pass
     else:
@@ -79,6 +79,7 @@ def dis_con (*args, **kargs):
 def on_message(client, userdata, msg):
 #    print(msg.topic + " " + str(msg.payload))
     message = str(msg.payload.decode("utf-8"))
+#    retained = msg.retained
     try:
         m_in=(json.loads(message)) #decode json data
 #        print(m_in)

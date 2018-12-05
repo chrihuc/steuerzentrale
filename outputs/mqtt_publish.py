@@ -11,13 +11,18 @@ import datetime
 import time
 from time import localtime,strftime
 
+connected = False
 
 zeit =  time.time()
 uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
 client = mqtt.Client(constants.name +'_pub_' + uhr)
 client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-client.connect(constants.mqtt_.server)
-client.loop_start()
+
+def connect():
+    global connected
+    client.connect(constants.mqtt_.server)
+    connected = True
+    client.loop_start()
 
 def handler(obj):
     if hasattr(obj, 'isoformat'):
@@ -28,6 +33,8 @@ def handler(obj):
         return 'non Json'
 
 def mqtt_pub(channel, data):
+    if not connected:
+        connect()
     zeit =  time.time()
     uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))    
     if isinstance(data, dict):

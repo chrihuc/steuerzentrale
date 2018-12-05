@@ -14,10 +14,10 @@ class TestUM(unittest.TestCase):
     def setUp(self):
         self.aes = AES()
 
-    def test_laod_evetns(self):
-        runs = self.aes.alarm_events_read(unacknowledged=True, prio=1)
-        self.assertTrue(runs,
-                         'Failed to get events')
+#    def test_laod_evetns(self):
+#        runs = self.aes.alarm_events_read(unacknowledged=True, prio=1)
+#        self.assertTrue(runs,
+#                         'Failed to get events')
 
     def test_sendmail(self):
         result = self.aes.send_mail('test', 'TEST')

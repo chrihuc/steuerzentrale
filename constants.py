@@ -298,4 +298,4 @@ class redundancy_:
     #'Master' 'Slave' 'auto'
     typ = 'Master'
 
-print(name, debug_level)
+print(name, debug_level, own_ip)

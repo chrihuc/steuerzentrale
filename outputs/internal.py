@@ -105,7 +105,7 @@ class Internal:
         aes.new_event(description="Restarting in 60", prio=7)
         time.sleep(60)
 #        sys.exit("XS1 goodbye")
-        exectext = "sudo killall python"
+        exectext = "sudo killall python3"
         aes.new_event(description="Restarting", prio=7)
         os.system(exectext)        
 

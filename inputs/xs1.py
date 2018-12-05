@@ -86,7 +86,7 @@ def heartbeat_sup():
         aes.new_event(description="XS1 nicht erreichbar", prio=7)
         msqc.setting_s("XS1_off", "Active")
     msqc.setting_s("NumRestart", str(count + 1))
-    exectext = "sudo killall python"
+    exectext = "sudo killall python3"
     print("XS1 connection lost")
     if toolbox.ping(constants.router_IP):
         constants.run = False
