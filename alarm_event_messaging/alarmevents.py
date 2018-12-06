@@ -9,6 +9,10 @@ if sys.version_info >= (3, 0):
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
+from PIL import Image
+import requests
+from io import BytesIO
+
 #import paho.mqtt.client as mqtt
 #import json
 
@@ -140,9 +144,12 @@ class AES:
 #            req = urllib3.Request(url)
             try:
 #                response = urllib3.urlopen(req)
-                response = urlopen(url)
+#                response = urlopen(url)
 #                data = response.read()
-                img = MIMEImage(response)
+                
+                response = requests.get(url)
+                img = Image.open(BytesIO(response.content))                
+#                img = MIMEImage(response)
                 msg.attach(img)
             except Exception as e:
                 data = None

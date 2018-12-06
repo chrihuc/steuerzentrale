@@ -419,13 +419,14 @@ class Szenen(object):
 #==============================================================================
 # Check for timeout
 #==============================================================================
-        while datetime.datetime.now() - start_t < cls.timeout:
-            t_list = cls.kommando_dict.get(szn_id)
-            time.sleep(.1)
-            if len(t_list) == 0:
-                erfolg = True
-                # write back to table
-                break
+        if erfuellt:
+            while datetime.datetime.now() - start_t < cls.timeout:
+                t_list = cls.kommando_dict.get(szn_id)
+                time.sleep(.1)
+                if len(t_list) == 0:
+                    erfolg = True
+                    # write back to table
+                    break
         t_list = cls.kommando_dict.get(szn_id)
         for item in t_list:
             aes.new_event(description="CMD Timeout: " + str(item), prio=1, karenz = 0.03)

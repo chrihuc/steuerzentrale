@@ -65,7 +65,7 @@ def on_connect(client_data, userdata, flags, rc):
         client.connected_flag=True #set flag
         print("connected OK")
         for topic in topics:
-            client.subscribe(topic, retained=False)
+            client.subscribe(topic)
     elif client.connected_flag:
         pass
     else:
@@ -79,27 +79,30 @@ def dis_con (*args, **kargs):
 def on_message(client, userdata, msg):
 #    print(msg.topic + " " + str(msg.payload))
     message = str(msg.payload.decode("utf-8"))
-#    retained = msg.retained
+    retained = message.retain
     try:
         m_in=(json.loads(message)) #decode json data
 #        print(m_in)
-        if 'Inputs' in msg.topic:
-            name = msg.topic[7:]
-            if 'Value' in m_in.keys():
-                broadcast_input_value('MQTT.' + name, float(m_in['Value']))
-        elif 'Command' in msg.topic:
-            if 'Szene' in msg.topic:
-                szene = msg.topic.split('/')[2]
-                broadcast_exec_szn(szene)
-            if 'Device' in msg.topic:
-                device = m_in['Device']
-                command = m_in['Command']
-                broadcast_exec_comm(device, command)
-        elif 'AlarmOk' in msg.topic:
-            if 'uuid' in m_in.keys:
-                aes.alarm_liste.delAlarm(m_in['uuid'])
-        elif 'DataRequest' in msg.topic:
+        if not retained:
+            if 'Inputs' in msg.topic:
+                name = msg.topic[7:]
+                if 'Value' in m_in.keys():
+                    broadcast_input_value('MQTT.' + name, float(m_in['Value']))
+            elif 'Command' in msg.topic:
+                if 'Szene' in msg.topic:
+                    szene = msg.topic.split('/')[2]
+                    broadcast_exec_szn(szene)
+                if 'Device' in msg.topic:
+                    device = m_in['Device']
+                    command = m_in['Command']
+                    broadcast_exec_comm(device, command)
+            elif 'AlarmOk' in msg.topic:
+                if 'uuid' in m_in.keys:
+                    print(m_in['uuid'])
+                    aes.alarm_liste.delAlarm(m_in['uuid'])
+        if 'DataRequest' in msg.topic:
             if 'Wecker' in msg.topic:
+                print('DataRequest Wecker')
                 mqtt_pub("DataRequest/Answer/Wecker", crn.get_all(wecker=True))
     except ValueError:
         pass
