@@ -79,7 +79,8 @@ def dis_con (*args, **kargs):
 def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.payload))
     message = str(msg.payload.decode("utf-8"))
-    retained = message.retain
+    retained = msg.retain
+    print(retained)
     try:
         m_in=(json.loads(message)) #decode json data
         print(m_in)
