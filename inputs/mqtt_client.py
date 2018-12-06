@@ -77,12 +77,12 @@ def dis_con (*args, **kargs):
     print("disconnected")
 
 def on_message(client, userdata, msg):
-#    print(msg.topic + " " + str(msg.payload))
+    print(msg.topic + " " + str(msg.payload))
     message = str(msg.payload.decode("utf-8"))
     retained = message.retain
     try:
         m_in=(json.loads(message)) #decode json data
-#        print(m_in)
+        print(m_in)
         if not retained:
             if 'Inputs' in msg.topic:
                 name = msg.topic[7:]
@@ -106,7 +106,7 @@ def on_message(client, userdata, msg):
                 mqtt_pub("DataRequest/Answer/Wecker", crn.get_all(wecker=True))
     except ValueError:
         pass
-#        print("no json code", message)
+        print("no json code", message)
 
 mqtt.Client.connected_flag=False
 client = None

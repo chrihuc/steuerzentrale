@@ -198,7 +198,7 @@ class TiFo:
         while True:
             try:
                 self.ipcon.connect(self.ip, PORT)
-                aes.new_event(description="Tifo connected: "+self.ip, prio=7)
+#                aes.new_event(description="Tifo connected: "+self.ip, prio=7)
                 break
             except Error as e:
                 toolbox.log('Connection Error: ' + str(e.description))

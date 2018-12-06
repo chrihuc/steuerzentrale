@@ -28,7 +28,7 @@ from tools import toolbox
 #toolbox.log('debug on')
 
 aes = aevs.AES()
-aes.new_event(description="Starting", prio=7)
+#aes.new_event(description="Starting", prio=7)
 
 anw = internal.Anwesenheit()
 
@@ -134,7 +134,7 @@ t = toolbox.OwnTimer(0, function=mqtt_client.main, args = [], name="mqtt_inputs"
 threadliste.append(t)
 t.start()
 
-aes.new_event(description="All Threads started", prio=7)
+#aes.new_event(description="All Threads started", prio=7)
 if constants.debug:
     toolbox.log(threadliste)
 
