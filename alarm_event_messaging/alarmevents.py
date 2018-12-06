@@ -30,40 +30,16 @@ from time import localtime,strftime
 
 import uuid
 
-# 4 prios at the moment
-# 0 no action
-# 0.1 with red light notification
-# 0.2 with blue light notification
-# 0.3 with green light notification
+# prios
+# 0 noting to do
+# 1 normal logging
+# 2 notification
+#
+#
+# 5 Ringtone in Cell
+# 6 Alarm with mail
+# 7 only to me
 
-# 1 send notification to at home and once in 24h
-
-# 2
-
-# 3 send notification only when awake
-
-
-# 4 send notification all times
-
-# * todo:
-# * 4.0 no light
-# * 4.1 lights red 30 secs
-# * 4.2 lights red in anticipation (Schlafzimmer only when not awake)
-# * 4.3 lights blinking red in higher alarm, same as above
-
-
-#client = mqtt.Client()
-#client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-#client.connect(constants.mqtt_.server)
-#client.loop_start()
-
-#def handler(obj):
-#    if hasattr(obj, 'isoformat'):
-#        return obj.isoformat()
-#    elif isinstance(obj, datetime.timedelta):
-#        return obj.seconds
-#    else:
-#        raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
 
 class sql_object:
     def __init__(self,name,typ,columns):

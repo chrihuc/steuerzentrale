@@ -7,6 +7,8 @@ import paho.mqtt.client as mqtt
 import constants
 
 import MySQLdb as mdb
+import warnings
+warnings.filterwarnings('ignore', category=mdb.Warning)
 from threading import Timer
 import time
 from time import localtime, strftime
@@ -543,8 +545,9 @@ def maxSzenenId():
 
 def inputs(device, value, add_to_mqtt=True):
     i = 0
-    while device in locklist and i < 10:
-        time.sleep(0.2)
+    ct = datetime.datetime.now()
+    while device in locklist and i < 12:
+        time.sleep(0.1)
         i += 1
     if not device in locklist:
         locklist.append(device)
@@ -552,7 +555,6 @@ def inputs(device, value, add_to_mqtt=True):
     dicti = {}
     dicti_1 = {}
     szenen = []
-    ct = datetime.datetime.now()
     desc = None
     heartbt = None
 #    print(device,value)
