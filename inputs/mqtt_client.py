@@ -85,7 +85,7 @@ def on_message(client, userdata, msg):
         m_in=(json.loads(message)) #decode json data
 #        print(m_in)
         print(msg.topic + " " + str(msg.payload))
-           if not retained:
+        if not retained:
             if 'Inputs' in msg.topic:
                 name = msg.topic[7:]
                 if 'Value' in m_in.keys():
