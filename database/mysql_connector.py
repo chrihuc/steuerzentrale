@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import pandas as pd
-import numpy as np
-import paho.mqtt.client as mqtt
 
 import constants
 
@@ -547,6 +545,7 @@ def inputs(device, value, add_to_mqtt=True):
     i = 0
     ct = datetime.datetime.now()
     while device in locklist and i < 12:
+        if i == 0: print('input locked')
         time.sleep(0.1)
         i += 1
     if not device in locklist:
@@ -586,6 +585,7 @@ def inputs(device, value, add_to_mqtt=True):
                 db_time = ct
             else:
                 db_time = last_time + datetime.timedelta(seconds=debounce)
+                print('input debouncing ', ct, db_time)
             deltaT = ct - last_time
             deltaTm = deltaT.total_seconds() / 60
             if deltaTm > 0:
@@ -642,6 +642,7 @@ def inputs(device, value, add_to_mqtt=True):
                         insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
                         cur.execute(insertstatement)
                     except:
+                        pass
                         print(insertstatement)
 
 #                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
@@ -676,5 +677,6 @@ def inputs(device, value, add_to_mqtt=True):
     return szenen, desc, heartbt
 
 def invalidTimers(hks):
+    print('input timed out: ', hks)
     commands = {'Valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands)

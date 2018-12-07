@@ -9,6 +9,9 @@ if sys.version_info >= (3, 0):
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
+import json
+import datetime
+
 from PIL import Image
 import requests
 from io import BytesIO
@@ -20,6 +23,7 @@ import MySQLdb as mdb
 from database import mysql_connector
 from alarm_event_messaging import messaging
 from outputs.mqtt_publish import mqtt_pub
+import toolbox
 
 from threading import Timer
 import threading
@@ -41,6 +45,14 @@ import uuid
 # 7 only to me
 
 
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
 class sql_object:
     def __init__(self,name,typ,columns):
         self.name = name
@@ -54,7 +66,7 @@ class AlarmListe:
     liste = {}
 
     def __init__(self):
-        pass
+        self.load()
         mqtt_pub("Message/Alarmliste", AlarmListe.liste)
 
 
@@ -65,10 +77,28 @@ class AlarmListe:
         newAlarm = {'Titel':titel, 'Text':text, 'ts':uhr, 'uuid':hash_id}
         AlarmListe.liste[hash_id] = newAlarm
         mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+        self.store()
 
     def delAlarm(self, uuid):
-        del AlarmListe.liste[uuid]
+        print(AlarmListe.liste)
+        try:
+            del AlarmListe.liste[uuid]
+        except:
+            print('error deleting alarm ', uuid)
         mqtt_pub("Message/Alarmliste", AlarmListe.liste)
+        self.store()
+
+    def store(self):
+        with open('alarmlist.jsn', 'w') as fout:
+            json.dump(AlarmListe.liste, fout, default=json_serial)
+
+    def load(self):
+        try:
+            with open('alarmlist.jsn') as f:
+                full = f.read()            
+            AlarmListe.liste = json.loads(full)
+        except:
+            toolbox.log('Laden der Szenen fehlgeschlagen', level=1)
 
 class AES:
 

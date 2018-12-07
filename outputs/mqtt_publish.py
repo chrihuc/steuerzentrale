@@ -27,19 +27,24 @@ def connect():
 def handler(obj):
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
+    # if entry is timedelta then use seconds as the value unit
     elif isinstance(obj, datetime.timedelta):
         return obj.seconds
     else:
         return 'non Json'
 
-def mqtt_pub(channel, data):
+def mqtt_pub(channel, data, retain=True):
     if not connected:
         connect()
     zeit =  time.time()
     uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))    
     if isinstance(data, dict):
         data['ts'] = uhr
-        data = json.dumps(data, default=handler, allow_nan=False)
-        client.publish(channel, data, qos=1, retain=True)
+        try:
+            data = json.dumps(data, default=handler, allow_nan=False)
+        except:
+            client.publish(channel, "couldn't convert to json", qos=1, retain=True)
+        else:
+            client.publish(channel, data, qos=1, retain=retain)
     else:
-        client.publish(channel, data, qos=1, retain=True)
+        client.publish(channel, data, qos=1, retain=retain)

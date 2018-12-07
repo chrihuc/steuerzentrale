@@ -83,8 +83,11 @@ def on_message(client, userdata, msg):
 #    print(retained)
     try:
         m_in=(json.loads(message)) #decode json data
+    except ValueError:
+        print("no json code", message)
+    else:        
 #        print(m_in)
-        print(msg.topic + " " + str(msg.payload))
+#        print(msg.topic + " " + str(msg.payload))        
         if not retained:
             if 'Inputs' in msg.topic:
                 name = msg.topic[7:]
@@ -100,15 +103,14 @@ def on_message(client, userdata, msg):
                     broadcast_exec_comm(device, command)
             elif 'AlarmOk' in msg.topic:
                 if 'uuid' in m_in.keys:
-                    print(m_in['uuid'])
+#                    print(m_in['uuid'])
                     aes.alarm_liste.delAlarm(m_in['uuid'])
         if 'DataRequest' in msg.topic:
             if 'Wecker' in msg.topic:
-                print('DataRequest Wecker')
+#                print('DataRequest Wecker')
+                print(crn.get_all(wecker=True))
                 mqtt_pub("DataRequest/Answer/Wecker", crn.get_all(wecker=True))
-    except ValueError:
-        pass
-        print("no json code", message)
+
 
 mqtt.Client.connected_flag=False
 client = None

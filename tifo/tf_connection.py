@@ -155,6 +155,7 @@ class TiFo:
         self.LEDList = LEDStrips()
         self.al = []
         self.drb = []
+        self.drbuids = {}
         self.master = []
         self.md = []
         self.si = []
@@ -655,13 +656,14 @@ class TiFo:
         toolbox.log(toolbox.kw_unpack(kwargs,'typ') == 'output', toolbox.kw_unpack(kwargs,'receiver') == 'TiFo')
         if toolbox.kw_unpack(kwargs,'typ') == 'output' and toolbox.kw_unpack(kwargs,'receiver') == 'TiFo':
             toolbox.log(payload)
-            result = self.set_device(payload)
+            result = self.set_device(payload, adress=toolbox.kw_unpack(kwargs,'adress'))
             toolbox.communication.send_message(payload, typ='return', value=result)
 
-    def set_device(self, data_ev):
+    def set_device(self, data_ev, adress=None):
 #       TODO do threaded with stop criteria
 #        TODO change to send address and check if connected
         toolbox.log(data_ev)
+#        uid = adress.split(".")[1] + '.' + adress.split(".")[2]
         if settings.outputs.get(data_ev.get('Device')) == 'IO16o':
             return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
         elif settings.outputs.get(data_ev.get('Device')) == 'IO16o':
@@ -669,6 +671,8 @@ class TiFo:
         elif settings.outputs.get(data_ev.get('Device')) == 'LEDs':
             return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
         elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
+#        elif uid in self.drbuids.keys:
+            print(data_ev.get('Device'), adress, data_ev.get('Value'))
             return self.set_drb(data_ev.get('Device'),data_ev.get('Value'))
         else:
             return False
@@ -766,6 +770,7 @@ class TiFo:
             if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
                 self.drb.append(BrickletDualRelay(uid, self.ipcon))
                 temp_uid = str(self.drb[-1].get_identity()[1]) +"."+ str(self.drb[-1].get_identity()[0])
+                self.drbuids[temp_uid] = BrickletDualRelay(uid, self.ipcon)
                 toolbox.log('Dual Relay Bricklet', temp_uid)
                 found  = True
                 toolbox.log("BrickletDualRelay", temp_uid)
@@ -878,7 +883,7 @@ class TiFo:
                 temp_uid = str(self.master[-1].get_identity()[0])
                 toolbox.log('Master Brick', temp_uid)
                 thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
-                print(firmware_version)
+#                print(firmware_version)
                 if firmware_version[0]*100+firmware_version[1]*10+firmware_version[2] >= 232:
                     self.master[-1].disable_status_led()
                 #thread_rs_error.start()
