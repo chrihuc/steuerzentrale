@@ -84,7 +84,8 @@ def on_message(client, userdata, msg):
     try:
         m_in=(json.loads(message)) #decode json data
 #        print(m_in)
-        if not retained:
+        print(msg.topic + " " + str(msg.payload))
+           if not retained:
             if 'Inputs' in msg.topic:
                 name = msg.topic[7:]
                 if 'Value' in m_in.keys():
@@ -107,7 +108,7 @@ def on_message(client, userdata, msg):
                 mqtt_pub("DataRequest/Answer/Wecker", crn.get_all(wecker=True))
     except ValueError:
         pass
-#        print("no json code", message)
+        print("no json code", message)
 
 mqtt.Client.connected_flag=False
 client = None
