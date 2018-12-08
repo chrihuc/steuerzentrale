@@ -545,7 +545,7 @@ def inputs(device, value, add_to_mqtt=True):
     i = 0
     ct = datetime.datetime.now()
     while device in locklist and i < 12:
-        if i == 0: print('input locked')
+        if i == 0: print('input locked ',device)
         time.sleep(0.1)
         i += 1
     if not device in locklist:
