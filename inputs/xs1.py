@@ -62,12 +62,14 @@ def on_receive(data):
 #####################
 #Heartbeat & Server Steuerung
 #####################
-#    if (("heartbeat" in name) and (value == 0)):
+#    i
     heartbeat.cancel()
     heartbeat = Timer(constants.heartbt, heartbeat_sup)
     heartbeat.start()
-    ezcontrol.SetSwitchFunction("heartbeat", "1")
-    szenen.Szenen.trigger_scenes(name, value)
+    if (("heartbeat" in name) and (value == 0)):
+        ezcontrol.SetSwitchFunction("heartbeat", "1")
+    else:
+        szenen.Szenen.trigger_scenes(name, value)
 #    szns, desc = msqc.inputs(name,value)
 #    for szene in szns:
 #        if szene <> None:

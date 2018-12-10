@@ -679,4 +679,4 @@ def inputs(device, value, add_to_mqtt=True):
 def invalidTimers(hks):
     print('input timed out: ', hks)
     commands = {'Valid': 'False'}
-    mdb_set_table(constants.sql_tables.inputs.name, hks, commands)
+    mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
