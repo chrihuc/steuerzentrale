@@ -959,7 +959,7 @@ class TreeInputDevice(object):
         kinder.insert(1, {'name':'Status', 'title':'Status', 'type': 'str',
                                   'value':device['Status']})
         for feature, value in device.items():
-            if feature in ['Logging','Setting','Doppelklick']:
+            if feature in ['Logging','Setting','Doppelklick'] and value != None:
                 kinder.insert(2, {'name':feature, 'type': 'bool', 'value':eval(value)})
             elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise',
                              'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',

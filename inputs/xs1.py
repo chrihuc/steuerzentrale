@@ -88,16 +88,14 @@ def heartbeat_sup():
     msqc.setting_s("NumRestart", str(count + 1))
     exectext = "sudo killall python3"
     print("XS1 connection lost")
-    if toolbox.ping(constants.router_IP):
-        constants.run = False
-        time.sleep(10)
-#        sys.exit("XS1 goodbye")
-        os.system(exectext)
-    else:
-        reset_wlan()
-        constants.run = False
-#        sys.exit("XS1 goodbye")
-        os.system(exectext)
+#    if toolbox.ping(constants.router_IP):
+#        constants.run = False
+#        time.sleep(10)
+#        os.system(exectext)
+#    else:
+#        reset_wlan()
+#        constants.run = False
+#        os.system(exectext)
 
 def reset_wlan():
     os.system('sudo ifdown --force wlan0')

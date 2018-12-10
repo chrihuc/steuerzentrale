@@ -22,7 +22,7 @@ cfg_mail ={'USER':'','PASS':'','RECIP':'[]'}
 cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
            'Bilder': ''}
 cfg_mqtt = {'Username': '', 'Password': '', 'Server': '192.168.192.10'}
-cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': ''}
+cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': '', 'Key': ''}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -162,7 +162,8 @@ for i in range(0,3):
             class tradfri_:
                 identity = config.get('TRADFRI', 'Identity')
                 psk = config.get('TRADFRI', 'PSK')
-                host = config.get('TRADFRI', 'Host')                
+                host = config.get('TRADFRI', 'Host') 
+                key = config.get('TRADFRI', 'Key') 
         except:
             init_cfg()
             continue
