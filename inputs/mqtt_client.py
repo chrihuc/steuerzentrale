@@ -103,7 +103,7 @@ def on_message(client, userdata, msg):
                     broadcast_exec_comm(device, command)
             elif 'AlarmOk' in msg.topic:
                 if 'uuid' in m_in.keys:
-#                    print(m_in['uuid'])
+                    print(m_in['uuid'])
                     aes.alarm_liste.delAlarm(m_in['uuid'])
         if 'DataRequest' in msg.topic:
             if 'Wecker' in msg.topic:
