@@ -77,7 +77,7 @@ def dis_con (*args, **kargs):
     print("disconnected")
 
 def on_message(client, userdata, msg):
-#    print(msg.topic + " " + str(msg.payload))
+    print(msg.topic + " " + str(msg.payload))
     message = str(msg.payload.decode("utf-8"))
     retained = msg.retain
 #    print(retained)
@@ -86,8 +86,8 @@ def on_message(client, userdata, msg):
     except ValueError:
         print("no json code", message)
     else:        
-#        print(m_in)
-#        print(msg.topic + " " + str(msg.payload))        
+        print(m_in)
+        print(msg.topic + " " + str(msg.payload))        
         if not retained:
             if 'Inputs' in msg.topic:
                 name = msg.topic[7:]
