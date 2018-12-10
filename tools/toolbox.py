@@ -92,7 +92,7 @@ def log(*args, **kwargs):
     data = {"Description":args, "ts":uhr}
     data['Func1'] = calframe[1][1]
     data['Func2'] = calframe[1][3] 
-    mqtt_pub("log/Prio" + str(level), data)          
+#    mqtt_pub("log/Prio" + str(level), data)          
     if level > constants.debug_level:
         return
     if constants.debug:
