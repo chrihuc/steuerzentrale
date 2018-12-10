@@ -62,11 +62,11 @@ def on_receive(data):
 #####################
 #Heartbeat & Server Steuerung
 #####################
-    if (("heartbeat" in name) and (value == 0)):
-        heartbeat.cancel()
-        heartbeat = Timer(constants.heartbt, heartbeat_sup)
-        heartbeat.start()
-        ezcontrol.SetSwitchFunction("heartbeat", "1")
+#    if (("heartbeat" in name) and (value == 0)):
+    heartbeat.cancel()
+    heartbeat = Timer(constants.heartbt, heartbeat_sup)
+    heartbeat.start()
+    ezcontrol.SetSwitchFunction("heartbeat", "1")
     szenen.Szenen.trigger_scenes(name, value)
 #    szns, desc = msqc.inputs(name,value)
 #    for szene in szns:
@@ -88,14 +88,14 @@ def heartbeat_sup():
     msqc.setting_s("NumRestart", str(count + 1))
     exectext = "sudo killall python3"
     print("XS1 connection lost")
-#    if toolbox.ping(constants.router_IP):
-#        constants.run = False
-#        time.sleep(10)
-#        os.system(exectext)
-#    else:
-#        reset_wlan()
-#        constants.run = False
-#        os.system(exectext)
+    if toolbox.ping(constants.router_IP):
+        constants.run = False
+        time.sleep(10)
+        os.system(exectext)
+    else:
+        reset_wlan()
+        constants.run = False
+        os.system(exectext)
 
 def reset_wlan():
     os.system('sudo ifdown --force wlan0')

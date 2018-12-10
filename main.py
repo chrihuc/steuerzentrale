@@ -1,6 +1,9 @@
 #!  /usr/bin/python
 
 
+from alarm_event_messaging import alarmevents as aevs
+aes = aevs.AES()
+aes.new_event(description="Starting", prio=7)
 
 import threading
 import time, sys
@@ -21,14 +24,13 @@ from tifo import tf_connection
 
 from database import mysql_connector as msqc
 
-from alarm_event_messaging import alarmevents as aevs
+
 
 from tools import sound_provider as sp
 from tools import toolbox
 #toolbox.log('debug on')
 
-aes = aevs.AES()
-aes.new_event(description="Starting", prio=7)
+
 
 anw = internal.Anwesenheit()
 

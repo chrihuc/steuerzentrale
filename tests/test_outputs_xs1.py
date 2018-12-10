@@ -32,8 +32,8 @@ class TestUM(unittest.TestCase):
 #                         'Error sending command')
 
     def test_set_device_fht(self):
-        result = self.test_mod.set_device('Vm1ZIM1PFL1LI01', '0')
-        print result
+        result = self.test_mod.set_device('Vm1ZIM1PFL1LI01', '1')
+        print(result)
         self.assertTrue(result,
                          'Error sending command')
 
