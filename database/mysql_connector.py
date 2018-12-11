@@ -23,7 +23,7 @@ from outputs.mqtt_publish import mqtt_pub
 datab = constants.sql_.DB
 
 validTimers = {}
-locklist = []
+locklist = {}
 
 class tables(object):
 # TODO: change table names to constant settings
@@ -544,12 +544,7 @@ def maxSzenenId():
 def inputs(device, value, add_to_mqtt=True):
     i = 0
     ct = datetime.datetime.now()
-    while device in locklist and i < 12:
-        if i == 0: print('input locked ',device)
-        time.sleep(0.1)
-        i += 1
-    if not device in locklist:
-        locklist.append(device)
+    locklist[device] = ct
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}
@@ -576,7 +571,10 @@ def inputs(device, value, add_to_mqtt=True):
                     dicti_1[field_names_1[i]] = row[i]
             last_value = dicti_1['last_Value']
             if last_value is None: last_value = 0
-            last_time = dicti_1['last1']
+            try:
+                last_time = locklist[device]
+            except KeyError:
+                last_time = dicti_1['last1']
             debounce = dicti_1['debounce']
             heartbt = dicti_1['heartbeat']
             desc = dicti_1['Description']
@@ -585,7 +583,7 @@ def inputs(device, value, add_to_mqtt=True):
                 db_time = ct
             else:
                 db_time = last_time + datetime.timedelta(seconds=debounce)
-                print('input debouncing ', ct, db_time)
+#                print('input debouncing ', ct, db_time)
             deltaT = ct - last_time
             deltaTm = deltaT.total_seconds() / 60
             if deltaTm > 0:
@@ -594,15 +592,15 @@ def inputs(device, value, add_to_mqtt=True):
             else:
                 gradient = float(value) - float(last_value)
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
-            cur.execute(sql)
+#            cur.execute(sql)
 
             sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
             value = str(value)
             sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
             sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
             sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
-            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
-            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
+#            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
+#            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
             sql2 = sql2 + ' AND (enabled = "True" OR enabled is NULL )'
             sql2 = sql2 + ');'
             cur.execute(sql + sql2)
@@ -672,8 +670,7 @@ def inputs(device, value, add_to_mqtt=True):
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()
-    while device in locklist:
-        locklist.remove(device)
+    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt
 
 def invalidTimers(hks):

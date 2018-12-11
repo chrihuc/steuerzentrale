@@ -637,20 +637,23 @@ class TiFo:
 
         return True
 
-    def set_drb(self, device, value):
-        uid_cmds = settings.DualRelay.get(device)
-        uid = ''
-        for cmd in uid_cmds:
-            if (cmd.get('Value')) == float(value):
-                uid = cmd.get('UID')
-                state = cmd.get('state')
-                relaynr = cmd.get('relay')
-        for relay in self.drb:
-            temp_uid = str(relay.get_identity()[1]) +"."+ str(relay.get_identity()[0])
-            if temp_uid == uid:
-                relay.set_selected_state(relaynr, state)
-                return True
-        return False
+    def set_drb(self, device, value, adress):
+        temp_uid = adress.split('.')[1] + '.' + adress.split('.')[2]
+        relaynr = 1 # int(adress.split('.')[3])
+        relay = self.drbuids[temp_uid]
+        state = bool(value)
+        relay.set_selected_state(relaynr, state)
+#        for cmd in uid_cmds:
+#            if (cmd.get('Value')) == float(value):
+#                uid = cmd.get('UID')
+#                state = cmd.get('state')
+#                relaynr = cmd.get('relay')
+#        for relay in self.drb:
+#            temp_uid = str(relay.get_identity()[1]) +"."+ str(relay.get_identity()[0])
+#            if temp_uid == uid:
+#                relay.set_selected_state(relaynr, state)
+        return True
+
 
     def receive_communication(self, payload, *args, **kwargs):
         toolbox.log(toolbox.kw_unpack(kwargs,'typ') == 'output', toolbox.kw_unpack(kwargs,'receiver') == 'TiFo')
@@ -672,7 +675,7 @@ class TiFo:
             return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
         elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
 #        elif uid in self.drbuids.keys:
-            print(data_ev.get('Device'), adress, data_ev.get('Value'))
+            print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)
             return self.set_drb(data_ev.get('Device'),data_ev.get('Value'))
         else:
             return False

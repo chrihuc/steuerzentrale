@@ -275,6 +275,7 @@ class sputnik:
             count += 1
             if True:
 #            try:
+                print(self.IP, self.USER, self.PASS)
                 ssh.connect(self.IP, username=self.USER, password=self.PASS)
                 if constants.redundancy_.master:
                     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)

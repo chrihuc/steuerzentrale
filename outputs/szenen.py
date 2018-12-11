@@ -21,7 +21,7 @@ from alarm_event_messaging import messaging
 from database import mysql_connector as msqc
 
 from outputs import hue
-#from outputs import tradfri
+from outputs import tradfri
 from outputs import internal
 from outputs import samsung
 from outputs import satellites
@@ -34,20 +34,20 @@ from tools import toolbox
 
 xs1 = xs1.XS1()
 hues = hue.Hue_lights()
-#trads = tradfri.Tradfri_lights()
+trads = tradfri.Tradfri_lights()
 sn = sonos.Sonos()
 tv = samsung.TV()
 sat = satellites.Satellite()
 interna = internal.Internal()
 xs1_devs = msqc.tables.akt_type_dict['XS1']
 hue_devs = msqc.tables.akt_type_dict['HUE']
-#trads_devs = msqc.tables.akt_type_dict['TRADFRI']
+trads_devs = msqc.tables.akt_type_dict['TRADFRI']
 sns_devs = msqc.tables.akt_type_dict['SONOS']
 tvs_devs = msqc.tables.akt_type_dict['TV']
 sat_devs = msqc.tables.akt_type_dict['SATELLITE']
 sat_devs += msqc.tables.akt_type_dict['ZWave']
 loc_devs = msqc.tables.akt_type_dict['Local']
-cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs # + trads_devs
+cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs  + trads_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
 
@@ -224,8 +224,10 @@ class Szenen(object):
     def __sub_cmds__(cls, szn_id, device, commando, text):
         try:
             adress = msqc.get_device_adress(device)
+            system = adress.split(".")[0]
         except:
             adress = device
+            system = ''
         executed = False
         if szn_id != None:
             t_list = cls.kommando_dict.get(szn_id)
@@ -254,8 +256,8 @@ class Szenen(object):
     #                hue_del = Timer(hue_delay, hue.set_device, [key, commando])
     #                hue_del.start()
     #                hue_count += 1
-#            elif device in trads_devs:
-#                executed = trads.set_device(adress, commando)    
+            elif any([device in dev for dev in trads_devs]):
+                executed = trads.set_device(adress, commando)    
             elif device in sat_devs:
                 executed = sat.set_device(adress, commando)
             elif device in tvs_devs:
@@ -300,6 +302,7 @@ class Szenen(object):
 
     @classmethod
     def execute(cls, szene, check_bedingung=False, wert=0, device=None):
+        ct = datetime.datetime.now()
         toolbox.log(szene)
         if constants.passive:
             return True
@@ -453,6 +456,7 @@ class Szenen(object):
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
                     elif ex_re == 2:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)
+        print('Time spend on szene: ', str(datetime.datetime.now() - ct))
         return erfolg
 
 

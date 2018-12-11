@@ -300,8 +300,8 @@ class Szenen_tree():
 
     def get_commando_list(self,device):
         table = msqc.tables.akt_cmd_tbl_dict[device]
-        itera = 1
-        dicti = {'':1}
+        itera = 3
+        dicti = {'':1, 'man':2, 'auto':3}
         liste = msqc.mdb_read_table_column(table, 'Name')
         for item in liste:
             itera +=1            
