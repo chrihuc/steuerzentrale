@@ -81,7 +81,7 @@ def init_cfg():
         config.add_section('TRADFRI')
     for cfg in cfg_tradfri:
         if not config.has_option('TRADFRI', cfg):
-            config.set('TRADFRI', cfg, cfg_tradfri.get(cfg))            
+            config.set('TRADFRI', cfg, cfg_tradfri.get(cfg))
     # Writing our configuration file to 'main.cfg'
     with open('./main.cfg', 'w') as configfile:
         config.write(configfile)
@@ -123,7 +123,7 @@ for i in range(0,3):
 
 #            tifo = config.get('Main', 'tifo')
             tifo = json.loads(config.get('Main', 'tifo'))
-            
+
             debug_level = config.getint('Main', 'loglevel')
 
             class xs1_:
@@ -162,14 +162,14 @@ for i in range(0,3):
             class tradfri_:
                 identity = config.get('TRADFRI', 'Identity')
                 psk = config.get('TRADFRI', 'PSK')
-                host = config.get('TRADFRI', 'Host') 
-                key = config.get('TRADFRI', 'Key') 
+                host = config.get('TRADFRI', 'Host')
+                key = config.get('TRADFRI', 'Key')
         except:
             init_cfg()
             continue
         break
 
-akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave', 'Local', 'Heating']
+akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave', 'Local', 'Heating', 'TRADFRI']
 szn_types = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
 stockwerke = ['Vm1','V00','A00','V01','V02','VIR','']
 
