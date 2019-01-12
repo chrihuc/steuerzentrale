@@ -670,7 +670,7 @@ def inputs(device, value, add_to_mqtt=True):
         sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
         cur.execute(sql)
     con.close()
-    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
+#    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt
 
 def invalidTimers(hks):

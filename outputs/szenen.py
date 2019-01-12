@@ -82,7 +82,7 @@ class Szenen(object):
         if ('Name' in payload) and ('Value' in payload):
             cls.trigger_scenes(payload['Name'], payload['Value'])
         if toolbox.kw_unpack(kwargs,'typ') == 'ExecSzene':
-            cls.threadExecute(payload['Szene'])            
+            cls.threadExecute(payload['Szene'])
 
 
     @classmethod
@@ -257,7 +257,7 @@ class Szenen(object):
     #                hue_del.start()
     #                hue_count += 1
             elif any([device in dev for dev in trads_devs]):
-                executed = trads.set_device(adress, commando)    
+                executed = trads.set_device(adress, commando)
             elif device in sat_devs:
                 executed = sat.set_device(adress, commando)
             elif device in tvs_devs:
@@ -456,7 +456,7 @@ class Szenen(object):
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
                     elif ex_re == 2:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)
-        print('Time spend on szene: ', str(datetime.datetime.now() - ct))
+#        print('Time spend on szene: ', str(datetime.datetime.now() - ct))
         return erfolg
 
 

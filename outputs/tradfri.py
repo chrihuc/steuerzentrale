@@ -132,7 +132,7 @@ class Tradfri_lights():
             print(l)
             for lampe in l:
                 if lampe.light_control.can_set_color:
-                    color_command = lampe.light_control.set_hsb(szene['hue'], szene['sat'], szene['bri'])
+                    color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), int(szene['bri']))
                     api(color_command)
                 else:
                     dim_command = lampe.light_control.set_dimmer(int(szene['bri']))
