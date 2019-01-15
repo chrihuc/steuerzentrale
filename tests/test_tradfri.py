@@ -27,7 +27,7 @@ class TestUM(unittest.TestCase):
                          'Error getting commands')
 #    
     def test_set_device(self):
-        result = self.test_mod.set_device('Stehlampe', 'Nacht')
+        result = self.test_mod.set_device('StehlampeRGB', 'Nacht')
         self.assertTrue(result,
                          'Error sending command')  
 # 

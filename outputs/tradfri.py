@@ -118,7 +118,9 @@ class Tradfri_lights():
         szene = mysql_connector.mdb_read_table_entry(table.name,commd)
         
         if int(szene.get('bri'))<=0 or not szene['an']:
-            szene['bri'] = 0
+            bri = 0
+        else:
+            bri = int(szene['bri'])
         
         l = self.get_light_by_name(device)
         if szene['temp'] == None:
@@ -132,10 +134,11 @@ class Tradfri_lights():
             print(l)
             for lampe in l:
                 if lampe.light_control.can_set_color:
-                    color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), int(szene['bri']))
+#                    RANGE_SATURATION = (0, 65279)
+                    color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), bri)
                     api(color_command)
                 else:
-                    dim_command = lampe.light_control.set_dimmer(int(szene['bri']))
+                    dim_command = lampe.light_control.set_dimmer(bri)
                     api(dim_command) 
                     dim_command = lampe.light_control.set_color_temp(temp)
                     api(dim_command)                     
