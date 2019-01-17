@@ -197,3 +197,5 @@ class Internal:
             constants.ext_IP = ip
             aes.new_event(description="New IP "+ip, prio=7)
             constants.save_config()
+        else:
+            aes.new_event(description="Old IP "+ip, prio=7)

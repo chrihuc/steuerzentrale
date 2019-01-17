@@ -676,7 +676,7 @@ class TiFo:
         elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
 #        elif uid in self.drbuids.keys:
             print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)
-            return self.set_drb(data_ev.get('Device'),data_ev.get('Value'))
+            return self.set_drb(data_ev.get('Device'),data_ev.get('Value'), adress)
         else:
             return False
 

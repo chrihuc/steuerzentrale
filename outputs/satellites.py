@@ -5,6 +5,7 @@ import constants
 import socket
 from socket import error as socket_error
 import paramiko
+import time
 
 # TODO Tests split adress from hks
 import MySQLdb as mdb
@@ -273,17 +274,16 @@ class sputnik:
         count = 0
         while (not success) and (count <= tries):
             count += 1
-            if True:
-#            try:
-                print(self.IP, self.USER, self.PASS)
+#            if True:
+            try:
+#                print(self.IP, self.USER, self.PASS)
                 ssh.connect(self.IP, username=self.USER, password=self.PASS)
-                if constants.redundancy_.master:
-                    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
+                ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
                 success = True
 #            except socket_error as serr:
 #                success = False
-#            except:
-#                success = False
+            except:
+                time.sleep(0.5)
 #        if success:
 #            aes.new_event(description=self.name + " " + text, prio=0)
 #        else:
