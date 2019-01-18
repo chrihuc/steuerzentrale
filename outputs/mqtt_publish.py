@@ -46,5 +46,13 @@ def mqtt_pub(channel, data, retain=True):
             client.publish(channel, "couldn't convert to json", qos=1, retain=True)
         else:
             client.publish(channel, data, qos=1, retain=retain)
+    elif isinstance(data, list):
+        data = {'payload': data, 'ts': uhr}
+        try:
+            data = json.dumps(data, default=handler, allow_nan=False)
+        except:
+            client.publish(channel, "couldn't convert to json", qos=1, retain=True)
+        else:
+            client.publish(channel, data, qos=1, retain=retain)            
     else:
         client.publish(channel, data, qos=1, retain=retain)

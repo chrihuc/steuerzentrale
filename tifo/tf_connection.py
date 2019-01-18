@@ -674,7 +674,7 @@ class TiFo:
         elif settings.outputs.get(data_ev.get('Device')) == 'LEDs':
             return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
 #        elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
-        elif uid in self.drbuids.keys:
+        elif uid in self.drbuids.keys():
             print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)
             return self.set_drb(data_ev.get('Device'),data_ev.get('Value'), adress)
         else:

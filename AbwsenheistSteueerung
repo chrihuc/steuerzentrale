@@ -1,27 +1,31 @@
 
+
 dauernd:
     handy Pingen
-    ping ok  -> input = 1
+    ping ok  -> input = 1 -> Abwesend --> Szene User Anwesend
     ping nok -> input = 0
 
 usb
     input = 0
-    input = 1
+    input = 1 -> Abwesend --> Szene User Anwesend
 
 
 Tür Zu sofort:
-    Szene interner kommmand
-        für alle Bewohner in Table
-            Handy da oder
-            Schlüssel da
-            Input Bewohner * da  
-    Szene Anwesend über Inputs table auslösen wenn
-        Abwesend
+    Szene User1 weg
+        bedingungen HKS usb & HKS key == 0
+        Setting User auf 0 
+    Szene User2 weg
+        bedingungen HKS usb & HKS key == 0
+        Setting User auf 0         
+    Szene Abwesend 1 s später
+        bedingungen User1 == 0 & User2 == 0
             
 Tür zu 5 min später:
-    Szene interner kommmand
-        für alle Bewohner in Table
-            Handy weg und
-            Schlüssel weg
-            Input Bewohner * weg 
-    Szene Abwesend wenn alle Bewohner weg
+    Szene User1 weg
+        bedingungen HKS usb & HKS key == 0
+        Setting User auf 0 
+    Szene User2 weg
+        bedingungen HKS usb & HKS key == 0
+        Setting User auf 0         
+    Szene Abwesend 1 s später
+        bedingungen User1 == 0 & User2 == 0
