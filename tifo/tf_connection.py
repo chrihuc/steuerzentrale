@@ -639,9 +639,9 @@ class TiFo:
 
     def set_drb(self, device, value, adress):
         temp_uid = adress.split('.')[1] + '.' + adress.split('.')[2]
-        relaynr = 1 # int(adress.split('.')[3])
+        relaynr = int(adress.split('.')[3])
         relay = self.drbuids[temp_uid]
-        state = bool(value)
+        state = bool(int(value))
         relay.set_selected_state(relaynr, state)
 #        for cmd in uid_cmds:
 #            if (cmd.get('Value')) == float(value):
