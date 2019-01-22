@@ -133,12 +133,12 @@ class Tradfri_lights():
     #        api(dim_command)
 #            print(l)
             for lampe in l:
-                if lampe.light_control.can_set_color:
-                    dim_command = lampe.light_control.set_dimmer(bri)
-                    api(dim_command)                     
+                if lampe.light_control.can_set_color:                     
 #                    RANGE_SATURATION = (0, 65279)
                     color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']))
                     api(color_command)
+                    dim_command = lampe.light_control.set_dimmer(bri)
+                    api(dim_command)                    
                 else:
                     dim_command = lampe.light_control.set_dimmer(bri)
                     api(dim_command) 

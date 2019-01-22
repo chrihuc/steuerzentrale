@@ -210,7 +210,9 @@ furn_dict = {'SCA':'Scanner',
              'RUT':'Router',
              'SAT':'Satellite',
              'USB':'USBKey',
-             'IPA':'Handy'}
+             'IPA':'Handy',
+             'TUR':'Turm',
+             'STE':'Stehlampe'}
 
 dev_kat_dict = {'TE': 'Temperature',
                 'HU': 'Humidity',

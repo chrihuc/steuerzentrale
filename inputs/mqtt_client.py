@@ -12,6 +12,7 @@ from time import localtime,strftime
 from tools import toolbox
 
 from alarm_event_messaging import alarmevents
+from database import mysql_connector as msqc
 from outputs import cron
 from outputs.mqtt_publish import mqtt_pub
 aes = alarmevents.AES()
@@ -105,16 +106,23 @@ def on_message(client, userdata, msg):
                 if 'uuid' in m_in.keys():
                     print(m_in['uuid'])
                     aes.alarm_liste.delAlarm(m_in['uuid'])
+            elif 'SetWecker' in msg.topic:
+                table = constants.sql_tables.cron.name
+                for entry in eval(m_in['SetWecker']):
+                    device = entry['Name']
+                    msqc.mdb_set_table(table, device, entry)                    
         if 'DataRequest' in msg.topic:
-            if 'Wecker' in msg.topic:
+            if 'Wecker' in m_in:
 #                print('DataRequest Wecker')
                 print(crn.get_all(wecker=True))
-                mqtt_pub("DataRequest/Answer/Wecker", crn.get_all(wecker=True))
+                mqtt_pub("DataRequest/Answer/Cron", crn.get_all(wecker=True))
+            if 'Schaltuhr' in m_in:
+                mqtt_pub("DataRequest/Answer/Cron", crn.get_all(typ='Gui'))
 
 
 mqtt.Client.connected_flag=False
 client = None
-topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#"]
+topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#"]
 ipaddress = constants.mqtt_.server
 port = 1883
 

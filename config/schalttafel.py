@@ -68,7 +68,7 @@ cmd_lsts = ['out_hue','out_Sonos']
 cmd_lsts += sat.listCommandTable('alle',nameReturn = False)
 cmd_lsts = list(set(cmd_lsts))
 
-szn_typs = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
+szn_typs = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia', 'Anwesenheit']
 stockwerke = ['Vm1','V00','A00','V01','V02','VIR','']
 
 stockwerke_dict = {'Vm1':'Keller','V00':'Erdgeschoss','V01':'1. Stock','V02':'2. Stock',
@@ -108,7 +108,9 @@ furn_dict = {'SCA':'Scanner',
              'RUT':'Router',
              'SAT':'Satellite',
              'USB':'USBKey',
-             'IPA':'Handy'}
+             'IPA':'Handy',
+             'TUR':'Turm',
+             'STE':'Stehlampe'}
 
 
 szenen_beschreibung = mysql_connector.mdb_read_table_entry(db='set_Szenen',entry='Description')
@@ -408,7 +410,7 @@ class Szenen_tree():
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'], 'value': '='},{'name': 'Bedingung', 'type': 'str', 'value': kinder.get(child)}],'tip': "This is a checkbox"})
                         else:
                             if child != None:
-                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'list','values':['']+sorted(mysql_connector.settings_r())+sorted(mysql_connector.tables.inputs_dict_hks), 'value': child[0]},
+                                szn_d_child_l.append({'name': 'Bedingung %d' % (len(szn_d_child_l)+1), 'type': 'group', 'children':[{'name': 'Setting', 'type': 'str', 'value': child[0]},
                         {'name': 'Operand', 'type': 'list', 'values':['==','=','<','>','<=','>=','in','!'],'value': child[1]},{'name': 'Bedingung', 'type': 'str', 'value': child[2]}]})
                     szn_d_child['children']= szn_d_child_l
                     szn_l_child.append(szn_d_child)

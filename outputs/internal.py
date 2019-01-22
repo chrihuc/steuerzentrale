@@ -146,7 +146,7 @@ class Internal:
 #            akt_state_usb = eval(mysql_connector.setting_r(person['HKS_USB']))
 #            if akt_state_usb == 1:
 #                anwesend = True
-            broadcast_input_value('Bewohner.'+person['Name']+'.Anwesend', int(anwesend))
+#            broadcast_input_value('Bewohner.'+person['Name']+'.Anwesend', int(anwesend))
             
 #            name = 'Bew_' + str(person['Name'])
 #            akt_stat = eval(mysql_connector.setting_r(person['Name']))

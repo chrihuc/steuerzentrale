@@ -221,7 +221,7 @@ class AES:
                 self.send_mail('Alarm', text=description)
             elif prio >= 7 and prio < 8:
                 self.mes.send_direkt(to=self.mes.chris, titel="Debug", text=description, prio=prio)
-            if prio > 2 and prio <8:
+            if prio > 3 and prio <8:
                 AES.alarm_liste.addAlarm('Alarm', description)
 
     def alarm_resolved(self, description, resolv_desc):
