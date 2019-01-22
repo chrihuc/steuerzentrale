@@ -112,7 +112,7 @@ def on_message(client, userdata, msg):
                     device = entry['Name']
                     msqc.mdb_set_table(table, device, entry)                    
         if 'DataRequest' in msg.topic:
-            if 'Wecker' in m_in:
+            if 'Wecker' in m_in.values():
 #                print('DataRequest Wecker')
                 print(crn.get_all(wecker=True))
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(wecker=True))
