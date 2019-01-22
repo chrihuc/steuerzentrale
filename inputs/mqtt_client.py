@@ -116,7 +116,7 @@ def on_message(client, userdata, msg):
 #                print('DataRequest Wecker')
                 print(crn.get_all(wecker=True))
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(wecker=True))
-            if 'Schaltuhr' in m_in:
+            if 'Schaltuhr' in m_in.values():
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(typ='Gui'))
 
 
