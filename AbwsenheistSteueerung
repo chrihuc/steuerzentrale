@@ -9,6 +9,10 @@ usb
     input = 0
     input = 1 -> Abwesend --> Szene User Anwesend
 
+    Besucher
+    input = 0 -> 6hrs später & Status Besucher --> Abwesend
+    input = 1 -> besucher = 1
+                -> Abwesend --> SznBesucher
 
 Tür Zu sofort:
     Szene User1 weg
@@ -18,9 +22,10 @@ Tür Zu sofort:
         bedingungen HKS usb & HKS key == 0
         Setting User auf 0         
     Szene Abwesend 1 s später
-        bedingungen User1 == 0 & User2 == 0
+        bedingungen User1 == 0 & User2 == 0 & besucher == 0 --> Abwesend
+                    User1 == 0 & User2 == 0 & besucher == 1 --> SznBesucher
             
-Tür zu 5 min später:
+Tür zu 6 min später:
     Szene User1 weg
         bedingungen HKS usb & HKS key == 0
         Setting User auf 0 
@@ -29,3 +34,9 @@ Tür zu 5 min später:
         Setting User auf 0         
     Szene Abwesend 1 s später
         bedingungen User1 == 0 & User2 == 0
+        
+User 1          done
+User 2          todo
+Besucher        todo
+AutoAbwesend    todo
+besucherSzenen  todo

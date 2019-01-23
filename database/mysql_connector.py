@@ -542,9 +542,13 @@ def maxSzenenId():
     return results[0][0]
 
 def inputs(device, value, add_to_mqtt=True):
-    i = 0
+#    i = 0
     ct = datetime.datetime.now()
-    locklist[device] = ct
+    try:
+        last_time = locklist[device]
+    except KeyError:
+        last_time = None
+    locklist[device] = ct    
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}
@@ -571,14 +575,16 @@ def inputs(device, value, add_to_mqtt=True):
                     dicti_1[field_names_1[i]] = row[i]
             last_value = dicti_1['last_Value']
             if last_value is None: last_value = 0
-            try:
-                last_time = locklist[device]
-            except KeyError:
-                last_time = dicti_1['last1']
+            if not last_time:
+                try:
+                    last_time = dicti_1['last1']
+                except:
+                    last_time = ct - datetime.timedelta(hours=1)
+            locklist[device] = ct
             debounce = dicti_1['debounce']
             heartbt = dicti_1['heartbeat']
             desc = dicti_1['Description']
-            if str(last_time) == 'None': last_time = ct
+            if str(last_time) == 'None': last_time = ct - datetime.timedelta(hours=1)
             if debounce is None:
                 db_time = ct
             else:

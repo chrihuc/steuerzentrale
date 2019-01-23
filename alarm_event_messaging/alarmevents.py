@@ -80,7 +80,6 @@ class AlarmListe:
         self.store()
 
     def delAlarm(self, uuid):
-        print(AlarmListe.liste)
         try:
             del AlarmListe.liste[uuid]
         except:

@@ -544,7 +544,7 @@ class Sonos:
         mysql_connector.mdb_set_table(table.name,self.Names.get(player),dicti)
         return True
 
-    def soco_get_status(self, player, store = True):
+    def soco_get_status(self, player, store = True, sznName=None, mainInfo=False):
         dicti = {}
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
@@ -560,6 +560,7 @@ class Sonos:
                 if _zone in posinfo:
                     zone = _zone
         name = player.player_name
+        sznName = sznName or name
 #        if player.is_coordinator:
         if zone == own_zone:
             dicti['MasterZone'] = ''
@@ -567,15 +568,16 @@ class Sonos:
             self.PLAYLISTS[name] = player.get_queue()
         else:
             dicti['MasterZone'] = zone
-        dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'
         dicti['Radio'] = not 'file' in track_info['uri']
         dicti['Sender'] = track_info['uri']
         dicti['TitelNr'] = track_info['playlist_position']
         dicti['Time'] = track_info['position']
         dicti['Name'] = name
-        dicti['Volume'] = player.volume
+        if not mainInfo:
+            dicti['Volume'] = player.volume
+            dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'        
         if store: self.Status[name] = dicti
-        mysql_connector.mdb_set_table(table.name,name,dicti)  
+        mysql_connector.mdb_set_table(table.name,sznName,dicti)  
         sonospl = player.get_sonos_playlist_by_attr('Title',name)
         player.remove_sonos_playlist(sonospl)
         player.create_sonos_playlist_from_queue(name)
@@ -861,6 +863,8 @@ class Sonos:
                 self.SetPause(player_ip)
             elif (str(command) == "EingangWohnzi"):
                 self.StreamInput(player_ip, self.WohnZiZone)
+            elif (str(command) == "SpeicherFavorit"):
+                self.soco_get_status(player, sznName='Favorit', mainInfo=True)                
             elif (str(command) == "Isolieren"):
                 self.isolate(player_ip)
             elif ((str(command) != "resume") and (str(command) != "An") and (str(command) != "None")):
@@ -873,7 +877,7 @@ class Sonos:
     def list_commands(self):
         comands = mysql_connector.mdb_get_table(table.name)
         liste = ["Pause","Play","Save","Announce_Time","Durchsage",'Ansage',"Return","resume","lauter",
-                 "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi","Isolieren"]
+                 "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi","Isolieren","SpeicherFavorit"]
         for comand in comands:
             liste.append(comand.get("Name"))
         #liste.remove("Name")
