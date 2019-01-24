@@ -114,11 +114,11 @@ def on_message(client, userdata, msg):
         if 'DataRequest' in msg.topic:
             if 'Wecker' in m_in.values():
 #                print('DataRequest Wecker')
-                print(crn.get_all(wecker=True))
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(wecker=True))
             if 'Schaltuhr' in m_in.values():
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(typ='Gui'))
-            elif 'SetTable' in msg.topic:     
+            elif 'SetTable' in msg.topic:  
+                print(m_in)
                 table = constants.sql_tables.cron.name
                 for entry in eval(m_in['payload']):
                     device = entry['Name']
