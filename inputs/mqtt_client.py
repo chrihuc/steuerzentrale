@@ -112,17 +112,18 @@ def on_message(client, userdata, msg):
                     device = entry['Name']
                     msqc.mdb_set_table(table, device, entry)                    
         if 'DataRequest' in msg.topic:
-            if 'Wecker' in m_in.values():
+            if 'SetTable' in msg.topic:  
+                table = constants.sql_tables.cron.name
+                for entry in m_in['payload']:
+#                    print(entry)
+                    device = entry['Name']
+                    msqc.mdb_set_table(table, device, entry)            
+            elif 'Wecker' in m_in.values():
 #                print('DataRequest Wecker')
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(wecker=True))
-            if 'Schaltuhr' in m_in.values():
+            elif 'Schaltuhr' in m_in.values():
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(typ='Gui'))
-            elif 'SetTable' in msg.topic:  
-                print(m_in)
-                table = constants.sql_tables.cron.name
-                for entry in eval(m_in['payload']):
-                    device = entry['Name']
-                    msqc.mdb_set_table(table, device, entry)                
+                
 
 
 mqtt.Client.connected_flag=False

@@ -555,6 +555,7 @@ def inputs(device, value, add_to_mqtt=True):
     szenen = []
     desc = None
     heartbt = None
+    filtered = False
 #    print(device,value)
 #    if 'MQTT' in device:
 #        add_to_mqtt = False
@@ -574,107 +575,123 @@ def inputs(device, value, add_to_mqtt=True):
                 for i in range (0,len(row)):
                     dicti_1[field_names_1[i]] = row[i]
             last_value = dicti_1['last_Value']
-            if last_value is None: last_value = 0
-            if not last_time:
-                try:
-                    last_time = dicti_1['last1']
-                except:
-                    last_time = ct - datetime.timedelta(hours=1)
-            locklist[device] = ct
-            debounce = dicti_1['debounce']
-            heartbt = dicti_1['heartbeat']
-            desc = dicti_1['Description']
-            if str(last_time) == 'None': last_time = ct - datetime.timedelta(hours=1)
-            if debounce is None:
-                db_time = ct
-            else:
-                db_time = last_time + datetime.timedelta(seconds=debounce)
-#                print('input debouncing ', ct, db_time)
-            deltaT = ct - last_time
-            deltaTm = deltaT.total_seconds() / 60
-            if deltaTm > 0:
-                deltaX = float(value) - float(last_value)
-                gradient = deltaX #/ deltaTm
-            else:
-                gradient = float(value) - float(last_value)
-            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
-#            cur.execute(sql)
-
-            sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
-            value = str(value)
-            sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
-            sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
-            sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
-#            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
-#            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
-            sql2 = sql2 + ' AND (enabled = "True" OR enabled is NULL )'
-            sql2 = sql2 + ');'
-            cur.execute(sql + sql2)
-            results = cur.fetchall()
-            field_names = [i[0] for i in cur.description]
-            #dicti = {key: "" for (key) in szene_columns}
-            for row in results:
-                single = True
-                for i in range (0,len(row)):
-                    dicti[field_names[i]] = row[i]
-                doppelklick = dicti.get("Doppelklick")
-                if ct >= db_time:
-                    if str(dicti.get("last2")) != "None":
-                        if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
-                            szenen.append(dicti.get("Dreifach"))
-                            single = False
-                        elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
-                            szenen.append(dicti.get("Doppel"))
-                            single = False
-                    if str(doppelklick) != "True": single = True
-                    if single: szenen.append(dicti.get(setting_r("Status")))
-                    szenen.append(dicti.get('Immer'))
-#            get stting and logging
-            hks = dicti_1['HKS']
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
-            if cur.fetchone()[0] > 0:
-                setting_s(hks, value)
-            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-            if cur.fetchone()[0] > 0 and str(hks) != str(device):
-                try:
-                    insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-                    cur.execute(insertstatement)
-                except:
+            
+            # Filtern, wenn grösser oder kleiner Messung ignorieren
+            filtering = dicti_1['Filter']
+            try:
+                filtering = eval(filtering)
+            except:
+                filtering = [None, None]
+            if filtering[0]:
+                if value <= filtering[0]:
+                    filtered = True
+            if filtering[1]:
+                if value >= filtering[1]:
+                    filtered = True
+                    
+            if not filtered:
+                if last_value is None: last_value = 0
+                if not last_time:
                     try:
-                        ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % (constants.sql_tables.his_inputs.name, hks)
-                        cur.execute(ist)
+                        last_time = dicti_1['last1']
+                    except:
+                        last_time = ct - datetime.timedelta(hours=1)
+                locklist[device] = ct
+                debounce = dicti_1['debounce']
+                heartbt = dicti_1['heartbeat']
+                desc = dicti_1['Description']
+                if str(last_time) == 'None': last_time = ct - datetime.timedelta(hours=1)
+                if debounce is None:
+                    db_time = ct
+                else:
+                    db_time = last_time + datetime.timedelta(seconds=debounce)
+    #                print('input debouncing ', ct, db_time)
+                deltaT = ct - last_time
+                deltaTm = deltaT.total_seconds() / 60
+                if deltaTm > 0:
+                    deltaX = float(value) - float(last_value)
+                    gradient = deltaX #/ deltaTm
+                else:
+                    gradient = float(value) - float(last_value)
+                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
+    #            cur.execute(sql)
+    
+                sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
+                value = str(value)
+                sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
+                sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
+                sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
+    #            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
+    #            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
+                sql2 = sql2 + ' AND (enabled = "True" OR enabled is NULL )'
+                sql2 = sql2 + ');'
+                cur.execute(sql + sql2)
+                results = cur.fetchall()
+                field_names = [i[0] for i in cur.description]
+                #dicti = {key: "" for (key) in szene_columns}
+                for row in results:
+                    single = True
+                    for i in range (0,len(row)):
+                        dicti[field_names[i]] = row[i]
+                    doppelklick = dicti.get("Doppelklick")
+                    if ct >= db_time:
+                        if str(dicti.get("last2")) != "None":
+                            if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
+                                szenen.append(dicti.get("Dreifach"))
+                                single = False
+                            elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
+                                szenen.append(dicti.get("Doppel"))
+                                single = False
+                        if str(doppelklick) != "True": single = True
+                        if single: szenen.append(dicti.get(setting_r("Status")))
+                        szenen.append(dicti.get('Immer'))
+    #            get stting and logging
+                hks = dicti_1['HKS']
+                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
+                if cur.fetchone()[0] > 0:
+                    setting_s(hks, value)
+                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
+                if cur.fetchone()[0] > 0 and str(hks) != str(device):
+                    try:
                         insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
                         cur.execute(insertstatement)
                     except:
-                        pass
-                        print(insertstatement)
-
-#                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
-#                ist = "SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s'" % (constants.sql_tables.his_inputs.name, datab, hks)
-#                cur.execute(ist)
-#                if not cur.fetchall():
-#                    ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(5,2)" % (constants.sql_tables.his_inputs.name, hks)
-#                    cur.execute(ist)
-
-
-            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
+                        try:
+                            ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % (constants.sql_tables.his_inputs.name, hks)
+                            cur.execute(ist)
+                            insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
+                            cur.execute(insertstatement)
+                        except:
+                            pass
+                            print(insertstatement)
+    
+    #                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
+    #                ist = "SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s'" % (constants.sql_tables.his_inputs.name, datab, hks)
+    #                cur.execute(ist)
+    #                if not cur.fetchall():
+    #                    ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(5,2)" % (constants.sql_tables.his_inputs.name, hks)
+    #                    cur.execute(ist)
+    
+    
+                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
+                cur.execute(sql)
+                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET valid = "True" WHERE Name = "' + str(device) +'"'
+                cur.execute(sql)
+                if not heartbt is None:
+                    if hks in validTimers:
+                        validTimers[hks].cancel()
+                    thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
+                    thread_pt_.start()
+                    validTimers[hks] = thread_pt_
+                if str(dicti.get("last1")) != "None":
+                    sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
+                    cur.execute(sql + sql2)
+                if str(hks) != str(device) and add_to_mqtt:
+                    data = {"Value":value, "HKS":hks}
+                    mqtt_pub("Inputs/" + str(hks), data)
+        if not filtered:
+            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)
-            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET valid = "True" WHERE Name = "' + str(device) +'"'
-            cur.execute(sql)
-            if not heartbt is None:
-                if hks in validTimers:
-                    validTimers[hks].cancel()
-                thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
-                thread_pt_.start()
-                validTimers[hks] = thread_pt_
-            if str(dicti.get("last1")) != "None":
-                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
-                cur.execute(sql + sql2)
-            if str(hks) != str(device) and add_to_mqtt:
-                data = {"Value":value, "HKS":hks}
-                mqtt_pub("Inputs/" + str(hks), data)
-        sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
-        cur.execute(sql)
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt

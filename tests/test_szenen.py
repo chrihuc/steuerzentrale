@@ -26,7 +26,7 @@ class TestUM(unittest.TestCase):
         self.start_t = None
 
     def print_it(self, it):
-        print datetime.datetime.now() - self.start_t, it
+        print(datetime.datetime.now() - self.start_t, it)
 
 
 #
@@ -53,7 +53,7 @@ class TestUM(unittest.TestCase):
 #        toolbox.communication.send_message(payload)
 
     def test_execute0(self):
-        runs = self.sz.execute("SideBorAus")
+        runs = self.sz.execute("Radio2")
         self.assertTrue(runs,
                          'Failed to Execute Scene')
 

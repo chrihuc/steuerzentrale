@@ -14,23 +14,23 @@ class TestUM(unittest.TestCase):
     def setUp(self):
         self.test_mod = sonos.Sonos()
 
-    def test_list_devices(self):
-        list_devices = self.test_mod.list_devices()
-        print(list_devices)
-        self.assertTrue(list_devices,
-                         'Error getting devices')
-
-    def test_list_commands(self):
-        list_commands = self.test_mod.list_commands()
-        print(list_commands)
-        self.assertTrue(list_commands,
-                         'Error getting commands')
-
-    def test_dict_commands(self):
-        list_commands = self.test_mod.dict_commands()
-        print(list_commands)
-        self.assertTrue(list_commands,
-                         'Error getting commands')
+#    def test_list_devices(self):
+#        list_devices = self.test_mod.list_devices()
+#        print(list_devices)
+#        self.assertTrue(list_devices,
+#                         'Error getting devices')
+#
+#    def test_list_commands(self):
+#        list_commands = self.test_mod.list_commands()
+#        print(list_commands)
+#        self.assertTrue(list_commands,
+#                         'Error getting commands')
+#
+#    def test_dict_commands(self):
+#        list_commands = self.test_mod.dict_commands()
+#        print(list_commands)
+#        self.assertTrue(list_commands,
+#                         'Error getting commands')
 
 #
     def test_set_device(self):
@@ -38,7 +38,7 @@ class TestUM(unittest.TestCase):
 #        self.assertTrue(result,
 #                         'Error sending command')
 #        time.sleep(5)
-        result = self.test_mod.set_device('Bad', 'MasterWohnZi')
+        result = self.test_mod.set_device('Kueche', 'KlassikDe')
         self.assertTrue(result,
                          'Error sending command')
 #
