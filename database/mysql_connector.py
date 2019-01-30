@@ -583,10 +583,10 @@ def inputs(device, value, add_to_mqtt=True):
             except:
                 filtering = [None, None]
             if filtering[0]:
-                if value <= filtering[0]:
+                if float(value) <= filtering[0]:
                     filtered = True
             if filtering[1]:
-                if value >= filtering[1]:
+                if float(value) >= filtering[1]:
                     filtered = True
                     
             if not filtered:

@@ -119,29 +119,29 @@ class Internal:
         constants.run = False
 
     def check_anwesenheit(self):
-        bewohner = mysql_connector.mdb_get_table(constants.sql_tables.Bewohner.name)
+#        bewohner = mysql_connector.mdb_get_table(constants.sql_tables.Bewohner.name)
 #        alle_da = True
 #        alle_weg = True
 #        alle_da_act = eval(mysql_connector.setting_r('Alle_Bewohner_anwesend'))
 #        alle_weg_act = eval(mysql_connector.setting_r('Alle_Bewohner_abwesend'))
-        for person in bewohner:
-            anwesend = False
-            ip_adress = person['Handy_IP']
-            if ip_adress == None:
-                continue
-            state = person['Handy_State']
-            if state == None:
-                state = 0
-            else:
-                state = int(state)
-            if toolbox.ping(ip_adress):
-                person['Handy_State'] = 5
-                anwesend = True
-            else:
-                person['Handy_State'] = state - 1
-            cmd = {'Handy_State':person['Handy_State']}
-            mysql_connector.mdb_set_table(constants.sql_tables.Bewohner.name, person['Name'], cmd)  
-            broadcast_input_value('Bewohner.'+person['Name']+'.Handy', int(state))
+#        for person in bewohner:
+#            anwesend = False
+#            ip_adress = person['Handy_IP']
+#            if ip_adress == None:
+#                continue
+#            state = person['Handy_State']
+#            if state == None:
+#                state = 0
+#            else:
+#                state = int(state)
+#            if toolbox.ping(ip_adress):
+#                person['Handy_State'] = 5
+#                anwesend = True
+#            else:
+#                person['Handy_State'] = state - 1
+#            cmd = {'Handy_State':person['Handy_State']}
+#            mysql_connector.mdb_set_table(constants.sql_tables.Bewohner.name, person['Name'], cmd)  
+#            broadcast_input_value('Bewohner.'+person['Name']+'.Handy', int(state))
 #            TODO: Table anpassend und Zeilen einkommentieren
 #            akt_state_usb = eval(mysql_connector.setting_r(person['HKS_USB']))
 #            if akt_state_usb == 1:

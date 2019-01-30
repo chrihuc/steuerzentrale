@@ -15,7 +15,9 @@ from tools import toolbox
 #toolbox.log('debug on')
 
 # TODO: unittest
-
+def broadcast_input_value(Name, Value):
+    payload = {'Name':Name,'Value':Value}
+    toolbox.communication.send_message(payload, typ='InputValue')
 
 class Anwesenheit:
     def __init__(self):
@@ -41,6 +43,7 @@ class Anwesenheit:
                 person['Handy_State'] = state
             cmd = {'Handy_State':person['Handy_State']}
             msqc.mdb_set_table(constants.sql_tables.Bewohner.name, person['Name'], cmd)
+            broadcast_input_value('Bewohner.'+person['Name']+'.Handy', int(state))
 
     def check_handys_service(self):
         while True:
