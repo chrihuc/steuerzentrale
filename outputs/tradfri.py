@@ -32,12 +32,21 @@ class sql_object:
 
 table = sql_object("out_tradfri", "Outputs", (("Id","INT(11)","PRIMARY KEY","AUTO_INCREMENT"),("Name","VARCHAR(45)"),("hue","VARCHAR(45)"),("bri","VARCHAR(45)"),("sat","VARCHAR(45)"),("an","VARCHAR(45)"),("transitiontime","VARCHAR(45)")))
 
+class NoKey(Exception):
+    pass
+
 def authenticate():
     identity = uuid.uuid4().hex
     api_factory = APIFactory(host=constants.tradfri_.host, psk_id=identity)
+    if constants.tradfri_.key == '':
+        aes.new_event(description="Kein Key für Tradfri", prio=7)
+        raise KeyError
     psk = api_factory.generate_psk(constants.tradfri_.key) 
     constants.tradfri_.identity = identity
     constants.tradfri_.psk = psk
+    constants.config.set('TRADFRI', 'Identity', identity)
+    constants.config.set('TRADFRI', 'PSK', psk)
+    constants.config.set('TRADFRI', 'Key', '')
     constants.save_config()
     return api_factory
     

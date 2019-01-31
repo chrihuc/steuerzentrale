@@ -548,7 +548,7 @@ def inputs(device, value, add_to_mqtt=True):
         last_time = locklist[device]
     except KeyError:
         last_time = None
-    locklist[device] = ct    
+        locklist[device] = ct    
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}
@@ -596,7 +596,6 @@ def inputs(device, value, add_to_mqtt=True):
                         last_time = dicti_1['last1']
                     except:
                         last_time = ct - datetime.timedelta(hours=1)
-                locklist[device] = ct
                 debounce = dicti_1['debounce']
                 heartbt = dicti_1['heartbeat']
                 desc = dicti_1['Description']
@@ -606,6 +605,8 @@ def inputs(device, value, add_to_mqtt=True):
                 else:
                     db_time = last_time + datetime.timedelta(seconds=debounce)
     #                print('input debouncing ', ct, db_time)
+                if ct >= db_time:
+                    locklist[device] = ct
                 deltaT = ct - last_time
                 deltaTm = deltaT.total_seconds() / 60
                 if deltaTm > 0:

@@ -39,7 +39,7 @@ class Anwesenheit:
             if tb.ping(ip_adress):
                 person['Handy_State'] = 5
             else:
-                state = min(0,state-1)
+                state = max(0,state-1)
                 person['Handy_State'] = state
             cmd = {'Handy_State':person['Handy_State']}
             msqc.mdb_set_table(constants.sql_tables.Bewohner.name, person['Name'], cmd)

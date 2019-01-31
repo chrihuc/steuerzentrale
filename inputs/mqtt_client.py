@@ -104,7 +104,6 @@ def on_message(client, userdata, msg):
                     broadcast_exec_comm(device, command)
             elif 'AlarmOk' in msg.topic:
                 if 'uuid' in m_in.keys():
-                    print(m_in['uuid'])
                     aes.alarm_liste.delAlarm(m_in['uuid'])
             elif 'SetWecker' in msg.topic:
                 table = constants.sql_tables.cron.name

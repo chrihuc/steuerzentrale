@@ -21,7 +21,7 @@ from alarm_event_messaging import messaging
 from database import mysql_connector as msqc
 
 from outputs import hue
-from outputs import tradfri
+
 from outputs import internal
 from outputs import samsung
 from outputs import satellites
@@ -32,16 +32,22 @@ from tools import szn_timer
 from tools import toolbox
 #toolbox.log('debug on')
 
+try:
+    from outputs import tradfri
+    trads = tradfri.Tradfri_lights()
+    trads_devs = msqc.tables.akt_type_dict['TRADFRI']
+except KeyError:
+    trads = None
+    trads_devs = []
+
 xs1 = xs1.XS1()
 hues = hue.Hue_lights()
-trads = tradfri.Tradfri_lights()
 sn = sonos.Sonos()
 tv = samsung.TV()
 sat = satellites.Satellite()
 interna = internal.Internal()
 xs1_devs = msqc.tables.akt_type_dict['XS1']
 hue_devs = msqc.tables.akt_type_dict['HUE']
-trads_devs = msqc.tables.akt_type_dict['TRADFRI']
 sns_devs = msqc.tables.akt_type_dict['SONOS']
 tvs_devs = msqc.tables.akt_type_dict['TV']
 sat_devs = msqc.tables.akt_type_dict['SATELLITE']

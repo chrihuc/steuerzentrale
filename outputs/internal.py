@@ -195,7 +195,9 @@ class Internal:
         ip = requests.get('https://api.ipify.org').text
         if ip != constants.ext_IP:
             constants.ext_IP = ip
-            aes.new_event(description="New IP "+ip, prio=7)
+            aes.new_event(description="New IP "+ip, prio=8)
+            constants.config.set('Main', 'eigene_IP', ip)
             constants.save_config()
         else:
-            aes.new_event(description="Old IP "+ip, prio=7)
+            pass
+#            aes.new_event(description="Old IP "+ip, prio=8)

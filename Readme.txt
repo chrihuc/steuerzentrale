@@ -48,7 +48,7 @@ sudo apt-get install daemontools daemontools-run
 python3-pandas python3-mysqldb python3-ephem python3-urllib3 python3-git python3-paramiko python3-pycurl python3-pip
 
 export LC_ALL=C
-sudo pip3 install phue pytradfri paho-mqtt soco tinkerforge samsungctl
+sudo pip3 install phue pytradfri paho-mqtt soco tinkerforge samsungctl pyowm
 
 pyqtgraph easygui
 

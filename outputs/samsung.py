@@ -124,8 +124,8 @@ import samsungctl
 config = {
     "name": "samsungctl",
     "description": "PC",
-    "id": "00:30:1b:a0:2f:05",
-    "host": "192.168.192.29",
+    "id": constants.samsung_tv_.mac,
+    "host": constants.samsung_tv_.ip,
     "port": 55000,
     "method": "legacy",
     "timeout": 0,
@@ -152,7 +152,7 @@ class TV:
     def register(self):
         while True:
             self.tv_remote_lan = None
-            while not ping("192.168.192.29"):
+            while not ping(constants.samsung_tv_.ip):
                 time.sleep(5.0) 
             time.sleep(5.0)
             while self.tv_remote_lan == None:
@@ -162,7 +162,7 @@ class TV:
                 except:
                     self.tv_remote_lan = None
                     time.sleep(1)
-            while ping("192.168.192.29"):
+            while ping(constants.samsung_tv_.ip):
                 time.sleep(5.0) 
             time.sleep(5.0)            
      
@@ -253,7 +253,7 @@ class TV:
      #KEY_PROG_UP
 
 if __name__ == '__main__':
-    tv = Remotecontrol(constants.eigene_IP,'192.168.192.29','00:30:1b:a0:2f:05')
+    tv = Remotecontrol(constants.eigene_IP,constants.samsung_tv_.ip,constants.samsung_tv_.mac)
     tv.authenti()
 
     

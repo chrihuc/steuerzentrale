@@ -55,7 +55,7 @@ class Szenen_Timer:
         dicti["delay"] = delay
         dicti["child"] = child
         dicti["exact"] = exact
-        dicti["retrig"] = retrig
+        dicti["retrig"] = retrig                                # Verlängerbar, kommt eine weitere Aufforderung der Szene wird diese ausgeführt
         dicti['due'] = ct + datetime.timedelta(seconds=delay)
         hash_id = uuid.uuid4()
         dicti["hash_id"] = hash_id

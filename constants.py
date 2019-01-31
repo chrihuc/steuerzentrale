@@ -14,7 +14,7 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
         'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
-        'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0, 'Ext_IP':'0.0.0.0'}
+        'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0, 'Ext_IP':'0.0.0.0', 'OWM_key':'fillme'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
@@ -23,6 +23,7 @@ cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
            'Bilder': ''}
 cfg_mqtt = {'Username': '', 'Password': '', 'Server': '192.168.192.10'}
 cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': '', 'Key': ''}
+cfg_samsung_tv = {'IP': '', 'MAC': '00:30:1b:a0:2f:05'}
 
 def init_cfg():
     if not config.has_section('Main'):
@@ -82,6 +83,11 @@ def init_cfg():
     for cfg in cfg_tradfri:
         if not config.has_option('TRADFRI', cfg):
             config.set('TRADFRI', cfg, cfg_tradfri.get(cfg))
+    if not config.has_section('SamsungTV'):
+        config.add_section('SamsungTV')
+    for cfg in cfg_samsung_tv:
+        if not config.has_option('SamsungTV', cfg):
+            config.set('SamsungTV', cfg, cfg_samsung_tv.get(cfg))            
     # Writing our configuration file to 'main.cfg'
     with open('./main.cfg', 'w') as configfile:
         config.write(configfile)
@@ -125,6 +131,8 @@ for i in range(0,3):
             tifo = json.loads(config.get('Main', 'tifo'))
 
             debug_level = config.getint('Main', 'loglevel')
+            
+            owm_key = config.getint('Main', 'OWM_key')
 
             class xs1_:
                 STREAM_URL = xs1_IP+"/control?callback=cname&cmd=subscribe&format=txt"
@@ -164,6 +172,9 @@ for i in range(0,3):
                 psk = config.get('TRADFRI', 'PSK')
                 host = config.get('TRADFRI', 'Host')
                 key = config.get('TRADFRI', 'Key')
+            class samsung_tv_:
+                ip = config.get('SamsungTV', 'IP')
+                mac = config.get('SamsungTV', 'MAC')              
         except:
             init_cfg()
             continue
@@ -301,4 +312,8 @@ class redundancy_:
     #'Master' 'Slave' 'auto'
     typ = 'Master'
 
+if eigene_IP <> own_ip:
+    config.set('Main', 'eigene_IP', own_ip)
+    save_config()
+    
 print(name, debug_level, own_ip)
