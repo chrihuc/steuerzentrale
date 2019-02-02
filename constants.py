@@ -13,7 +13,7 @@ config = configparser.RawConfigParser()
 cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
-        'gcm_ID':'', 'automatic_backup':'False', 'webcam_supervision':'False',\
+        'gcm_ID':'depc', 'automatic_backup':'False', 'webcam_supervision':'False',\
         'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0, 'Ext_IP':'0.0.0.0', 'OWM_key':'fillme'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
@@ -132,7 +132,7 @@ for i in range(0,3):
 
             debug_level = config.getint('Main', 'loglevel')
             
-            owm_key = config.getint('Main', 'OWM_key')
+            owm_key = config.get('Main', 'OWM_key')
 
             class xs1_:
                 STREAM_URL = xs1_IP+"/control?callback=cname&cmd=subscribe&format=txt"
