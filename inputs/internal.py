@@ -37,7 +37,7 @@ class Anwesenheit:
             else:
                 state = int(state)
             if tb.ping(ip_adress):
-                person['Handy_State'] = 5
+                person['Handy_State'] = 50
             else:
                 state = max(0,state-1)
                 person['Handy_State'] = state
