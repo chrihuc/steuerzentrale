@@ -196,7 +196,7 @@ class Internal:
         if ip != constants.ext_IP:
             constants.ext_IP = ip
             aes.new_event(description="New IP "+ip, prio=8)
-            constants.config.set('Main', 'eigene_IP', ip)
+            constants.config.set('Main', 'Ext_IP', ip)
             constants.save_config()
         else:
             pass

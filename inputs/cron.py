@@ -7,6 +7,7 @@ import time
 from threading import Timer
 import threading
 from time import localtime,strftime
+#import datetime
 from outputs import cron
 from outputs import szenen
 
@@ -79,8 +80,12 @@ def periodic_supervision():
                 for i in range(min2,30):
                     #executed every min
                     zeit =  time.time()
-                    uhr = str(strftime("%H:%M",localtime(zeit)))  
+                    uhr = str(strftime("%H:%M",localtime(zeit))) 
                     mqtt_pub("Time", {'Value':uhr})
+#                    jetzt = datetime.datetime.today()
+#                    jetzt = jetzt + datetime.timedelta(minutes=1)
+#                    tag = jetzt.weekday()
+#                    uhr = jetzt.strftime("%H:%M")                    
                     l += 1
                     if l == 2:
                         t = threading.Thread(target=every_2_min)

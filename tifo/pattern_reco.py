@@ -8,7 +8,7 @@ This is a temporary script file.
 import time
 from random import randint
 
-cycle_time = 0.05
+cycle_time = 0.1
 
 patterns = [{'count_min'   :   9,
              'count_max'   :  10,
