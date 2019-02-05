@@ -378,7 +378,7 @@ class TiFo:
         toolbox.log(device)
         time0 = time.time()
         data = []
-        return
+#        return
         nr_cycles = int(5 / pr.cycle_time)
         for i in range(0, nr_cycles):
             sample = device.get_intensity()
@@ -675,7 +675,7 @@ class TiFo:
             return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
 #        elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
         elif uid in self.drbuids.keys():
-            print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)
+#            print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)
             return self.set_drb(data_ev.get('Device'),data_ev.get('Value'), adress)
         else:
             return False

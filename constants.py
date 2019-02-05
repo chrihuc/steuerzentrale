@@ -101,7 +101,7 @@ def save_config():
         config.write(configfile)
 
 for i in range(0,3):
-    while True:
+#    while True:
         try:
             run = True
             passive = False
