@@ -105,7 +105,7 @@ try:
     threadliste.append(t)
     t.start()
 except:
-    aes.new_event(description="OWM not installed"+t.name, prio=7)
+    aes.new_event(description="OWM not installed", prio=7)
 
 aes.new_event(description="All Threads started", prio=7)
 if constants.debug:
