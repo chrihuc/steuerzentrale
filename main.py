@@ -17,8 +17,7 @@ from inputs import cron
 from inputs import xs1
 from inputs import internal
 from outputs import temp_control
-from outputs import batswitch
-from inputs import mqtt_client
+
 
 from tifo import tf_connection
 
@@ -90,13 +89,23 @@ t = toolbox.OwnTimer(0, function=sp.main, args = [], name="sound_prov")
 threadliste.append(t)
 t.start()
 
+from outputs import batswitch
 t = toolbox.OwnTimer(0, function=batswitch.main, args = [], name="mqtt_batswitch")
 threadliste.append(t)
 t.start()
 
+from inputs import mqtt_client
 t = toolbox.OwnTimer(0, function=mqtt_client.main, args = [], name="mqtt_inputs")
 threadliste.append(t)
 t.start()
+
+try:
+    from inputs import owm
+    t = toolbox.OwnTimer(0, function=owm.main, args = [], name="weather")
+    threadliste.append(t)
+    t.start()
+except:
+    aes.new_event(description="OWM not installed"+t.name, prio=7)
 
 aes.new_event(description="All Threads started", prio=7)
 if constants.debug:

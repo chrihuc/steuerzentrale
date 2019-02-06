@@ -7,7 +7,7 @@ import time
 from threading import Timer
 import threading
 from time import localtime,strftime
-#import datetime
+import datetime
 from outputs import cron
 from outputs import szenen
 
@@ -82,10 +82,10 @@ def periodic_supervision():
                     zeit =  time.time()
                     uhr = str(strftime("%H:%M",localtime(zeit))) 
                     mqtt_pub("Time", {'Value':uhr})
-#                    jetzt = datetime.datetime.today()
-#                    jetzt = jetzt + datetime.timedelta(minutes=1)
-#                    tag = jetzt.weekday()
-#                    uhr = jetzt.strftime("%H:%M")                    
+                    jetzt = datetime.datetime.today()
+                    jetzt = jetzt + datetime.timedelta(minutes=1)
+                    tag = jetzt.weekday()
+                    uhr = jetzt.strftime("%H:%M")                    
                     l += 1
                     if l == 2:
                         t = threading.Thread(target=every_2_min)
@@ -96,19 +96,19 @@ def periodic_supervision():
                         t = threading.Thread(target=every_10_min)
                         t.start()
                         min10 = 0
-                    #check cron
-                    tag = int(strftime("%w", lt))
-                    #log(str(stunde_f_alarm))
-                    if (j*30+i+1)>=60:
-                        if k+1 >=24:
-                            zeit = str(0) + ":" + str(0)
-                            tag += 1
-                        else:
-                            zeit = str(k+1) + ":" + str(0)
-                    else:
-                        zeit = str(k) + ":" + str(j*30+i+1)
-                    if tag == 7:
-                        tag = 0
+#                    #check cron
+#                    tag = int(strftime("%w", lt))
+#                    #log(str(stunde_f_alarm))
+#                    if (j*30+i+1)>=60:
+#                        if k+1 >=24:
+#                            zeit = str(0) + ":" + str(0)
+#                            tag += 1
+#                        else:
+#                            zeit = str(k+1) + ":" + str(0)
+#                    else:
+#                        zeit = str(k) + ":" + str(j*30+i+1)
+#                    if tag == 7:
+#                        tag = 0
                     t = threading.Thread(target=every_min, args=[tag,uhr])
                     t.start()
                     lt = localtime()
