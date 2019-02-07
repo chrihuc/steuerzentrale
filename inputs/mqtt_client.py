@@ -109,6 +109,11 @@ def on_message(client, userdata, msg):
                 table = constants.sql_tables.cron.name
                 for entry in eval(m_in['SetWecker']):
                     device = entry['Name']
+                    msqc.mdb_set_table(table, device, entry) 
+            elif 'SetSettings' in msg.topic:
+                table = constants.sql_tables.settings.name
+                for entry in eval(m_in['SetSettings']):
+                    device = entry['Name']
                     msqc.mdb_set_table(table, device, entry)                    
         if 'DataRequest' in msg.topic:
             if 'SetTable' in msg.topic:  
@@ -122,6 +127,8 @@ def on_message(client, userdata, msg):
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(wecker=True))
             elif 'Schaltuhr' in m_in.values():
                 mqtt_pub("DataRequest/Answer/Cron", crn.get_all(typ='Gui'))
+            elif 'GetSettings' in m_in.values():
+                mqtt_pub("DataRequest/Answer/Settings", msqc.mdb_get_table(constants.sql_tables.settings.name))                
                 
 
 

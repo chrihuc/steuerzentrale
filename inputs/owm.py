@@ -14,10 +14,10 @@ from outputs.mqtt_publish import mqtt_pub
 import pyowm
 
 owm = pyowm.OWM(constants.owm_key, language="de")
-observation = owm.weather_at_id(2658173)
 
 def main():
     while constants.run:
+        observation = owm.weather_at_id(2658173)
         w = observation.get_weather()
         value = w.get_temperature('celsius')['temp']
         tmin = w.get_temperature('celsius')['temp_min']

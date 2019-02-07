@@ -188,6 +188,7 @@ class TiFo:
         self.timeout.start()
 
     def timedOut(self):
+        aes.new_event(description="Tifo timedOut: "+self.ip, prio=7)
         self.connect()
 
     def connect(self):
