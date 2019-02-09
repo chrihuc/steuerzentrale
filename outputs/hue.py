@@ -123,10 +123,10 @@ class Hue_lights():
         bright = szene.get('bri')
         if bright != None:
             if int(bright)>0:
-                szene['bri'] = int(bright)
-        if bright != None:
-            if int(bright)>0:
-                pass     
+                szene['bri'] = min(int(bright),254)
+#        if bright != None:
+#            if int(bright)>0:
+#                pass     
         # switch light on to be able to modify it
         if str(szene.get('on')) == "1" or str(szene.get('on')) == "True":
             try:         

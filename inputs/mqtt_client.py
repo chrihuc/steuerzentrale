@@ -112,9 +112,7 @@ def on_message(client, userdata, msg):
                     msqc.mdb_set_table(table, device, entry) 
             elif 'SetSettings' in msg.topic:
                 table = constants.sql_tables.settings.name
-                for entry in eval(m_in['SetSettings']):
-                    device = entry['Name']
-                    msqc.mdb_set_table(table, device, entry)                    
+                msqc.setting_s(m_in['Name'], m_in['Value'])                    
         if 'DataRequest' in msg.topic:
             if 'SetTable' in msg.topic:  
                 table = constants.sql_tables.cron.name
@@ -134,7 +132,8 @@ def on_message(client, userdata, msg):
 
 mqtt.Client.connected_flag=False
 client = None
-topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#"]
+topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
+          "DataRequest/SetSettings/#"]
 ipaddress = constants.mqtt_.server
 port = 1883
 

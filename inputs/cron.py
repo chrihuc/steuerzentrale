@@ -84,7 +84,7 @@ def periodic_supervision():
                     mqtt_pub("Time", {'Value':uhr})
                     jetzt = datetime.datetime.today()
                     jetzt = jetzt + datetime.timedelta(minutes=1)
-                    tag = jetzt.weekday()
+                    tag = (jetzt.weekday() + 1) % 7
                     uhr = jetzt.strftime("%H:%M")                    
                     l += 1
                     if l == 2:

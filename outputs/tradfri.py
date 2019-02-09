@@ -129,7 +129,7 @@ class Tradfri_lights():
         if int(szene.get('bri'))<=0 or not szene['an']:
             bri = 0
         else:
-            bri = int(szene['bri'])
+            bri = min(int(szene['bri']), 254)
         
         l = self.get_light_by_name(device)
         if szene['temp'] == None:
