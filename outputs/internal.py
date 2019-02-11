@@ -5,19 +5,19 @@ Created on Tue Apr 19 13:58:42 2016
 @author: chuckle
 """
 
-import socket
+#import socket
 
-import os, sys
+import os
 import time, datetime
 import glob
-from subprocess import call
+#from subprocess import call
 
 import constants
 import git
 import requests
 from alarm_event_messaging import alarmevents
 
-from database import mysql_connector
+#from database import mysql_connector
 from outputs import simulation
 from tools import toolbox
 

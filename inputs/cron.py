@@ -10,6 +10,7 @@ from time import localtime,strftime
 import datetime
 from outputs import cron
 from outputs import szenen
+from outputs import internal
 
 from tools import toolbox
 from outputs.mqtt_publish import mqtt_pub
@@ -48,6 +49,7 @@ def every_30_min():
     pass
 
 def every_60_min():
+    internal.check_ext_ip()
     pass
 
 def every_24_hrs():
