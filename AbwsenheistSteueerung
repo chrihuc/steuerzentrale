@@ -1,9 +1,7 @@
 
 
-dauernd:
-    handy Pingen
-    ping ok  -> input = 1 -> Abwesend --> Szene User Anwesend
-    ping nok -> input = 0
+handy:
+
 
 usb
     input = 0
@@ -36,7 +34,7 @@ Tür zu 6 min später:
         bedingungen User1 == 0 & User2 == 0
         
 Einbruchblock nachts:
-    USB abgezogen/eingesteckt 10min setting "SchlafenGehenAlarmBlock"
+    USB abgezogen/eingesteckt 15min setting "AlarmBlock"
 
 Einbruch:
     Schlafen 
@@ -45,13 +43,13 @@ Einbruch:
                     USB oder PNG -> Leise
     Abwesend/Urlaub
                 Gartentüren sofort
-                Eingangstüren 60 sec
+                Eingangstüren 30 sec
+                --> warnung 30 sec
                     USB oder PNG -> Anwesend           
                     Besucher -> Besucher
                     
 User 1                  done
 User 2                  todo USB
-Einbruchblock nachts    todo
 Besucher                todo
 AutoAbwesend            todo
 besucherSzenen          todo

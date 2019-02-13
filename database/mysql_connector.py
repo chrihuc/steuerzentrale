@@ -506,8 +506,8 @@ def getSzenenSources(szene):
     with con:
         cur = con.cursor()
         sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+\
-              '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)'
-        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach)' % (constants.sql_tables.inputs.name, szene)
+              '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)'
+        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)' % (constants.sql_tables.inputs.name, szene)
         cur.execute(sql)
         results = cur.fetchall()
         field_names = [i[0] for i in cur.description]

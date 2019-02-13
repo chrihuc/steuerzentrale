@@ -778,7 +778,7 @@ class InputsTree():
                         kinder2.append({'name': sub, 'title':'Beschreibung', 'type': 'str', 'value':aktuator.get(sub)})
                     elif sub in ['Value_lt','Value_eq','Value_gt']:
                         kinder3.append({'name': sub, 'type': 'str', 'value':aktuator.get(sub)})
-                    elif sub in ['Immer','Wach','Wecken','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
+                    elif sub in ['Immer','Wach','Wecken','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach','Alarm']:
                         kinder4.append({'name': sub, 'type': 'list','value': aktuator.get(sub), 'values':self._szn_lst})
                     elif sub in ['Id']:
                         pass
@@ -965,7 +965,7 @@ class TreeInputDevice(object):
                 kinder.insert(2, {'name':feature, 'type': 'bool', 'value':eval(value)})
             elif feature in ['Immer', 'Wach', 'Wecken', 'Schlafen', 'Schlummern', 'Leise',
                              'AmGehen', 'Gegangen', 'Abwesend', 'Urlaub', 'Besuch', 'Doppel',
-                             'Dreifach']:
+                             'Dreifach','Alarm']:
                 kinder.append({'name':feature, 'type': 'list', 'value':value,
                                'values':sorted(szn_lst)})
             elif feature in ['Id', 'Description', 'Status']:
@@ -1051,6 +1051,8 @@ class SettingsTree(object):
                 kind['type'] = 'list'
                 kind['values']=self.__return_enum__(seti.get('Typ'))
                 kind['value']  = seti.get('Value')
+            elif ',' in seti.get('Typ'):
+                pass
             else:
                 kind['type'] =seti.get('Typ')
                 kind['value']  = eval(seti.get('Value'))
@@ -1212,7 +1214,7 @@ def change(param, changes):
         print('  data:      %s'% str(data))
         print('  ----------')
         if data != '':
-            if path[-1] in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach']:
+            if path[-1] in ['Wach','Schlafen','Schlummern','Leise','AmGehen','Gegangen','Abwesend','Urlaub','Besuch','Doppel','Dreifach','Alarm']:
                 selected(str(data))
 
 def change_sz(param, changes):
