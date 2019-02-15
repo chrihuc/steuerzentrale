@@ -631,8 +631,8 @@ def inputs(device, value, add_to_mqtt=True):
     #            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
                 sql2 = sql + ' AND (enabled = "True" OR enabled is NULL)'
                 sql2 = sql2 + ';'
-                print(sql2)
-                cur.execute(sql + sql2)
+#                print(sql2)
+                cur.execute(sql2)
                 results = cur.fetchall()
                 field_names = [i[0] for i in cur.description]
                 #dicti = {key: "" for (key) in szene_columns}
