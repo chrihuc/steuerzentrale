@@ -102,6 +102,7 @@ class tables(object):
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
     #['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]]
+    #['sub_calc',[20,['lin_calc',[0.5,['sett','A00TER1GEN1TE01'],0]]]] : 20-0.5*A00TER1GEN1TE01
     #['sett','Temperatur_Balkon']
     if "calc" in str(inpt):
         try:
@@ -116,6 +117,10 @@ def re_calc(inpt):
                         lst[1][num] = float(value)
                 if lst[0] == "lin_calc":
                     return (lst[1][0] * lst[1][1]) + lst[1][2]
+                elif lst[0] == "add_calc":
+                    return lst[1][0] + lst[1][1]
+                elif lst[0] == "sub_calc":
+                    return lst[1][0] - lst[1][1]                
         except:
             return inpt
     if "sett" in str(inpt):
@@ -619,12 +624,12 @@ def inputs(device, value, add_to_mqtt=True):
     
                 sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
                 value = str(value)
-                sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
-                sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
-                sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
+#                sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
+#                sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
+#                sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
     #            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
     #            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
-                sql2 = sql2 + ' AND (enabled = "True" OR enabled is NULL )'
+                sql2 = sql + ' AND (enabled = "True" OR enabled is NULL )'
                 sql2 = sql2 + ');'
                 cur.execute(sql + sql2)
                 results = cur.fetchall()
@@ -636,6 +641,7 @@ def inputs(device, value, add_to_mqtt=True):
                         dicti[field_names[i]] = row[i]
                     doppelklick = dicti.get("Doppelklick")
                     if ct >= db_time:
+                        append = True
                         if str(dicti.get("last2")) != "None":
                             if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                                 szenen.append(dicti.get("Dreifach"))
@@ -644,8 +650,14 @@ def inputs(device, value, add_to_mqtt=True):
                                 szenen.append(dicti.get("Doppel"))
                                 single = False
                         if str(doppelklick) != "True": single = True
-                        if single: szenen.append(dicti.get(setting_r("Status")))
-                        szenen.append(dicti.get('Immer'))
+                        if (dicti['Value_lt'] is not None and re_calc(dicti['Value_lt']) >= value):
+                            append = False
+                        if (dicti['Value_eq'] is not None and re_calc(dicti['Value_eq']) != value):
+                            append = False
+                        if (dicti['Value_gt'] is not None and re_calc(dicti['Value_gt']) <= value):
+                            append = False
+                        if single and append: szenen.append(dicti.get(setting_r("Status")))
+                        if append:szenen.append(dicti.get('Immer'))
     #            get stting and logging
                 hks = dicti_1['HKS']
                 cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
