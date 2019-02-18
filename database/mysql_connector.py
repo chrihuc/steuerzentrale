@@ -629,10 +629,10 @@ def inputs(device, value, add_to_mqtt=True):
 #                sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
     #            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
     #            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
-                sql2 = sql + ' AND (enabled = "True" OR enabled is NULL)'
+                sql2 =  ' AND (enabled = "True" OR enabled is NULL)'
                 sql2 = sql2 + ';'
 #                print(sql2)
-                cur.execute(sql2)
+                cur.execute(sql + sql2)
                 results = cur.fetchall()
                 field_names = [i[0] for i in cur.description]
                 #dicti = {key: "" for (key) in szene_columns}
@@ -651,14 +651,15 @@ def inputs(device, value, add_to_mqtt=True):
                                 szenen.append(dicti.get("Doppel"))
                                 single = False
                         if str(doppelklick) != "True": single = True
-                        if (dicti['Value_lt'] is not None and re_calc(dicti['Value_lt']) >= value):
+                        if (dicti['Value_lt'] is not None and re_calc(dicti['Value_lt']) <= float(value)):
                             append = False
-                        if (dicti['Value_eq'] is not None and re_calc(dicti['Value_eq']) != value):
+                        if (dicti['Value_eq'] is not None and re_calc(dicti['Value_eq']) != float(value)):
                             append = False
-                        if (dicti['Value_gt'] is not None and re_calc(dicti['Value_gt']) <= value):
+                        if (dicti['Value_gt'] is not None and re_calc(dicti['Value_gt']) >= float(value)):
                             append = False
-                        if single and append: szenen.append(dicti.get(setting_r("Status")))
-                        if append:szenen.append(dicti.get('Immer'))
+                        if single and append and dicti.get(setting_r("Status")) is not None: 
+                            szenen.append(dicti.get(setting_r("Status")))
+                        if append and dicti.get('Immer') is not None:szenen.append(dicti.get('Immer'))
     #            get stting and logging
                 hks = dicti_1['HKS']
                 cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
