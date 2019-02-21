@@ -136,6 +136,8 @@ class Tradfri_lights():
             temp = 454 # 250 454
         else:
             temp = int(szene['temp'])
+            
+        transT = szene['transitiontime']
         
         if l != None:
     #        dim_command = l.light_control.set_dimmer(szene['bri'])
@@ -143,18 +145,18 @@ class Tradfri_lights():
 #            print(l)
             for lampe in l:
                 if bri == 0:
-                    dim_command = lampe.light_control.set_dimmer(bri)
+                    dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
                     api(dim_command)                   
                 elif lampe.light_control.can_set_color:                     
 #                    RANGE_SATURATION = (0, 65279)
-                    color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']))
+                    color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), transition_time=transT)
                     api(color_command)
-                    dim_command = lampe.light_control.set_dimmer(bri)
+                    dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
                     api(dim_command)                    
                 else:
-                    dim_command = lampe.light_control.set_dimmer(bri)
+                    dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
                     api(dim_command) 
-                    dim_command = lampe.light_control.set_color_temp(temp)
+                    dim_command = lampe.light_control.set_color_temp(temp, transition_time=transT)
                     api(dim_command)                     
             
             success = True
