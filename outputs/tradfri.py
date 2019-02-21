@@ -136,8 +136,9 @@ class Tradfri_lights():
             temp = 454 # 250 454
         else:
             temp = int(szene['temp'])
-            
-        transT = szene['transitiontime']
+         
+        if szene['transitiontime'] is not None:
+            transT = int(szene['transitiontime'])
         print(transT)
         
         if l != None:
