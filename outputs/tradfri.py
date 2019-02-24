@@ -168,6 +168,9 @@ class Tradfri_lights():
     #                    RANGE_SATURATION = (0, 65279)
                         color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT)
                         api(color_command)
+                        time.sleep(transT + 1)
+                        color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT)
+                        api(color_command)
 #                        dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
 #                        api(dim_command)                    
                     else:

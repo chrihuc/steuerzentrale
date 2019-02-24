@@ -42,6 +42,18 @@ def broadcast_input_value(Name, Value):
 #        return True
 #    return False
 
+        
+def check_ext_ip():
+    ip = requests.get('https://api.ipify.org').text
+    if ip != constants.ext_IP:
+        constants.ext_IP = ip
+        aes.new_event(description="New IP "+ip, prio=8)
+        constants.config.set('Main', 'Ext_IP', ip)
+        constants.save_config()
+    else:
+        pass
+#            aes.new_event(description="Old IP "+ip, prio=8)
+
 class Internal:
 
     def __init__ (self):
@@ -98,7 +110,7 @@ class Internal:
         elif commd == 'Restart':
             self.restart()
         elif commd == 'check_ext_ip':
-            self.check_ext_ip()            
+            check_ext_ip()            
 
     def restart(self):
         constants.run = False
@@ -190,14 +202,3 @@ class Internal:
 
     def zeitgheist_stop(self):
         self.ghost.stop()
-        
-    def check_ext_ip(self):
-        ip = requests.get('https://api.ipify.org').text
-        if ip != constants.ext_IP:
-            constants.ext_IP = ip
-            aes.new_event(description="New IP "+ip, prio=8)
-            constants.config.set('Main', 'Ext_IP', ip)
-            constants.save_config()
-        else:
-            pass
-#            aes.new_event(description="Old IP "+ip, prio=8)

@@ -651,11 +651,11 @@ def inputs(device, value, add_to_mqtt=True):
                                 szenen.append(dicti.get("Doppel"))
                                 single = False
                         if str(doppelklick) != "True": single = True
-                        if (dicti['Value_lt'] is not None and re_calc(dicti['Value_lt']) <= float(value)):
+                        if (dicti['Value_lt'] is not None and float(re_calc(dicti['Value_lt'])) <= float(value)):
                             append = False
-                        if (dicti['Value_eq'] is not None and re_calc(dicti['Value_eq']) != float(value)):
+                        if (dicti['Value_eq'] is not None and float(re_calc(dicti['Value_eq'])) != float(value)):
                             append = False
-                        if (dicti['Value_gt'] is not None and re_calc(dicti['Value_gt']) >= float(value)):
+                        if (dicti['Value_gt'] is not None and float(re_calc(dicti['Value_gt'])) >= float(value)):
                             append = False
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))

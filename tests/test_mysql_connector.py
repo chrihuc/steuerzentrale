@@ -18,7 +18,7 @@ class TestUM(unittest.TestCase):
     def test_inputs(self):
 #        self.assertTrue(msqc.inputs('Vm1ZIM1PFL1TE01', 25.9),
 #                         'Inputs function returning wrong scenes')
-        print(msqc.inputs('XS1.Temperatur_3', 28))
+        print(msqc.inputs('XS1.V01FLU1RUM1DI02', 13.7))
 
 #    def test_get_device_adress(self):
 #        print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')
