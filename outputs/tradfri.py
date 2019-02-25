@@ -67,6 +67,9 @@ lights = [dev for dev in devices if dev.has_light_control]
 #    print(l.light_control.can_set_color)
 
 class Tradfri_lights():
+    
+    locklist = {}
+    
     def __init__(self):
         self.devices = self.list_devices()
         self.__init_table__()
@@ -148,6 +151,8 @@ class Tradfri_lights():
     #        api(dim_command)
 #            print(l)
             for lampe in l:
+                hash_id = str(uuid.uuid4())
+                Tradfri_lights.locklist[lampe] = hash_id
                 if bri == 0:
                     dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
                     api(dim_command)
@@ -168,16 +173,19 @@ class Tradfri_lights():
     #                    RANGE_SATURATION = (0, 65279)
                         color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT)
                         api(color_command)
-                        time.sleep(transT + 1)
-                        color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT)
-                        api(color_command)
+                        time.sleep(transT + 5)
+                        if Tradfri_lights.locklist[lampe] == hash_id:
+                            color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT)
+                            api(color_command)
 #                        dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
 #                        api(dim_command)                    
                     else:
                         dim_command = lampe.light_control.set_color_temp(temp)
-                        api(dim_command)                         
-                        dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
-                        api(dim_command) 
+                        api(dim_command)
+                        time.sleep(1)
+                        if Tradfri_lights.locklist[lampe] == hash_id:                         
+                            dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
+                            api(dim_command) 
             
             success = True
         

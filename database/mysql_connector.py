@@ -595,7 +595,7 @@ def inputs(device, value, add_to_mqtt=True):
                     filtered = True
                     
             if not filtered:
-                if last_value is None: last_value = 0
+                if last_value is None: last_value = value
                 if not last_time:
                     try:
                         last_time = dicti_1['last1']
@@ -657,6 +657,13 @@ def inputs(device, value, add_to_mqtt=True):
                             append = False
                         if (dicti['Value_gt'] is not None and float(re_calc(dicti['Value_gt'])) >= float(value)):
                             append = False
+                        # Gradient
+                        if (dicti['Gradient_lt'] is not None and float(re_calc(dicti['Gradient_lt'])) <= gradient):
+                            append = False
+#                        if (dicti['Gradient_eq'] is not None and float(re_calc(dicti['Gradient_eq'])) != gradient):
+#                            append = False
+                        if (dicti['Gradient_gt'] is not None and float(re_calc(dicti['Gradient_gt'])) >= gradient):
+                            append = False                        
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
                         if append and dicti.get('Immer') is not None:szenen.append(dicti.get('Immer'))
