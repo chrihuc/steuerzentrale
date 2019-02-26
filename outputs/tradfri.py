@@ -171,11 +171,11 @@ class Tradfri_lights():
                 else:
                     if lampe.light_control.can_set_color:                     
     #                    RANGE_SATURATION = (0, 65279)
-                        color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT)
+                        color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT*10)
                         api(color_command)
                         time.sleep(transT + 5)
                         if Tradfri_lights.locklist[lampe] == hash_id:
-                            color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT)
+                            color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT*10)
                             api(color_command)
 #                        dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
 #                        api(dim_command)                    
@@ -184,7 +184,7 @@ class Tradfri_lights():
                         api(dim_command)
                         time.sleep(1)
                         if Tradfri_lights.locklist[lampe] == hash_id:                         
-                            dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
+                            dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT*10)
                             api(dim_command) 
             
             success = True
