@@ -102,7 +102,7 @@ class tables(object):
 def re_calc(inpt):
     #['lin_calc',[1,'temp',1]]
     #['lin_calc',[1,2,['lin_calc',[1,'temp',1]]]]
-    #['sub_calc',[20,['lin_calc',[0.5,['sett','A00TER1GEN1TE01'],0]]]] : 20-0.5*A00TER1GEN1TE01
+    #['sub_calc',[20,['lin_calc',[0.5,'A00TER1GEN1TE01',0]]]] : 20-0.5*A00TER1GEN1TE01
     #['sett','Temperatur_Balkon']
     if "calc" in str(inpt):
         try:

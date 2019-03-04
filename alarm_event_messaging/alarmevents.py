@@ -6,7 +6,7 @@ import smtplib
 import sys
 if sys.version_info >= (3, 0):
     from urllib.request import urlopen
-from email.mime.image import MIMEImage
+#from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
 import json
@@ -25,10 +25,10 @@ from alarm_event_messaging import messaging
 from outputs.mqtt_publish import mqtt_pub
 from tools import toolbox
 
-from threading import Timer
+#from threading import Timer
 import threading
 from email.mime.text import MIMEText
-from subprocess import Popen, PIPE
+#from subprocess import Popen, PIPE
 import time
 from time import localtime,strftime
 
@@ -98,6 +98,9 @@ class AlarmListe:
             AlarmListe.liste = json.loads(full)
         except:
             toolbox.log('Laden der Szenen fehlgeschlagen', level=1)
+            
+    def clear(self):
+        AlarmListe.liste = {}
 
 class AES:
 

@@ -21,7 +21,7 @@ cfg_hue ={'IP':''}
 cfg_mail ={'USER':'','PASS':'','RECIP':'[]'}
 cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
            'Bilder': ''}
-cfg_mqtt = {'Username': '', 'Password': '', 'Server': '192.168.192.10'}
+cfg_mqtt = {'Username': '', 'Password': '', 'Server': '["192.168.192.10","192.168.192.2"]'}
 cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': '', 'Key': ''}
 cfg_samsung_tv = {'IP': '', 'MAC': '00:30:1b:a0:2f:05'}
 
@@ -102,7 +102,7 @@ def save_config():
 
 for i in range(0,3):
 #    while True:
-        try:
+#        try:
             run = True
             passive = False
             debug = False
@@ -166,7 +166,10 @@ for i in range(0,3):
             class mqtt_:
                 user = config.get('MQTT', 'Username')
                 password = config.get('MQTT', 'Password')
-                server = config.get('MQTT', 'Server')
+                try:
+                    server = json.loads(config.get('MQTT', 'Server'))
+                except:
+                    server = [config.get('MQTT', 'Server')]
             class tradfri_:
                 identity = config.get('TRADFRI', 'Identity')
                 psk = config.get('TRADFRI', 'PSK')
@@ -175,10 +178,10 @@ for i in range(0,3):
             class samsung_tv_:
                 ip = config.get('SamsungTV', 'IP')
                 mac = config.get('SamsungTV', 'MAC')              
-        except:
-            init_cfg()
-            continue
-        break
+#        except:
+#            init_cfg()
+#            continue
+#        break
 
 akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave', 'Local', 'Heating', 'TRADFRI']
 szn_types = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
@@ -316,4 +319,4 @@ if eigene_IP != own_ip:
     config.set('Main', 'eigene_IP', own_ip)
     save_config()
     
-print(name, debug_level, own_ip)
+print(name, debug_level, own_ip, mqtt_.server)

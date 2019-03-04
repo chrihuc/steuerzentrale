@@ -15,10 +15,10 @@ class TestUM(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_inputs(self):
+#    def test_inputs(self):
 #        self.assertTrue(msqc.inputs('Vm1ZIM1PFL1TE01', 25.9),
 #                         'Inputs function returning wrong scenes')
-        print(msqc.inputs('XS1.V01FLU1RUM1DI02', 13.7))
+#        print(msqc.inputs('TiFo.62Z1j6.zdB', 12.9))
 
 #    def test_get_device_adress(self):
 #        print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')
@@ -51,8 +51,8 @@ class TestUM(unittest.TestCase):
 #        mysql_connector.tables.reload_scenes()
 #        print mysql_connector.tables.scenes_df.columns
 
-#    def test_recalc(self):
-#        print msqlc.re_calc(['lin_calc',['AmbientGain','V00WOH1RUM1HE01','AmbientBias']])
+    def test_recalc(self):
+        print(msqc.re_calc("['lin_calc',[0.5,'A00TER1GEN1TE01',15]]"))
 
 #    def test_get_input_value(self):
 #        print msqc.get_input_value('V00KUE1TUE1DI01')
