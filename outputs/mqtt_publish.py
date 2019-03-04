@@ -66,6 +66,6 @@ for mqtt_con in constants.mqtt_.server:
     mqtt_list.append(mq_cli)
 
 def mqtt_pub(channel, data, retain=True):
-    for cli in mq_cli:
+    for cli in mqtt_list:
         cli.mqtt_pub(channel, data, retain)
            
