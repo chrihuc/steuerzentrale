@@ -147,7 +147,7 @@ def main():
     for mqtt_con in constants.mqtt_.server:            
         mq_cli = MqttClient(mqtt_con, topics)
         mq_cli.connect()
-        mqtt_list.add(mq_cli)    
+        mqtt_list.append(mq_cli)    
 
 
 if __name__ == "__main__":

@@ -63,7 +63,7 @@ class MqttClient():
 
 for mqtt_con in constants.mqtt_.server:            
     mq_cli = MqttClient(mqtt_con)
-    mqtt_list.add(mq_cli)
+    mqtt_list.append(mq_cli)
 
 def mqtt_pub(channel, data, retain=True):
     for cli in mq_cli:
