@@ -711,6 +711,7 @@ def inputs(device, value, add_to_mqtt=True):
                 if str(hks) != str(device) and add_to_mqtt:
                     data = {"Value":value, "HKS":hks}
                     mqtt_pub("Inputs/" + str(hks), data)
+                    mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
             sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
             cur.execute(sql)
