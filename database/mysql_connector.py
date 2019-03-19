@@ -294,6 +294,27 @@ def mdb_read_table_column(db, column):
     con.close()
     return rlist
 
+def mdb_read_table_columns(db, columns):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    dicti = {}
+    liste = []
+    with con:
+        cur = con.cursor()
+        column  = ''
+        for col in columns[0:-1]:
+            column = column + col + ', '
+        column = column + columns[-1]
+        sql = 'SELECT '+column+' FROM ' + db
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            for i in range (0,len(row)):
+               dicti[field_names[i]] = row[i]
+            liste.append(dicti)
+    con.close()
+    return liste
+
 def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc", exact=False):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     rlist = []

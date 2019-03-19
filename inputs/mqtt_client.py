@@ -133,14 +133,16 @@ class MqttClient:
                 elif 'Schaltuhr' in m_in.values():
                     mqtt_pub("DataRequest/Answer/Cron", crn.get_all(typ='Gui'))
                 elif 'GetSettings' in m_in.values():
-                    mqtt_pub("DataRequest/Answer/Settings", msqc.mdb_get_table(constants.sql_tables.settings.name))                
+                    mqtt_pub("DataRequest/Answer/Settings", msqc.mdb_get_table(constants.sql_tables.settings.name)) 
+                elif 'SzenenGruppen' in m_in.values():
+                    mqtt_pub("DataRequest/Answer/SzenenGruppen", msqc.mdb_read_table_columns(constants.sql_tables.szenen.name, ['Name','Gruppe']))
                 
 
 mqtt_list = []
 mqtt.Client.connected_flag=False
 #client = None
 topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
-          "DataRequest/SetSettings/#"]
+          "DataRequest/SetSettings/#", "Message/AlarmListClear"]
 
 
 def main():

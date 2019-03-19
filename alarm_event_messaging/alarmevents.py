@@ -101,6 +101,7 @@ class AlarmListe:
             
     def clear(self):
         AlarmListe.liste = {}
+        mqtt_pub("Message/Alarmliste", AlarmListe.liste)
 
 class AES:
 
