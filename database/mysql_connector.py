@@ -12,6 +12,7 @@ import time
 from time import localtime, strftime
 import datetime
 from outputs.mqtt_publish import mqtt_pub
+import copy
 #import json
 
 # TODO: reconnect of MQTT
@@ -311,7 +312,7 @@ def mdb_read_table_columns(db, columns):
         for row in results:
             for i in range (0,len(row)):
                dicti[field_names[i]] = row[i]
-            liste.append(dicti)
+            liste.append(copy.copy(dicti))
     con.close()
     return liste
 
