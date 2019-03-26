@@ -707,7 +707,7 @@ def inputs(device, value, add_to_mqtt=True):
                             cur.execute(insertstatement)
                         except:
                             pass
-                            print(insertstatement)
+#                            print(insertstatement)
     
     #                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
     #                ist = "SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s'" % (constants.sql_tables.his_inputs.name, datab, hks)
