@@ -25,10 +25,10 @@ def main():
     while constants.run:
 #        try:
         if True:
-            if False:
+            if msqc.settings_r()['ESP_Test'] == 'True':
                 # AUS und 5 min Warten
-                mqtt_pub("Outputs/Kerze1", 0)
-
+                mqtt_pub("Outputs/Kerze1", 'x')
+                mqtt_pub("Outputs/Nachtlicht", 'x')
             elif msqc.settings_r()['Nacht'] != 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 5:
                 # AN und 5 min Warten
                 mqtt_pub("Outputs/Kerze1", 1)

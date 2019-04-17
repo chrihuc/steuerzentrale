@@ -118,7 +118,9 @@ try:
     while constants.run:
         for t in threadliste:
             if not t in threading.enumerate():
-                aes.new_event(description="Thread stopped: "+t.name, prio=1)
+                if not t.failed:
+                    aes.new_event(description="Thread stopped: "+t.name, prio=1)
+                    t.failed = True
                 try:
                     new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
                     new_t.start()
@@ -131,6 +133,10 @@ try:
                     exectext = "sudo killall python3"
                     os.system(exectext)
                     sys.exit()
+            else:
+                if t.failed:
+                    aes.new_event(description="Thread running again: "+t.name, prio=1)
+                    t.failed = False
         toolbox.sleep(10)
 except KeyboardInterrupt:
     constants.run = False

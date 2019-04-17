@@ -26,11 +26,12 @@ class OwnTimer(Thread):
 
     """
 
-    def __init__(self, interval, function, name, args=[], kwargs={}):
+    def __init__(self, interval, function, name, failed=False, args=[], kwargs={}):
         Thread.__init__(self)
         self.interval = interval
         self.function = function
         self.name = name
+        self.failed = failed
         self.args = args
         self.kwargs = kwargs
         self.finished = Event()
