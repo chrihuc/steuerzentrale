@@ -119,14 +119,15 @@ try:
         for t in threadliste:
             if not t in threading.enumerate():
                 if not t.failed:
-                    aes.new_event(description="Thread stopped: "+t.name, prio=1)
+                    aes.new_event(description="Thread stopped: "+t.name, prio=7)
                     t.failed = True
                 try:
                     new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
                     new_t.start()
+                    new_t.failed = True
                     threadliste.remove(t)
                     threadliste.append(new_t)
-                    aes.new_event(description="Restarted Thread: "+t.name, prio=7)
+                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
                 except:
                     constants.run = False
                     aes.new_event(description="Couldn't restart Thread "+t.name+", killing python", prio=7)
@@ -135,7 +136,7 @@ try:
                     sys.exit()
             else:
                 if t.failed:
-                    aes.new_event(description="Thread running again: "+t.name, prio=1)
+                    aes.new_event(description="Thread running again: "+t.name, prio=7)
                     t.failed = False
         toolbox.sleep(10)
 except KeyboardInterrupt:
