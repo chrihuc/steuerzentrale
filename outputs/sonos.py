@@ -8,14 +8,22 @@ import subprocess
 import pwd, os
 import threading
 
+from alarm_event_messaging import alarmevents as aevs
+aes = aevs.AES()
+
 import constants
 from tools import decorators
 
 from random import choice
 
-from urllib import quote
+import sys
+if sys.version_info >= (3, 0):
+    from urllib.parse import quote
+    import http.client
+else:
+    from urllib import quote
 
-import httplib
+
 import requests
 import time
 from time import localtime,strftime
@@ -23,6 +31,8 @@ from datetime import date
 import MySQLdb as mdb
 from database import mysql_connector
 from outputs import cron
+
+from tools import toolbox
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, StreamInput, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList, ClearList, PlayList (defect), PlayListNr)
 #RenderingControl (SetMute, GetVolume, SetVolume)
@@ -37,32 +47,32 @@ table = constants.sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KE
 
 #Envelope for all AVTrans actions the same
 def Envelope(self, Player, body, SOAPAction):
-    blen = len(body)
-    requestor = httplib.HTTP(Player, self.SERVER_PORT)
+    blen = len(body.encode())
+    requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
     requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
     requestor.putheader("HOST", Player)
     requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
     requestor.putheader("Content-Length", str(blen))
     requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
     requestor.endheaders()
-    requestor.send(body)
-    (status_code, message, reply_headers) = requestor.getreply()
-    reply_body = requestor.getfile().read()
+    requestor.send(body.encode())
+    status = requestor.getresponse()
+    reply_body = status.read()
     return reply_body
 
 #Envelope for all RendCont actions the same
 def EnvelopeRC(self, Player, body, SOAPAction):
-    blen = len(body)
-    requestor = httplib.HTTP(Player, self.SERVER_PORT)
+    blen = len(body.encode())
+    requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
     requestor.putrequest("POST", "/MediaRenderer/RenderingControl/Control HTTP/1.1")
     requestor.putheader("Host", Player)
     requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
     requestor.putheader("Content-Length", str(blen))
     requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
     requestor.endheaders()
-    requestor.send(body)
-    (status_code, message, reply_headers) = requestor.getreply()
-    reply_body = requestor.getfile().read()
+    requestor.send(body.encode())
+    status = requestor.getresponse()
+    reply_body = status.read()
     return reply_body
 
 def send_command(self, player, endpoint, action, body):
@@ -99,12 +109,18 @@ class Sonos:
     Status = {}
 
     def __init__(self):
-        # deprecated
+        # Workaround
         self.WohnZi = "192.168.192.201"
         self.SchlafZi = "192.168.192.202"
         self.Bad = "192.168.192.203"
-        self.Kueche = "192.168.192.204"
-        self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche"}
+        self.Keller = "192.168.192.204"
+        self.Kueche = "192.168.192.205"
+        self.DG = "192.168.192.206"
+        self.Kizi = "192.168.192.207"        
+        self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche",
+                      self.Kizi:"Kinderzimmer", self.DG:"Dachgeschoss", self.Keller:"Hobbyraum"}
+        
+        # deprecated
         self.Devices = {'V00WOH1RUM1AV11':self.WohnZi,'V00KUE1RUM1AV11':self.Kueche,'V01BAD1RUM1AV11':self.Bad,'V01SCH1RUM1AV11':self.SchlafZi}
 
         # deprecated
@@ -120,7 +136,10 @@ class Sonos:
         self.SERVER_PORT = 1400
         self.VOLUME = 0
         self.PLAYLISTS = {}
-#        self.__init_table__()
+        
+        self.devices = set()
+        self.list_devices()
+        
 
     def __init_table__(self):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -142,46 +161,62 @@ class Sonos:
                 results = cur.fetchall()
         con.close()
 
+    def socoDiscover(self):
+        if len(self.devices) == 0: 
+            self.devices = soco.discover()
+            if not self.devices:
+                aes.new_event(description="Soco discover not working", prio=7)
+                self.devices = set()
+                for ip in self.Names.keys():
+                    if toolbox.ping(ip):
+                        newP = soco.SoCo(ip)
+                        #print(newP)
+                        self.devices.add(newP)
+            else:
+                aes.new_event(description="Soco discover working again", prio=7)                        
+        return self.devices
+
+
     def get_addr(self,hks):
         """
         translates hks haus kennzeichen system in ip, uid and p_name
         """
-        players = list(soco.discover())
+        players = list(self.socoDiscover())
         if hks in self.Devices_neu:
             p_name = self.Devices_neu[hks]
         else:
             p_name = hks
         for player in players:
-            if player._player_name == p_name:
+            if player.player_name == p_name:
                 ip = player.ip_address
                 uid = player.uid
-                return ip, uid, p_name
+                return player, ip, uid, p_name
 
     def get_player(self,uid):
-        players = list(soco.discover())
+        players = list(self.socoDiscover())
         for player in players:
             if player.uid == uid:
                 return player
 
     def get_zones(self):
-        players = list(soco.discover())
+        players = list(self.socoDiscover())
         zones = []
         for player in players:
             zones.append(player.uid)
         return zones
 
     def Envelope(self, Player, body, SOAPAction):
-        blen = len(body)
-        requestor = httplib.HTTP(Player, self.SERVER_PORT)
+        blen = len(body.encode())
+        requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
         requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
         requestor.putheader("HOST", Player)
         requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
         requestor.putheader("Content-Length", str(blen))
         requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:" + SOAPAction)
         requestor.endheaders()
-        requestor.send(body)
-        (status_code, message, reply_headers) = requestor.getreply()
-        reply_body = requestor.getfile().read()
+        requestor.send(body.encode())
+        status = requestor.getresponse()
+        reply_body = status.read()
         return reply_body
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList)
@@ -466,19 +501,19 @@ class Sonos:
             <u:ListAlarms xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1" />
             </s:Body>
             </s:Envelope>"""
-        blen = len(body)
-        requestor = httplib.HTTP(Player, self.SERVER_PORT)
+        blen = len(body.encode())
+        requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
         requestor.putrequest("POST", "/AlarmClock/Control HTTP/1.1")
         requestor.putheader("Host", Player)
         requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
         requestor.putheader("Content-Length", str(blen))
         requestor.putheader("SOAPAction", "urn:schemas-upnp-org:service:AlarmClock:1#ListAlarms")
         requestor.endheaders()
-        requestor.send(body)
-        (status_code, message, reply_headers) = requestor.getreply()
+        requestor.send(body.encode())
+        status = requestor.getresponse()
         ReturnV =[]
         try:
-            reply_body = requestor.getfile().read()
+            reply_body = status.read()
             Alarm = 0
             Alarms = []
             while reply_body.find ('StartTime',Alarm+1) >0:
@@ -539,7 +574,7 @@ class Sonos:
         mysql_connector.mdb_set_table(table.name,self.Names.get(player),dicti)
         return True
 
-    def soco_get_status(self, player, store = True):
+    def soco_get_status(self, player, store = True, sznName=None, mainInfo=False):
         dicti = {}
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
@@ -555,6 +590,7 @@ class Sonos:
                 if _zone in posinfo:
                     zone = _zone
         name = player.player_name
+        sznName = sznName or name
 #        if player.is_coordinator:
         if zone == own_zone:
             dicti['MasterZone'] = ''
@@ -562,25 +598,30 @@ class Sonos:
             self.PLAYLISTS[name] = player.get_queue()
         else:
             dicti['MasterZone'] = zone
-        dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'
         dicti['Radio'] = not 'file' in track_info['uri']
         dicti['Sender'] = track_info['uri']
         dicti['TitelNr'] = track_info['playlist_position']
         dicti['Time'] = track_info['position']
         dicti['Name'] = name
-        dicti['Volume'] = player.volume
+        if not mainInfo:
+            dicti['Volume'] = player.volume
+            dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'        
         if store: self.Status[name] = dicti
+        mysql_connector.mdb_set_table(table.name,sznName,dicti)  
+        sonospl = player.get_sonos_playlist_by_attr('Title',name)
+        player.remove_sonos_playlist(sonospl)
+        player.create_sonos_playlist_from_queue(name)
         return dicti
 
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
         tries = 0
-        while (dicti <> self.soco_get_status(player, store=False)) and tries < 7:
+        while (dicti != self.soco_get_status(player, store=False)) and tries < 7:
             tries += 1
             try:
                 player_ip = player.ip_address
                 self.SetVolume(player_ip, dicti.get('Volume'))
-                if dicti['MasterZone'] <> '':
+                if dicti['MasterZone'] != '':
                     master = self.get_player(dicti['MasterZone'])
                     player.join(master)
         #            self.CombineZones(player_ip, dicti['MasterZone'])
@@ -594,7 +635,7 @@ class Sonos:
                         self.setRadio(player_ip, dicti['Sender'])
                     else:
                         self.Seek(player_ip, "TRACK_NR", str(dicti['TitelNr']))
-                        if str(dicti['Time']) <> 'None':
+                        if str(dicti['Time']) != 'None':
                             self.Seek(player_ip, "REL_TIME", dicti['Time'])
                     if not dicti['Pause']:
                         player.play()
@@ -603,36 +644,65 @@ class Sonos:
                 pass
 
 
+    def soco_read_szene(self, player, sonos_szene, overrde_play=False):
+        if str(sonos_szene.get('Volume')) != 'None':
+            player.volume = sonos_szene.get('Volume')
+        zone = sonos_szene.get('MasterZone')
+        if (str(zone) != "None") and (str(zone) != "Own"):
+            zonemaster, _, _, _ = self.get_addr(str(zone))
+            player.join(zonemaster.group.coordinator)
+        else:
+            if str(zone) != "None":
+                player.unjoin()
+                player.clear_queue()
+                if str(sonos_szene.get('Radio')) == '1':
+                    player.play_uri(uri=str(sonos_szene.get('Sender')), start=False, force_radio=True)  
+                else:
+                    if isinstance(sonos_szene.get('PlayListNr'), int):
+                        playlistItem = player.get_sonos_playlist_by_attr('item_id', 'SQ:'+ str(sonos_szene.get('PlayListNr')))
+                        player.add_to_queue(playlistItem)
+                    elif str(sonos_szene.get('PlayListNr')) != 'None':
+                        playlistItem = player.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
+                        player.add_to_queue(playlistItem)
+                    player.play_from_queue(sonos_szene.get('TitelNr'), start=False)
+                    if str(sonos_szene.get('Time')) != 'None':
+                        player.seek(sonos_szene.get('Time'))
+            if (sonos_szene.get('Pause') == 1) or overrde_play:
+                player.group.coordinator.pause()
+            elif sonos_szene.get('Pause') == 0:
+                player.group.coordinator.play()
+        return True        
+
     def sonos_read_szene(self, player, sonos_szene, hergestellt = False):
         #read szene from Sonos DB and execute
         socoplayer = soco.SoCo(player)
-        if str(sonos_szene.get('Volume')) <> 'None':
+        if str(sonos_szene.get('Volume')) != 'None':
             self.SetVolume(player, sonos_szene.get('Volume'))
         zone = sonos_szene.get('MasterZone')
-        if (str(zone) <> "None") and (str(zone) <> "Own"):
+        if (str(zone) != "None") and (str(zone) != "Own"):
             if 'RINCON' in str(zone):
                 self.CombineZones(player, zone)
             else:
-                z_ip, _, _ = self.get_addr(str(zone))
+                _, z_ip, _, _ = self.get_addr(str(zone))
                 to_att = soco.SoCo(z_ip)
                 socoplayer.join(to_att.group.coordinator)
         else:
             zoneown = socoplayer.uid #self.sonos_zonen.get(str(player))
             if str(sonos_szene.get('Radio')) == '1':
                 self.setRadio(player, str(sonos_szene.get('Sender')))
-            elif str(zone) <> "None":
+            elif str(zone) != "None":
                 self.ClearZones(player)
                 self.ClearList(player)
                 if isinstance(sonos_szene.get('PlayListNr'), int):
                     self.PlayListNr(player, str(sonos_szene.get('PlayListNr')))
-                elif str(sonos_szene.get('PlayListNr')) <> 'None':
+                elif str(sonos_szene.get('PlayListNr')) != 'None':
                     playlistItem = socoplayer.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
                     socoplayer.add_to_queue(playlistItem)
 #                    self.PlayListNr(player, str())
 #                    playlist via soco
                 self.ActivateList(player, zoneown)
                 self.Seek(player, "TRACK_NR", str(sonos_szene.get('TitelNr')))
-                if str(sonos_szene.get('Time')) <> 'None':
+                if str(sonos_szene.get('Time')) != 'None':
                     self.Seek(player, "REL_TIME", sonos_szene.get('Time'))
             if (sonos_szene.get('Pause') == 1) or hergestellt:
                 self.SetPause(player)
@@ -696,7 +766,7 @@ class Sonos:
 
     def ansage(self,text,player_ip):
         player = soco.SoCo(player_ip)
-        _, uid, _ = self.get_addr('Vm1ZIM1RUM1AV11')
+        _, _, uid, _ = self.get_addr('Vm1ZIM1RUM1AV11')
         # save zone
         self.soco_get_status(player)
         # source to PC
@@ -709,7 +779,7 @@ class Sonos:
 
     def isolate(self,player_ip):
         player = soco.SoCo(player_ip)
-        if len(player.group.members) <> 1:
+        if len(player.group.members) != 1:
             for device in player.group.members:
                 device.unjoin()
         return True
@@ -753,85 +823,92 @@ class Sonos:
 
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
-        player, p_uid, playerName = self.get_addr(player)
-        if player in self.Devices:
-            player = self.Devices.get(str(player))
-            player_ip, p_uid, playerName = self.get_addr(player)
-        # playerName = self.Names.get(player)
-        if str(command) == "Pause":
-            self.SetPause(player)
-        elif str(command) == "Play":
-            self.SetPlay(player)
-        elif str(command) == "Save":
-            self.sonos_write_szene(player)
-        elif str(command) == "Announce_Time":
-            self.sonos_write_szene(player)
-            lt = localtime()
-            stunde = int(strftime("%H", lt))
-            minute = int(strftime("%M", lt))
-            if (minute <> 0) and (minute <> 30):
-                text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
+#        print(player, command)
+#        if True:
+        try:
+            player, player_ip, p_uid, playerName = self.get_addr(player)
+            if player in self.Devices:
+                player = self.Devices.get(str(player))
+                player, player_ip, p_uid, playerName = self.get_addr(player)
+            # playerName = self.Names.get(player)
+            if str(command) == "Pause":
+                player.group.coordinator.pause()
+            elif str(command) == "Play":
+                player.group.coordinator.play()
+            elif str(command) == "Save":
+                player.soco_get_status()
+            elif str(command) == "Announce_Time":
+                player.soco_get_status()
+                lt = localtime()
+                stunde = int(strftime("%H", lt))
+                minute = int(strftime("%M", lt))
+                if (minute != 0) and (minute != 30):
+                    text = "Es ist " + str(stunde) + " Uhr und " + str(minute) + " Minuten."
+                    laenge = downloadAudioFile(text)
+                    self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
+                    time.sleep(laenge + 1)
+                    self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
+            elif str(command) == "Durchsage":
+                self.durchsage(text)
+            elif str(command) == "Ansage":
+                self.play_local_file(playerName, text)
+            elif str(command) == "Return":
+                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName), overrde_play=True)
+            elif ((str(command) == "resume") ):
+                time.sleep(60)
+                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
+            elif (str(command) == "lauter"):
+                ActVol = player.volume
+                increment = 8
+                VOLUME = ActVol + increment
+                player.volume = VOLUME
+                return
+            elif (str(command) == "leiser"):
+                ActVol = player.volume
+                increment = 8
+                VOLUME = ActVol - increment
+                player.volume = VOLUME
+                return
+            elif (str(command) == "inc_lauter"):
+                ActVol = player.volume
+                if ActVol >= 20: increment = 8
+                if ActVol < 20: increment = 4
+                if ActVol < 8: increment = 2
+                VOLUME = ActVol + increment
+                player.volume = VOLUME
+            elif (str(command) == "inc_leiser"):
+                ActVol = player.volume
+                if ActVol >= 20: increment = 8
+                if ActVol < 20: increment = 4
+                if ActVol < 8: increment = 2
+                VOLUME = ActVol - increment
+                player.volume = VOLUME
+            elif (str(command) == "WeckerAnsage"):
+                self.SetPause(player_ip)
+                self.SetVolume(player_ip, 20)
+                mysql_connector.setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
+                text = mysql_connector.setting_r("Durchsage")
                 laenge = downloadAudioFile(text)
-                self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
+                self.soco_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
                 time.sleep(laenge + 1)
-                self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
-        elif str(command) == "Durchsage":
-            self.durchsage(text)
-        elif str(command) == "Ansage":
-            self.play_local_file(playerName, text)
-        elif str(command) == "Return":
-            self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName), hergestellt = False)
-        elif ((str(command) == "resume") ):
-            time.sleep(60)
-            self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,playerName))
-        elif (str(command) == "lauter"):
-            ActVol = self.GetVolume(player)
-            increment = 8
-            VOLUME = ActVol + increment
-            self.SetVolume(player, VOLUME)
-            return
-        elif (str(command) == "leiser"):
-            ActVol = self.GetVolume(player)
-            increment = 8
-            VOLUME = ActVol - increment
-            self.SetVolume(player, VOLUME)
-            return
-        elif (str(command) == "inc_lauter"):
-            ActVol = self.GetVolume(player)
-            if ActVol >= 20: increment = 8
-            if ActVol < 20: increment = 4
-            if ActVol < 8: increment = 2
-            VOLUME = ActVol + increment
-            self.SetVolume(player, VOLUME)
-        elif (str(command) == "inc_leiser"):
-            ActVol = self.GetVolume(player)
-            if ActVol >= 20: increment = 8
-            if ActVol < 20: increment = 4
-            if ActVol < 8: increment = 2
-            VOLUME = ActVol - increment
-            self.SetVolume(player, VOLUME)
-        elif (str(command) == "WeckerAnsage"):
-            self.SetPause(player)
-            self.SetVolume(player, 20)
-            mysql_connector.setting_s("Durchsage", str(crn.next_wecker_heute_morgen()))
-            text = mysql_connector.setting_r("Durchsage")
-            laenge = downloadAudioFile(text)
-            self.sonos_read_szene(player, mysql_connector.mdb_read_table_entry(table.name,"TextToSonos"))
-            time.sleep(laenge + 1)
-            self.SetPause(player)
-        elif (str(command) == "EingangWohnzi"):
-            self.StreamInput(player, self.WohnZiZone)
-        elif (str(command) == "Isolieren"):
-            self.isolate(player)
-        elif ((str(command) <> "resume") and (str(command) <> "An") and (str(command) <> "None")):
-            sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
-            self.sonos_read_szene(player, sonos_szene)
-        return True
+                self.SetPause(player_ip)
+            elif (str(command) == "EingangWohnzi"):
+                self.StreamInput(player_ip, self.WohnZiZone)
+            elif (str(command) == "SpeicherFavorit"):
+                self.soco_get_status(player, sznName='Favorit', mainInfo=True)                
+            elif (str(command) == "Isolieren"):
+                self.isolate(player_ip)
+            elif ((str(command) != "resume") and (str(command) != "An") and (str(command) != "None")):
+                sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
+                self.soco_read_szene(player, sonos_szene)
+            return True
+        except:
+            return False
 
     def list_commands(self):
         comands = mysql_connector.mdb_get_table(table.name)
         liste = ["Pause","Play","Save","Announce_Time","Durchsage",'Ansage',"Return","resume","lauter",
-                 "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi","Isolieren"]
+                 "leiser","inc_leiser","inc_lauter","WeckerAnsage", "EingangWohnzi","Isolieren","SpeicherFavorit"]
         for comand in comands:
             liste.append(comand.get("Name"))
         #liste.remove("Name")
@@ -847,7 +924,7 @@ class Sonos:
         return dicti
 
     def list_devices(self):
-        return [player._player_name for player in soco.discover()]
+        return [player.player_name for player in self.socoDiscover()]
 #        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
 #        liste = []
 #        for comand in comands:
