@@ -8,6 +8,9 @@ import subprocess
 import pwd, os
 import threading
 
+from alarm_event_messaging import alarmevents as aevs
+aes = aevs.AES()
+
 import constants
 from tools import decorators
 
@@ -28,6 +31,8 @@ from datetime import date
 import MySQLdb as mdb
 from database import mysql_connector
 from outputs import cron
+
+from tools import toolbox
 
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, StreamInput, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList, ClearList, PlayList (defect), PlayListNr)
 #RenderingControl (SetMute, GetVolume, SetVolume)
@@ -104,12 +109,18 @@ class Sonos:
     Status = {}
 
     def __init__(self):
-        # deprecated
+        # Workaround
         self.WohnZi = "192.168.192.201"
         self.SchlafZi = "192.168.192.202"
         self.Bad = "192.168.192.203"
-        self.Kueche = "192.168.192.204"
-        self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche"}
+        self.Keller = "192.168.192.204"
+        self.Kueche = "192.168.192.205"
+        self.DG = "192.168.192.206"
+        self.Kizi = "192.168.192.207"        
+        self.Names = {self.SchlafZi:"SchlafZi", self.Bad:"Bad", self.WohnZi:"WohnZi", self.Kueche:"Kueche",
+                      self.Kizi:"Kinderzimmer", self.DG:"Dachgeschoss", self.Keller:"Hobbyraum"}
+        
+        # deprecated
         self.Devices = {'V00WOH1RUM1AV11':self.WohnZi,'V00KUE1RUM1AV11':self.Kueche,'V01BAD1RUM1AV11':self.Bad,'V01SCH1RUM1AV11':self.SchlafZi}
 
         # deprecated
@@ -125,7 +136,10 @@ class Sonos:
         self.SERVER_PORT = 1400
         self.VOLUME = 0
         self.PLAYLISTS = {}
-#        self.__init_table__()
+        
+        self.devices = set()
+        self.list_devices()
+        
 
     def __init_table__(self):
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -147,29 +161,45 @@ class Sonos:
                 results = cur.fetchall()
         con.close()
 
+    def socoDiscover(self):
+        if len(self.devices) == 0: 
+            self.devices = soco.discover()
+            if not self.devices:
+                aes.new_event(description="Soco discover not working", prio=7)
+                self.devices = set()
+                for ip in self.Names.keys():
+                    if toolbox.ping(ip):
+                        newP = soco.SoCo(ip)
+                        #print(newP)
+                        self.devices.add(newP)
+            else:
+                aes.new_event(description="Soco discover working again", prio=7)                        
+        return self.devices
+
+
     def get_addr(self,hks):
         """
         translates hks haus kennzeichen system in ip, uid and p_name
         """
-        players = list(soco.discover())
+        players = list(self.socoDiscover())
         if hks in self.Devices_neu:
             p_name = self.Devices_neu[hks]
         else:
             p_name = hks
         for player in players:
-            if player._player_name == p_name:
+            if player.player_name == p_name:
                 ip = player.ip_address
                 uid = player.uid
                 return player, ip, uid, p_name
 
     def get_player(self,uid):
-        players = list(soco.discover())
+        players = list(self.socoDiscover())
         for player in players:
             if player.uid == uid:
                 return player
 
     def get_zones(self):
-        players = list(soco.discover())
+        players = list(self.socoDiscover())
         zones = []
         for player in players:
             zones.append(player.uid)
@@ -794,6 +824,7 @@ class Sonos:
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
 #        print(player, command)
+#        if True:
         try:
             player, player_ip, p_uid, playerName = self.get_addr(player)
             if player in self.Devices:
@@ -893,7 +924,7 @@ class Sonos:
         return dicti
 
     def list_devices(self):
-        return [player._player_name for player in soco.discover()]
+        return [player.player_name for player in self.socoDiscover()]
 #        comands = mysql_connector.mdb_read_table_entry(constants.sql_tables.szenen.name,"Device_Type")
 #        liste = []
 #        for comand in comands:
