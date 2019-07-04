@@ -17,6 +17,12 @@ import pyowm
 import itertools
 import operator
 
+def broadcast_input_value(Name, Value):
+    payload = {'Name':Name,'Value':Value}
+#    on server:
+    toolbox.log(Name, Value)
+    toolbox.communication.send_message(payload, typ='InputValue')
+
 def most_common(L):
   # get an iterable of (item, iterable) pairs
   SL = sorted((x, i) for i, x in enumerate(L))
@@ -44,7 +50,18 @@ def main():
         
         forecast = owm.three_hours_forecast_at_id(2658173)
         f = forecast.get_forecast()
-#        lst = f.get_weathers()
+        lst = f.get_weathers()
+        rain = 0
+        if lst.get_rain():
+            try:
+                rain = lst.get_rain()['1h']
+            except:
+                pass
+        winds = lst.get_wind()['speed']
+        data = {'Value':rain}
+        broadcast_input_value('Wetter/Regen', data)
+        data = {'Value':winds}
+        broadcast_input_value('Wetter/Wind', data)        
         jetzt = datetime.datetime.today()
         morgen = jetzt + datetime.timedelta(days=1)
         bern = pytz.timezone('Europe/Berlin')
@@ -64,6 +81,6 @@ def main():
 #        tmin = w.get_temperature('celsius')['temp_min']
 #        tmax = w.get_temperature('celsius')['temp_max']
 #        Status = w.get_detailed_status()
-        data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati)}
+        data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati), 'Regen':rain}
         mqtt_pub("Wetter/Jetzt", data)
         toolbox.sleep(60*10)

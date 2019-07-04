@@ -170,7 +170,6 @@ class Sonos:
                 for ip in self.Names.keys():
                     if toolbox.ping(ip):
                         newP = soco.SoCo(ip)
-                        #print(newP)
                         self.devices.add(newP)
             else:
                 aes.new_event(description="Soco discover working again", prio=7)                        
@@ -813,6 +812,7 @@ class Sonos:
         zone.clear_queue()
         zone.add_uri_to_queue(netpath)
         time.sleep(.1)
+        zone.volume += 10
         zone.play()
         with contextlib.closing(wave.open(location+random_file,'r')) as f:
             frames = f.getnframes()
