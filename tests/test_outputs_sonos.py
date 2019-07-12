@@ -34,18 +34,18 @@ class TestUM(unittest.TestCase):
 #                         'Error getting commands')
 
     def test_klingel(self):
-        result = self.test_mod.set_device('Kueche', 'Ansage', 'klingel.wav')
+        result = self.test_mod.set_device('Bad', 'Ansage', 'klingel.wav')
         self.assertTrue(result,
                          'Error sending command')
 #
-    def test_set_device(self):
+#    def test_set_device(self):
 #        result = self.test_mod.set_device('Bad', 'DRS3')
 #        self.assertTrue(result,
 #                         'Error sending command')
 #        time.sleep(5)
-        result = self.test_mod.set_device('Kueche', 'VolKuecheLeise')
-        self.assertTrue(result,
-                         'Error sending command')
+#        result = self.test_mod.set_device('Kueche', 'VolKuecheLeise')
+#        self.assertTrue(result,
+#                         'Error sending command')
 #
 #    def test_all_commands(self):
 #        list_commands = self.test_mod.list_commands()

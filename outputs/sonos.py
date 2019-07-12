@@ -586,7 +586,7 @@ class Sonos:
             posinfo = self.GetPositionInfo(player_ip)
             zones = self.get_zones()
             for _zone in zones:
-                if _zone in posinfo:
+                if _zone.encode('utf-8') in posinfo:
                     zone = _zone
         name = player.player_name
         sznName = sznName or name
@@ -606,10 +606,10 @@ class Sonos:
             dicti['Volume'] = player.volume
             dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'        
         if store: self.Status[name] = dicti
-        mysql_connector.mdb_set_table(table.name,sznName,dicti)  
-        sonospl = player.get_sonos_playlist_by_attr('Title',name)
-        player.remove_sonos_playlist(sonospl)
-        player.create_sonos_playlist_from_queue(name)
+#        mysql_connector.mdb_set_table(table.name,sznName,dicti)  
+#        sonospl = player.get_sonos_playlist_by_attr('Title',name)
+#        player.remove_sonos_playlist(sonospl)
+#        player.create_sonos_playlist_from_queue(name)
         return dicti
 
     def soco_set_status(self,player):
@@ -822,13 +822,14 @@ class Sonos:
             rate = f.getframerate()
             duration = frames / float(rate)
         time.sleep(duration)
+        zone.volume -= 10
         self.soco_set_status(zone)
 
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
 #        print(player, command)
-#        if True:
-        try:
+        if True:
+#        try:
             player, player_ip, p_uid, playerName = self.get_addr(player)
             if player in self.Devices:
                 player = self.Devices.get(str(player))
@@ -905,8 +906,8 @@ class Sonos:
                 sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
                 self.soco_read_szene(player, sonos_szene)
             return True
-        except:
-            return False
+#        except:
+#            return False
 
     def list_commands(self):
         comands = mysql_connector.mdb_get_table(table.name)
