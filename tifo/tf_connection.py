@@ -136,7 +136,7 @@ class LineBrick:
             print('pulse counted')
         
     def evaluate(self):
-        self.value = self.counter / self.f_value
+        self.value = self.counter / 60 * self.f_value
         self.counter = 0
 #        print(self.value)
         broadcast_input_value('TiFo.' + self.name, str(self.value))
