@@ -50,11 +50,7 @@ def main():
         
         forecast = owm.three_hours_forecast_at_id(2658173)
         f = forecast.get_forecast()
-<<<<<<< HEAD
         lst = observation.get_weather()
-=======
-        lst = f.get_weathers()
->>>>>>> 575dbd98c736e6a620c1c1a37d5cd00d9fa9c4e0
         rain = 0
         if lst.get_rain():
             try:
@@ -63,15 +59,9 @@ def main():
                 pass
         winds = lst.get_wind()['speed']
         data = {'Value':rain}
-<<<<<<< HEAD
         broadcast_input_value('Wetter/Regen', rain)
         data = {'Value':winds}
         broadcast_input_value('Wetter/Wind', winds)        
-=======
-        broadcast_input_value('Wetter/Regen', data)
-        data = {'Value':winds}
-        broadcast_input_value('Wetter/Wind', data)        
->>>>>>> 575dbd98c736e6a620c1c1a37d5cd00d9fa9c4e0
         jetzt = datetime.datetime.today()
         morgen = jetzt + datetime.timedelta(days=1)
         bern = pytz.timezone('Europe/Berlin')
