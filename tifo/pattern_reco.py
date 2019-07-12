@@ -47,7 +47,7 @@ def analyze(timeseries):
     result = []
     for pattern in patterns:
         result_1 = analyze_one_pattern(timeseries, pattern)
-        print(result_1)
+#        print(result_1)
         if compare(result_1, pattern):
             result.append(pattern['name'])
     return result

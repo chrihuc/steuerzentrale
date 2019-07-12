@@ -26,12 +26,13 @@ class OwnTimer(Thread):
 
     """
 
-    def __init__(self, interval, function, name, failed=False, args=[], kwargs={}):
+    def __init__(self, interval, function, name, failed=False, restartCounter=0, args=[], kwargs={}):
         Thread.__init__(self)
         self.interval = interval
         self.function = function
         self.name = name
         self.failed = failed
+        self.restartCounter = restartCounter
         self.args = args
         self.kwargs = kwargs
         self.finished = Event()
@@ -93,7 +94,7 @@ def log(*args, **kwargs):
     data = {"Description":args, "ts":uhr}
     data['Func1'] = calframe[1][1]
     data['Func2'] = calframe[1][3] 
-#    mqtt_pub("log/Prio" + str(level), data)          
+#    mqtt_pub("log/Prio" + str(level), data)       
     if level > constants.debug_level:
         return
     if constants.debug:

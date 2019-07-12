@@ -58,11 +58,19 @@ if psk == '' or identity == '':
 else:
     api_factory = APIFactory(host=host, psk_id=identity, psk=psk)
 api = api_factory.request
-gateway = Gateway()
-devices_command = gateway.get_devices()
-devices_commands = api(devices_command)
-devices = api(devices_commands)
-lights = [dev for dev in devices if dev.has_light_control]
+try:
+    gateway = Gateway()
+    devices_command = gateway.get_devices()
+    devices_commands = api(devices_command)
+    devices = api(devices_commands)
+    lights = [dev for dev in devices if dev.has_light_control]
+except:
+    devices_command = []
+    devices_commands = []
+    devices = []
+    lights = []
+    aes.new_event(description="Tradfri nicht erreichbar", prio=7)
+    
 #for l in lights:
 #    print(l.light_control.can_set_color)
 

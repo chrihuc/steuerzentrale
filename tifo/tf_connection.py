@@ -30,6 +30,7 @@ from tinkerforge.bricklet_ptc import BrickletPTC
 from tinkerforge.bricklet_temperature import BrickletTemperature
 from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
+from tinkerforge.bricklet_line import BrickletLine
 from tinkerforge.brick_master import BrickMaster
 from tinkerforge.ip_connection import Error
 
@@ -111,6 +112,38 @@ class io16Dict:
                 ios["times"] = times
                 return timedelta.total_seconds()
 
+class LineBrick:
+    def __init__(self, device, uid):
+        self.device = device
+        self.uid = uid
+        self.state = 0
+        self.gwl = 3450
+        self.gwh = 3650
+        self.counter = 0
+        self.f_value = 60
+        self.value = 0
+        self.name = str(self.device.get_identity()[1]) +"."+ str(self.device.get_identity()[0])
+        self.readout = threading.Timer(self.f_value, self.evaluate)
+        self.readout.start()
+        toolbox.log('line Bricklet created')
+        
+    def callback(self, value):
+        if value < self.gwl:
+            self.state = 0
+        if value > self.gwh and self.state == 0:
+            self.state = 1
+            self.counter += 1
+            print('pulse counted')
+        
+    def evaluate(self):
+        self.value = self.counter / self.f_value
+        self.counter = 0
+#        print(self.value)
+        broadcast_input_value('TiFo.' + self.name, str(self.value))
+        self.readout = threading.Timer(self.f_value, self.evaluate)
+        self.readout.start()
+        
+
 class LEDStrips:
     def __init__(self):
         self.liste = []
@@ -148,6 +181,7 @@ class TiFo:
     threadliste = []
 
     def __init__(self, ip):
+        toolbox.log('TiFo init start')
         self.led = None
         self.io = []
         self.io16list = io16Dict()
@@ -168,6 +202,7 @@ class TiFo:
         self.moist = None
         self.unknown = []
         self.threadliste = []
+        self.lineBricklets = {}
         self.ip = ip
         self.delay = 5
         self.timeoutTime = 600
@@ -180,6 +215,7 @@ class TiFo:
                                      self.cb_enumerate)
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
                                      self.cb_connected)
+        toolbox.log('TiFo init done')
 
 
     def timeout_reset(self):
@@ -387,14 +423,20 @@ class TiFo:
             time.sleep(pr.cycle_time)
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
-        print(uhr)
-        print(time.time() - time0)
-        print(data)
+#        print(uhr)
+#        print(time.time() - time0)
+#        print(data)
         result = pr.analyze(data)
-        print(result)
+#        print(result)
         for res in result:
             broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), res)
         self.timeout_reset()
+
+    def cb_li(self, value, device, uid):
+        temp_uid = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+#        print(value)
+        self.lineBricklets[temp_uid].callback(value)
+        
 
     def set_io16_sub(self,cmd,io,value):
         port = cmd.get('Port')
@@ -882,10 +924,18 @@ class TiFo:
                 found  = True
                 toolbox.log("BrickletVoltageCurrent", temp_uid)
 
+            if device_identifier == BrickletLine.DEVICE_IDENTIFIER:
+                lb = BrickletLine(uid, self.ipcon)
+                temp_uid = str(lb.get_identity()[1]) +"."+ str(lb.get_identity()[0])
+                self.lineBricklets[temp_uid] = LineBrick(lb, uid)
+                lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
+                lb.set_reflectivity_callback_threshold('o', 3450, 3650)
+                toolbox.log('Line Bricklet', temp_uid)
+                found  = True
+
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))
                 temp_uid = str(self.master[-1].get_identity()[0])
-                toolbox.log('Master Brick', temp_uid)
                 thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
 #                print(firmware_version)
                 if firmware_version[0]*100+firmware_version[1]*10+firmware_version[2] >= 232:

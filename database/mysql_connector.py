@@ -603,7 +603,7 @@ def inputs(device, value, add_to_mqtt=True):
                     dicti_1[field_names_1[i]] = row[i]
             last_value = dicti_1['last_Value']
             
-            # Filtern, wenn grösser oder kleiner Messung ignorieren
+            # Filtern, wenn groesser oder kleiner Messung ignorieren
             filtering = dicti_1['Filter']
             try:
                 filtering = eval(filtering)

@@ -315,8 +315,8 @@ class redundancy_:
     #'Master' 'Slave' 'auto'
     typ = 'Master'
 
-if eigene_IP != own_ip:
-    config.set('Main', 'eigene_IP', own_ip)
-    save_config()
+#if eigene_IP != own_ip:
+#    config.set('Main', 'eigene_IP', own_ip)
+#    save_config()
     
 print(name, debug_level, own_ip, mqtt_.server)
