@@ -54,7 +54,7 @@ def main():
         rain = 0
         if lst.get_rain():
             try:
-                rain = lst.get_rain()['1h']
+                rain = lst.get_rain()['3h']
             except:
                 pass
         winds = lst.get_wind()['speed']

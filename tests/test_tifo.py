@@ -25,8 +25,8 @@ class TestUM(unittest.TestCase):
         constants.debug_level = 8
         self.test_mod2 = tf_connection.TiFo('192.168.192.2')
         self.test_mod2.main()
-        time.sleep(75)
-        self.test_mod2.connect()        
+#        time.sleep(75)
+#        self.test_mod2.connect()        
 #        self.test_mod3 = tf_connection.TiFo('192.168.193.102')
 #        self.test_mod3.main()
 #        self.test_mod4 = tf_connection.TiFo('192.168.193.23')
