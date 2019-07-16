@@ -56,7 +56,7 @@ aes = aevs.AES()
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
 #    on server:
-    toolbox.log(Name, Value)
+    toolbox.log(Name, Value, level=9)
     toolbox.communication.send_message(payload, typ='InputValue')
 
 #    on satellite:
@@ -121,11 +121,19 @@ class LineBrick:
         self.gwh = 3650
         self.counter = 0
         self.f_value = 60
+        self.hour = 3600
+        self.day = 3600 * 24
         self.value = 0
+        self.value_h = 0
+        self.value_d = 0
         self.name = str(self.device.get_identity()[1]) +"."+ str(self.device.get_identity()[0])
         self.readout = threading.Timer(self.f_value, self.evaluate)
         self.readout.start()
-        toolbox.log('line Bricklet created')
+        self.readout_h = threading.Timer(self.hour, self.evaluate_h)
+        self.readout_h.start()
+        self.readout_d = threading.Timer(self.day, self.evaluate_d)
+        self.readout_d.start()        
+        toolbox.log('line Bricklet created', level=5)
         
     def callback(self, value):
         if value < self.gwl:
@@ -133,15 +141,34 @@ class LineBrick:
         if value > self.gwh and self.state == 0:
             self.state = 1
             self.counter += 1
+            self.value_h += 1
+            self.value_d += 1
             print('pulse counted')
         
     def evaluate(self):
         self.value = self.counter / 60 * self.f_value
         self.counter = 0
-#        print(self.value)
-        broadcast_input_value('TiFo.' + self.name, str(self.value))
+        toolbox.log('min reset', level=5)
+        broadcast_input_value('TiFo.' + self.name + '.m', str(self.value))
         self.readout = threading.Timer(self.f_value, self.evaluate)
         self.readout.start()
+     
+    def evaluate_h(self):
+        broadcast_input_value('TiFo.' + self.name + '.h', str(self.value_h))
+        self.value_h = 0        
+        self.readout_h = threading.Timer(self.hour, self.evaluate_h)
+        self.readout_h.start()
+        
+    def evaluate_d(self):
+        broadcast_input_value('TiFo.' + self.name + '.h', str(self.value_d))
+        self.value_d = 0        
+        self.readout_d = threading.Timer(self.day, self.evaluate_d)
+        self.readout_d.start()           
+        
+    def stop_timers(self):
+        self.readout.cancel()
+        self.readout_h.cancel()
+        self.readout_d.cancel()
         
 
 class LEDStrips:
@@ -925,11 +952,14 @@ class TiFo:
                 toolbox.log("BrickletVoltageCurrent", temp_uid)
 
             if device_identifier == BrickletLine.DEVICE_IDENTIFIER:
-                lb = BrickletLine(uid, self.ipcon)
                 temp_uid = str(lb.get_identity()[1]) +"."+ str(lb.get_identity()[0])
-                self.lineBricklets[temp_uid] = LineBrick(lb, uid)
+                if not temp_uid in self.lineBricklets:
+                    lb = BrickletLine(uid, self.ipcon)
+                    self.lineBricklets[temp_uid] = LineBrick(lb, uid)
+                else:
+                    lb = self.lineBricklets[temp_uid]
                 lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
-                lb.set_reflectivity_callback_threshold('o', 3450, 3650)
+                lb.set_reflectivity_callback_threshold('o', 3649, 3650)
                 toolbox.log('Line Bricklet', temp_uid)
                 found  = True
 
