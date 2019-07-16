@@ -162,7 +162,7 @@ class LineBrick:
             self.counter += 1
             self.value_h += 1
             self.value_d += 1
-        self.store()
+            self.store()
         
     def evaluate(self):
         self.value = self.counter / 60 * self.f_value
