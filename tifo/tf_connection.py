@@ -168,18 +168,18 @@ class LineBrick:
         self.value = self.counter / 60 * self.f_value
         self.counter = 0
         toolbox.log('min reset', level=5)
-        broadcast_input_value('TiFo.' + self.name + '.m', str(self.value))
+        broadcast_input_value('TiFo.' + self.name + '.minute', str(self.value))
         self.readout = threading.Timer(self.f_value, self.evaluate)
         self.readout.start()
      
     def evaluate_h(self):
-        broadcast_input_value('TiFo.' + self.name + '.h', str(self.value_h))
+        broadcast_input_value('TiFo.' + self.name + '.hour', str(self.value_h))
         self.value_h = 0        
         self.readout_h = threading.Timer(self.hour, self.evaluate_h)
         self.readout_h.start()
         
     def evaluate_d(self):
-        broadcast_input_value('TiFo.' + self.name + '.h', str(self.value_d))
+        broadcast_input_value('TiFo.' + self.name + '.day', str(self.value_d))
         broadcast_input_value('TiFo.' + self.name + '.minimum', str(self.min))
         broadcast_input_value('TiFo.' + self.name + '.maximum', str(self.max))
         self.value_d = 0   
