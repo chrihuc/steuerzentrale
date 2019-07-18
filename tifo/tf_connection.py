@@ -169,12 +169,13 @@ class LineBrick:
         self.counter = 0
         toolbox.log('min reset', level=5)
         broadcast_input_value('TiFo.' + self.name + '.minute', str(self.value))
+        self.store()
         self.readout = threading.Timer(self.f_value, self.evaluate)
         self.readout.start()
      
     def evaluate_h(self):
         broadcast_input_value('TiFo.' + self.name + '.hour', str(self.value_h))
-        self.value_h = 0        
+        self.value_h = 0    
         self.readout_h = threading.Timer(self.hour, self.evaluate_h)
         self.readout_h.start()
         
@@ -184,7 +185,7 @@ class LineBrick:
         broadcast_input_value('TiFo.' + self.name + '.maximum', str(self.max))
         self.value_d = 0   
         self.min = 9999
-        self.max = 0        
+        self.max = 0     
         self.readout_d = threading.Timer(self.day, self.evaluate_d)
         self.readout_d.start()           
         
@@ -205,6 +206,7 @@ class LineBrick:
 
     def load(self):
         try:
+#        if True:
             with open(self.uid + '.jsn') as f:
                 full = f.read()            
             alte = json.loads(full)
@@ -213,7 +215,7 @@ class LineBrick:
             self.value_h = alte['self.value_h']
             self.value_d = alte['self.value_d']
             self.min = alte['self.min']
-            self.max = alte['self.max']            
+            self.max = alte['self.max'] 
         except:
             toolbox.log('Laden der Wasserzaehler Impulse fehlgeschlagen', level=1)
 

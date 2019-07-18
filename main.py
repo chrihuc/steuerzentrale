@@ -107,6 +107,11 @@ try:
 except:
     aes.new_event(description="OWM not installed", prio=7)
 
+import app
+t = toolbox.OwnTimer(0, function=app.main, args = [], name="flask")
+threadliste.append(t)
+t.start()
+
 aes.new_event(description="All Threads started", prio=7)
 if constants.debug:
     toolbox.log(threadliste)

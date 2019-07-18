@@ -570,9 +570,14 @@ def maxSzenenId():
     return results[0][0]
 
 def writeInfluxDb(hks, value, utc):
-    json_body = [{"measurement": hks,
-                  "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
-                  "fields": {"value": float(value)}}]
+    if float(value) == 0:
+         json_body = [{"measurement": hks,
+                      "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                      "fields": {"value": 0.}}] 
+    else:      
+        json_body = [{"measurement": hks,
+                      "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                      "fields": {"value": float(value)}}]
     client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
     client.write_points(json_body)
     return True      
