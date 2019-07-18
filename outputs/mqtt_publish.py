@@ -50,7 +50,6 @@ class MqttClient():
                 self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)
             else:
                 self.client.publish(channel, data, qos=1, retain=retain)
-                print(channel)
         elif isinstance(data, list):
             data = {'payload': data, 'ts': uhr}
             try:
