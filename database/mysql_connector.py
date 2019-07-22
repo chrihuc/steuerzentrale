@@ -5,6 +5,7 @@ import pandas as pd
 import constants
 
 import MySQLdb as mdb
+from influxdb import InfluxDBClient
 import warnings
 warnings.filterwarnings('ignore', category=mdb.Warning)
 from threading import Timer
@@ -568,9 +569,26 @@ def maxSzenenId():
     con.close()
     return results[0][0]
 
+def writeInfluxDb(hks, value, utc):
+    try:
+        if float(value) == 0:
+             json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": 0.}}] 
+        else:      
+            json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": float(value)}}]
+        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
+        client.write_points(json_body)
+    except:
+        print(hks, value, utc)
+    return True      
+
 def inputs(device, value, add_to_mqtt=True):
 #    i = 0
     ct = datetime.datetime.now()
+    utc = datetime.datetime.utcnow()
     try:
         last_time = locklist[device]
     except KeyError:
@@ -707,6 +725,8 @@ def inputs(device, value, add_to_mqtt=True):
                             cur.execute(insertstatement)
                         except:
                             pass
+                    thread_inflx = Timer(0, writeInfluxDb, [hks, value, utc])
+                    thread_inflx.start()
 #                            print(insertstatement)
     
     #                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'

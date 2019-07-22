@@ -16,6 +16,7 @@ import pyowm
 
 import itertools
 import operator
+import urllib.request, json 
 
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
@@ -44,6 +45,15 @@ def most_common(L):
 
 owm = pyowm.OWM(constants.owm_key, language="de")
 
+def get_rain():
+    with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-niederschlag-10min/ch.meteoschweiz.messwerte-niederschlag-10min_de.json") as url:
+        data = json.loads(url.read().decode())
+        for section in data:
+            if section == 'features':
+                for feature in data['features']:
+                    if feature['properties']['station_name'] == 'Bözberg':
+                        return feature['properties']['value']
+
 def main():
     while constants.run:
         observation = owm.weather_at_id(2658173)
@@ -52,13 +62,14 @@ def main():
         f = forecast.get_forecast()
         lst = observation.get_weather()
         rain = 0
-        if lst.get_rain():
-            try:
-                rain = lst.get_rain()['1h']
-            except:
-                pass
+#        if lst.get_rain():
+#            try:
+#                rain = lst.get_rain()['3h']
+#            except:
+#                pass
         winds = lst.get_wind()['speed']
-        data = {'Value':rain}
+#        data = {'Value':rain}
+        rain = get_rain()
         broadcast_input_value('Wetter/Regen', rain)
         data = {'Value':winds}
         broadcast_input_value('Wetter/Wind', winds)        

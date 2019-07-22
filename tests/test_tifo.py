@@ -22,9 +22,15 @@ class TestUM(unittest.TestCase):
 
     def setUp(self):
         constants.debug = True
-        constants.debug_level = 0
+        constants.debug_level = 8
         self.test_mod2 = tf_connection.TiFo('192.168.192.2')
         self.test_mod2.main()
+#        time.sleep(75)
+#        self.test_mod2.connect()        
+#        self.test_mod3 = tf_connection.TiFo('192.168.193.102')
+#        self.test_mod3.main()
+#        self.test_mod4 = tf_connection.TiFo('192.168.193.23')
+#        self.test_mod4.main()        
 
 #        constants.debug_text = 'tf_conn'
 
@@ -37,6 +43,8 @@ class TestUM(unittest.TestCase):
 
     def test_connect_2_conns(self):
         toolbox.log('test')
+
+        
 #        self.test_mod2.main()
 
 

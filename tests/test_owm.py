@@ -37,6 +37,7 @@ def most_common(L):
 owm = pyowm.OWM(constants.owm_key, language="de")
 observation = owm.weather_at_id(2658173)
 w = observation.get_weather()
+print(w.get_rain())
 if w.get_rain():
     print("raining")
 print(w.get_wind()['speed'])

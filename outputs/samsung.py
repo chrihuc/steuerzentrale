@@ -57,7 +57,7 @@ class Remotecontrol:
         ipencoded = base64.b64encode(self.my_ip.encode('utf-8'))
         macencoded = base64.b64encode(self.my_mac.encode('utf-8'))
         messagepart1_1 = chr(0x64) + chr(0x00) + chr(len(ipencoded)) 
-        print(messagepart1_1)
+#        print(messagepart1_1)
         messagepart1_2 = chr(0x00) + ipencoded + chr(len(macencoded)) + chr(0x00) 
         messagepart1_3 = macencoded + chr(len(base64.b64encode(self.remotename))) + chr(0x00) 
         messagepart1_4 = base64.b64encode(self.remotename.encode('utf-8'))

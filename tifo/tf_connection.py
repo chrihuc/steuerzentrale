@@ -35,6 +35,7 @@ from tinkerforge.brick_master import BrickMaster
 from tinkerforge.ip_connection import Error
 
 import threading
+import json
 #from threading import Timer
 import time
 from time import localtime,strftime
@@ -53,10 +54,19 @@ from tools import toolbox
 from alarm_event_messaging import alarmevents as aevs
 aes = aevs.AES()
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+
+
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
 #    on server:
-    toolbox.log(Name, Value)
+    toolbox.log(Name, Value, level=9)
     toolbox.communication.send_message(payload, typ='InputValue')
 
 #    on satellite:
@@ -119,30 +129,95 @@ class LineBrick:
         self.state = 0
         self.gwl = 3450
         self.gwh = 3650
+        self.min = 9999
+        self.max = 0
         self.counter = 0
         self.f_value = 60
+        self.hour = 3600
+        self.day = 3600 * 24
         self.value = 0
+        self.value_h = 0
+        self.value_d = 0
         self.name = str(self.device.get_identity()[1]) +"."+ str(self.device.get_identity()[0])
-        self.readout = threading.Timer(self.f_value, self.evaluate)
+        lt = localtime()
+        sekunde = int(strftime("%S", lt))    
+        minute = int(strftime("%M", lt)) 
+        stunde = int(strftime("%H", lt))  
+        self.load()
+        self.readout = threading.Timer(self.f_value - sekunde, self.evaluate)
         self.readout.start()
-        toolbox.log('line Bricklet created')
+        self.readout_h = threading.Timer(self.hour - (minute * 60) - sekunde, self.evaluate_h)
+        self.readout_h.start()
+        self.readout_d = threading.Timer(self.day - (stunde * 3600) - (minute * 60) - sekunde, self.evaluate_d)
+        self.readout_d.start()        
+        toolbox.log('line Bricklet created', level=5)
         
     def callback(self, value):
+        self.min = min(self.min, value)
+        self.max = max(self.max, value)
         if value < self.gwl:
             self.state = 0
         if value > self.gwh and self.state == 0:
             self.state = 1
             self.counter += 1
-            print('pulse counted')
+            self.value_h += 1
+            self.value_d += 1
+            self.store()
         
     def evaluate(self):
         self.value = self.counter / 60 * self.f_value
         self.counter = 0
-#        print(self.value)
-        broadcast_input_value('TiFo.' + self.name, str(self.value))
+        toolbox.log('min reset', level=5)
+        broadcast_input_value('TiFo.' + self.name + '.minute', str(self.value))
+        self.store()
         self.readout = threading.Timer(self.f_value, self.evaluate)
         self.readout.start()
+     
+    def evaluate_h(self):
+        broadcast_input_value('TiFo.' + self.name + '.hour', str(self.value_h))
+        self.value_h = 0    
+        self.readout_h = threading.Timer(self.hour, self.evaluate_h)
+        self.readout_h.start()
         
+    def evaluate_d(self):
+        broadcast_input_value('TiFo.' + self.name + '.day', str(self.value_d))
+        broadcast_input_value('TiFo.' + self.name + '.minimum', str(self.min))
+        broadcast_input_value('TiFo.' + self.name + '.maximum', str(self.max))
+        self.value_d = 0   
+        self.min = 9999
+        self.max = 0     
+        self.readout_d = threading.Timer(self.day, self.evaluate_d)
+        self.readout_d.start()           
+        
+    def stop_timers(self):
+        self.readout.cancel()
+        self.readout_h.cancel()
+        self.readout_d.cancel()
+        
+    def store(self):
+        write_list = {'self.counter' : self.counter,
+                      'self.state'     : self.state,                      
+                      'self.value_h' : self.value_h,
+                      'self.value_d' : self.value_d,
+                      'self.min'     : self.min,
+                      'self.max'     : self.max}
+        with open(self.uid + '.jsn', 'w') as fout:
+            json.dump(write_list, fout, default=json_serial)    
+
+    def load(self):
+        try:
+#        if True:
+            with open(self.uid + '.jsn') as f:
+                full = f.read()            
+            alte = json.loads(full)
+            self.counter = alte['self.counter']
+            self.state = alte['self.state']            
+            self.value_h = alte['self.value_h']
+            self.value_d = alte['self.value_d']
+            self.min = alte['self.min']
+            self.max = alte['self.max'] 
+        except:
+            toolbox.log('Laden der Wasserzaehler Impulse fehlgeschlagen', level=1)
 
 class LEDStrips:
     def __init__(self):
@@ -418,6 +493,7 @@ class TiFo:
 #        return
         nr_cycles = int(5 / pr.cycle_time)
         for i in range(0, nr_cycles):
+#           ToDo: handle timeouts here
             sample = device.get_intensity()
             data.append(sample)
             time.sleep(pr.cycle_time)
@@ -927,9 +1003,10 @@ class TiFo:
             if device_identifier == BrickletLine.DEVICE_IDENTIFIER:
                 lb = BrickletLine(uid, self.ipcon)
                 temp_uid = str(lb.get_identity()[1]) +"."+ str(lb.get_identity()[0])
-                self.lineBricklets[temp_uid] = LineBrick(lb, uid)
+                if not temp_uid in self.lineBricklets:
+                    self.lineBricklets[temp_uid] = LineBrick(lb, uid)
                 lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
-                lb.set_reflectivity_callback_threshold('o', 3450, 3650)
+                lb.set_reflectivity_callback_threshold('o', 3649, 3650)
                 toolbox.log('Line Bricklet', temp_uid)
                 found  = True
 
