@@ -62,11 +62,13 @@ def main():
         f = forecast.get_forecast()
         lst = observation.get_weather()
         rain = 0
+
 #        if lst.get_rain():
 #            try:
 #                rain = lst.get_rain()['3h']
 #            except:
 #                pass
+
         winds = lst.get_wind()['speed']
 #        data = {'Value':rain}
         rain = get_rain()
