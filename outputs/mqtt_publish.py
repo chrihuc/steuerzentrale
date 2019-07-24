@@ -9,6 +9,7 @@ import paho.mqtt.client as mqtt
 import json
 import datetime
 import time
+import os, sys, re
 from time import localtime,strftime
 
 mqtt_list = []
@@ -61,9 +62,33 @@ class MqttClient():
         else:
             self.client.publish(channel, data, qos=1, retain=retain)
 
-for mqtt_con in constants.mqtt_.server:            
-    mq_cli = MqttClient(mqtt_con)
-    mqtt_list.append(mq_cli)
+def ping(IP, number = 1):
+    pinged = False
+    if IP == None:
+        return False
+    else:
+        lifeline = re.compile(r"(\d) received")
+        for i in range(0,number):
+            pingaling = os.popen("ping -q -c 2 "+IP,"r")
+            sys.stdout.flush()
+            while 1==1:
+               line = pingaling.readline()
+               if not line: break
+               igot = re.findall(lifeline,line)
+               if igot:
+                if int(igot[0])==2:
+                    pinged = True
+                else:
+                    pass
+        return pinged
+
+for mqtt_con in constants.mqtt_.server: 
+    if ping(mqtt_con):             
+        mq_cli = MqttClient(mqtt_con)
+        mqtt_list.append(mq_cli)
+        
+if not mqtt_list:
+    print("Kein MQTT Server gefunden")        
 
 def mqtt_pub(channel, data, retain=True):
     for cli in mqtt_list:

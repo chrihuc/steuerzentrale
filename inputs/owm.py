@@ -61,7 +61,7 @@ def get_wind():
             if section == 'features':
                 for feature in data['features']:
                     if feature['id'] == 'BUS':
-                        print(feature['properties']['value']) 
+                        return feature['properties']['value']
                         
 def get_boeen():
     with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-wind-boeenspitze-kmh-10min/ch.meteoschweiz.messwerte-wind-boeenspitze-kmh-10min_de.json") as url:
@@ -70,7 +70,7 @@ def get_boeen():
             if section == 'features':
                 for feature in data['features']:
                     if feature['id'] == 'BUS':
-                        print(feature['properties']['value'])  
+                        return feature['properties']['value']  
 
 def main():
     while constants.run:

@@ -146,10 +146,13 @@ topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", 
 
 
 def main():
-    for mqtt_con in constants.mqtt_.server:            
-        mq_cli = MqttClient(mqtt_con, topics)
-        mq_cli.connect()
-        mqtt_list.append(mq_cli)    
+    for mqtt_con in constants.mqtt_.server:    
+        if toolbox.ping(mqtt_con):        
+            mq_cli = MqttClient(mqtt_con, topics)
+            mq_cli.connect()
+            mqtt_list.append(mq_cli)  
+    if not mqtt_list:
+        print("Kein MQTT Server gefunden")              
 
 
 if __name__ == "__main__":

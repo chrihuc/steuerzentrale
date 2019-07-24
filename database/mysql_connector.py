@@ -138,6 +138,33 @@ def re_calc(inpt):
     else:
         return inpt
 
+def writeInfluxDb(hks, value, utc):
+    try:
+        if float(value) == 0:
+             json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": 0.}}] 
+        else:      
+            json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": float(value)}}]
+        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
+        client.write_points(json_body)
+    except:
+        print(hks, value, utc)
+    return True  
+
+def writeInfluxString(key, value, utc):
+    try:
+        json_body = [{"measurement": key,
+                      "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                      "fields": {"value": str(value)}}]
+        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
+        client.write_points(json_body)
+    except:
+        print(key, value, utc)
+    return True 
+
 def get_input_value(hks):
     """ returns the value from an input device
     """
@@ -172,12 +199,15 @@ def inputs_r():
 def setting_s(setting, wert):
     ''' set single setting
     '''
+    utc = datetime.datetime.utcnow()
     if wert in ('Ein','ein','an'):
         wert = True
     if wert in ('Aus','aus'):
         wert = False
     data = {'Value':wert, 'Setting':setting}
     mqtt_pub("Settings/" + setting, data)
+    thread_inflx = Timer(0, writeInfluxString, [setting, wert, utc])
+    thread_inflx.start()
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
@@ -567,23 +597,7 @@ def maxSzenenId():
         cur.execute(sql)
         results = cur.fetchall()
     con.close()
-    return results[0][0]
-
-def writeInfluxDb(hks, value, utc):
-    try:
-        if float(value) == 0:
-             json_body = [{"measurement": hks,
-                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
-                          "fields": {"value": 0.}}] 
-        else:      
-            json_body = [{"measurement": hks,
-                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
-                          "fields": {"value": float(value)}}]
-        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
-        client.write_points(json_body)
-    except:
-        print(hks, value, utc)
-    return True      
+    return results[0][0]    
 
 def inputs(device, value, add_to_mqtt=True):
 #    i = 0
