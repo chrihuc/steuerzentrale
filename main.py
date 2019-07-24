@@ -136,11 +136,8 @@ try:
                     threadliste.append(new_t)
                     aes.new_event(description="Restarted Thread: "+t.name, prio=1)
                 except:
-                    constants.run = False
                     aes.new_event(description="Couldn't restart Thread "+t.name+", killing python", prio=7)
-                    exectext = "sudo killall python3"
-                    os.system(exectext)
-                    sys.exit()
+                    toolbox.restart()
             else:
                 if t.failed:
                     if t.restartCounter >= 2:

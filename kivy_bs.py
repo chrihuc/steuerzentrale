@@ -89,7 +89,7 @@ class YourApp(App):
 #        button_grid.children[0].bind(on_press=evaluate_result)
 
         def clear_label(instance):
-            if output_label.text == '1402':
+            if output_label.text == '1234':
                 output_label.text = 'Eingabe OK'
             else:
                 output_label.text = 'Eingabe Falsch'

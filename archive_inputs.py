@@ -16,7 +16,7 @@ WHERE TABLE_NAME = N'HIS_inputs_arch') t2 \
 ON t1.COLUMN_NAME = t2.COLUMN_NAME WHERE t2.COLUMN_NAME is NULL; ")
     results = cur.fetchall()
     for row in results:
-        print(row[0])
+#        print(row[0])
         ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % ('HIS_inputs_arch', row[0])
         cur.execute(ist)   
 #    cmd = "START TRANSACTION;\

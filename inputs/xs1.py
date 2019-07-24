@@ -88,16 +88,12 @@ def heartbeat_sup():
         aes.new_event(description="XS1 nicht erreichbar", prio=7)
         msqc.setting_s("XS1_off", "Active")
     msqc.setting_s("NumRestart", str(count + 1))
-    exectext = "sudo killall python3"
-    print("XS1 connection lost")
     if toolbox.ping(constants.router_IP):
-        constants.run = False
         time.sleep(10)
-        os.system(exectext)
+        toolbox.restart()
     else:
         reset_wlan()
-        constants.run = False
-        os.system(exectext)
+        toolbox.restart()
 
 def reset_wlan():
     os.system('sudo ifdown --force wlan0')

@@ -152,7 +152,7 @@ class Tradfri_lights():
             transT = int(szene['transitiontime'])
         else:
             transT = 0
-        print(transT)
+#        print(transT)
         
         if l != None:
     #        dim_command = l.light_control.set_dimmer(szene['bri'])

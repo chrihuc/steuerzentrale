@@ -145,6 +145,14 @@ def sleep(interval):
     except KeyboardInterrupt:
         constants.run = False
 
+def restart():
+    constants.run = False
+    exectext = "sudo svc -du /etc/service/steuerzentrale"
+    os.system(exectext)    
+    exectext = "sudo killall python3"
+    os.system(exectext)
+    sys.exit()    
+
 class communication(object):
 
     queue = []

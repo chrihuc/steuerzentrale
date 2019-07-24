@@ -54,27 +54,37 @@ def get_rain():
                     if feature['properties']['station_name'] == 'Bözberg':
                         return feature['properties']['value']
 
+def get_wind():
+    with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-windgeschwindigkeit-kmh-10min/ch.meteoschweiz.messwerte-windgeschwindigkeit-kmh-10min_de.json") as url:
+        data = json.loads(url.read().decode())
+        for section in data:
+            if section == 'features':
+                for feature in data['features']:
+                    if feature['id'] == 'BUS':
+                        print(feature['properties']['value']) 
+                        
+def get_boeen():
+    with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-wind-boeenspitze-kmh-10min/ch.meteoschweiz.messwerte-wind-boeenspitze-kmh-10min_de.json") as url:
+        data = json.loads(url.read().decode())
+        for section in data:
+            if section == 'features':
+                for feature in data['features']:
+                    if feature['id'] == 'BUS':
+                        print(feature['properties']['value'])  
+
 def main():
     while constants.run:
         observation = owm.weather_at_id(2658173)
         
         forecast = owm.three_hours_forecast_at_id(2658173)
         f = forecast.get_forecast()
-        lst = observation.get_weather()
-        rain = 0
 
-#        if lst.get_rain():
-#            try:
-#                rain = lst.get_rain()['3h']
-#            except:
-#                pass
-
-        winds = lst.get_wind()['speed']
-#        data = {'Value':rain}
+        winds = get_wind()
         rain = get_rain()
+        boeen = get_boeen()
         broadcast_input_value('Wetter/Regen', rain)
-        data = {'Value':winds}
-        broadcast_input_value('Wetter/Wind', winds)        
+        broadcast_input_value('Wetter/Wind', winds)  
+        broadcast_input_value('Wetter/Boeen', boeen)         
         jetzt = datetime.datetime.today()
         morgen = jetzt + datetime.timedelta(days=1)
         bern = pytz.timezone('Europe/Berlin')

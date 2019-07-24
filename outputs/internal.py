@@ -117,9 +117,7 @@ class Internal:
         aes.new_event(description="Restarting in 60", prio=7)
         time.sleep(60)
 #        sys.exit("XS1 goodbye")
-        exectext = "sudo killall python3"
-        aes.new_event(description="Restarting", prio=7)
-        os.system(exectext)        
+        toolbox.restart()       
 
     def git_update(self):
         g = git.cmd.Git()
@@ -128,7 +126,7 @@ class Internal:
 
         print("Update done, exiting")
         aes.new_event(description="Update performed, restarting", prio=1)
-        constants.run = False
+        toolbox.restart()
 
     def check_anwesenheit(self):
 #        bewohner = mysql_connector.mdb_get_table(constants.sql_tables.Bewohner.name)
