@@ -26,6 +26,7 @@ datab = constants.sql_.DB
 
 validTimers = {}
 locklist = {}
+persTimers = {}
 
 class tables(object):
 # TODO: change table names to constant settings
@@ -599,6 +600,13 @@ def maxSzenenId():
     con.close()
     return results[0][0]    
 
+
+# latching (user setting)
+# latched (from evaluation automatic) only latch after scene was found
+# persistance (user setting)
+# violation time (from evaluation automatic)
+# funktioniert bei einem Deadband vieillicht nicht, wert muss neu ankommen..
+# sollte über interne kommunikation mit ExecSzene' möglich sein.
 def inputs(device, value, add_to_mqtt=True):
 #    i = 0
     ct = datetime.datetime.now()
@@ -721,6 +729,24 @@ def inputs(device, value, add_to_mqtt=True):
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
                         if append and dicti.get('Immer') is not None:szenen.append(dicti.get('Immer'))
+                        if append and dicti.get('violTime') is None:
+                            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET violTime = "'+str(ct)+'" WHERE Id = "' + str(dicti.get('Id')) +'"'
+                            cur.execute(sql)
+                        if not append:
+                            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET violTime = NULL WHERE Id = "' + str(dicti.get('Id')) +'"'
+                            cur.execute(sql) 
+                        if append and dicti.get('violTime') is not None and dicti.get('persistance') is not None:
+                            if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
+                                szenen = []
+                        if str(dicti.get('latching')) == "True":
+                            if not szenen and str(dicti.get('latched')) == "True":
+                                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET latched = "False" WHERE Id = "' + str(dicti.get('Id')) +'"'
+                                cur.execute(sql) 
+                            if szenen and str(dicti.get('latched')) != "True":
+                                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET latched = "True" WHERE Id = "' + str(dicti.get('Id')) +'"'
+                                cur.execute(sql) 
+                            if szenen and str(dicti.get('latched')) == "True":
+                                szenen = []
     #            get stting and logging
                 hks = dicti_1['HKS']
                 cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
