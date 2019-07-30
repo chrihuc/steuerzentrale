@@ -800,10 +800,10 @@ def inputs(device, value, add_to_mqtt=True):
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
             if str(dicti.get("last1")) != "None":
-                sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "True", last_Value = "" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(dicti.get("last1")), str(ct), str(value), str(device))
+                sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "True", last_Value = "" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, dicti.get("last1"), ct, value, device)
                 cur.execute(sql)  
             else:
-                sql = 'UPDATE %s SET last1 = "%s", valid = "True", last_Value = "" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(ct), str(value), str(device))
+                sql = 'UPDATE %s SET last1 = "%s", valid = "True", last_Value = "" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, ct, value, device)
                 cur.execute(sql) 
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
