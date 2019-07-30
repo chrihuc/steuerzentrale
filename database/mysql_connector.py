@@ -749,13 +749,13 @@ def inputs(device, value, add_to_mqtt=True):
                             if szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
                         if violTime is not None and latched is not None:
-                            sql = 'UPDATE % SET violTime = "%", latched = "%" WHERE Id = "%"' % (constants.sql_tables.inputs.name, violTime, latched, dicti.get('Id'))
+                            sql = 'UPDATE %s SET violTime = "%s", latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, latched, dicti.get('Id'))
                             cur.execute(sql)
                         elif violTime is not None and latched is None:  
-                            sql = 'UPDATE % SET violTime = "%" WHERE Id = "%"' % (constants.sql_tables.inputs.name, violTime, dicti.get('Id'))
+                            sql = 'UPDATE %s SET violTime = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, dicti.get('Id'))
                             cur.execute(sql)   
                         elif violTime is None and latched is not None:  
-                            sql = 'UPDATE % SET latched = "%" WHERE Id = "%"' % (constants.sql_tables.inputs.name, latched, dicti.get('Id'))
+                            sql = 'UPDATE %s SET latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, dicti.get('Id'))
                             cur.execute(sql)                             
     #            get stting and logging
                 hks = dicti_1['HKS']
@@ -800,10 +800,10 @@ def inputs(device, value, add_to_mqtt=True):
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
             if str(dicti.get("last1")) != "None":
-                sql = 'UPDATE % SET last2 = "%", last1 = "%", valid = "True", last_Value = "" WHERE Name = "%" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(dicti.get("last1")), str(ct), str(value), str(device))
+                sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "True", last_Value = "" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(dicti.get("last1")), str(ct), str(value), str(device))
                 cur.execute(sql)  
             else:
-                sql = 'UPDATE % SET last1 = "%", valid = "True", last_Value = "" WHERE Name = "%" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(ct), str(value), str(device))
+                sql = 'UPDATE %s SET last1 = "%s", valid = "True", last_Value = "" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(ct), str(value), str(device))
                 cur.execute(sql) 
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
