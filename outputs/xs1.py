@@ -12,6 +12,7 @@ import json
 from database import mysql_connector
 
 from tools import toolbox
+import time
 #toolbox.log('debug on')
 
 # TODO Tests split adress from hks
@@ -178,7 +179,11 @@ class XS1:
                     value=100
             elif 'func' in str(commd):
                 self.SetSwitchFunction(str(device), str(commd)[5:])
+                time.sleep(0.2)
+                self.SetSwitchFunction(str(device), str(commd)[5:])
             else:
+                self.SetSwitch(str(device), str(commd))
+                time.sleep(0.2)
                 self.SetSwitch(str(device), str(commd))
             return True
         except:
