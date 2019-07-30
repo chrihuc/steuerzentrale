@@ -623,6 +623,7 @@ def inputs(device, value, add_to_mqtt=True):
     desc = None
     heartbt = None
     filtered = False
+    
 #    print(device,value)
 #    if 'MQTT' in device:
 #        add_to_mqtt = False
@@ -656,7 +657,7 @@ def inputs(device, value, add_to_mqtt=True):
                 if float(value) >= filtering[1]:
                     filtered = True
                     
-            if not filtered:
+            if not filtered:                
                 if last_value is None: last_value = value
                 if not last_time:
                     try:
@@ -699,6 +700,10 @@ def inputs(device, value, add_to_mqtt=True):
                 field_names = [i[0] for i in cur.description]
                 #dicti = {key: "" for (key) in szene_columns}
                 for row in results:
+
+                    violTime = None
+                    latched = None                    
+                    
                     single = True
                     for i in range (0,len(row)):
                         dicti[field_names[i]] = row[i]
@@ -730,23 +735,28 @@ def inputs(device, value, add_to_mqtt=True):
                             szenen.append(dicti.get(setting_r("Status")))
                         if append and dicti.get('Immer') is not None:szenen.append(dicti.get('Immer'))
                         if append and dicti.get('violTime') is None:
-                            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET violTime = "'+str(ct)+'" WHERE Id = "' + str(dicti.get('Id')) +'"'
-                            cur.execute(sql)
-                        if not append:
-                            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET violTime = NULL WHERE Id = "' + str(dicti.get('Id')) +'"'
-                            cur.execute(sql) 
+                            violTime = str(ct)
+                        if not append and not dicti.get('violTime') is None:
+                            violTime = 'NULL'
                         if append and dicti.get('violTime') is not None and dicti.get('persistance') is not None:
                             if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
                                 szenen = []
                         if str(dicti.get('latching')) == "True":
                             if not szenen and str(dicti.get('latched')) == "True":
-                                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET latched = "False" WHERE Id = "' + str(dicti.get('Id')) +'"'
-                                cur.execute(sql) 
-                            if szenen and str(dicti.get('latched')) != "True":
-                                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET latched = "True" WHERE Id = "' + str(dicti.get('Id')) +'"'
-                                cur.execute(sql) 
+                                latched = 'False'
+                            if szenen and str(dicti.get('latched')) != "True": 
+                                latched = 'True'
                             if szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
+                        if violTime is not None and latched is not None:
+                            sql = 'UPDATE % SET violTime = "%", latched = "%" WHERE Id = "%"' % (constants.sql_tables.inputs.name, violTime, latched, dicti.get('Id'))
+                            cur.execute(sql)
+                        elif violTime is not None and latched is None:  
+                            sql = 'UPDATE % SET violTime = "%" WHERE Id = "%"' % (constants.sql_tables.inputs.name, violTime, dicti.get('Id'))
+                            cur.execute(sql)   
+                        elif violTime is None and latched is not None:  
+                            sql = 'UPDATE % SET latched = "%" WHERE Id = "%"' % (constants.sql_tables.inputs.name, latched, dicti.get('Id'))
+                            cur.execute(sql)                             
     #            get stting and logging
                 hks = dicti_1['HKS']
                 cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
@@ -754,17 +764,17 @@ def inputs(device, value, add_to_mqtt=True):
                     setting_s(hks, value)
                 cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
                 if cur.fetchone()[0] > 0 and str(hks) != str(device):
-                    try:
-                        insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-                        cur.execute(insertstatement)
-                    except:
-                        try:
-                            ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % (constants.sql_tables.his_inputs.name, hks)
-                            cur.execute(ist)
-                            insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-                            cur.execute(insertstatement)
-                        except:
-                            pass
+#                    try:
+#                        insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
+#                        cur.execute(insertstatement)
+#                    except:
+#                        try:
+#                            ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % (constants.sql_tables.his_inputs.name, hks)
+#                            cur.execute(ist)
+#                            insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
+#                            cur.execute(insertstatement)
+#                        except:
+#                            pass
                     thread_inflx = Timer(0, writeInfluxDb, [hks, value, utc])
                     thread_inflx.start()
 #                            print(insertstatement)
@@ -777,26 +787,24 @@ def inputs(device, value, add_to_mqtt=True):
     #                    cur.execute(ist)
     
     
-                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last1 = "'+str(ct)+'" WHERE Name = "' + str(device) +'"'
-                cur.execute(sql)
-                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET valid = "True" WHERE Name = "' + str(device) +'"'
-                cur.execute(sql)
+
                 if not heartbt is None:
                     if hks in validTimers:
                         validTimers[hks].cancel()
                     thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
                     thread_pt_.start()
                     validTimers[hks] = thread_pt_
-                if str(dicti.get("last1")) != "None":
-                    sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last2 = "'+str(dicti.get("last1"))+'" WHERE Name = "' + str(device) +'"'
-                    cur.execute(sql + sql2)
                 if str(hks) != str(device) and add_to_mqtt:
                     data = {"Value":value, "HKS":hks}
                     mqtt_pub("Inputs/" + str(hks), data)
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
-            sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET last_Value = "'+str(value)+'" WHERE Name = "' + str(device) +'"'
-            cur.execute(sql)
+            if str(dicti.get("last1")) != "None":
+                sql = 'UPDATE % SET last2 = "%", last1 = "%", valid = "True", last_Value = "" WHERE Name = "%" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(dicti.get("last1")), str(ct), str(value), str(device))
+                cur.execute(sql)  
+            else:
+                sql = 'UPDATE % SET last1 = "%", valid = "True", last_Value = "" WHERE Name = "%" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, str(ct), str(value), str(device))
+                cur.execute(sql) 
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt
