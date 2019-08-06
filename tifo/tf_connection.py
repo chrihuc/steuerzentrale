@@ -43,6 +43,8 @@ from math import log
 import datetime
 import uuid
 
+from influxdb import InfluxDBClient
+
 #from distutils.version import LooseVersion
 
 import constants
@@ -73,6 +75,23 @@ def broadcast_input_value(Name, Value):
 #    mySocket.sendto(str(payload) ,(constants.server1,constants.broadPort))
 
 # tranisiton modes
+    
+def writeInfluxDb(hks, value, utc):
+    try:
+        if float(value) == 0:
+             json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": 0.}}] 
+        else:      
+            json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": float(value)}}]
+        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
+        client.write_points(json_body)
+    except:
+        print(hks, value, utc)
+    return True    
+    
 ANSTEIGEND = 0
 ABSTEIGEND = 1
 ZUSAMMEN = 2
@@ -512,6 +531,8 @@ class TiFo:
         temp_uid = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
 #        print(value)
         self.lineBricklets[temp_uid].callback(value)
+        utc = datetime.datetime.utcnow()
+        writeInfluxDb(temp_uid, value, utc)
         
 
     def set_io16_sub(self,cmd,io,value):
