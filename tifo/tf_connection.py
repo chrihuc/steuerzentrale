@@ -146,8 +146,8 @@ class LineBrick:
         self.device = device
         self.uid = uid
         self.state = 0
-        self.gwl = 3450
-        self.gwh = 3650
+        self.gwl = 3300
+        self.gwh = 3500
         self.min = 9999
         self.max = 0
         self.counter = 0
@@ -1027,6 +1027,7 @@ class TiFo:
                 if not temp_uid in self.lineBricklets:
                     self.lineBricklets[temp_uid] = LineBrick(lb, uid)
                 lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
+                lb.set_debounce_period(1000)
                 lb.set_reflectivity_callback_threshold('o', 3649, 3650)
                 toolbox.log('Line Bricklet', temp_uid)
                 found  = True

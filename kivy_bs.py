@@ -14,7 +14,8 @@ from kivy.logger import Logger
 from kivy.base import runTouchApp
 import os
 import datetime
-
+from outputs.mqtt_publish import mqtt_pub
+import constants
 
 class ScreenSaver_handler(object):
     def __init__(self):
@@ -89,8 +90,18 @@ class YourApp(App):
 #        button_grid.children[0].bind(on_press=evaluate_result)
 
         def clear_label(instance):
-            if output_label.text == '1234':
+            if output_label.text in constants.pins.besucher:
                 output_label.text = 'Eingabe OK'
+                command = {'Szene':'Besuch'}
+                mqtt_pub("Command/Szene/Besuch", command)
+                print("besucher")
+            elif output_label.text in constants.pins.bewohner:
+                output_label.text = 'Eingabe OK'
+                command = {'Szene':'AlarmanlageAus'}
+                mqtt_pub("Command/Szene/AlarmanlageAus", command)   
+                command = {'Szene':'Wach'}
+                mqtt_pub("Command/Szene/Wach", command)   
+                print("bewohner")
             else:
                 output_label.text = 'Eingabe Falsch'
         enter_button.bind(on_press=clear_label)

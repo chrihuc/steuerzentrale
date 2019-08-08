@@ -24,8 +24,13 @@ cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
 cfg_mqtt = {'Username': '', 'Password': '', 'Server': '["192.168.192.10","192.168.192.2"]'}
 cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': '', 'Key': ''}
 cfg_samsung_tv = {'IP': '', 'MAC': '00:30:1b:a0:2f:05'}
+cfg_pins = {'Besucher':'[]', 'Bewohner':'[]'}
 
 def init_cfg():
+    try:
+        config.read_file(open('./main.cfg'))
+    except:
+        print("couldn't open config file, new created")
     if not config.has_section('Main'):
         config.add_section('Main')
     for cfg in cfg_main:
@@ -87,7 +92,12 @@ def init_cfg():
         config.add_section('SamsungTV')
     for cfg in cfg_samsung_tv:
         if not config.has_option('SamsungTV', cfg):
-            config.set('SamsungTV', cfg, cfg_samsung_tv.get(cfg))            
+            config.set('SamsungTV', cfg, cfg_samsung_tv.get(cfg)) 
+    if not config.has_section('PINs'):
+        config.add_section('PINs')            
+    for cfg in cfg_pins:
+        if not config.has_option('PINs', cfg):
+            config.set('PINs', cfg, cfg_pins.get(cfg))             
     # Writing our configuration file to 'main.cfg'
     with open('./main.cfg', 'w') as configfile:
         config.write(configfile)
@@ -102,7 +112,7 @@ def save_config():
 
 for i in range(0,3):
 #    while True:
-#        try:
+        try:
             run = True
             passive = False
             debug = False
@@ -177,11 +187,14 @@ for i in range(0,3):
                 key = config.get('TRADFRI', 'Key')
             class samsung_tv_:
                 ip = config.get('SamsungTV', 'IP')
-                mac = config.get('SamsungTV', 'MAC')              
-#        except:
-#            init_cfg()
-#            continue
-#        break
+                mac = config.get('SamsungTV', 'MAC') 
+            class pins:
+                besucher = json.loads(config.get('PINs', 'Besucher'))
+                bewohner = json.loads(config.get('PINs', 'Bewohner'))                
+        except:
+            init_cfg()
+            continue
+        break
 
 akt_types = ['TV', 'SONOS', 'SATELLITE', 'HUE', 'XS1', 'ZWave', 'Local', 'Heating', 'TRADFRI']
 szn_types = ['','Favorit', 'GUI','Intern','Scanner','Wecker','Lichter','Klima', 'Multimedia']
