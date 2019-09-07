@@ -27,40 +27,54 @@ class MqttClient():
     def __init__(self, ip):
         self.connected = False
         zeit =  time.time()
-        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))
-        self.client = mqtt.Client(constants.name +'_pub_' + uhr)
+        uhr = str(strftime("%Y-%m-%d_%H_%M_%S",localtime(zeit)))
+        self.client = mqtt.Client(client_id=constants.name +'_pub_' + uhr, clean_session=False)
         self.client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
         self.ip = ip
+        self.connect()
+
+    def on_connect(self, client, userdata, flags, rc):
+        print("Connected with result code "+ str(rc))
+        self.connected = True
+#        client.subscribe("test")
 
     def connect(self):
-        self.client.connect(self.ip)
-        self.connected = True
+        self.client.connect(self.ip, 1883, 60)
+        print("connecting")
+        self.client.on_connect = self.on_connect
         self.client.loop_start()
     
     
     def mqtt_pub(self, channel, data, retain=True):
         if not self.connected:
-            self.connect()
+            time.sleep(5)
+            if not self.connected: self.connect()
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))    
         if isinstance(data, dict):
             data['ts'] = uhr
             try:
                 data = json.dumps(data, default=handler, allow_nan=False)
+                print(data)
             except:
                 self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)
+                print(2)
             else:
                 self.client.publish(channel, data, qos=1, retain=retain)
+                print(channel)
         elif isinstance(data, list):
             data = {'payload': data, 'ts': uhr}
             try:
                 data = json.dumps(data, default=handler, allow_nan=False)
+                print(3)
             except:
                 self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)
+                print(4)
             else:
                 self.client.publish(channel, data, qos=1, retain=retain)            
         else:
             self.client.publish(channel, data, qos=1, retain=retain)
+            print(5)
 
 def ping(IP, number = 1):
     pinged = False

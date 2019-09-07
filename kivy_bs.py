@@ -14,7 +14,8 @@ from kivy.logger import Logger
 from kivy.base import runTouchApp
 import os
 import datetime
-
+from outputs.mqtt_publish import mqtt_pub
+import constants
 
 class ScreenSaver_handler(object):
     def __init__(self):
@@ -52,30 +53,33 @@ class YourApp(App):
         button_symbols = ('1', '2', '3',
                           '4', '5', '6',
                           '7', '8', '9',
-                          '*', '0', 'Del')
+                          'Del', '0', 'Enter')
 
         button_grid = GridLayout(cols=3, size_hint_y=2) 
         for symbol in button_symbols:
             button_grid.add_widget(Button(text=symbol))
 
-        enter_button = Button(text='enter', size_hint_y=None,
+        enter_button = Button(text='', size_hint_y=None,
                               height=100)
 
         def print_button_text(instance):
-            if 'Eingabe' in output_label.text:
+            liste = ['Hallo', 'aus', 'Eingabe']
+            if any([True for i in liste if i in output_label.text]):
                 output_label.text = ''            
             output_label.text += instance.text
             
         def delete_key(instance):
-            if 'Eingabe' in output_label.text:
+            liste = ['Hallo', 'aus', 'Eingabe']
+            if any([True for i in liste if i in output_label.text]):
                 output_label.text = ''            
             output_label.text = output_label.text[:-1]            
             
-        for button in button_grid.children[1:]:  # note use of the
+        for button in button_grid.children[3:]:  # note use of the
                                              # `children` property
             button.bind(on_press=print_button_text)
-            
-        button_grid.children[0].bind(on_press=delete_key)
+        
+        button_grid.children[1].bind(on_press=print_button_text)
+        button_grid.children[2].bind(on_press=delete_key)
 
         def resize_label_text(label, new_height):
             label.font_size = 0.5*label.height
@@ -89,10 +93,24 @@ class YourApp(App):
 #        button_grid.children[0].bind(on_press=evaluate_result)
 
         def clear_label(instance):
-            if output_label.text == '1234':
-                output_label.text = 'Eingabe OK'
+            if output_label.text in constants.pins.besucher:
+                output_label.text = 'Hallo Besucher'
+                command = {'Szene':'Besuch'}
+                mqtt_pub("Command/Szene/Besuch", command)
+                print("besucher")
+            elif output_label.text in constants.pins.bewohner:
+                output_label.text = 'Alarmanlage aus'
+                command = {'Szene':'AlarmanlageAus'}
+                mqtt_pub("Command/Szene/AlarmanlageAus", command)   
+                command = {'Szene':'Wach'}
+                mqtt_pub("Command/Szene/Wach", command)   
+                print("bewohner")
             else:
                 output_label.text = 'Eingabe Falsch'
+                command = {'Szene':'FalscherPin'}
+                mqtt_pub("Command/Szene/FalscherPin", command)                 
+                
+        button_grid.children[0].bind(on_press=clear_label)                
         enter_button.bind(on_press=clear_label)
 
         root_widget.add_widget(output_label)

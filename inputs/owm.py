@@ -17,6 +17,7 @@ import pyowm
 import itertools
 import operator
 import urllib.request, json 
+from influxdb import InfluxDBClient
 
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
@@ -74,17 +75,21 @@ def get_boeen():
 
 def main():
     while constants.run:
-        observation = owm.weather_at_id(2658173)
-        
-        forecast = owm.three_hours_forecast_at_id(2658173)
-        f = forecast.get_forecast()
-
         winds = get_wind()
         rain = get_rain()
         boeen = get_boeen()
         broadcast_input_value('Wetter/Regen', rain)
         broadcast_input_value('Wetter/Wind', winds)  
-        broadcast_input_value('Wetter/Boeen', boeen)         
+        broadcast_input_value('Wetter/Boeen', boeen)   
+        
+        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
+        result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - 7d;')
+        points=list(result.get_points())
+        broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
+        
+        observation = owm.weather_at_id(2658173)
+        forecast = owm.three_hours_forecast_at_id(2658173)
+        f = forecast.get_forecast()        
         jetzt = datetime.datetime.today()
         morgen = jetzt + datetime.timedelta(days=1)
         bern = pytz.timezone('Europe/Berlin')

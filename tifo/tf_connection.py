@@ -43,6 +43,8 @@ from math import log
 import datetime
 import uuid
 
+from influxdb import InfluxDBClient
+
 #from distutils.version import LooseVersion
 
 import constants
@@ -73,6 +75,23 @@ def broadcast_input_value(Name, Value):
 #    mySocket.sendto(str(payload) ,(constants.server1,constants.broadPort))
 
 # tranisiton modes
+    
+def writeInfluxDb(hks, value, utc):
+    try:
+        if float(value) == 0:
+             json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": 0.}}] 
+        else:      
+            json_body = [{"measurement": hks,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": float(value)}}]
+        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
+        client.write_points(json_body)
+    except:
+        print(hks, value, utc)
+    return True    
+    
 ANSTEIGEND = 0
 ABSTEIGEND = 1
 ZUSAMMEN = 2
@@ -127,8 +146,8 @@ class LineBrick:
         self.device = device
         self.uid = uid
         self.state = 0
-        self.gwl = 3450
-        self.gwh = 3650
+        self.gwl = 3000
+        self.gwh = 3400
         self.min = 9999
         self.max = 0
         self.counter = 0
@@ -151,7 +170,7 @@ class LineBrick:
         self.readout_d = threading.Timer(self.day - (stunde * 3600) - (minute * 60) - sekunde, self.evaluate_d)
         self.readout_d.start()        
         toolbox.log('line Bricklet created', level=5)
-        
+     
     def callback(self, value):
         self.min = min(self.min, value)
         self.max = max(self.max, value)
@@ -183,6 +202,9 @@ class LineBrick:
         broadcast_input_value('TiFo.' + self.name + '.day', str(self.value_d))
         broadcast_input_value('TiFo.' + self.name + '.minimum', str(self.min))
         broadcast_input_value('TiFo.' + self.name + '.maximum', str(self.max))
+        if self.min > 0 and (self.max - self.min) > 600:
+            self.gwl = self.min + 200
+            self.gwh = self.max - 200
         self.value_d = 0   
         self.min = 9999
         self.max = 0     
@@ -200,7 +222,9 @@ class LineBrick:
                       'self.value_h' : self.value_h,
                       'self.value_d' : self.value_d,
                       'self.min'     : self.min,
-                      'self.max'     : self.max}
+                      'self.max'     : self.max,
+                      'self.gwl'     : self.gwl,
+                      'self.gwh'     : self.gwh}
         with open(self.uid + '.jsn', 'w') as fout:
             json.dump(write_list, fout, default=json_serial)    
 
@@ -215,7 +239,9 @@ class LineBrick:
             self.value_h = alte['self.value_h']
             self.value_d = alte['self.value_d']
             self.min = alte['self.min']
-            self.max = alte['self.max'] 
+            self.max = alte['self.max']
+            self.gwl = alte['self.gwl']
+            self.gwh = alte['self.gwh']
         except:
             toolbox.log('Laden der Wasserzaehler Impulse fehlgeschlagen', level=1)
 
@@ -512,6 +538,8 @@ class TiFo:
         temp_uid = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
 #        print(value)
         self.lineBricklets[temp_uid].callback(value)
+        utc = datetime.datetime.utcnow()
+        writeInfluxDb(temp_uid, value, utc)
         
 
     def set_io16_sub(self,cmd,io,value):
@@ -1006,6 +1034,7 @@ class TiFo:
                 if not temp_uid in self.lineBricklets:
                     self.lineBricklets[temp_uid] = LineBrick(lb, uid)
                 lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
+                lb.set_debounce_period(1000)
                 lb.set_reflectivity_callback_threshold('o', 3649, 3650)
                 toolbox.log('Line Bricklet', temp_uid)
                 found  = True

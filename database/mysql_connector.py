@@ -734,7 +734,6 @@ def inputs(device, value, add_to_mqtt=True):
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
                         if append and dicti.get('Immer') is not None:szenen.append(dicti.get('Immer'))
-                        print(dicti.get('violTime') == None)
                         if append and dicti.get('violTime') is None:
                             violTime = str(ct)
                         if not append and not dicti.get('violTime') is None:
