@@ -12,10 +12,57 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.logger import Logger
 from kivy.base import runTouchApp
+
+from kivy.uix.modalview import ModalView
+from kivy.uix.carousel import Carousel
+from kivy.uix.image import AsyncImage
+
 import os
 import datetime
 from outputs.mqtt_publish import mqtt_pub
 import constants
+import random
+
+from inputs.mqtt_kivy_client import MqttClient
+
+class PictureFrame(ModalView):
+
+    def __init__(self, **kwargs):
+        super(PictureFrame, self).__init__(**kwargs)
+        self.bind(on_touch_down=self.dismiss)
+        self.base_dir = constants.gui_.Bilder
+        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        self.carousel = Carousel(direction='right', loop=True)
+        random.shuffle(imgs)
+        for img in imgs:
+            image = AsyncImage(source=img, nocache=True)
+            self.carousel.add_widget(image)
+        self.add_widget(self.carousel)
+
+        self.delay = 5
+        #self.load_next_p()
+        self.clock_event = None
+
+    def load_next_p(self, *args):
+        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        random.shuffle(imgs)
+        self.carousel.clear_widgets()
+        try:
+            image = AsyncImage(source=imgs[0], nocache=True)
+            self.carousel.add_widget(image)
+        except:
+            pass
+# TODO: stop clock
+        self.clock_event = Clock.schedule_once(self.load_next, self.delay)
+
+    def dismiss(self, *args,**kwargs):
+        super(PictureFrame, self).dismiss()
+        if self.clock_event != None:
+            self.clock_event.cancel()
+
+    def start_show(self):
+        self.open()
+        self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)
 
 class ScreenSaver_handler(object):
     def __init__(self):
@@ -23,25 +70,42 @@ class ScreenSaver_handler(object):
         Window.bind(on_motion=self.on_motion)
         event = Clock.schedule_interval(self.slideshow, .5)
         event()
+        topics = ["Settings/#"]
+        self.mq_cli = MqttClient("192.168.192.2", topics, self.mqtt_on_mes)
+        self.mq_cli.connect()          
         self.ss_on = False
+        self.pic_frame = PictureFrame()
         Logger.info("init done")
 
     def slideshow(self, *args):
         if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=10):
             if not self.ss_on:
-                self.backlight(0)
+                if self.mq_cli.status == "Wach":
+                    self.pic_frame.start_show()
+                else:
+                    self.backlight(0)
                 Logger.info("screen off")
                 self.ss_on = True
 
     def on_motion(self, *args, **kwargs):
         self.last_event = datetime.datetime.now()
         self.backlight(100)
+        self.pic_frame.dismiss()
         Logger.info("screen on")
         self.ss_on = False
 
     def backlight(self, value):
         exectext = 'echo %s > /sys/class/backlight/rpi_backlight/brightness' % (value)
         os.system(exectext) 
+    
+    def mqtt_on_mes(self, topic, m_in):
+        if topic == "Settings/Status":
+            if m_in['Value'] == "Wach":
+                self.backlight(100)
+                self.pic_frame.start_show()
+            else:
+                self.backlight(0)
+                self.pic_frame.dismiss()                
 
 class YourApp(App):
     def build(self):

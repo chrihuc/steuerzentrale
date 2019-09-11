@@ -1034,7 +1034,7 @@ class TiFo:
                 if not temp_uid in self.lineBricklets:
                     self.lineBricklets[temp_uid] = LineBrick(lb, uid)
                 lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
-                lb.set_debounce_period(1000)
+                lb.set_debounce_period(500)
                 lb.set_reflectivity_callback_threshold('o', 3649, 3650)
                 toolbox.log('Line Bricklet', temp_uid)
                 found  = True
