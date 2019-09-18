@@ -18,13 +18,13 @@ import time
 from time import localtime,strftime
 
 class MqttClient:
-    def __init__(self, ip, topics, on_mes):
+    def __init__(self, ip, topics, on_mes=None):
         self.port = 1883
         self.ip = ip
         self.topics = topics
         self.client = None
         self.status = None
-        self.on_mes = None
+        self.on_mes = on_mes
         
 
     def connect(self):
@@ -34,8 +34,8 @@ class MqttClient:
         self.assign_handlers(self.on_connect, self.dis_con, self.on_message)
         self.client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
         self.client.connect(self.ip, self.port, 60)
-    #    client.loop_start()
-        self.client.loop_forever()
+        self.client.loop_start()
+        # self.client.loop_forever()
     
     
     def assign_handlers(self, connect, disconnect, message):

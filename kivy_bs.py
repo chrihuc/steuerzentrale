@@ -15,7 +15,7 @@ from kivy.base import runTouchApp
 
 from kivy.uix.modalview import ModalView
 from kivy.uix.carousel import Carousel
-from kivy.uix.image import AsyncImage
+from kivy.uix.image import Image,AsyncImage
 
 import os
 import datetime
@@ -31,11 +31,11 @@ class PictureFrame(ModalView):
         super(PictureFrame, self).__init__(**kwargs)
         self.bind(on_touch_down=self.dismiss)
         self.base_dir = constants.gui_.Bilder
-        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
         self.carousel = Carousel(direction='right', loop=True)
-        random.shuffle(imgs)
-        for img in imgs:
-            image = AsyncImage(source=img, nocache=True)
+#        random.shuffle(self.imgs)
+        for img in self.imgs:
+            image = Image(source=img)
             self.carousel.add_widget(image)
         self.add_widget(self.carousel)
 
@@ -61,6 +61,12 @@ class PictureFrame(ModalView):
             self.clock_event.cancel()
 
     def start_show(self):
+        self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        random.shuffle(self.imgs)
+        self.carousel.clear_widgets()
+        for img in self.imgs:
+            image = AsyncImage(source=img, nocache=False)
+            self.carousel.add_widget(image)        
         self.open()
         self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)
 
@@ -72,7 +78,7 @@ class ScreenSaver_handler(object):
         event()
         topics = ["Settings/#"]
         self.mq_cli = MqttClient("192.168.192.2", topics, self.mqtt_on_mes)
-        self.mq_cli.connect()          
+#        self.mq_cli.connect()          
         self.ss_on = False
         self.pic_frame = PictureFrame()
         Logger.info("init done")
@@ -80,7 +86,7 @@ class ScreenSaver_handler(object):
     def slideshow(self, *args):
         if datetime.datetime.now() - self.last_event > datetime.timedelta(hours=0, minutes=0, seconds=10):
             if not self.ss_on:
-                if self.mq_cli.status == "Wach":
+                if self.mq_cli.status == None or self.mq_cli.status == "Wach":
                     self.pic_frame.start_show()
                 else:
                     self.backlight(0)
@@ -99,6 +105,7 @@ class ScreenSaver_handler(object):
         os.system(exectext) 
     
     def mqtt_on_mes(self, topic, m_in):
+#        print(topic)
         if topic == "Settings/Status":
             if m_in['Value'] == "Wach":
                 self.backlight(100)

@@ -33,14 +33,15 @@ def last_data_reset():
 
 def on_receive(data):
     data = data.decode()
+    global heartbeat
+    global last_data
+    global ldt    
     if not constants.run:
+        heartbeat.cancel()
         return -1
         time.sleep(10)
         conn.close()
         sys.exit("Error message")
-    global heartbeat
-    global last_data
-    global ldt
     if False:
         ldt.cancel()
         ldt = Timer(1, last_data_reset)

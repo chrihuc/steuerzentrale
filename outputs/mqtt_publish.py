@@ -55,26 +55,20 @@ class MqttClient():
             data['ts'] = uhr
             try:
                 data = json.dumps(data, default=handler, allow_nan=False)
-                print(data)
             except:
                 self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)
-                print(2)
             else:
                 self.client.publish(channel, data, qos=1, retain=retain)
-                print(channel)
         elif isinstance(data, list):
             data = {'payload': data, 'ts': uhr}
             try:
                 data = json.dumps(data, default=handler, allow_nan=False)
-                print(3)
             except:
                 self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)
-                print(4)
             else:
                 self.client.publish(channel, data, qos=1, retain=retain)            
         else:
             self.client.publish(channel, data, qos=1, retain=retain)
-            print(5)
 
 def ping(IP, number = 1):
     pinged = False
