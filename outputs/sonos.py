@@ -171,8 +171,8 @@ class Sonos:
                     if toolbox.ping(ip):
                         newP = soco.SoCo(ip)
                         self.devices.add(newP)
-            else:
-                aes.new_event(description="Soco discover working again", prio=7)                        
+#            else:
+#                aes.new_event(description="Soco discover working again", prio=7)                        
         return self.devices
 
 

@@ -63,7 +63,7 @@ def main():
 
             elif msqc.settings_r()['Nacht'] == 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
                 # AUS und 6 h Warten
-                mqtt_pub("Outputs/Kerze1", 8)
+                mqtt_pub("Outputs/Kerze1", 4)
                 # Nachtlicht An und 10 min Warten
                 mqtt_pub("Outputs/Nachtlicht", 3)
             elif msqc.settings_r()['Nacht'] == 'True':

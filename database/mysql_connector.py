@@ -152,7 +152,8 @@ def writeInfluxDb(hks, value, utc):
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         client.write_points(json_body)
     except:
-        print(hks, value, utc)
+        pass
+#        print(hks, value, utc)
     return True  
 
 def writeInfluxString(key, value, utc):
@@ -163,7 +164,8 @@ def writeInfluxString(key, value, utc):
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         client.write_points(json_body)
     except:
-        print(key, value, utc)
+        pass
+#        print(key, value, utc)
     return True 
 
 def get_input_value(hks):
@@ -747,10 +749,13 @@ def inputs(device, value, add_to_mqtt=True):
                         if str(dicti.get('latching')) == "True":
                             if not szenen and str(dicti.get('latched')) == "True":
                                 latched = 'False'
-                            if szenen and str(dicti.get('latched')) != "True": 
-                                latched = 'True'
-                            if szenen and str(dicti.get('latched')) == "True":
+                                # anti szene (praktisch das reset):
+                                if dicti.get('ResetSzene') is not None:szenen.append(dicti.get('ResetSzene'))
+                            elif szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
+                            elif szenen and str(dicti.get('latched')) != "True": 
+                                latched = 'True'
+
                         if violTime is not None and latched is not None:
                             sql = 'UPDATE %s SET violTime = "%s", latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, latched, dicti.get('Id'))
                             cur.execute(sql)
