@@ -405,7 +405,7 @@ class Szenen(object):
                 cls.sz_t.cancel_timer(parent = szene, child = kommando)
 #==============================================================================
 # start timer with following actions
-# ['Szene', delay(s), exact_retrigger, selben bedingungen, abhängig erfolg]                
+# ['Szene', delay(s), exact_retrigger [0 nicht exact & retrig,1,2 nicht nicht], selben bedingungen, abhängig erfolg]                
 #==============================================================================
         if ((szene_dict.get("Follows") != "") and (str(szene_dict.get("Follows")) != "None")):
             kommandos = cls.__return_enum__(szene_dict.get("Follows"))

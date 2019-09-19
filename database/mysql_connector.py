@@ -14,6 +14,7 @@ from time import localtime, strftime
 import datetime
 from outputs.mqtt_publish import mqtt_pub
 import copy
+from tools import toolbox
 #import json
 
 # TODO: reconnect of MQTT
@@ -602,6 +603,21 @@ def maxSzenenId():
     con.close()
     return results[0][0]    
 
+def sendSql(sql):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    cur = con.cursor()
+    retrycount = 3
+    counter = 1
+    while counter <= retrycount:
+        try:
+            cur.execute(sql)
+            counter = retrycount + 1
+        except:
+            time.sleep(1)
+            counter += 1
+            if counter == 4:
+                print('could not write to DB')
+    con.close()
 
 # latching (user setting)
 # latched (from evaluation automatic) only latch after scene was found
@@ -795,13 +811,6 @@ def inputs(device, value, add_to_mqtt=True):
     #                    cur.execute(ist)
     
     
-
-                if not heartbt is None:
-                    if hks in validTimers:
-                        validTimers[hks].cancel()
-                    thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
-                    thread_pt_.start()
-                    validTimers[hks] = thread_pt_
                 if str(hks) != str(device) and add_to_mqtt:
                     data = {"Value":value, "HKS":hks}
                     mqtt_pub("Inputs/" + str(hks), data)
@@ -809,10 +818,17 @@ def inputs(device, value, add_to_mqtt=True):
         if not filtered:
             if str(dicti.get("last1")) != "None":
                 sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "True", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, dicti.get("last1"), ct, value, device)
-                cur.execute(sql)  
             else:
                 sql = 'UPDATE %s SET last1 = "%s", valid = "True", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, ct, value, device)
-                cur.execute(sql) 
+            thread_sql = Timer(0.1, sendSql, [sql])
+            thread_sql.start()
+        if heartbt:
+            if hks in validTimers:
+                validTimers[hks].cancel()
+            thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
+            thread_pt_.start()
+            validTimers[hks] = thread_pt_
+            print(validTimers.keys())
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt
@@ -821,3 +837,5 @@ def invalidTimers(hks):
     print('input timed out: ', hks)
     commands = {'Valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
+    payload = {'description':'input timed out: '+ hks,'prio':7}
+    toolbox.communication.send_message(payload, typ='new_event')    
