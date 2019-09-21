@@ -611,6 +611,7 @@ def sendSql(sql):
     while counter <= retrycount:
         try:
             print(sql)
+            cur.execute("SELECT "+datab)
             cur.execute(sql)
             print("success")
             counter = retrycount + 1
