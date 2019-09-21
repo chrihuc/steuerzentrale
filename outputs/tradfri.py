@@ -163,28 +163,28 @@ class Tradfri_lights():
                 Tradfri_lights.locklist[lampe] = hash_id
                 if bri == 0:
                     dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
-                    api(dim_command)
+                    self.api_cmd(dim_command)
                 elif transT == 0:
                     if lampe.light_control.can_set_color:                     
     #                    RANGE_SATURATION = (0, 65279)
                         color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']))
-                        api(color_command)
+                        self.api_cmd(color_command)
                         dim_command = lampe.light_control.set_dimmer(bri)
-                        api(dim_command)                    
+                        self.api_cmd(dim_command)                    
                     else:
                         dim_command = lampe.light_control.set_dimmer(bri)
-                        api(dim_command) 
+                        self.api_cmd(dim_command) 
                         dim_command = lampe.light_control.set_color_temp(temp)
-                        api(dim_command)
+                        self.api_cmd(dim_command)
                 else:
                     if lampe.light_control.can_set_color:                     
     #                    RANGE_SATURATION = (0, 65279)
                         color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT*10)
-                        api(color_command)
+                        self.api_cmd(color_command)
                         time.sleep(transT + 5)
                         if Tradfri_lights.locklist[lampe] == hash_id:
                             color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), brightness=bri, transition_time=transT*10)
-                            api(color_command)
+                            self.api_cmd(color_command)
 #                        dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
 #                        api(dim_command)                    
                     else:
@@ -193,9 +193,17 @@ class Tradfri_lights():
                         time.sleep(1)
                         if Tradfri_lights.locklist[lampe] == hash_id:                         
                             dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT*10)
-                            api(dim_command) 
-            
+                            self.api_cmd(dim_command) 
             success = True
-        
         return success
- 
+    
+    def api_cmd(self, command):
+        retry_max = 3
+        retry = 0
+        while retry < retry_max:
+            try:
+                api(command)
+                retry = retry_max
+            except:
+                retry += 1
+                time.sleep(100)

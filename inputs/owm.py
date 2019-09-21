@@ -75,40 +75,53 @@ def get_boeen():
 
 def main():
     while constants.run:
-        winds = get_wind()
-        rain = get_rain()
-        boeen = get_boeen()
-        broadcast_input_value('Wetter/Regen', rain)
-        broadcast_input_value('Wetter/Wind', winds)  
-        broadcast_input_value('Wetter/Boeen', boeen)   
+        try:
+            rain = get_rain()
+            broadcast_input_value('Wetter/Regen', rain)
+        except:
+            print("Regen Failed")   
+        try:            
+            winds = get_wind()
+            broadcast_input_value('Wetter/Wind', winds) 
+        except:
+            print("Wind Failed")              
+        try:            
+            boeen = get_boeen()
+            broadcast_input_value('Wetter/Boeen', boeen)   
+        except:
+            print("Wind Boeen Failed")              
         
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - 7d;')
         points=list(result.get_points())
         broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
         
-        observation = owm.weather_at_id(2658173)
-        forecast = owm.three_hours_forecast_at_id(2658173)
-        f = forecast.get_forecast()        
-        jetzt = datetime.datetime.today()
-        morgen = jetzt + datetime.timedelta(days=1)
-        bern = pytz.timezone('Europe/Berlin')
-        morgen = bern.localize(morgen)
-        minimum = 100
-        maximum = -100 
-        stati = []   
-        for weather in f:
-        #    datetime.strptime(time2, format)
-            if morgen >  weather.get_reference_time('date'):
-                minimum = min(weather.get_temperature('celsius')['temp'], minimum)
-                maximum = max(weather.get_temperature('celsius')['temp'], maximum)
-                stati.append(weather.get_detailed_status())   
-
-        w = observation.get_weather()
-        value = w.get_temperature('celsius')['temp']
-#        tmin = w.get_temperature('celsius')['temp_min']
-#        tmax = w.get_temperature('celsius')['temp_max']
-#        Status = w.get_detailed_status()
-        data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati), 'Regen':rain}
-        mqtt_pub("Wetter/Jetzt", data)
+        try:
+            observation = owm.weather_at_id(2658173)
+            forecast = owm.three_hours_forecast_at_id(2658173)
+            f = forecast.get_forecast()        
+            jetzt = datetime.datetime.today()
+            morgen = jetzt + datetime.timedelta(days=1)
+            bern = pytz.timezone('Europe/Berlin')
+            morgen = bern.localize(morgen)
+            minimum = 100
+            maximum = -100 
+            stati = []   
+            for weather in f:
+            #    datetime.strptime(time2, format)
+                if morgen >  weather.get_reference_time('date'):
+                    minimum = min(weather.get_temperature('celsius')['temp'], minimum)
+                    maximum = max(weather.get_temperature('celsius')['temp'], maximum)
+                    stati.append(weather.get_detailed_status())   
+    
+            w = observation.get_weather()
+            value = w.get_temperature('celsius')['temp']
+    #        tmin = w.get_temperature('celsius')['temp_min']
+    #        tmax = w.get_temperature('celsius')['temp_max']
+    #        Status = w.get_detailed_status()
+            data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati), 'Regen':rain}
+            mqtt_pub("Wetter/Jetzt", data)
+        except:
+            print("OWM Failed")
+            pass
         toolbox.sleep(60*10)

@@ -11,6 +11,7 @@ import datetime
 import time
 import os, sys, re
 from time import localtime,strftime
+from tools import toolbox
 
 mqtt_list = []
 
@@ -31,6 +32,7 @@ class MqttClient():
         self.client = mqtt.Client(client_id=constants.name +'_pub_' + uhr, clean_session=False)
         self.client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
         self.ip = ip
+        toolbox.communication.register_callback(self.receive_communication)
         self.connect()
 
     def on_connect(self, client, userdata, flags, rc):
@@ -69,6 +71,14 @@ class MqttClient():
                 self.client.publish(channel, data, qos=1, retain=retain)            
         else:
             self.client.publish(channel, data, qos=1, retain=retain)
+        return True
+
+    def receive_communication(self, payload, *args, **kwargs):
+        if toolbox.kw_unpack(kwargs,'typ') == 'output' and toolbox.kw_unpack(kwargs,'receiver') == 'MQTT':
+            adress=toolbox.kw_unpack(kwargs,'adress')
+            device = adress.split(".")[1]            
+            result = self.mqtt_pub("Command/MQTT/" + device, payload)
+            toolbox.communication.send_message(payload, typ='return', value=result)
 
 def ping(IP, number = 1):
     pinged = False

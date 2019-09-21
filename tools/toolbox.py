@@ -15,7 +15,6 @@ import inspect
 #from urllib.request import urlopen
 
 from threading import Thread, Event
-from outputs.mqtt_publish import mqtt_pub
 #
 class OwnTimer(Thread):
     """Call a function after a specified number of seconds:

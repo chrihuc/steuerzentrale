@@ -828,7 +828,7 @@ class Sonos:
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
 #        print(player, command)
-        if True:
+        if player:
 #        try:
             player, player_ip, p_uid, playerName = self.get_addr(player)
             if player in self.Devices:

@@ -610,7 +610,9 @@ def sendSql(sql):
     counter = 1
     while counter <= retrycount:
         try:
+            print(sql)
             cur.execute(sql)
+            print("success")
             counter = retrycount + 1
         except:
             time.sleep(1)
@@ -828,14 +830,14 @@ def inputs(device, value, add_to_mqtt=True):
             thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
             thread_pt_.start()
             validTimers[hks] = thread_pt_
-            print(validTimers.keys())
+#            print(validTimers.keys())
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt
 
 def invalidTimers(hks):
     print('input timed out: ', hks)
-    commands = {'Valid': 'False'}
+    commands = {'valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
     payload = {'description':'input timed out: '+ hks,'prio':7}
     toolbox.communication.send_message(payload, typ='new_event')    
