@@ -823,8 +823,19 @@ def inputs(device, value, add_to_mqtt=True):
                 sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "True", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, dicti.get("last1"), ct, value, device)
             else:
                 sql = 'UPDATE %s SET last1 = "%s", valid = "True", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, ct, value, device)
-            thread_sql = Timer(1, sendSql, [sql])
-            thread_sql.start()
+#            thread_sql = Timer(1, sendSql, [sql])
+            retrycount = 3
+            counter = 1
+            while counter <= retrycount:
+                try:
+                    cur.execute(sql)
+                    counter = retrycount + 1
+                except:
+                    time.sleep(.1)
+                    counter += 1
+                    if counter == 4:
+                        print('could not write to DB')            
+#            thread_sql.start()
         if heartbt:
             if hks in validTimers:
                 validTimers[hks].cancel()
