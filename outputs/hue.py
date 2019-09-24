@@ -139,7 +139,7 @@ class Hue_lights():
                     hbridge.set_light(device, {'on':True}) 
                     success = h_dev.on
                 except:
-                    time.sleep(1)
+                    time.sleep(retry * 1)
                     success = False
                     retry += 1
             if not success:
@@ -171,7 +171,7 @@ class Hue_lights():
                     hbridge.set_light(device, command)
                     success = True
                 except:
-                    time.sleep(1)
+                    time.sleep(retry * 1)
                     success = False 
                     retry += 1
         # switch light off
@@ -186,7 +186,7 @@ class Hue_lights():
                     hbridge.set_light(device, {'on':False})  
                     success = not h_dev.on
                 except:
-                    time.sleep(1)
+                    time.sleep(retry * 1)
                     success = False 
                     retry += 1
             if retry == max_retry:

@@ -96,32 +96,36 @@ def main():
         points=list(result.get_points())
         broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
         
-        try:
-            observation = owm.weather_at_id(2658173)
-            forecast = owm.three_hours_forecast_at_id(2658173)
-            f = forecast.get_forecast()        
-            jetzt = datetime.datetime.today()
-            morgen = jetzt + datetime.timedelta(days=1)
-            bern = pytz.timezone('Europe/Berlin')
-            morgen = bern.localize(morgen)
-            minimum = 100
-            maximum = -100 
-            stati = []   
-            for weather in f:
-            #    datetime.strptime(time2, format)
-                if morgen >  weather.get_reference_time('date'):
-                    minimum = min(weather.get_temperature('celsius')['temp'], minimum)
-                    maximum = max(weather.get_temperature('celsius')['temp'], maximum)
-                    stati.append(weather.get_detailed_status())   
-    
-            w = observation.get_weather()
-            value = w.get_temperature('celsius')['temp']
-    #        tmin = w.get_temperature('celsius')['temp_min']
-    #        tmax = w.get_temperature('celsius')['temp_max']
-    #        Status = w.get_detailed_status()
-            data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati), 'Regen':rain}
-            mqtt_pub("Wetter/Jetzt", data)
-        except:
-            print("OWM Failed")
-            pass
+        retries = 0
+        while retries < 3:
+            try:
+                observation = owm.weather_at_id(2658173)
+                forecast = owm.three_hours_forecast_at_id(2658173)
+                f = forecast.get_forecast()        
+                jetzt = datetime.datetime.today()
+                morgen = jetzt + datetime.timedelta(days=1)
+                bern = pytz.timezone('Europe/Berlin')
+                morgen = bern.localize(morgen)
+                minimum = 100
+                maximum = -100 
+                stati = []   
+                for weather in f:
+                #    datetime.strptime(time2, format)
+                    if morgen >  weather.get_reference_time('date'):
+                        minimum = min(weather.get_temperature('celsius')['temp'], minimum)
+                        maximum = max(weather.get_temperature('celsius')['temp'], maximum)
+                        stati.append(weather.get_detailed_status())   
+        
+                w = observation.get_weather()
+                value = w.get_temperature('celsius')['temp']
+        #        tmin = w.get_temperature('celsius')['temp_min']
+        #        tmax = w.get_temperature('celsius')['temp_max']
+        #        Status = w.get_detailed_status()
+                data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati), 'Regen':rain}
+                mqtt_pub("Wetter/Jetzt", data)
+                retries = 3
+            except:
+                print("OWM Failed")
+                retries += 1
+                pass
         toolbox.sleep(60*10)

@@ -12,6 +12,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.logger import Logger
 from kivy.base import runTouchApp
+import time
 
 from kivy.uix.modalview import ModalView
 from kivy.uix.carousel import Carousel
@@ -37,6 +38,7 @@ class PictureFrame(ModalView):
         for img in self.imgs:
             image = Image(source=img)
             self.carousel.add_widget(image)
+            time.sleep(1)
         self.add_widget(self.carousel)
 
         self.delay = 5
@@ -61,12 +63,12 @@ class PictureFrame(ModalView):
             self.clock_event.cancel()
 
     def start_show(self):
-        self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
-        random.shuffle(self.imgs)
-        self.carousel.clear_widgets()
-        for img in self.imgs:
-            image = AsyncImage(source=img, nocache=False)
-            self.carousel.add_widget(image)        
+#        self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+#        random.shuffle(self.imgs)
+#        self.carousel.clear_widgets()
+#        for img in self.imgs:
+#            image = AsyncImage(source=img, nocache=False)
+#            self.carousel.add_widget(image) 
         self.open()
         self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)
 

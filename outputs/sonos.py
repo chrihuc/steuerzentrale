@@ -579,7 +579,7 @@ class Sonos:
         transinfo = player.get_current_transport_info()
         own_zone = player.uid
         zone = own_zone
-        if False:
+        if True:
             zone = player.group.uid.split(':')[0]
         else:
             player_ip = player.ip_address
@@ -828,7 +828,7 @@ class Sonos:
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
 #        print(player, command)
-        if player:
+        if player is not None:
 #        try:
             player, player_ip, p_uid, playerName = self.get_addr(player)
             if player in self.Devices:
@@ -836,7 +836,10 @@ class Sonos:
                 player, player_ip, p_uid, playerName = self.get_addr(player)
             # playerName = self.Names.get(player)
             if str(command) == "Pause":
-                player.group.coordinator.pause()
+                try:
+                    player.group.coordinator.pause()
+                except:
+                    pass
             elif str(command) == "Play":
                 player.group.coordinator.play()
             elif str(command) == "Save":
