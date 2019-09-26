@@ -190,6 +190,7 @@ class Sonos:
                 ip = player.ip_address
                 uid = player.uid
                 return player, ip, uid, p_name
+        return None, None, None, None
 
     def get_player(self,uid):
         players = list(self.socoDiscover())
@@ -831,6 +832,8 @@ class Sonos:
         if player is not None:
 #        try:
             player, player_ip, p_uid, playerName = self.get_addr(player)
+            if player is None:
+                return False
             if player in self.Devices:
                 player = self.Devices.get(str(player))
                 player, player_ip, p_uid, playerName = self.get_addr(player)
