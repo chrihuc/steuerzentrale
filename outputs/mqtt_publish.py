@@ -47,14 +47,15 @@ class MqttClient():
         self.client.loop_start()
     
     
-    def mqtt_pub(self, channel, data, retain=True):
+    def mqtt_pub(self, channel, data, retain=True, short=False):
         if not self.connected:
             time.sleep(5)
             if not self.connected: self.connect()
         zeit =  time.time()
         uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))    
         if isinstance(data, dict):
-            data['ts'] = uhr
+            if not short:
+                data['ts'] = uhr
             try:
                 data = json.dumps(data, default=handler, allow_nan=False)
             except:
@@ -76,8 +77,11 @@ class MqttClient():
     def receive_communication(self, payload, *args, **kwargs):
         if toolbox.kw_unpack(kwargs,'typ') == 'output' and toolbox.kw_unpack(kwargs,'receiver') == 'MQTT':
             adress=toolbox.kw_unpack(kwargs,'adress')
-            device = adress.split(".")[1]            
-            result = self.mqtt_pub("Command/MQTT/" + device, payload)
+            device = adress.split(".")[1]  
+            new_pl = {}
+            new_pl['Value'] = payload['Value']
+            new_pl['SleepTime'] = payload['SleepTime']
+            result = self.mqtt_pub("Outputs/" + device, new_pl, short=True)
             toolbox.communication.send_message(payload, typ='return', value=result)
 
 def ping(IP, number = 1):

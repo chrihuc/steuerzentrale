@@ -38,7 +38,6 @@ class PictureFrame(ModalView):
         for img in self.imgs:
             image = Image(source=img)
             self.carousel.add_widget(image)
-            time.sleep(1)
         self.add_widget(self.carousel)
 
         self.delay = 5
@@ -55,7 +54,7 @@ class PictureFrame(ModalView):
         except:
             pass
 # TODO: stop clock
-        self.clock_event = Clock.schedule_once(self.load_next, self.delay)
+        self.clock_event = Clock.schedule_once(self.load_next_p, self.delay)
 
     def dismiss(self, *args,**kwargs):
         super(PictureFrame, self).dismiss()
@@ -70,7 +69,8 @@ class PictureFrame(ModalView):
 #            image = AsyncImage(source=img, nocache=False)
 #            self.carousel.add_widget(image) 
         self.open()
-        self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)
+        self.clock_event = Clock.schedule_once(self.load_next_p, self.delay)
+#        self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)
 
 class ScreenSaver_handler(object):
     def __init__(self):

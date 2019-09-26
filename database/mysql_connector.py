@@ -663,8 +663,7 @@ def inputs(device, value, add_to_mqtt=True):
             for row in results_1:
                 for i in range (0,len(row)):
                     dicti_1[field_names_1[i]] = row[i]
-            last_value = dicti_1['last_Value']
-            
+            last_value = dicti_1['last_Value']            
             # Filtern, wenn groesser oder kleiner Messung ignorieren
             filtering = dicti_1['Filter']
             try:
@@ -678,7 +677,13 @@ def inputs(device, value, add_to_mqtt=True):
                 if float(value) >= filtering[1]:
                     filtered = True
                     
-            if not filtered:                
+            if not filtered:        
+                valid = dicti_1['valid']
+                heartbt = dicti_1['heartbeat']
+                desc = dicti_1['Description']
+                if heartbt and str(valid) == "False":
+                    payload = {'description':'input recovered: '+ desc,'prio':7}
+                    toolbox.communication.send_message(payload, typ='new_event')                  
                 if last_value is None: last_value = value
                 if not last_time:
                     try:
@@ -686,8 +691,6 @@ def inputs(device, value, add_to_mqtt=True):
                     except:
                         last_time = ct - datetime.timedelta(hours=1)
                 debounce = dicti_1['debounce']
-                heartbt = dicti_1['heartbeat']
-                desc = dicti_1['Description']
                 if str(last_time) == 'None': last_time = ct - datetime.timedelta(hours=1)
                 if debounce is None:
                     db_time = ct
@@ -766,7 +769,7 @@ def inputs(device, value, add_to_mqtt=True):
                             if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
                                 szenen = []
                         if str(dicti.get('latching')) == "True":
-                            if not szenen and str(dicti.get('latched')) == "True":
+                            if not append and str(dicti.get('latched')) == "True":
                                 latched = 'False'
                                 # anti szene (praktisch das reset):
                                 if dicti.get('ResetSzene') is not None:szenen.append(dicti.get('ResetSzene'))
@@ -839,7 +842,7 @@ def inputs(device, value, add_to_mqtt=True):
         if heartbt:
             if hks in validTimers:
                 validTimers[hks].cancel()
-            thread_pt_ = Timer(int(heartbt), invalidTimers, [hks])
+            thread_pt_ = Timer(int(heartbt), invalidTimers, [hks, desc])
             thread_pt_.start()
             validTimers[hks] = thread_pt_
 #            print(validTimers.keys())
@@ -847,9 +850,9 @@ def inputs(device, value, add_to_mqtt=True):
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt
 
-def invalidTimers(hks):
-    print('input timed out: ', hks)
+def invalidTimers(hks, desc):
+    print('input timed out: ', desc)
     commands = {'valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
-    payload = {'description':'input timed out: '+ hks,'prio':7}
+    payload = {'description':'input timed out: '+ desc,'prio':7}
     toolbox.communication.send_message(payload, typ='new_event')    
