@@ -33,26 +33,34 @@ class PictureFrame(ModalView):
         self.bind(on_touch_down=self.dismiss)
         self.base_dir = constants.gui_.Bilder
         self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        random.shuffle(self.imgs)
         self.carousel = Carousel(direction='right', loop=True)
-#        random.shuffle(self.imgs)
-        for img in self.imgs:
-            image = Image(source=img)
+        self.currImage = 0
+        try:
+            image = AsyncImage(source=self.imgs[self.currImage], nocache=True)
             self.carousel.add_widget(image)
+        except:
+            pass        
+#        random.shuffle(self.imgs)
+#        for img in self.imgs:
+#            image = Image(source=img)
+#            self.carousel.add_widget(image)
         self.add_widget(self.carousel)
 
-        self.delay = 5
+        self.delay = 20
         #self.load_next_p()
         self.clock_event = None
 
     def load_next_p(self, *args):
-        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
-        random.shuffle(imgs)
+#        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+#        random.shuffle(self.imgs)
         self.carousel.clear_widgets()
+        self.currImage = (self.currImage + 1) % len(self.imgs)
         try:
-            image = AsyncImage(source=imgs[0], nocache=True)
+            image = AsyncImage(source=self.imgs[self.currImage], nocache=True)
             self.carousel.add_widget(image)
         except:
-            pass
+            pass  
 # TODO: stop clock
         self.clock_event = Clock.schedule_once(self.load_next_p, self.delay)
 
@@ -80,7 +88,7 @@ class ScreenSaver_handler(object):
         event()
         topics = ["Settings/#"]
         self.mq_cli = MqttClient("192.168.192.2", topics, self.mqtt_on_mes)
-#        self.mq_cli.connect()          
+        self.mq_cli.connect()          
         self.ss_on = False
         self.pic_frame = PictureFrame()
         Logger.info("init done")

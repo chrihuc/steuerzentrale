@@ -839,10 +839,12 @@ class Sonos:
                 player, player_ip, p_uid, playerName = self.get_addr(player)
             # playerName = self.Names.get(player)
             if str(command) == "Pause":
-                try:
-                    player.group.coordinator.pause()
-                except:
-                    pass
+                currinf = player.group.coordinator.get_current_transport_info()
+                if currinf['current_transport_state'] != 'STOPPED':
+                    try:
+                        player.group.coordinator.pause()
+                    except:
+                        pass
             elif str(command) == "Play":
                 player.group.coordinator.play()
             elif str(command) == "Save":
