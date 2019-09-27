@@ -17,6 +17,7 @@ import time
 from kivy.uix.modalview import ModalView
 from kivy.uix.carousel import Carousel
 from kivy.uix.image import Image,AsyncImage
+from kivy.cache import Cache
 
 import os
 import datetime
@@ -57,6 +58,8 @@ class PictureFrame(ModalView):
         self.carousel.clear_widgets()
         self.currImage = (self.currImage + 1) % len(self.imgs)
         try:
+            Cache.remove('kv.image')
+            Cache.remove('kv.texture')
             image = AsyncImage(source=self.imgs[self.currImage], nocache=True)
             self.carousel.add_widget(image)
         except:
