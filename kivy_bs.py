@@ -69,16 +69,21 @@ class PictureFrame(ModalView):
 
     def dismiss(self, *args,**kwargs):
         super(PictureFrame, self).dismiss()
+        self.carousel.clear_widgets()
+        Cache.remove('kv.image')
+        Cache.remove('kv.texture')        
         if self.clock_event != None:
             self.clock_event.cancel()
 
     def start_show(self):
-#        self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
-#        random.shuffle(self.imgs)
-#        self.carousel.clear_widgets()
-#        for img in self.imgs:
-#            image = AsyncImage(source=img, nocache=False)
-#            self.carousel.add_widget(image) 
+        self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+        random.shuffle(self.imgs)
+        self.currImage = 0
+        try:
+            image = AsyncImage(source=self.imgs[self.currImage], nocache=True)
+            self.carousel.add_widget(image)
+        except:
+            pass    
         self.open()
         self.clock_event = Clock.schedule_once(self.load_next_p, self.delay)
 #        self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)

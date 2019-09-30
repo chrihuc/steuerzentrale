@@ -20,7 +20,7 @@ from tools import toolbox
 
 aes = alarmevents.AES()
 
-max_retry = 4
+max_retry = 6
 
 class sql_object:
     def __init__(self,name,typ,columns):
@@ -162,7 +162,7 @@ class Hue_lights():
                 t_sucess = False
                 retry += 1
         if retry == max_retry:
-            print(device, ' hue timed out')
+            print(device, ' hue timed out (getting)')
         if command != {} and t_h_dev:
             success = False
             retry = 1
@@ -174,6 +174,8 @@ class Hue_lights():
                     time.sleep(retry * 1)
                     success = False 
                     retry += 1
+            if retry == max_retry:
+                print(device, ' hue timed out (setting)')                    
         # switch light off
         if str(szene.get('on')) == "0" or str(szene.get('on')) == "False":
             success = False #not h_dev.on
@@ -190,7 +192,7 @@ class Hue_lights():
                     success = False 
                     retry += 1
             if retry == max_retry:
-                print(device, ' hue timed out')
+                print(device, ' hue timed out (checking)')
         try:
             if not h_dev.reachable:
                 success = False

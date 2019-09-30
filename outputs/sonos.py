@@ -49,7 +49,7 @@ table = constants.sql_object("out_Sonos", "Outputs",(("Id","INT(11)","PRIMARY KE
 def Envelope(self, Player, body, SOAPAction):
     blen = len(body.encode())
     requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
-    requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
+    requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control%20HTTP/1.1")
     requestor.putheader("HOST", Player)
     requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
     requestor.putheader("Content-Length", str(blen))
@@ -64,7 +64,7 @@ def Envelope(self, Player, body, SOAPAction):
 def EnvelopeRC(self, Player, body, SOAPAction):
     blen = len(body.encode())
     requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
-    requestor.putrequest("POST", "/MediaRenderer/RenderingControl/Control HTTP/1.1")
+    requestor.putrequest("POST", "/MediaRenderer/RenderingControl/Control%20HTTP/1.1")
     requestor.putheader("Host", Player)
     requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
     requestor.putheader("Content-Length", str(blen))
@@ -208,7 +208,7 @@ class Sonos:
     def Envelope(self, Player, body, SOAPAction):
         blen = len(body.encode())
         requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
-        requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control HTTP/1.1")
+        requestor.putrequest("POST", "/MediaRenderer/AVTransport/Control%20HTTP/1.1")
         requestor.putheader("HOST", Player)
         requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
         requestor.putheader("Content-Length", str(blen))
@@ -503,7 +503,7 @@ class Sonos:
             </s:Envelope>"""
         blen = len(body.encode())
         requestor = http.client.HTTPConnection(Player, self.SERVER_PORT)
-        requestor.putrequest("POST", "/AlarmClock/Control HTTP/1.1")
+        requestor.putrequest("POST", "/AlarmClock/Control%20HTTP/1.1")
         requestor.putheader("Host", Player)
         requestor.putheader("Content-Type", """text/xml; charset="utf-8" """)
         requestor.putheader("Content-Length", str(blen))

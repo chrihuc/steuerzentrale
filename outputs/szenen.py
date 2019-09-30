@@ -64,7 +64,7 @@ mes = messaging.Messaging()
 class Szenen(object):
 
     kommando_dict = {}
-    timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
+    timeout = datetime.timedelta(hours=0, minutes=0, seconds=30)
     sz_t = szn_timer.Szenen_Timer()
 
     def __init__ (self):
@@ -95,8 +95,8 @@ class Szenen(object):
     def trigger_scenes(cls, device, value):
         szns, desc, heartbt = msqc.inputs(device,value)
 #        hearbeat supervision
-        if not ((heartbt is None) or (device is None)):
-            cls.timer_add(cls.execute, parent=None, device=desc, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
+#        if not ((heartbt is None) or (device is None)):
+#            cls.timer_add(cls.execute, parent=None, device=desc, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
         for szene in szns:
             if szene != None:
                 cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc)

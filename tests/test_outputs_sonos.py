@@ -34,7 +34,7 @@ class TestUM(unittest.TestCase):
 #                         'Error getting commands')
 
     def test_klingel(self):
-        result = self.test_mod.set_device('Bad', 'Ansage', 'klingel.wav')
+        result = self.test_mod.set_device('Kueche', 'Pause')
         self.assertTrue(result,
                          'Error sending command')
 #

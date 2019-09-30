@@ -75,21 +75,33 @@ def get_boeen():
 
 def main():
     while constants.run:
-        try:
-            rain = get_rain()
-            broadcast_input_value('Wetter/Regen', rain)
-        except:
-            print("Regen Failed")   
-        try:            
-            winds = get_wind()
-            broadcast_input_value('Wetter/Wind', winds) 
-        except:
-            print("Wind Failed")              
-        try:            
-            boeen = get_boeen()
-            broadcast_input_value('Wetter/Boeen', boeen)   
-        except:
-            print("Wind Boeen Failed")              
+        retries = 0
+        while retries < 3:        
+            try:
+                rain = get_rain()
+                broadcast_input_value('Wetter/Regen', rain)
+                retries = 3
+            except:
+                retries += 1                
+                print("Regen Failed")   
+        retries = 0
+        while retries < 3:            
+            try:            
+                winds = get_wind()
+                broadcast_input_value('Wetter/Wind', winds) 
+                retries = 3
+            except:
+                retries += 1
+                print("Wind Failed") 
+        retries = 0
+        while retries < 3:             
+            try:            
+                boeen = get_boeen()
+                broadcast_input_value('Wetter/Boeen', boeen)   
+                retries = 3
+            except:
+                retries += 1
+                print("Wind Boeen Failed")              
         
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - 7d;')
