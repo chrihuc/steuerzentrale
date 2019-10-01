@@ -290,7 +290,7 @@ class Szenen(object):
             for itm in t_list:
                 if itm[0] == device and itm[1] == commando:
                     t_list.remove(itm)
-        else:
+        elif not device in msqc.tables.akt_type_dict['Local']:
             aes.new_event(description="Failed: " + str(device) + str(commando), prio=1, karenz = 0.03)
         cls.kommando_dict[szn_id] = t_list
 

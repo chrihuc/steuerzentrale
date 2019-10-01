@@ -12,6 +12,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.logger import Logger
 from kivy.base import runTouchApp
+import gc
 import time
 
 from kivy.uix.modalview import ModalView
@@ -60,6 +61,7 @@ class PictureFrame(ModalView):
         try:
             Cache.remove('kv.image')
             Cache.remove('kv.texture')
+            gc.collect()
             image = AsyncImage(source=self.imgs[self.currImage], nocache=True)
             self.carousel.add_widget(image)
         except:
@@ -71,7 +73,8 @@ class PictureFrame(ModalView):
         super(PictureFrame, self).dismiss()
         self.carousel.clear_widgets()
         Cache.remove('kv.image')
-        Cache.remove('kv.texture')        
+        Cache.remove('kv.texture')    
+        gc.collect()
         if self.clock_event != None:
             self.clock_event.cancel()
 

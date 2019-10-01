@@ -642,6 +642,7 @@ class Sonos:
             except:
                 time.sleep(tries)
                 pass
+        print("set %s back to prev after %s tries" % (player.player_name, tries))
 
 
     def soco_read_szene(self, player, sonos_szene, overrde_play=False):
