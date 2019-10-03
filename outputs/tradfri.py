@@ -189,7 +189,7 @@ class Tradfri_lights():
 #                        api(dim_command)                    
                     else:
                         dim_command = lampe.light_control.set_color_temp(temp)
-                        api(dim_command)
+                        self.api_cmd(dim_command)
                         time.sleep(1)
                         if Tradfri_lights.locklist[lampe] == hash_id:                         
                             dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT*10)
@@ -206,4 +206,6 @@ class Tradfri_lights():
                 retry = retry_max
             except:
                 retry += 1
-                time.sleep(100)
+                time.sleep(0.05 * retry)
+                if retry >= retry_max:
+                    print("Tradfri max retries reached")

@@ -142,10 +142,13 @@ class TV:
         
     def set_device(self,device, commd):
         if not self.tv_remote_lan == None:
-            if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
-                return True
-            else:
-                return False
+            try:
+                if self.tv_remote_lan.control(str(commd)): # or self.tv_remote.sendKey([str(commd)]):
+                    return True
+                else:
+                    return False
+            except:
+                pass
         else:
             return False            
   

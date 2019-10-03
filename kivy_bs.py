@@ -52,6 +52,7 @@ class PictureFrame(ModalView):
         self.delay = 20
         #self.load_next_p()
         self.clock_event = None
+        self.running = False
 
     def load_next_p(self, *args):
 #        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
@@ -77,18 +78,21 @@ class PictureFrame(ModalView):
         gc.collect()
         if self.clock_event != None:
             self.clock_event.cancel()
+        self.running = False            
 
     def start_show(self):
-        self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
-        random.shuffle(self.imgs)
-        self.currImage = 0
-        try:
-            image = AsyncImage(source=self.imgs[self.currImage], nocache=True)
-            self.carousel.add_widget(image)
-        except:
-            pass    
-        self.open()
-        self.clock_event = Clock.schedule_once(self.load_next_p, self.delay)
+        if not self.running:
+            self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
+            random.shuffle(self.imgs)
+            self.currImage = 0
+            try:
+                image = AsyncImage(source=self.imgs[self.currImage], nocache=True)
+                self.carousel.add_widget(image)
+            except:
+                pass    
+            self.open()
+            self.clock_event = Clock.schedule_once(self.load_next_p, self.delay)
+        self.running = True
 #        self.clock_event = Clock.schedule_interval(self.carousel.load_next, self.delay)
 
 class ScreenSaver_handler(object):
@@ -131,6 +135,9 @@ class ScreenSaver_handler(object):
             if m_in['Value'] == "Wach":
                 self.backlight(100)
                 self.pic_frame.start_show()
+            elif m_in['Value'] == "Leise":
+                self.backlight(50)
+                self.pic_frame.start_show()                
             else:
                 self.backlight(0)
                 self.pic_frame.dismiss()                
