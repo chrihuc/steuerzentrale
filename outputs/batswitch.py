@@ -29,17 +29,17 @@ def main():
                 # AUS und 5 min Warten
                 mqtt_pub("Outputs/Kerze1", 'x')
                 mqtt_pub("Outputs/Nachtlicht", 'x')
-            elif msqc.settings_r()['Nacht'] != 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 5:
+            elif msqc.settings_r()['Nacht'] != 'True' and float(msqc.settings_r()['V00WOH1RUM1HE01']) < 5:
                 # AN und 5 min Warten
                 mqtt_pub("Outputs/Kerze1", 1)
                 # Nachtlicht Aus und 5 min Warten
                 mqtt_pub("Outputs/Nachtlicht", 0)
-            elif msqc.settings_r()['Nacht'] != 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
+            elif msqc.settings_r()['Nacht'] != 'True' and float(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
                 # AN und 10 min Warten
                 mqtt_pub("Outputs/Kerze1", 3)
                 # Nachtlicht Aus und 10 min Warten
                 mqtt_pub("Outputs/Nachtlicht", 2)
-            elif msqc.settings_r()['Nacht'] != 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 300:
+            elif msqc.settings_r()['Nacht'] != 'True' and float(msqc.settings_r()['V00WOH1RUM1HE01']) < 300:
                 # AUS und 10 min Warten
                 mqtt_pub("Outputs/Kerze1", 2)
                 # Nachtlicht Aus und 30 min Warten
@@ -61,7 +61,7 @@ def main():
     #            # AN und 2 h Warten
     #            client.publish("Outputs/Kerze1", 7, qos=1)
 
-            elif msqc.settings_r()['Nacht'] == 'True' and int(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
+            elif msqc.settings_r()['Nacht'] == 'True' and float(msqc.settings_r()['V00WOH1RUM1HE01']) < 30:
                 # AUS und 6 h Warten
                 mqtt_pub("Outputs/Kerze1", 4)
                 # Nachtlicht An und 10 min Warten
