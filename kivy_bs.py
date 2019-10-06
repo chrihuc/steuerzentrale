@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-
+# sudo mount -t cifs -o user=christoph //192.168.192.2/Photos /home/pi/photos
 
 from kivy.app import App
 from kivy.core.window import Window

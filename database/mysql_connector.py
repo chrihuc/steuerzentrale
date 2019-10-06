@@ -265,7 +265,7 @@ def settings_r_old():
 
 def settings_r():
     dicti = settings_r_old()
-    #dicti.update(inputs_r())
+    dicti.update(inputs_r())
     return dicti
 
 def set_val_in_szenen(device, szene, value):

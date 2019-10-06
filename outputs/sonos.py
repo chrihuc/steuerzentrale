@@ -651,10 +651,10 @@ class Sonos:
         zone = sonos_szene.get('MasterZone')
         if (str(zone) != "None") and (str(zone) != "Own"):
             zonemaster, _, _, _ = self.get_addr(str(zone))
-            if not zonemaster:
+            if not zonemaster is None:
                 player.join(zonemaster.group.coordinator)
             else:
-                print("Zonemaster none %s"%zone)
+                print("Zonemaster is none %s" % zone)
         else:
             if str(zone) != "None":
                 player.unjoin()
