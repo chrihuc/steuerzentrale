@@ -34,6 +34,9 @@ from outputs import cron
 
 from tools import toolbox
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 #AVTransport (GetTransportInfo, SetPause, SetPlay, CombineZones, StreamInput, ClearZones, AddTrack, RemoveTrack, GetPosition, GetPositionInfo, Seek, ActivateList, ClearList, PlayList (defect), PlayListNr)
 #RenderingControl (SetMute, GetVolume, SetVolume)
 # TODO Tests split adress from hks
@@ -623,7 +626,7 @@ class Sonos:
                 self.SetVolume(player_ip, dicti.get('Volume'))
                 if dicti['MasterZone'] != '':
                     master = self.get_player(dicti['MasterZone'])
-                    player.join(master)
+                    player.join(master.group.coordinator)
         #            self.CombineZones(player_ip, dicti['MasterZone'])
                 else:
                     self.ClearZones(player_ip)
@@ -652,7 +655,14 @@ class Sonos:
         if (str(zone) != "None") and (str(zone) != "Own"):
             zonemaster, _, _, _ = self.get_addr(str(zone))
             if not zonemaster is None:
-                player.join(zonemaster.group.coordinator)
+                tries = 0
+                while tries < 4:
+                    try:
+                        print("Zonemaster is not none %s" % zone)
+                        player.join(zonemaster.group.coordinator)
+                        tries = 4
+                    except:
+                        tries += 1
             else:
                 print("Zonemaster is none %s" % zone)
         else:
@@ -820,8 +830,9 @@ class Sonos:
         zone.add_uri_to_queue(netpath)
         time.sleep(.1)
         zone.volume += 10
+        zone.play_from_queue(0)
         print("playing now")
-        zone.play()
+#        zone.play()
         with contextlib.closing(wave.open(location+random_file,'r')) as f:
             frames = f.getnframes()
             rate = f.getframerate()
