@@ -3,7 +3,7 @@
 
 from alarm_event_messaging import alarmevents as aevs
 aes = aevs.AES()
-aes.new_event(description="Starting", prio=7)
+aes.new_event(description="Starting", prio=9)
 
 import threading
 import time, sys
@@ -105,14 +105,14 @@ try:
     threadliste.append(t)
     t.start()
 except:
-    aes.new_event(description="OWM not installed", prio=7)
+    aes.new_event(description="OWM not installed", prio=9)
 
 import app
 t = toolbox.OwnTimer(0, function=app.main, args = [], name="flask")
 threadliste.append(t)
 t.start()
 
-aes.new_event(description="All Threads started", prio=7)
+aes.new_event(description="All Threads started", prio=9)
 if constants.debug:
     toolbox.log(threadliste)
 
@@ -125,7 +125,7 @@ try:
             if not t in threading.enumerate():
                 if not t.failed:
                     if t.restartCounter == 2:                    
-                        aes.new_event(description="Thread stopped: "+t.name, prio=7)
+                        aes.new_event(description="Thread stopped: "+t.name, prio=9)
                     t.failed = True
                 try:
                     new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
@@ -136,12 +136,12 @@ try:
                     threadliste.append(new_t)
                     aes.new_event(description="Restarted Thread: "+t.name, prio=1)
                 except:
-                    aes.new_event(description="Couldn't restart Thread "+t.name+", killing python", prio=7)
+                    aes.new_event(description="Couldn't restart Thread "+t.name+", killing python", prio=9)
                     toolbox.restart()
             else:
                 if t.failed:
                     if t.restartCounter >= 2:
-                        aes.new_event(description="Thread running again: "+t.name, prio=7)
+                        aes.new_event(description="Thread running again: "+t.name, prio=9)
                     t.failed = False
                     t.restartCounter = 0
         toolbox.sleep(10)

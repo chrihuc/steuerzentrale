@@ -52,7 +52,7 @@ def on_receive(data):
     if count > 0:
         msqc.setting_s("NumRestart", str(0))
     if count > 1:
-        aes.new_event(description="XS1 wieder erreichbar", prio=7)
+        aes.new_event(description="XS1 wieder erreichbar", prio=9)
         msqc.setting_s("XS1_off", "inactive")
 #Zerlegung des Empfangs
     toolbox.log(data)
@@ -84,9 +84,9 @@ def heartbeat_sup():
     msqc.setting_s("Autorestart", str(now))
     count = int(msqc.setting_r("NumRestart"))
     if count == 0:
-        aes.new_event(description="Verbindung unterbrochen XS1inputs", prio=7)
+        aes.new_event(description="Verbindung unterbrochen XS1inputs", prio=9)
     if ((count > 0) and (msqc.setting_r("XS1_off") == "inactive")):
-        aes.new_event(description="XS1 nicht erreichbar", prio=7)
+        aes.new_event(description="XS1 nicht erreichbar", prio=9)
         msqc.setting_s("XS1_off", "Active")
     msqc.setting_s("NumRestart", str(count + 1))
     if toolbox.ping(constants.router_IP):

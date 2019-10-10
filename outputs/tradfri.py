@@ -39,7 +39,7 @@ def authenticate():
     identity = uuid.uuid4().hex
     api_factory = APIFactory(host=constants.tradfri_.host, psk_id=identity)
     if constants.tradfri_.key == '':
-        aes.new_event(description="Kein Key für Tradfri", prio=7)
+        aes.new_event(description="Kein Key für Tradfri", prio=9)
         raise KeyError
     psk = api_factory.generate_psk(constants.tradfri_.key) 
     constants.tradfri_.identity = identity
@@ -69,7 +69,7 @@ except:
     devices_commands = []
     devices = []
     lights = []
-    aes.new_event(description="Tradfri nicht erreichbar", prio=7)
+    aes.new_event(description="Tradfri nicht erreichbar", prio=9)
     
 #for l in lights:
 #    print(l.light_control.can_set_color)

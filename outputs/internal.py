@@ -114,7 +114,7 @@ class Internal:
 
     def restart(self):
         constants.run = False
-        aes.new_event(description="Restarting in 60", prio=7)
+        aes.new_event(description="Restarting in 60", prio=9)
         time.sleep(60)
 #        sys.exit("XS1 goodbye")
         toolbox.restart()       

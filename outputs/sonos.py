@@ -168,14 +168,14 @@ class Sonos:
         if len(self.devices) == 0: 
             self.devices = soco.discover()
             if not self.devices:
-                aes.new_event(description="Soco discover not working", prio=7)
+                aes.new_event(description="Soco discover not working", prio=9)
                 self.devices = set()
                 for ip in self.Names.keys():
                     if toolbox.ping(ip):
                         newP = soco.SoCo(ip)
                         self.devices.add(newP)
 #            else:
-#                aes.new_event(description="Soco discover working again", prio=7)                        
+#                aes.new_event(description="Soco discover working again", prio=9)                        
         return self.devices
 
 

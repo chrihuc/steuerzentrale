@@ -325,7 +325,7 @@ class TiFo:
         self.timeout.start()
 
     def timedOut(self):
-        aes.new_event(description="Tifo timedOut: "+self.ip, prio=7)
+        aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
         self.connect()
 
     def connect(self):
@@ -337,7 +337,7 @@ class TiFo:
         while True:
             try:
                 self.ipcon.connect(self.ip, PORT)
-#                aes.new_event(description="Tifo connected: "+self.ip, prio=7)
+#                aes.new_event(description="Tifo connected: "+self.ip, prio=9)
                 break
             except Error as e:
                 toolbox.log('Connection Error: ' + str(e.description))
