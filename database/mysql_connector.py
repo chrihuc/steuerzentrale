@@ -701,9 +701,13 @@ def inputs(device, value, add_to_mqtt=True):
                     locklist[device] = ct
                 deltaT = ct - last_time
                 deltaTm = deltaT.total_seconds() / 60
+                gradient = 0
                 if deltaTm > 0:
-                    deltaX = float(value) - float(last_value)
-                    gradient = deltaX #/ deltaTm
+                    try:
+                        deltaX = float(value) - float(last_value)
+                        gradient = deltaX #/ deltaTm
+                    except:
+                        print(value, last_value, device)
                 else:
                     gradient = float(value) - float(last_value)
                 sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'

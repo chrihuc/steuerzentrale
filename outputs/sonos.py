@@ -642,7 +642,8 @@ class Sonos:
                             self.Seek(player_ip, "REL_TIME", dicti['Time'])
                     if not dicti['Pause']:
                         player.play()
-            except:
+            except Exception as e:
+                print(e)
                 time.sleep(tries)
                 pass
         print("set %s back to prev after %s tries" % (player.player_name, tries))
@@ -823,13 +824,14 @@ class Sonos:
         player_ip = zone.ip_address
         self.soco_get_status(zone)
         print("got status of " + player_ip)
-        time.sleep(5)
+        time.sleep(0)
         zone.unjoin()
         self.ActivateList(player_ip, zoneown)
         zone.clear_queue()
         zone.add_uri_to_queue(netpath)
-        time.sleep(.1)
+        time.sleep(0)
         zone.volume += 10
+        time.sleep(5)        
         zone.play_from_queue(0)
         print("playing now")
 #        zone.play()

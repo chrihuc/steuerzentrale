@@ -20,7 +20,7 @@ cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
 cfg_mail ={'USER':'','PASS':'','RECIP':'[]'}
 cfg_gui = {'KommandoStation': False, 'KSHome':1, 'KlingelAn':False, 'Feh':True,
-           'Bilder': ''}
+           'Bilder': '', 'BilderServer': ''}
 cfg_mqtt = {'Username': '', 'Password': '', 'Server': '["192.168.192.10","192.168.192.2"]'}
 cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': '', 'Key': ''}
 cfg_samsung_tv = {'IP': '', 'MAC': '00:30:1b:a0:2f:05'}
@@ -173,6 +173,7 @@ for i in range(0,3):
                 KlingelAn = config.getboolean('GUI', 'KlingelAn')
                 Feh = config.getboolean('GUI', 'Feh')
                 Bilder = config.get('GUI', 'Bilder')
+                BilderServer = config.get('GUI', 'BilderServer')
             class mqtt_:
                 user = config.get('MQTT', 'Username')
                 password = config.get('MQTT', 'Password')

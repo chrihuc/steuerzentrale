@@ -15,13 +15,7 @@ table = constants.sql_tables.Bewohner
 class Messaging:
     def __init__(self):
         #self.gcm = GCM(constants.gcm_ID)
-        self.chris_vorname = "Christoph"
-        self.sabina_vorname = "Sabina"
-        self.chris = ['Christoph']
-        self.sabina = ['Sabina']
-        self.tf201 = ['tf201']
-        self.alle = self.chris + self.sabina + self.tf201
-        self.dict_namen = {self.chris[0]:self.chris_vorname, self.sabina[0]:self.sabina_vorname}
+        self.alle = []
         self.__init_table__()
 
     def __init_table__(self):
@@ -43,6 +37,10 @@ class Messaging:
                 cur.execute(command)
                 results = cur.fetchall()
         con.close()
+        gcm_users = msqc.mdb_get_table(table.name)
+        for user in gcm_users:
+            if user.get('Name') != None:
+                self.alle.append(user.get('Name'))
 
     def send_direkt(self, to, titel, text, prio=2):
         success = True
@@ -59,6 +57,8 @@ class Messaging:
         #response = self.gcm.json_request(registration_ids=to, data=data)
 
     def send_zuhause(self, to, titel, text, prio=2):
+        if not isinstance(to, list):
+            to = [to]
         success = True
         data = {'titel': titel, 'message': text, 'prio':prio}
         gcm_users = msqc.mdb_get_table(table.name)
@@ -73,6 +73,7 @@ class Messaging:
 #                            success = False
         return success
 
+#   deprecated
     def send_abwesend(self, to, titel, text, prio=2):
         success = True
         data = {'titel': titel, 'message': text, 'prio':prio}
@@ -88,6 +89,7 @@ class Messaging:
 #                            success = False
         return success
 
+#    deprecated
     def send_wach(self, to, titel, text):
         if (msqc.setting_r("Status") != "Schlafen"):
             return self.send_direkt(to, titel, text)

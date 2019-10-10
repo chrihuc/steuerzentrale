@@ -199,10 +199,34 @@ class AES:
                 else:
                     insertstatement = 'INSERT INTO '+table.name+'(description, prio, Date) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
                 cur.execute(insertstatement)
-            if str(mysql_connector.setting_r("Status")) == "Wach":
-                anwesend = True
-            else:
-                anwesend = False
+#            if str(mysql_connector.setting_r("Status")) == "Wach":
+#                anwesend = True
+#            else:
+#                anwesend = False
+                
+# Neu
+            # Wach
+            nurwach = prio // 10000
+            prio = prio - nurwach * 10000
+            if nurwach and not str(mysql_connector.setting_r("Status")) in ["Wach"]:
+                return True
+            anwesend = prio // 1000
+            prio = prio - anwesend * 1000
+            mail = prio // 100
+            prio = prio - mail * 100
+            if mail:
+                self.send_mail('Hinweis/Alarm', text=description)
+            if anwesend:
+                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
+            elif prio > 0:
+                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
+            mute = prio // 10
+            prio = prio - mute * 10
+            if prio > 1:
+                AES.alarm_liste.addAlarm('Event', description)                
+            return True
+        
+        
             if prio == 0:
                 pass
             elif prio == 1:

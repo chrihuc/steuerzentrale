@@ -176,8 +176,12 @@ class Szenen(object):
 #                for i, wert in enumerate(bedingungen):
 #                    for j, eintrag in enumerate(wert):
 #                        bedingungen[i][j]=mysql_connector.re_calc(eintrag)
-                item, operand, wert = bedingung
-                wert = msqc.re_calc(wert)
+                try:
+                    item, operand, wert = bedingung
+                    wert = msqc.re_calc(wert)
+                except:
+                    print(bedingung)
+                    return False
                 if msqc.setting_r(item) == None:
                     msqc.setting_s(bedingung, '')
 #                item = settings.get(item)

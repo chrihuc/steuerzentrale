@@ -25,6 +25,7 @@ import datetime
 from outputs.mqtt_publish import mqtt_pub
 import constants
 import random
+import shutil
 
 from inputs.mqtt_kivy_client import MqttClient
 
@@ -34,6 +35,8 @@ class PictureFrame(ModalView):
         super(PictureFrame, self).__init__(**kwargs)
         self.bind(on_touch_down=self.dismiss)
         self.base_dir = constants.gui_.Bilder
+        self.server_dir = constants.gui_.BilderServer
+#        shutil.copy2(self.server_dir, self.base_dir, *,follow_symlinks=True)
         self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
         random.shuffle(self.imgs)
         self.carousel = Carousel(direction='right', loop=True)
