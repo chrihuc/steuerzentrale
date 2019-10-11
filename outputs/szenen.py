@@ -345,10 +345,16 @@ class Szenen(object):
             if (str(szene_dict.get("Delay")) != "None"):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
-                text = '%s = %s, Szene: %s' % (device, wert, szene)
+                if device:
+                    text = '%s = %s, Szene: %s' % (device, wert, szene)
+                else:
+                    text = 'Szene: %s' % (szene)
             else:
-                text = '%s = %s, %s' % (device, wert, str(szene_dict.get("Beschreibung")))
-            aes.new_event(description=text, prio=Prio, karenz=Karenz)
+                if device:
+                    text = '%s = %s, %s' % (device, wert, str(szene_dict.get("Beschreibung")))
+                else:
+                    text = str(szene_dict.get("Beschreibung"))
+            aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")

@@ -36,7 +36,11 @@ class PictureFrame(ModalView):
         self.bind(on_touch_down=self.dismiss)
         self.base_dir = constants.gui_.Bilder
         self.server_dir = constants.gui_.BilderServer
-#        shutil.copy2(self.server_dir, self.base_dir, *,follow_symlinks=True)
+        for root, dirs, files in os.walk(self.server_dir):
+                for datei in files:
+                    ziel = os.path.join(self.server_dir, datei)
+                    if not os.path.exists(ziel):
+                        shutil.copy2(ziel, self.base_dir)        
         self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
         random.shuffle(self.imgs)
         self.carousel = Carousel(direction='right', loop=True)
@@ -162,7 +166,7 @@ class YourApp(App):
             button_grid.add_widget(Button(text=symbol))
 
         enter_button = Button(text='', size_hint_y=None,
-                              height=100)
+                              height=200)
 
         def print_button_text(instance):
             liste = ['Hallo', 'aus', 'Eingabe']

@@ -43,34 +43,36 @@ class Messaging:
                 self.alle.append(user.get('Name'))
 
     def send_direkt(self, to, titel, text, prio=2):
+        if not isinstance(to, list):
+            if str(to) == 'Alle' or str(to) == 'None':
+                to = self.alle
+            elif isinstance(eval(to), list):
+                to = eval(to)
+            else:
+                to = [to]        
         success = True
         data = {'titel': titel, 'message': text, 'prio':prio}
-        gcm_users = msqc.mdb_get_table(table.name)
-        for user in gcm_users:
-            if user.get('Name') != None:
-                if (user.get('Name') in to) and constants.redundancy_.master:
-#                    response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
-                    mqtt_pub("Message/" + str(user.get('Name')), data)
-#                    if response != {}:
-#                        success = False
+        for empf in to:
+            mqtt_pub("Message/" + empf, data)
         return success
         #response = self.gcm.json_request(registration_ids=to, data=data)
 
     def send_zuhause(self, to, titel, text, prio=2):
         if not isinstance(to, list):
-            to = [to]
+            if str(to) == 'Alle' or str(to) == 'None':
+                to = self.alle
+            elif isinstance(eval(to), list):
+                to = eval(to)
+            else:
+                to = [to]
         success = True
         data = {'titel': titel, 'message': text, 'prio':prio}
-        gcm_users = msqc.mdb_get_table(table.name)
-        for user in gcm_users:
-            if user.get('Name') != None:
-                if (user.get('Name') in to) and constants.redundancy_.master:
-                #if user.get('gcm_regid') in to:
-                    if str(msqc.setting_r(user.get('Name')) == "True"):
-#                        response = self.gcm.json_request(registration_ids=[user.get('gcm_regid')], data=data)
-                        mqtt_pub("Message/" + str(user.get('Name')), data)
-#                        if response != {}:
-#                            success = False
+        for empf in to:
+            anw = msqc.setting_r(empf)
+            if str(anw) == 'None':
+                mqtt_pub("Message/" + empf, data)
+            elif eval(anw):               
+                mqtt_pub("Message/" + empf, data)            
         return success
 
 #   deprecated

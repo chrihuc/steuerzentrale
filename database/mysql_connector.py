@@ -235,10 +235,10 @@ def setting_r(setting):
             cur = con.cursor()
             cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
             if cur.fetchone()[0] == 0:
-                return False
-                sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES (0,"'+ str(setting) + '")'
-                value = 0
-                cur.execute(sql)
+                return None
+#                sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES (0,"'+ str(setting) + '")'
+#                value = 0
+#                cur.execute(sql)
             else:
                 sql = 'SELECT * FROM '+constants.sql_tables.settings.name+' WHERE Name = "' + str(setting) +'"'
                 cur.execute(sql)

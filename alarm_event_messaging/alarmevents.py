@@ -168,11 +168,11 @@ class AES:
             server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())
 
 
-    def new_event(self, description, prio=0, durchsage="", karenz=-1):
-        t = threading.Thread(target=self.new_event_t, args=[description, prio, durchsage, karenz])
+    def new_event(self, description, to=None, prio=0, durchsage="", karenz=-1):
+        t = threading.Thread(target=self.new_event_t, args=[description, to, prio, durchsage, karenz])
         t.start()
 
-    def new_event_t(self, description, prio=0, durchsage="", karenz=-1):
+    def new_event_t(self, description, to=None, prio=0, durchsage="", karenz=-1):
         data = {"Description":description, "Durchsage":durchsage}
         mqtt_pub("AES/Prio" + str(prio), data)
         if prio == None:
@@ -217,9 +217,9 @@ class AES:
             if mail:
                 self.send_mail('Hinweis/Alarm', text=description)
             if anwesend:
-                self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
-            elif prio > 0:
-                self.mes.send_direkt(to=self.mes.alle, titel="Hinweis", text=description, prio=prio)
+                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio)
+            elif prio > 1:
+                self.mes.send_direkt(to=to, titel="Hinweis", text=description, prio=prio)
             mute = prio // 10
             prio = prio - mute * 10
             if prio > 1:
