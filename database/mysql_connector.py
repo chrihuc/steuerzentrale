@@ -35,7 +35,7 @@ def json_serial(obj):
 
     if isinstance(obj, (datetime.datetime, datetime.date)):
         return obj.isoformat()
-    raise TypeError ("Type %s not serializable" % type(obj))
+    return '' #TypeError ("Type %s not serializable" % type(obj))
 
 
 def invalidTimers(hks, desc):
