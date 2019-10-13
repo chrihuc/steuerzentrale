@@ -46,7 +46,7 @@ class Messaging:
         if not isinstance(to, list):
             if str(to) == 'Alle' or str(to) == 'None':
                 to = self.alle
-            elif isinstance(eval(to), list):
+            elif isinstance(eval(to), list):  # eval('Christoph') gibt error
                 to = eval(to)
             else:
                 to = [to]        

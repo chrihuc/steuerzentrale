@@ -614,12 +614,27 @@ class Sonos:
 #        sonospl = player.get_sonos_playlist_by_attr('Title',name)
 #        player.remove_sonos_playlist(sonospl)
 #        player.create_sonos_playlist_from_queue(name)
+        print(name, 'gelesen')
+        print(dicti)
         return dicti
+
+    def compare_status(dicti1, dicti2):
+        for key, value in dicti1:
+            if key in ['Pause', 'Queue', 'Radio']:
+                if value != dicti2[key]:
+                    return False
+        if dicti1['Radio']:
+            if dicti1['Sender'] != dicti2['Sender']:
+                return False
+        else:
+            if dicti1['TitelNr'] != dicti1['TitelNr']:
+                return False
+        return True
 
     def soco_set_status(self,player):
         dicti = self.Status[player.player_name]
         tries = 0
-        while (dicti != self.soco_get_status(player, store=False)) and tries < 7:
+        while not compare_status(dicti, self.soco_get_status(player, store=False)) and tries < 7:
             tries += 1
             try:
                 player_ip = player.ip_address
@@ -627,6 +642,7 @@ class Sonos:
                 if dicti['MasterZone'] != '':
                     master = self.get_player(dicti['MasterZone'])
                     player.join(master.group.coordinator)
+                    break
         #            self.CombineZones(player_ip, dicti['MasterZone'])
                 else:
                     self.ClearZones(player_ip)
@@ -641,6 +657,7 @@ class Sonos:
                         if str(dicti['Time']) != 'None':
                             self.Seek(player_ip, "REL_TIME", dicti['Time'])
                     if not dicti['Pause']:
+                        print(dicti)
                         player.play()
             except Exception as e:
                 print(e)

@@ -15,7 +15,7 @@ import datetime
 from outputs.mqtt_publish import mqtt_pub
 import copy
 from tools import toolbox
-#import json
+import json
 
 # TODO: reconnect of MQTT
 
@@ -28,6 +28,48 @@ datab = constants.sql_.DB
 validTimers = {}
 locklist = {}
 persTimers = {}
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+
+def invalidTimers(hks, desc):
+    print('input timed out: ', desc)
+    commands = {'valid': 'False'}
+    mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
+    payload = {'description':'input timed out: '+ desc,'prio':9}
+    validTimers.remove(hks)
+    with open('hrtbt_timer.jsn', 'w') as fout:
+        json.dump(validTimers, fout, default=json_serial)      
+    toolbox.communication.send_message(payload, typ='new_event') 
+
+try:
+    with open('hrtbt_timer.jsn') as f:
+        full = f.read()            
+    alte = json.loads(full)
+    for eintrag in alte:
+        due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')
+        ct = datetime.datetime.now()
+        if due > ct:
+            delay = (due - ct).seconds + 1
+            hks = eintrag['hks']
+            desc = eintrag['desc']
+            entry = {'hks' : hks, 'desc' : desc}
+            if delay < 0:
+                invalidTimers(hks, desc)
+            else:
+                thread_pt_ = Timer(due, invalidTimers, [hks, desc])
+                thread_pt_.start()
+                entry['timer'] = thread_pt_
+            validTimers[hks] = entry            
+#            self.add_timer(parent, delay, child, exact, retrig, device, start=True)
+except:
+    toolbox.log('Laden der Szenen fehlgeschlagen', level=1)
 
 class tables(object):
 # TODO: change table names to constant settings
@@ -682,7 +724,7 @@ def inputs(device, value, add_to_mqtt=True):
                 heartbt = dicti_1['heartbeat']
                 desc = dicti_1['Description']
                 if heartbt and str(valid) == "False":
-                    payload = {'description':'input recovered: '+ desc,'prio':7}
+                    payload = {'description':'input recovered: '+ desc,'prio':9}
                     toolbox.communication.send_message(payload, typ='new_event')                  
                 if last_value is None: last_value = value
                 if not last_time:
@@ -845,18 +887,18 @@ def inputs(device, value, add_to_mqtt=True):
 #            thread_sql.start()
         if heartbt:
             if hks in validTimers:
-                validTimers[hks].cancel()
+                validTimers[hks]['timer'].cancel()
+            entry = {'hks' : hks, 'desc' : desc}
+            entry['due'] = datetime.datetime.now() + datetime.timedelta(0,int(heartbt))
             thread_pt_ = Timer(int(heartbt), invalidTimers, [hks, desc])
             thread_pt_.start()
-            validTimers[hks] = thread_pt_
+            entry['timer'] = thread_pt_
+            validTimers[hks] = entry
+            with open('hrtbt_timer.jsn', 'w') as fout:
+                json.dump(validTimers, fout, default=json_serial)            
 #            print(validTimers.keys())
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return szenen, desc, heartbt
 
-def invalidTimers(hks, desc):
-    print('input timed out: ', desc)
-    commands = {'valid': 'False'}
-    mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
-    payload = {'description':'input timed out: '+ desc,'prio':7}
-    toolbox.communication.send_message(payload, typ='new_event')    
+   
