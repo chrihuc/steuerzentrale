@@ -618,9 +618,9 @@ class Sonos:
         print(dicti)
         return dicti
 
-    def compare_status(dicti1, dicti2):
+    def compare_status(self, dicti1, dicti2):
         for key, value in dicti1:
-            if key in ['Pause', 'Queue', 'Radio']:
+            if key in ['Pause', 'Queue', 'Radio', 'Volume']:
                 if value != dicti2[key]:
                     return False
         if dicti1['Radio']:
@@ -632,9 +632,12 @@ class Sonos:
         return True
 
     def soco_set_status(self,player):
+        # setzt den Status wieder zurück, möglich wäre noch die einzelnen keys zurückzusetzen in
+        # separaten schleifen, der jetzige Weg ist ineffizient
+        # und als letztes play pause
         dicti = self.Status[player.player_name]
         tries = 0
-        while not compare_status(dicti, self.soco_get_status(player, store=False)) and tries < 7:
+        while not self.compare_status(dicti, self.soco_get_status(player, store=False)) and tries < 7:
             tries += 1
             try:
                 player_ip = player.ip_address
@@ -667,6 +670,7 @@ class Sonos:
 
 
     def soco_read_szene(self, player, sonos_szene, overrde_play=False):
+        print(sonos_szene)
         if str(sonos_szene.get('Volume')) != 'None':
             player.volume = sonos_szene.get('Volume')
         zone = sonos_szene.get('MasterZone')
@@ -676,18 +680,19 @@ class Sonos:
                 tries = 0
                 while tries < 4:
                     try:
-                        print("Zonemaster is not none %s" % zone)
+#                        print("Zonemaster is not none %s" % zone)
                         player.join(zonemaster.group.coordinator)
                         tries = 4
                     except:
                         tries += 1
-            else:
-                print("Zonemaster is none %s" % zone)
+#            else:
+#                print("Zonemaster is none %s" % zone)
         else:
             if str(zone) != "None":
                 player.unjoin()
                 player.clear_queue()
                 if str(sonos_szene.get('Radio')) == '1':
+                    print('setting radio')
                     player.play_uri(uri=str(sonos_szene.get('Sender')), start=False, force_radio=True)  
                 else:
                     if isinstance(sonos_szene.get('PlayListNr'), int):

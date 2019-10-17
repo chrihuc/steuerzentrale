@@ -208,12 +208,15 @@ class AES:
             # Wach
             nurwach = prio // 10000
             prio = prio - nurwach * 10000
-            if nurwach and not str(mysql_connector.setting_r("Status")) in ["Wach"]:
+            if nurwach and not str(mysql_connector.setting_r("Status")) in ["Wach", "Leise"]:
                 return True
             anwesend = prio // 1000
             prio = prio - anwesend * 1000
             mail = prio // 100
             prio = prio - mail * 100
+            if nurwach and str(mysql_connector.setting_r("Status")) in ["Leise"]:
+                temp = prio // 10
+                prio = temp * 10 + 8
             if mail:
                 self.send_mail('Hinweis/Alarm', text=description)
             if anwesend:

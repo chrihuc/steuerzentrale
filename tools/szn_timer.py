@@ -121,7 +121,10 @@ class Szenen_Timer:
                         self.store()
                     else:
                         self.callback(child, device=device, wert='timed')
-                        self.liste.remove(item)
+                        try:
+                            self.liste.remove(item)
+                        except:
+                            pass
                         self.store()
                     found = True
         return found

@@ -346,9 +346,9 @@ class Szenen(object):
                 time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 if device:
-                    text = '%s = %s, Szene: %s' % (device, wert, szene)
+                    text = '%s = %s, Szene: %s' % (device, wert, '')
                 else:
-                    text = 'Szene: %s' % (szene)
+                    text = 'Szene: %s' % ('')
             else:
                 if device:
                     text = '%s = %s, %s' % (device, wert, str(szene_dict.get("Beschreibung")))

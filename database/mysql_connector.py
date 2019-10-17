@@ -35,7 +35,7 @@ def json_serial(obj):
 
     if isinstance(obj, (datetime.datetime, datetime.date)):
         return obj.isoformat()
-    return '' #TypeError ("Type %s not serializable" % type(obj))
+    return 'not json serializable' #TypeError ("Type %s not serializable" % type(obj))
 
 
 def invalidTimers(hks, desc):
@@ -43,7 +43,8 @@ def invalidTimers(hks, desc):
     commands = {'valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
     payload = {'description':'input timed out: '+ desc,'prio':9}
-    validTimers.remove(hks)
+#    validTimers.remove(hks)
+    validTimers.pop(hks, None)
     with open('hrtbt_timer.jsn', 'w') as fout:
         json.dump(validTimers, fout, default=json_serial)      
     toolbox.communication.send_message(payload, typ='new_event') 

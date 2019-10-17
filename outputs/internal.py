@@ -50,6 +50,7 @@ def check_ext_ip():
         aes.new_event(description="New IP "+ip, prio=8)
         constants.config.set('Main', 'Ext_IP', ip)
         constants.save_config()
+        broadcast_input_value("Internal.CheckExtIp", 1)
     else:
         pass
 #            aes.new_event(description="Old IP "+ip, prio=8)

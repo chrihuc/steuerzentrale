@@ -83,7 +83,7 @@ def main():
                 retries = 3
             except:
                 retries += 1                
-                print("Regen Failed")   
+#                print("Regen Failed")   
         retries = 0
         while retries < 3:            
             try:            
@@ -92,7 +92,7 @@ def main():
                 retries = 3
             except:
                 retries += 1
-                print("Wind Failed") 
+#                print("Wind Failed") 
         retries = 0
         while retries < 3:             
             try:            
@@ -101,7 +101,7 @@ def main():
                 retries = 3
             except:
                 retries += 1
-                print("Wind Boeen Failed")              
+#                print("Wind Boeen Failed")              
         
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - 7d;')
@@ -135,9 +135,10 @@ def main():
         #        Status = w.get_detailed_status()
                 data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati), 'Regen':rain}
                 mqtt_pub("Wetter/Jetzt", data)
+                broadcast_input_value('Internal.OWM', 1)
                 retries = 3
             except:
-                print("OWM Failed")
+#                print("OWM Failed")
                 retries += 1
                 pass
         toolbox.sleep(60*10)
