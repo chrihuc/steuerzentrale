@@ -352,7 +352,7 @@ class Szenen(object):
                 if device:
                     text = '%s = %s, Szene: %s' % (device, wert, '')
                 else:
-                    text = 'Szene: %s' % ('')
+                    text = ''
             else:
                 if device:
                     text = '%s = %s, %s' % (device, wert, str(szene_dict.get("Beschreibung")))

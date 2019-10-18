@@ -619,7 +619,7 @@ class Sonos:
         return dicti
 
     def compare_status(self, dicti1, dicti2):
-        for key, value in dicti1.iteritems():
+        for key, value in dicti1.items():
             if key in ['Pause', 'Queue', 'Radio', 'Volume']:
                 if value != dicti2[key]:
                     return False
