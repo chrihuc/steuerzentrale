@@ -619,7 +619,7 @@ class Sonos:
         return dicti
 
     def compare_status(self, dicti1, dicti2):
-        for key, value in dicti1:
+        for key, value in dicti1.iteritems():
             if key in ['Pause', 'Queue', 'Radio', 'Volume']:
                 if value != dicti2[key]:
                     return False
@@ -678,13 +678,10 @@ class Sonos:
             zonemaster, _, _, _ = self.get_addr(str(zone))
             if not zonemaster is None:
                 tries = 0
-                while tries < 4:
-                    try:
-#                        print("Zonemaster is not none %s" % zone)
-                        player.join(zonemaster.group.coordinator)
-                        tries = 4
-                    except:
-                        tries += 1
+                while tries < 4 and player.group.coordinator != zonemaster.group.coordinator:
+                    player.join(zonemaster.group.coordinator)
+                    tries += 1
+                    time.sleep(1)
 #            else:
 #                print("Zonemaster is none %s" % zone)
         else:

@@ -20,12 +20,12 @@ class TestUM(unittest.TestCase):
         self.test_mod = szn_timer.Szenen_Timer(callback=self.print_it)
         self.start_t = None
 
-    def print_it(self, it, device):
-        print datetime.datetime.now() - self.start_t, it
+    def print_it(self, it, device, noDelay):
+        print(datetime.datetime.now() - self.start_t, it, noDelay)
 
     def test_list_devices(self):
         self.start_t = datetime.datetime.now()
-        print self.test_mod.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True)
+        print(self.test_mod.retrigger_add(parent = "Bad_ir",delay = 10, child = "Bad_aus", exact = False, retrig = True))
         time.sleep(5)
         self.test_mod.zeige()
 #        self.assertTrue(list_devices,

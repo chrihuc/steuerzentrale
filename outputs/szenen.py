@@ -311,7 +311,7 @@ class Szenen(object):
         t.start()
 
     @classmethod
-    def execute(cls, szene, check_bedingung=False, wert=0, device=None):
+    def execute(cls, szene, check_bedingung=False, wert=0, device=None, noDelay=False):
         ct = datetime.datetime.now()
         toolbox.log(szene)
         if constants.passive:
@@ -326,6 +326,12 @@ class Szenen(object):
         cls.kommando_dict[szn_id] = []
         if str(szene_dict.get("Bedingung")) != "None":
             bedingungen = eval(str(szene_dict.get("Bedingung")))
+        # wir warten erstmal den Delay ab, und prüfen dann die Bedingung, das ermöglicht eine Persitenz des Inputs
+        # e.g. Temp fällt unter 0 Grad, 30sec später prüfen wir die Bedingung, gilt sie (kein neuer Messwert) führen wir die Szene aus
+        if (str(szene_dict.get("Delay")) != "None") and (float(szene_dict.get("Delay")) > 0) and not noDelay:
+            cls.timer_add(cls.execute, parent = szene,delay = float(szene_dict.get("Delay")), child = szene, exact = False, retrig = False, noDelay=True)
+            return True
+#            time.sleep(float(szene_dict.get("Delay")))            
         erfuellt = cls.__bedingung__(bedingungen)
         if str(szene_dict.get("Latching")) != 'None':
             next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
@@ -342,8 +348,6 @@ class Szenen(object):
 # commandos to devices and internal commands
 #==============================================================================
         if erfuellt:
-            if (str(szene_dict.get("Delay")) != "None"):
-                time.sleep(float(szene_dict.get("Delay")))
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 if device:
                     text = '%s = %s, Szene: %s' % (device, wert, '')
@@ -480,8 +484,8 @@ class Szenen(object):
 #    sz_t.callback = execute
 
     @classmethod
-    def timer_add(cls, callback, parent, delay, child, exact, retrig, device=None):
+    def timer_add(cls, callback, parent, delay, child, exact, retrig, device=None, noDelay=False):
         cls.sz_t.callback = callback
-        cls.sz_t.retrigger_add(parent, delay, child, exact, retrig, device)
+        cls.sz_t.retrigger_add(parent, delay, child, exact, retrig, device, noDelay)
 
 toolbox.communication.register_callback(Szenen.callback_receiver)

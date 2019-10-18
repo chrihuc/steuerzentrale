@@ -304,6 +304,7 @@ class TiFo:
         self.unknown = []
         self.threadliste = []
         self.lineBricklets = {}
+        self.dus = []
         self.ip = ip
         self.delay = 5
         self.timeoutTime = 600
@@ -540,7 +541,6 @@ class TiFo:
         self.lineBricklets[temp_uid].callback(value)
         utc = datetime.datetime.utcnow()
         writeInfluxDb(temp_uid, value, utc)
-        
 
     def set_io16_sub(self,cmd,io,value):
         port = cmd.get('Port')
@@ -1039,6 +1039,13 @@ class TiFo:
                 toolbox.log('Line Bricklet', temp_uid)
                 found  = True
 
+            if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
+                self.dus.append(BrickletDistanceUS(uid, self.ipcon))
+                temp_uid = str(self.dus[-1].get_identity()[1]) +"."+ str(self.dus[-1].get_identity()[0])
+                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value, device = self.dus[-1], uid = temp_uid ))
+                self.dus[-1].set_distance_callback_period(5000)
+                toolbox.log("BrickletDistanceUS", temp_uid)
+
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))
                 temp_uid = str(self.master[-1].get_identity()[0])
@@ -1087,12 +1094,7 @@ class dist_us:
         #self.ipcon.enumerate()
 
 
-    def cb_distance(self, distance):
-        dicti = {}
-        dicti['value'] = str(distance)
-        dicti['name'] = str(self.dus.get_identity()[0]) + "_" + str(self.dus.get_identity()[5])
-        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort))
-        mySocket.sendto(str(dicti),(constants.server1,constants.broadPort))
+
 
 
     # Callback handles device connections and configures possibly lost

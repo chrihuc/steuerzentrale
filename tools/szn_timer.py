@@ -44,7 +44,7 @@ class Szenen_Timer:
     def callback(self, callback):
         self._callback = callback
 
-    def add_timer(self, parent, delay, child, exact, retrig, device, start=False):
+    def add_timer(self, parent, delay, child, exact, retrig, device, noDelay, start=False):
         if delay == 0 and start:
             self.callback(child)
             return None
@@ -59,10 +59,11 @@ class Szenen_Timer:
         dicti['due'] = ct + datetime.timedelta(seconds=delay)
         hash_id = uuid.uuid4()
         dicti["hash_id"] = hash_id
+        dicti["noDelay"] = noDelay
         if delay < 0:
             self.cancel_timer(parent, child)
         else:
-            t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device])
+            t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device, noDelay])
             dicti["timer"] = t
             if start: t.start()
             self.liste.append(dicti)
@@ -75,8 +76,8 @@ class Szenen_Timer:
         self.store()
         self.liste[nr].get("timer").start()
 
-    def add_timer_start(self, parent, delay, child, exact, retrig, device):
-        return self.add_timer(parent, delay, child, exact, retrig, device, start=True)
+    def add_timer_start(self, parent, delay, child, exact, retrig, device, noDelay):
+        return self.add_timer(parent, delay, child, exact, retrig, device, noDelay, start=True)
 
     def stop_timer(self, nr):
         self.liste[nr].get("timer").cancel()
@@ -91,7 +92,7 @@ class Szenen_Timer:
                 found = True
         return found
 
-    def retrigger(self, parent, delay, child, exact, retrig, device):
+    def retrigger(self, parent, delay, child, exact, retrig, device, noDelay):
         found = False
         for item in self.liste:
             if item.get("parent") is None:
@@ -99,7 +100,7 @@ class Szenen_Timer:
                     if item.get("retrig"): item.get("timer").cancel()
                     hash_id = item.get("hash_id")
                     if delay > 0:
-                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device])
+                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device, noDelay])
                         item["timer"] = t
                         item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                         item.get("timer").start()
@@ -114,7 +115,7 @@ class Szenen_Timer:
                     if item.get("retrig"): item.get("timer").cancel()
                     hash_id = item.get("hash_id")
                     if delay > 0:
-                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device])
+                        t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device, noDelay])
                         item["timer"] = t
                         item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                         item.get("timer").start()
@@ -129,9 +130,9 @@ class Szenen_Timer:
                     found = True
         return found
 
-    def retrigger_add(self, parent, delay, child, exact=False, retrig=True, device=None):
-        if not self.retrigger(parent, delay, child, exact, retrig, device):
-            return self.add_timer_start(parent, delay, child, exact, retrig, device)
+    def retrigger_add(self, parent, delay, child, exact=False, retrig=True, device=None, noDelay=False):
+        if not self.retrigger(parent, delay, child, exact, retrig, device, noDelay):
+            return self.add_timer_start(parent, delay, child, exact, retrig, device, noDelay)
 
     def zeige(self):
         print(self.liste)
@@ -164,14 +165,15 @@ class Szenen_Timer:
                     exact = eintrag['exact']
                     retrig = eintrag['retrig'] 
                     device = eintrag['device']
-                    self.add_timer(parent, delay, child, exact, retrig, device, start=True)
+                    noDelay = eintrag['noDelay']
+                    self.add_timer(parent, delay, child, exact, retrig, device, noDelay, start=True)
         except:
             toolbox.log('Laden der Szenen fehlgeschlagen', level=1)
 
-    def entferne_eintrag(self, hash_id, child, device):
+    def entferne_eintrag(self, hash_id, child, device, noDelay):
         for item in self.liste:
             if item.get("hash_id") == hash_id:
                 self.liste.remove(item)
-        self.callback(child, device=device)
+        self.callback(child, device=device, noDelay=noDelay)
         self.store()
 

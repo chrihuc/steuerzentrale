@@ -36,11 +36,7 @@ class PictureFrame(ModalView):
         self.bind(on_touch_down=self.dismiss)
         self.base_dir = constants.gui_.Bilder
         self.server_dir = constants.gui_.BilderServer
-        for root, dirs, files in os.walk(self.server_dir):
-                for datei in files:
-                    ziel = os.path.join(self.server_dir, datei)
-                    if not os.path.exists(ziel):
-                        shutil.copy2(ziel, self.base_dir)        
+        self.copy_pix()
         self.imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
         random.shuffle(self.imgs)
         self.carousel = Carousel(direction='right', loop=True)
@@ -60,6 +56,15 @@ class PictureFrame(ModalView):
         #self.load_next_p()
         self.clock_event = None
         self.running = False
+        event = Clock.schedule_interval(self.copy_pix, 3600)
+        event()        
+
+    def copy_pix(self):
+        for root, dirs, files in os.walk(self.server_dir):
+                for datei in files:
+                    ziel = os.path.join(self.server_dir, datei)
+                    if not os.path.exists(ziel):
+                        shutil.copy2(ziel, self.base_dir)          
 
     def load_next_p(self, *args):
 #        imgs = [os.path.join(self.base_dir, img) for img in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, img))]
