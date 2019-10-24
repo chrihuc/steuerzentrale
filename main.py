@@ -17,7 +17,7 @@ from inputs import cron
 from inputs import xs1
 from inputs import internal
 from outputs import temp_control
-
+from secvest import secvest_handler
 
 from tifo import tf_connection
 

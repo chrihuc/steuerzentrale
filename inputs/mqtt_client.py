@@ -136,6 +136,8 @@ class MqttClient:
                     mqtt_pub("DataRequest/Answer/Settings", msqc.mdb_get_table(constants.sql_tables.settings.name)) 
                 elif 'SzenenGruppen' in m_in.values():
                     mqtt_pub("DataRequest/Answer/SzenenGruppen", msqc.mdb_read_table_columns(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung']))
+                elif 'BDQs' in m_in.values():                    
+                    mqtt_pub("DataRequest/Answer/BDQs", msqc.mdb_read_bdqs())
                 
 
 mqtt_list = []

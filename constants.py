@@ -201,7 +201,7 @@ for i in range(0,3):
             class secvest:
                 hostname = config.get('SECVEST', 'hostname')
                 username = config.get('SECVEST', 'username')
-                password = config.get('SECVEST', 'password')                
+                password = config.get('SECVEST', 'passwort')
         except:
             init_cfg()
             continue

@@ -414,6 +414,25 @@ def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc", e
     con.close()
     return rlist
 
+def mdb_read_bdqs(amount=1000, order="desc"):
+    db = constants.sql_tables.inputs.name
+    column = 'description'
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    rlist = []
+    with con:
+        cur = con.cursor()
+        #SELECT * FROM Steuerzentrale.HIS_inputs where Name like '%Rose%' order by id desc limit 1000;
+        sql = 'SELECT %s FROM %s WHERE valid LIKE "False" ORDER BY ID %s LIMIT %s' % (column, db, order, amount)
+        cur.execute(sql)
+        results = cur.fetchall()
+        for row in results:
+            if type(row[0]) == datetime.datetime:
+                rlist.append((int(row[0].strftime("%s"))))
+            else:
+                rlist.append(eval(str(row[0])))
+    con.close()
+    return rlist
+
 def mdb_add_table_entry(table, values, primary = 'Id'):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     listNames = []
