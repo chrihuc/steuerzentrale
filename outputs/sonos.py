@@ -614,8 +614,8 @@ class Sonos:
 #        sonospl = player.get_sonos_playlist_by_attr('Title',name)
 #        player.remove_sonos_playlist(sonospl)
 #        player.create_sonos_playlist_from_queue(name)
-        print(name, 'gelesen')
-        print(dicti)
+#        print(name, 'gelesen')
+#        print(dicti)
         return dicti
 
     def compare_status(self, dicti1, dicti2):
@@ -660,17 +660,17 @@ class Sonos:
                         if str(dicti['Time']) != 'None':
                             self.Seek(player_ip, "REL_TIME", dicti['Time'])
                     if not dicti['Pause']:
-                        print(dicti)
+#                        print(dicti)
                         player.play()
             except Exception as e:
                 print(e)
                 time.sleep(tries)
                 pass
-        print("set %s back to prev after %s tries" % (player.player_name, tries))
+#        print("set %s back to prev after %s tries" % (player.player_name, tries))
 
 
     def soco_read_szene(self, player, sonos_szene, overrde_play=False):
-        print(sonos_szene)
+#        print(sonos_szene)
         if str(sonos_szene.get('Volume')) != 'None':
             player.volume = sonos_szene.get('Volume')
         zone = sonos_szene.get('MasterZone')
@@ -689,7 +689,7 @@ class Sonos:
                 player.unjoin()
                 player.clear_queue()
                 if str(sonos_szene.get('Radio')) == '1':
-                    print('setting radio')
+#                    print('setting radio')
                     player.play_uri(uri=str(sonos_szene.get('Sender')), start=False, force_radio=True)  
                 else:
                     if isinstance(sonos_szene.get('PlayListNr'), int):
@@ -835,14 +835,14 @@ class Sonos:
             *[quote(part) for part in os.path.split(filename)]
         )
         netpath = 'http://{}:{}/{}'.format(constants.eigene_IP, constants.sound_prov.PORT, random_file)
-        print("Playing " + netpath)
+#        print("Playing " + netpath)
         for zone in soco.discover():
             if zone.player_name == player_n:
                 break
         zoneown = zone.uid
         player_ip = zone.ip_address
         self.soco_get_status(zone)
-        print("got status of " + player_ip)
+#        print("got status of " + player_ip)
         time.sleep(0)
         zone.unjoin()
         self.ActivateList(player_ip, zoneown)
@@ -852,7 +852,7 @@ class Sonos:
         zone.volume += 10
         time.sleep(5)        
         zone.play_from_queue(0)
-        print("playing now")
+#        print("playing now")
 #        zone.play()
         with contextlib.closing(wave.open(location+random_file,'r')) as f:
             frames = f.getnframes()

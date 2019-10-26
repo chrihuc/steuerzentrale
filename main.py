@@ -17,7 +17,6 @@ from inputs import cron
 from inputs import xs1
 from inputs import internal
 from outputs import temp_control
-from secvest import secvest_handler
 
 from tifo import tf_connection
 
@@ -96,6 +95,11 @@ t.start()
 
 from inputs import mqtt_client
 t = toolbox.OwnTimer(0, function=mqtt_client.main, args = [], name="mqtt_inputs")
+threadliste.append(t)
+t.start()
+
+from secvest import secvest_handler
+t = toolbox.OwnTimer(0, function=secvest_handler.main, args = [], name="secvest")
 threadliste.append(t)
 t.start()
 

@@ -85,7 +85,7 @@ class Szenen(object):
                         if itm[0] == payload['Device'] and itm[1] == payload['Szene']:
                             t_list.remove(itm)
                 cls.kommando_dict[payload['szn_id']] = t_list
-        if ('Name' in payload) and ('Value' in payload) and not toolbox.kw_unpack(kwargs,'typ') == 'output':
+        elif ('Name' in payload) and ('Value' in payload) and not toolbox.kw_unpack(kwargs,'typ') == 'output':
             cls.trigger_scenes(payload['Name'], payload['Value'])
         if toolbox.kw_unpack(kwargs,'typ') == 'ExecSzene':
             cls.threadExecute(payload['Szene'])
