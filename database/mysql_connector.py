@@ -706,6 +706,7 @@ def inputs(device, value, add_to_mqtt=True):
     desc = None
     heartbt = None
     filtered = False
+    writeToInflx = False
     
 #    print(device,value)
 #    if 'MQTT' in device:
@@ -746,7 +747,11 @@ def inputs(device, value, add_to_mqtt=True):
                 if heartbt and str(valid) == "False":
                     payload = {'description':'input recovered: '+ desc,'prio':9}
                     toolbox.communication.send_message(payload, typ='new_event')                  
-                if last_value is None: last_value = value
+                if last_value is None: 
+                    last_value = value
+                    writeToInflx = True
+                elif float(last_value) != float(value):
+                    writeToInflx = True
                 if not last_time:
                     try:
                         last_time = dicti_1['last1']
@@ -859,7 +864,7 @@ def inputs(device, value, add_to_mqtt=True):
                 if cur.fetchone()[0] > 0:
                     setting_s(hks, value)
                 cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-                if cur.fetchone()[0] > 0 and str(hks) != str(device):
+                if cur.fetchone()[0] > 0 and str(hks) != str(device) and writeToInflx:
 #                    try:
 #                        insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
 #                        cur.execute(insertstatement)

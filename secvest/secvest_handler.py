@@ -27,7 +27,7 @@ class SecvestHandler(object):
         self.commandActive = False
         self.checkActive= False
         self.cycleTime = 15
-        self.Alarmanlage = None
+        self.alarmanlage = None
 
 
     def activate(self, alarmanlage, partition=1):
@@ -42,7 +42,7 @@ class SecvestHandler(object):
             success = True
         else:
             aes.new_event(description="Secvest konnte nicht aktiviert werden", prio=9)
-            self.__check_zones__(alarmanlage, partition, hinweis=True)
+            self.__check_zones__(partition, hinweis=True)
             print('Konnte die Partition nicht aktivieren')
         return success
     
@@ -61,8 +61,8 @@ class SecvestHandler(object):
             aes.new_event(description="Secvest konnte nicht deaktiviert werden", prio=9)
         return success    
         
-    def __check_zones__(self, alarmanlage, partition=1, hinweis=False):
-        zonen = alarmanlage.get_zones_by_partition(partition)
+    def __check_zones__(self, partition=1, hinweis=False):
+        zonen = self.alarmanlage.get_zones_by_partition(partition)
         for zone in zonen:
             if zone['state'] != 'closed':
                 broadcast_input_value('Secvest.Partition' + str(partition) + '.' + zone['name'], str(1))
@@ -74,27 +74,27 @@ class SecvestHandler(object):
     def check_ob_zu(self, partition=None):
         if partition is None:
             for partition in range(1,5):
-                self.__check_zones__(self.alarmanlage, partition)
+                self.__check_zones__(partition)
         else:
-            self.__check_zones__(self.alarmanlage, partition)        
+            self.__check_zones__(partition)        
         result = True
         return result
     
     def set_device(self, command, partition, *args,**kwargs):
         try:
-            alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
+            #alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
             result = False
             self.commandActive = True
             while self.checkActive:
                 time.sleep(1)            
             if command == 'activate':
-                result = self.activate(alarmanlage, partition)
+                result = self.activate(self.alarmanlage, partition)
             elif command == 'deactivate':
-                result = self.deactivate(alarmanlage, partition)  
+                result = self.deactivate(self.alarmanlage, partition)  
             elif command == 'check':
-                result = self.check_ob_zu(alarmanlage, partition)    
+                result = self.check_ob_zu(partition)    
                 broadcast_input_value('Secvest.Check.Done', str(1))
-            alarmanlage.logout()
+            #alarmanlage.logout()
             self.commandActive = False
             return result
         except Exception as e:
