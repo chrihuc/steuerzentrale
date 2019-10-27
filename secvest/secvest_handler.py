@@ -121,6 +121,7 @@ class SecvestHandler(object):
             try:
                 self.check_ob_zu()
             except:
+                print('einloggen secvest')
                 self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
                 self.check_ob_zu()
             self.checkActive = False
