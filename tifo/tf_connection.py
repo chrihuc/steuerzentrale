@@ -1051,7 +1051,7 @@ class TiFo:
                 temp_uid = str(self.dus[-1].get_identity()[1]) +"."+ str(self.dus[-1].get_identity()[0])
 #                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value, device = self.dus[-1]))
                 self.dus[-1].set_distance_callback_threshold('o', 0, 0)
-                self.dus[-1]..set_moving_average(100)
+                self.dus[-1].set_moving_average(100)
                 self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))
                 self.dus[-1].set_distance_callback_period(5000)
                 toolbox.log("BrickletDistanceUS", temp_uid)
