@@ -224,9 +224,9 @@ class YourApp(App):
         button_grid.children[0].bind(on_press=clear_label)                
         enter_button.bind(on_press=clear_label)
 
-        root_widget.add_widget(output_label)
-        root_widget.add_widget(button_grid)
-        root_widget.add_widget(enter_button)
+#        root_widget.add_widget(output_label)
+#        root_widget.add_widget(button_grid)
+#        root_widget.add_widget(enter_button)
         return root_widget
 
 

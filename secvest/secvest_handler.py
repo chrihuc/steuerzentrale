@@ -114,7 +114,7 @@ class SecvestHandler(object):
             toolbox.communication.send_message(payload, typ='return', value=result)            
             
     def monitor(self):
-        while True:
+        while constants.run:
             while self.commandActive:
                 time.sleep(1)
             self.checkActive = True
@@ -125,7 +125,9 @@ class SecvestHandler(object):
                 self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
                 self.check_ob_zu()
             self.checkActive = False
-            time.sleep(self.cycleTime)            
+            time.sleep(self.cycleTime)      
+        self.alarmanlage.logout()
+        print('Secvest logged out')
             
             
             

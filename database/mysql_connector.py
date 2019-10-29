@@ -56,7 +56,7 @@ try:
     for eintrag in alte:
         due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')
         ct = datetime.datetime.now()
-        if due > ct:
+        if True: #due > ct:
             delay = (due - ct).seconds + 1
             hks = eintrag['hks']
             desc = eintrag['desc']
@@ -67,7 +67,8 @@ try:
                 thread_pt_ = Timer(due, invalidTimers, [hks, desc])
                 thread_pt_.start()
                 entry['timer'] = thread_pt_
-            validTimers[hks] = entry            
+            validTimers[hks] = entry 
+            
 #            self.add_timer(parent, delay, child, exact, retrig, device, start=True)
 except:
     toolbox.log('Laden der Szenen fehlgeschlagen', level=1)
@@ -690,7 +691,7 @@ def sendSql(sql):
 # violation time (from evaluation automatic)
 # funktioniert bei einem Deadband vieillicht nicht, wert muss neu ankommen..
 # sollte über interne kommunikation mit ExecSzene' möglich sein.
-def inputs(device, value, add_to_mqtt=True):
+def inputs(device, value, add_to_mqtt=True, fallingback=False):
 #    i = 0
     ct = datetime.datetime.now()
     utc = datetime.datetime.utcnow()
@@ -729,6 +730,9 @@ def inputs(device, value, add_to_mqtt=True):
             last_value = dicti_1['last_Value']            
             # Filtern, wenn groesser oder kleiner Messung ignorieren
             filtering = dicti_1['Filter']
+            # könnte fallingback auch vorher definieren
+            if fallingback and dicti_1['fallback'] is not None:
+                value = float(dicti_1['fallback'])
             try:
                 filtering = eval(filtering)
             except:
@@ -744,7 +748,7 @@ def inputs(device, value, add_to_mqtt=True):
                 valid = dicti_1['valid']
                 heartbt = dicti_1['heartbeat']
                 desc = dicti_1['Description']
-                if heartbt and str(valid) == "False":
+                if heartbt and str(valid) == "False" and not fallingback:
                     payload = {'description':'input recovered: '+ desc,'prio':9}
                     toolbox.communication.send_message(payload, typ='new_event')                  
                 if last_value is None: 
@@ -894,9 +898,9 @@ def inputs(device, value, add_to_mqtt=True):
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
             if str(dicti.get("last1")) != "None":
-                sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "True", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, dicti.get("last1"), ct, value, device)
+                sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "%s", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, dicti.get("last1"), ct, not fallingback, value, device)
             else:
-                sql = 'UPDATE %s SET last1 = "%s", valid = "True", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, ct, value, device)
+                sql = 'UPDATE %s SET last1 = "%s", valid = "%s", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, ct, not fallingback, value, device)
 #            thread_sql = Timer(1, sendSql, [sql])
             retrycount = 3
             counter = 1
@@ -910,7 +914,7 @@ def inputs(device, value, add_to_mqtt=True):
                     if counter == 4:
                         print('could not write to DB')            
 #            thread_sql.start()
-        if heartbt:
+        if heartbt and not fallingback:
             if hks in validTimers:
                 validTimers[hks]['timer'].cancel()
             entry = {'hks' : hks, 'desc' : desc}

@@ -394,6 +394,13 @@ class TiFo:
         broadcast_input_value('TiFo.' + name + ext, str(value/div))
         self.timeout_reset()
 
+    def cb_dist_value(self, value,device,div=1.0,ext='', threshold=20):
+        toolbox.log(device)
+        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+        broadcast_input_value('TiFo.' + name + ext, str(value/div))
+        device.set_distance_callback_threshold('o', value-threshold, value+threshold)
+        self.timeout_reset()        
+
     def thread_ambLight(self, device):
         while constants.run:
             toolbox.log(device)
@@ -1042,7 +1049,10 @@ class TiFo:
             if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
                 self.dus.append(BrickletDistanceUS(uid, self.ipcon))
                 temp_uid = str(self.dus[-1].get_identity()[1]) +"."+ str(self.dus[-1].get_identity()[0])
-                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value, device = self.dus[-1], uid = temp_uid ))
+#                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value, device = self.dus[-1]))
+                self.dus[-1].set_distance_callback_threshold('o', 0, 0)
+                self.dus[-1]..set_moving_average(100)
+                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))
                 self.dus[-1].set_distance_callback_period(5000)
                 toolbox.log("BrickletDistanceUS", temp_uid)
 
