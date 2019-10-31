@@ -66,7 +66,7 @@ try:
             device = eintrag['device']
             fallback = eintrag['fallback']
             entry = {'hks' : hks, 'desc' : desc, 'device':device,'fallback':fallback}
-            if delay < datetime.datetime(hour = 0, minute = 0, second = 0):
+            if delay < 0:
                 invalidTimers(hks, desc)
             else:
                 thread_pt_ = Timer(delay, invalidTimers, [hks, desc])
