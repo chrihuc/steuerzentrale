@@ -69,7 +69,7 @@ try:
             if delay < datetime.datetime(hour = 0, minute = 0, second = 0):
                 invalidTimers(hks, desc)
             else:
-                thread_pt_ = Timer(due, invalidTimers, [hks, desc])
+                thread_pt_ = Timer(delay, invalidTimers, [hks, desc])
                 thread_pt_.start()
                 entry['timer'] = thread_pt_
             validTimers[hks] = entry 
