@@ -116,17 +116,20 @@ t = toolbox.OwnTimer(0, function=app.main, args = [], name="flask")
 threadliste.append(t)
 t.start()
 
-aes.new_event(description="All Threads started", prio=9)
 if constants.debug:
     toolbox.log(threadliste)
 
+startup = True
+time.sleep(5)
 #add supervision of threads
-toolbox.log('threads running')
+aes.new_event(description="All Threads kicked off", prio=9)
 
 try:
     while constants.run:
+        allgut = True
         for t in threadliste:
             if not t in threading.enumerate():
+                allgut = False
                 if not t.failed:
                     if t.restartCounter == 2:                    
                         aes.new_event(description="Thread stopped: "+t.name, prio=9)
@@ -148,6 +151,10 @@ try:
                         aes.new_event(description="Thread running again: "+t.name, prio=9)
                     t.failed = False
                     t.restartCounter = 0
+        if startup and allgut:
+            startup = False
+            aes.new_event(description="All Threads runnung", prio=9)
+            toolbox.log('threads running')
         toolbox.sleep(10)
 except KeyboardInterrupt:
     constants.run = False

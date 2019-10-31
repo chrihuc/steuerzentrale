@@ -10,6 +10,7 @@ import time
 from time import localtime,strftime
 from datetime import date
 import inspect
+import uuid
 #pycurl
 #import urllib3
 #from urllib.request import urlopen
@@ -155,16 +156,23 @@ def restart():
 class communication(object):
 
     queue = []
-    callbacks = []
+    callbacks = {}
 
     @classmethod
     def register_callback(cls, func):
-        cls.callbacks.append(func)
+        hash_id = str(uuid.uuid4())
+        cls.callbacks[hash_id] = func
+        return hash_id
+    
+    @classmethod
+    def unregister_callback(cls, hash_id):
+        del cls.callbacks[hash_id]
+        return True
 
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
         log(payload, args, kwargs, level=9)
-        for callback in cls.callbacks:
+        for hash_id, callback in cls.callbacks.items():
             if args:
                 args_to_send =[payload].append(args)
             else:

@@ -71,6 +71,8 @@ class Szenen(object):
 #        self.sz_t = szn_timer.Szenen_Timer(callback = self.execute)
 #        self.kommando_dict = {}
 #        self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
+        Szenen.sz_t.callback = self.execute
+        Szenen.sz_t.load()
         pass
 
     @classmethod

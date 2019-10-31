@@ -42,6 +42,7 @@ def invalidTimers(hks, desc):
     print('input timed out: ', desc)
     commands = {'valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
+#    inputs(validTimers[hks]['device'], validTimers[hks]['fallback'], fallingback=True)
     payload = {'description':'input timed out: '+ desc,'prio':9}
 #    validTimers.remove(hks)
     validTimers.pop(hks, None)
@@ -53,15 +54,19 @@ try:
     with open('hrtbt_timer.jsn') as f:
         full = f.read()            
     alte = json.loads(full)
-    for eintrag in alte:
+    print(alte)
+    for key, eintrag in alte.items():
+        print(eintrag)
         due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')
         ct = datetime.datetime.now()
         if True: #due > ct:
             delay = (due - ct).seconds + 1
             hks = eintrag['hks']
             desc = eintrag['desc']
-            entry = {'hks' : hks, 'desc' : desc}
-            if delay < 0:
+            device = eintrag['device']
+            fallback = eintrag['fallback']
+            entry = {'hks' : hks, 'desc' : desc, 'device':device,'fallback':fallback}
+            if delay < datetime.datetime(hour = 0, minute = 0, second = 0):
                 invalidTimers(hks, desc)
             else:
                 thread_pt_ = Timer(due, invalidTimers, [hks, desc])
@@ -70,8 +75,11 @@ try:
             validTimers[hks] = entry 
             
 #            self.add_timer(parent, delay, child, exact, retrig, device, start=True)
-except:
-    toolbox.log('Laden der Szenen fehlgeschlagen', level=1)
+    print('Heartbeats geladen')
+except Exception as e:
+    print(e)
+    print('Laden der Heartbeats fehlgeschlagen')
+    toolbox.log('Laden der Heartbeats fehlgeschlagen', level=1)
 
 class tables(object):
 # TODO: change table names to constant settings
@@ -427,10 +435,11 @@ def mdb_read_bdqs(amount=1000, order="desc"):
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
-            if type(row[0]) == datetime.datetime:
-                rlist.append((int(row[0].strftime("%s"))))
-            else:
-                rlist.append(eval(str(row[0])))
+            rlist.append(row[0])
+#            if type(row[0]) == datetime.datetime:
+#                rlist.append((int(row[0].strftime("%s"))))
+#            else:
+#                rlist.append(eval(str(row[0])))
     con.close()
     return rlist
 
@@ -917,7 +926,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
         if heartbt and not fallingback:
             if hks in validTimers:
                 validTimers[hks]['timer'].cancel()
-            entry = {'hks' : hks, 'desc' : desc}
+            entry = {'hks' : hks, 'desc' : desc, 'device':device, 'fallback':dicti_1['fallback']}
             entry['due'] = datetime.datetime.now() + datetime.timedelta(0,int(heartbt))
             thread_pt_ = Timer(int(heartbt), invalidTimers, [hks, desc])
             thread_pt_.start()

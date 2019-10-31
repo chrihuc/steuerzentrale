@@ -30,7 +30,7 @@ class Szenen_Timer:
     def __init__(self,callback=None):
         self.liste = []
         self._callback = callback
-        self.load()
+#        self.load()
         #self.index_p = {}
         #self.index_c = {}
         #exact means parent needs to be the same

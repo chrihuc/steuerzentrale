@@ -67,7 +67,7 @@ class SecvestHandler(object):
             if zone['state'] != 'closed':
                 broadcast_input_value('Secvest.Partition' + str(partition) + '.' + zone['name'], str(1))
                 if hinweis:
-                    aes.new_event(description=zone['name'] + ' ist nicht geschlossen', prio=9)
+                    aes.new_event(description=zone['name'] + ' ist nicht geschlossen', prio=6)
             else:
                 broadcast_input_value('Secvest.Partition' + str(partition) + '.' + zone['name'], str(0))            
         
@@ -114,19 +114,24 @@ class SecvestHandler(object):
             toolbox.communication.send_message(payload, typ='return', value=result)            
             
     def monitor(self):
-        while constants.run:
+        logged = True
+        while constants.run and logged:
             while self.commandActive:
                 time.sleep(1)
             self.checkActive = True
             try:
                 self.check_ob_zu()
             except:
-                print('einloggen secvest')
-                self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
-                self.check_ob_zu()
+                try:
+                    print('einloggen secvest')
+                    self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
+                    self.check_ob_zu()
+                except:
+                    logged = False
             self.checkActive = False
-            time.sleep(self.cycleTime)      
-        self.alarmanlage.logout()
+            time.sleep(self.cycleTime) 
+        if self.alarmanlage is not None:
+            self.alarmanlage.logout()
         print('Secvest logged out')
             
             
@@ -135,8 +140,9 @@ class SecvestHandler(object):
 
 def main():
     sv = SecvestHandler()            
-    toolbox.communication.register_callback(sv.receive_communication)            
-    sv.monitor()             
+    reg_id = toolbox.communication.register_callback(sv.receive_communication)            
+    sv.monitor()    
+    toolbox.communication.unregister_callback(reg_id)         
 
 if __name__ == "__main__":
     main()
