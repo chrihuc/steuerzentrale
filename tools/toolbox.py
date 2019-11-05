@@ -162,25 +162,24 @@ class communication(object):
     @classmethod
     def register_callback(cls, func):
         hash_id = str(uuid.uuid4())
-        cls.callbacks[hash_id] = func
+        cls.callbacks[hash_id] = {'func':func,'active':True}
         return hash_id
     
     @classmethod
     def unregister_callback(cls, hash_id):
-        del cls.callbacks[hash_id]
+        cls.callbacks[hash_id]['active']=False
         return True
 
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
         log(payload, args, kwargs, level=9)
-        # Todo copy dict before iterating
-        tempdict = copy.deepcopy(cls.callbacks)
-        for hash_id, callback in tempdict.items():
+        for hash_id, callbackdict in tempdict.items():
             if args:
                 args_to_send =[payload].append(args)
             else:
                 args_to_send =[payload]
-            t = threading.Thread(target=callback, args=args_to_send, kwargs=kwargs)
+            if callbackdict['active']:
+                t = threading.Thread(target=callbackdict['func'], args=args_to_send, kwargs=kwargs)
             t.start()
 #            callback(payload, *args, **kwargs)
 
