@@ -322,8 +322,8 @@ class AES:
             self.mes.send_zuhause(to=self.mes.alle, titel="Hinweis", text="Es gibt " + str(len(alarme)) + " neue Alarme:" + nachricht)
 
     def callback_receiver(self, payload, *args, **kwargs):
-        if toolbox.kw_unpack(kwargs,'typ') == 'new_event':
-            self.new_event(payload['description'], payload['prio'])
+        if toolbox.kw_unpack(kwargs,'typ') == 'new_event':    
+            self.new_event(payload['description'], prio=payload['prio'])
 
 aes = AES()
 toolbox.communication.register_callback(aes.callback_receiver)

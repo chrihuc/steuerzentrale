@@ -49,7 +49,7 @@ def every_30_min():
     pass
 
 def every_60_min():
-    internal.check_ext_ip()
+    internal.check_ext_ip(False)
     pass
 
 def every_24_hrs():

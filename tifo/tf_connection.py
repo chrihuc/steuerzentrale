@@ -307,7 +307,7 @@ class TiFo:
         self.dus = []
         self.ip = ip
         self.delay = 5
-        self.timeoutTime = 600
+        self.timeoutTime = 300
         self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
 
         self.ipcon = IPConnection()
@@ -326,7 +326,7 @@ class TiFo:
         self.timeout.start()
 
     def timedOut(self):
-        aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
+        #aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
         self.connect()
 
     def connect(self):
@@ -391,6 +391,12 @@ class TiFo:
     def cb_value(self, value,device,div=1.0,ext=''):
         toolbox.log(device)
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+        broadcast_input_value('TiFo.' + name + ext, str(value/div))
+        self.timeout_reset()
+
+    def cb_value_uid(self, value,device,div=1.0,ext='',uid=''):
+        toolbox.log(device)
+        name = uid
         broadcast_input_value('TiFo.' + name + ext, str(value/div))
         self.timeout_reset()
 
@@ -1049,7 +1055,7 @@ class TiFo:
             if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
                 self.dus.append(BrickletDistanceUS(uid, self.ipcon))
                 temp_uid = str(self.dus[-1].get_identity()[1]) +"."+ str(self.dus[-1].get_identity()[0])
-                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value, device = self.dus[-1]))
+                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value_uid, device = self.dus[-1], uid = temp_uid))
                 self.dus[-1].set_distance_callback_threshold('o', 0, 0)
                 self.dus[-1].set_moving_average(100)
 #                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))

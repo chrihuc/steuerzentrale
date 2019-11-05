@@ -42,8 +42,8 @@ def invalidTimers(hks, desc):
     print('input timed out: ', desc)
     commands = {'valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
-#    inputs(validTimers[hks]['device'], validTimers[hks]['fallback'], fallingback=True)
-    payload = {'description':'input timed out: '+ desc,'prio':9}
+    inputs(validTimers[hks]['device'], validTimers[hks]['fallback'], fallingback=True)
+    payload = {'description':'input timed out: '+ desc,'prio':109}
 #    validTimers.remove(hks)
     validTimers.pop(hks, None)
     with open('hrtbt_timer.jsn', 'w') as fout:
@@ -54,9 +54,9 @@ try:
     with open('hrtbt_timer.jsn') as f:
         full = f.read()            
     alte = json.loads(full)
-    print(alte)
+#    print(alte)
     for key, eintrag in alte.items():
-        print(eintrag)
+#        print(eintrag)
         due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')
         ct = datetime.datetime.now()
         if True: #due > ct:

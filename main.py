@@ -120,9 +120,9 @@ if constants.debug:
     toolbox.log(threadliste)
 
 startup = True
-time.sleep(5)
 #add supervision of threads
 aes.new_event(description="All Threads kicked off", prio=9)
+time.sleep(15)
 
 try:
     while constants.run:
@@ -130,10 +130,9 @@ try:
         for t in threadliste:
             if not t in threading.enumerate():
                 allgut = False
-                if not t.failed:
-                    if t.restartCounter == 2:                    
-                        aes.new_event(description="Thread stopped: "+t.name, prio=9)
-                    t.failed = True
+                if t.restartCounter == 2:                    
+                    aes.new_event(description="Thread stopped: "+t.name, prio=9)
+                t.failed = True
                 try:
                     new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
                     new_t.start()
@@ -153,7 +152,7 @@ try:
                     t.restartCounter = 0
         if startup and allgut:
             startup = False
-            aes.new_event(description="All Threads runnung", prio=9)
+            aes.new_event(description="All Threads running", prio=9)
             toolbox.log('threads running')
         toolbox.sleep(10)
 except KeyboardInterrupt:

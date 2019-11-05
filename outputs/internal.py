@@ -43,12 +43,12 @@ def broadcast_input_value(Name, Value):
 #    return False
 
         
-def check_ext_ip():
+def check_ext_ip(notify=True):
     ip = requests.get('https://api.ipify.org').text
     broadcast_input_value("Internal.CheckExtIp", 1)
-    if ip != constants.ext_IP:
+    if ip != constants.ext_IP or notify:
         constants.ext_IP = ip
-        aes.new_event(description="New IP "+ip, prio=8)
+        aes.new_event(description="New IP "+ip, prio=108)
         constants.config.set('Main', 'Ext_IP', ip)
         constants.save_config()
     else:
