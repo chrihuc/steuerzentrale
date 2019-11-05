@@ -214,13 +214,17 @@ class AES:
             prio = prio - anwesend * 1000
             mail = prio // 100
             prio = prio - mail * 100
+            stummaus = prio // 10
+            ton = prio - stummaus * 10
             if nurwach and str(mysql_connector.setting_r("Status")) in ["Leise"]:
-                temp = prio // 10
-                prio = temp * 10 + 8
+                prio = stummaus * 10 + 8
             if mail:
                 self.send_mail('Hinweis/Alarm', text=description)
-            if anwesend:
+            if anwesend == 1:
                 self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio)
+            elif anwesend == 2:
+                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio)  
+                self.mes.send_abwesend(to=to, titel="Hinweis", text=description, prio=ton)
             elif prio > 1:
                 self.mes.send_direkt(to=to, titel="Hinweis", text=description, prio=prio)
             mute = prio // 10

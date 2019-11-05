@@ -42,7 +42,8 @@ def invalidTimers(hks, desc):
     print('input timed out: ', desc)
     commands = {'valid': 'False'}
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
-    inputs(validTimers[hks]['device'], validTimers[hks]['fallback'], fallingback=True)
+    if validTimers[hks]['fallback']:
+        inputs(validTimers[hks]['device'], validTimers[hks]['fallback'], fallingback=True)
     payload = {'description':'input timed out: '+ desc,'prio':109}
 #    validTimers.remove(hks)
     validTimers.pop(hks, None)

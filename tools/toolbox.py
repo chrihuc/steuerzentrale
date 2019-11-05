@@ -11,6 +11,7 @@ from time import localtime,strftime
 from datetime import date
 import inspect
 import uuid
+import copy
 #pycurl
 #import urllib3
 #from urllib.request import urlopen
@@ -172,7 +173,9 @@ class communication(object):
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
         log(payload, args, kwargs, level=9)
-        for hash_id, callback in cls.callbacks.items():
+        # Todo copy dict before iterating
+        tempdict = copy.deepcopy(cls.callbacks)
+        for hash_id, callback in tempdict.items():
             if args:
                 args_to_send =[payload].append(args)
             else:

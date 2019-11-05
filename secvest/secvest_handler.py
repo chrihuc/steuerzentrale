@@ -10,6 +10,7 @@ import time
 import constants
 from tools import toolbox
 from alarm_event_messaging import alarmevents as aevs
+from database import mysql_connector as msqc
 aes = aevs.AES()
 
 
@@ -112,12 +113,21 @@ class SecvestHandler(object):
             #new_pl['SleepTime'] = payload['SleepTime']
             result = self.set_device(payload['command'], partition)          
             toolbox.communication.send_message(payload, typ='return', value=result)            
+          
+    def pause_monitoring(self):
+        if bool(msqc.setting_r("PauseSecvest")):
+            self.alarmanlage.logout()
+            while bool(msqc.setting_r("PauseSecvest")):
+                time.sleep(1)    
+            self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
             
     def monitor(self):
         logged = True
         while constants.run and logged:
+            self.pause_monitoring()
             while self.commandActive:
                 time.sleep(1)
+            self.pause_monitoring()
             self.checkActive = True
             try:
                 self.check_ob_zu()
@@ -129,7 +139,8 @@ class SecvestHandler(object):
                 except:
                     logged = False
             self.checkActive = False
-            time.sleep(self.cycleTime) 
+            self.pause_monitoring()
+            time.sleep(self.cycleTime)
         if self.alarmanlage is not None:
             self.alarmanlage.logout()
         print('Secvest logged out')
