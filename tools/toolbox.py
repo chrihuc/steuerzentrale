@@ -173,7 +173,7 @@ class communication(object):
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
         log(payload, args, kwargs, level=9)
-        for hash_id, callbackdict in tempdict.items():
+        for hash_id, callbackdict in cls.callbacks.items():
             if args:
                 args_to_send =[payload].append(args)
             else:
