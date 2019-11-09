@@ -180,7 +180,7 @@ class communication(object):
                 args_to_send =[payload]
             if callbackdict['active']:
                 t = threading.Thread(target=callbackdict['func'], args=args_to_send, kwargs=kwargs)
-            t.start()
+                t.start()
 #            callback(payload, *args, **kwargs)
 
 class meas_value:
