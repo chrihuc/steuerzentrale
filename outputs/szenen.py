@@ -90,7 +90,10 @@ class Szenen(object):
         elif ('Name' in payload) and ('Value' in payload) and not toolbox.kw_unpack(kwargs,'typ') == 'output':
             cls.trigger_scenes(payload['Name'], payload['Value'])
         if toolbox.kw_unpack(kwargs,'typ') == 'ExecSzene':
-            cls.threadExecute(payload['Szene'])
+            if toolbox.kw_unpack(payload,'desc'):
+                cls.threadExecute(payload['Szene'], desc=payload['desc'])
+            else:
+                cls.threadExecute(payload['Szene'])
 
 
     @classmethod
@@ -308,12 +311,12 @@ class Szenen(object):
         t.start()
 
     @classmethod
-    def threadExecute(cls, szene, check_bedingung=False, wert=0, device=None):
-        t = threading.Thread(target=cls.execute, args=[szene, check_bedingung, wert, device])
+    def threadExecute(cls, szene, check_bedingung=False, wert=0, device=None, desc=''):
+        t = threading.Thread(target=cls.execute, args=[szene, check_bedingung, wert, device, desc])
         t.start()
 
     @classmethod
-    def execute(cls, szene, check_bedingung=False, wert=0, device=None, noDelay=False):
+    def execute(cls, szene, check_bedingung=False, wert=0, device=None, noDelay=False, desc=''):
         ct = datetime.datetime.now()
         toolbox.log(szene)
         if constants.passive:
@@ -350,7 +353,9 @@ class Szenen(object):
 # commandos to devices and internal commands
 #==============================================================================
         if erfuellt:
-            if str(szene_dict.get("Beschreibung")) in ['None','']:
+            if desc != '':
+                text = desc
+            elif str(szene_dict.get("Beschreibung")) in ['None','']:
                 if device:
                     text = '%s = %s, Szene: %s' % (device, wert, '')
                 else:

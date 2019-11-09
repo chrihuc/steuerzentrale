@@ -42,9 +42,11 @@ class SecvestHandler(object):
             broadcast_input_value('Secvest.Partition' + str(partition), str(1))
             success = True
         else:
-            aes.new_event(description="Secvest konnte nicht aktiviert werden", prio=9)
+#            aes.new_event(description="Secvest konnte nicht aktiviert werden", prio=9)
             self.__check_zones__(partition, hinweis=True)
             print('Konnte die Partition nicht aktivieren')
+            payload = {'Szene':'SecvestInfo', 'desc':'Secvest konnte nicht aktiviert werden'}
+            toolbox.communication.send_message(payload, typ='ExecSzene')             
         return success
     
     def deactivate(self, alarmanlage, partition=1):
@@ -59,7 +61,9 @@ class SecvestHandler(object):
             success = True
         else:
             print('Konnte die Partition nicht deaktivieren')
-            aes.new_event(description="Secvest konnte nicht deaktiviert werden", prio=9)
+#            aes.new_event(description="Secvest konnte nicht deaktiviert werden", prio=9)
+            payload = {'Szene':'SecvestInfo', 'desc':'Secvest konnte nicht deaktiviert werden'}
+            toolbox.communication.send_message(payload, typ='ExecSzene')               
         return success    
         
     def __check_zones__(self, partition=1, hinweis=False):
@@ -68,7 +72,9 @@ class SecvestHandler(object):
             if zone['state'] != 'closed':
                 broadcast_input_value('Secvest.Partition' + str(partition) + '.' + zone['name'], str(1))
                 if hinweis:
-                    aes.new_event(description=zone['name'] + ' ist nicht geschlossen', prio=6)
+#                    aes.new_event(description=zone['name'] + ' ist nicht geschlossen', prio=6)
+                    payload = {'Szene':'SecvestInfo', 'desc':zone['name'] + ' ist nicht geschlossen'}
+                    toolbox.communication.send_message(payload, typ='ExecSzene')                     
             else:
                 broadcast_input_value('Secvest.Partition' + str(partition) + '.' + zone['name'], str(0))            
         
@@ -100,7 +106,9 @@ class SecvestHandler(object):
             return result
         except Exception as e:
             print(e)
-            aes.new_event(description="Secvest konnte nicht bedient werden", prio=9)
+#            aes.new_event(description="Secvest konnte nicht bedient werden", prio=9)
+            payload = {'Szene':'SecvestInfo', 'desc':'Secvest konnte nicht bedient werden'}
+            toolbox.communication.send_message(payload, typ='ExecSzene')            
             self.commandActive = False
             return False
                
@@ -115,10 +123,14 @@ class SecvestHandler(object):
             toolbox.communication.send_message(payload, typ='return', value=result)            
           
     def pause_monitoring(self):
-        if bool(msqc.setting_r("PauseSecvest")):
+        if bool(eval(str(msqc.setting_r("PauseSecvest")))):
             self.alarmanlage.logout()
-            while bool(msqc.setting_r("PauseSecvest")):
+            counter = 0
+            while bool(eval(str(msqc.setting_r("PauseSecvest")))):
                 time.sleep(1)    
+                counter += 1
+                if counter > 300:
+                    msqc.setting_s("PauseSecvest", False)
             self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
             
     def monitor(self):

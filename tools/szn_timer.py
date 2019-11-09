@@ -85,7 +85,7 @@ class Szenen_Timer:
     def cancel_timer(self,parent,child):
         found = False
         for item in self.liste:
-            if (item.get("parent") == parent or (not(item.get("exact")))) and item.get("child") == child:
+            if item.get("child") == child:
                 item.get("timer").cancel()
                 self.liste.remove(item)
                 self.store()
