@@ -30,6 +30,8 @@ class Secvest(object):
     PATH_PARTITIONS = '/system/partitions/'
     PATH_PARTITION = '/system/partition-%i/'
     PATH_PARTITION_ZONE = '/system/partition-%i/zones/'
+    PATH_FAULTS = '/faults/'
+    PATH_ALARMS = '/alarms/'    
 
     SSID = 'ssid'
     NO_SSID = '0'
@@ -129,6 +131,32 @@ class Secvest(object):
                                 cookies=self.cookies,
                                 verify=False)
         return response.json()
+    
+    def get_faults(self):
+        """
+        Method gets a list of zones assigned to the passed partition
+        :param partition:
+        :return: A list of faults
+        :rtype: list
+        """
+        response = requests.get(self.__build_uri_for_path__(Secvest.PATH_FAULTS),
+                                headers=Secvest.HEADERS,
+                                cookies=self.cookies,
+                                verify=False)
+        return response.json()  
+    
+    def get_alarms(self):
+        """
+        Method gets a list of zones assigned to the passed partition
+        :param partition:
+        :return: A list of faults
+        :rtype: list
+        """
+        response = requests.get(self.__build_uri_for_path__(Secvest.PATH_ALARMS),
+                                headers=Secvest.HEADERS,
+                                cookies=self.cookies,
+                                verify=False)
+        return response.json()     
 
     def set_partition(self, partition=1):
         data={"state":"set"}

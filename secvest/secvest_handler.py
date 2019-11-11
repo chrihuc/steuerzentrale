@@ -29,6 +29,8 @@ class SecvestHandler(object):
         self.checkActive= False
         self.cycleTime = 15
         self.alarmanlage = None
+        self.alarms = []
+        self.faults = []
 
 
     def activate(self, alarmanlage, partition=1):
@@ -86,6 +88,36 @@ class SecvestHandler(object):
             self.__check_zones__(partition)        
         result = True
         return result
+    
+    def get_faults(self):
+        faults = self.alarmanlage.get_faults() 
+        for fault in faults:
+            if not fault in self.faults:
+                payload = {'Szene':'SecvestInfo', 'desc':fault}
+                toolbox.communication.send_message(payload, typ='ExecSzene')
+                self.faults.append(fault)
+        for fault in self.faults:
+            if not fault in faults:
+                payload = {'Szene':'SecvestInfo', 'desc':fault + ' wieder weg.'}
+                toolbox.communication.send_message(payload, typ='ExecSzene')
+                self.faults.pop(fault)                            
+        result = True
+        return result 
+    
+    def get_alarms(self):
+        alarms = self.alarmanlage.get_alarms() 
+        for alarm in alarms:
+            if not alarm in self.alarms:
+                payload = {'Szene':'SecvestInfo', 'desc':alarm}
+                toolbox.communication.send_message(payload, typ='ExecSzene')
+                self.alarms.append(alarm)
+        for alarm in self.alarms:
+            if not alarm in alarms:
+                payload = {'Szene':'SecvestInfo', 'desc':alarm + ' wieder weg.'}
+                toolbox.communication.send_message(payload, typ='ExecSzene')
+                self.faults.pop(alarm)                            
+        result = True
+        return result    
     
     def set_device(self, command, partition, *args,**kwargs):
         try:
@@ -152,6 +184,8 @@ class SecvestHandler(object):
                     logged = False
             self.checkActive = False
             self.pause_monitoring()
+            self.get_alarms()
+            self.get_faults()
             time.sleep(self.cycleTime)
         if self.alarmanlage is not None:
             self.alarmanlage.logout()
