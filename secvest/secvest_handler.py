@@ -30,7 +30,7 @@ class SecvestHandler(object):
         self.cycleTime = 15
         self.alarmanlage = None
         self.alarms = []
-        self.faults = []
+        self.faults = {}
 
 
     def activate(self, alarmanlage, partition=1):
@@ -40,7 +40,7 @@ class SecvestHandler(object):
         status_part = alarmanlage.get_partition(partition)
         if status_part['state'] == 'set':
             print('ok')
-            aes.new_event(description="Secvest aktiv", prio=9)
+            aes.new_event(description="Secvest aktiv", prio=0)
             broadcast_input_value('Secvest.Partition' + str(partition), str(1))
             success = True
         else:
@@ -58,7 +58,7 @@ class SecvestHandler(object):
         status_part = alarmanlage.get_partition(partition)
         if status_part['state'] == 'unset':
             print('ok')
-            aes.new_event(description="Secvest deaktiviert", prio=9)
+            aes.new_event(description="Secvest deaktiviert", prio=0)
             broadcast_input_value('Secvest.Partition' + str(partition), str(0))
             success = True
         else:
@@ -92,17 +92,22 @@ class SecvestHandler(object):
     def get_faults(self):
         faults = self.alarmanlage.get_faults() 
         for fault in faults:
-            print(fault)
 #            {'type': '5000', 'id': '1474', 'ui-string': 'Z201 A Terrassentür', 'affects-partition': ['1'], 'affects-zone': '201', 'prevents-set': True, 'prevents-reset': False, 'is-rf-warning': False}
-#            if not fault in self.faults:
-#                payload = {'Szene':'SecvestInfo', 'desc':fault}
-#                toolbox.communication.send_message(payload, typ='ExecSzene')
-#                self.faults.append(fault)
-#        for fault in self.faults:
-#            if not fault in faults:
+            if not fault['ui-string'] in self.faults:
+                print(fault)
+                if fault['is-rf-warning']:
+                    payload = {'Szene':'SecvestInfo', 'desc':fault['is-rf-warning']}
+                    toolbox.communication.send_message(payload, typ='ExecSzene')
+                self.faults[fault['ui-string']] = fault
+        for stored,value in self.faults.items():
+            found = False
+            for fault in faults:
+                if stored == fault['ui-string']:
+                    found = True
 #                payload = {'Szene':'SecvestInfo', 'desc':fault + ' wieder weg.'}
 #                toolbox.communication.send_message(payload, typ='ExecSzene')
-#                self.faults.pop(fault)                            
+            if not found: 
+                self.faults.pop(fault)                            
         result = True
         return result 
     

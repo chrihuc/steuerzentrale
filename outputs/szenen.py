@@ -312,12 +312,12 @@ class Szenen(object):
 
     @classmethod
     def threadExecute(cls, szene, check_bedingung=False, wert=0, device=None, desc=''):
-        t = threading.Thread(target=cls.execute, args=[szene, check_bedingung, wert, device, desc])
+        t = threading.Thread(target=cls.execute, args=[szene, check_bedingung, wert, device, False, desc])
         t.start()
 
     @classmethod
     def execute(cls, szene, check_bedingung=False, wert=0, device=None, noDelay=False, desc=''):
-        ct = datetime.datetime.now()
+#        ct = datetime.datetime.now()
         toolbox.log(szene)
         if constants.passive:
             return True
@@ -441,6 +441,7 @@ class Szenen(object):
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
+                    print('Time spend till follows: ', str(datetime.datetime.now() - start_t))
                     if ex_re == 0:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
@@ -484,7 +485,7 @@ class Szenen(object):
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = True, retrig = True)
                     elif ex_re == 2:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)
-#        print('Time spend on szene: ', str(datetime.datetime.now() - ct))
+#        print('Time spend on szene: ', str(datetime.datetime.now() - start_t))
         return erfolg
 
 

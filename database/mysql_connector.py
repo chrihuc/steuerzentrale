@@ -57,24 +57,26 @@ try:
     alte = json.loads(full)
 #    print(alte)
     for key, eintrag in alte.items():
-#        print(eintrag)
-        due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')
-        ct = datetime.datetime.now()
-        if True: #due > ct:
-            delay = (due - ct).seconds + 1
-            hks = eintrag['hks']
-            desc = eintrag['desc']
-            device = eintrag['device']
-            fallback = eintrag['fallback']
-            entry = {'hks' : hks, 'desc' : desc, 'device':device,'fallback':fallback}
-            if delay < 0:
-                invalidTimers(hks, desc)
-            else:
-                thread_pt_ = Timer(delay, invalidTimers, [hks, desc])
-                thread_pt_.start()
-                entry['timer'] = thread_pt_
-            validTimers[hks] = entry 
-            
+        try:
+    #        print(eintrag)
+            due = datetime.datetime.strptime(eintrag['due'], '%Y-%m-%dT%H:%M:%S.%f')
+            ct = datetime.datetime.now()
+            if True: #due > ct:
+                delay = (due - ct).seconds + 1
+                hks = eintrag['hks']
+                desc = eintrag['desc']
+                device = eintrag['device']
+                fallback = eintrag['fallback']
+                entry = {'hks' : hks, 'desc' : desc, 'device':device,'fallback':fallback, 'due':due}
+                if delay < 0:
+                    invalidTimers(hks, desc)
+                else:
+                    thread_pt_ = Timer(delay, invalidTimers, [hks, desc])
+                    thread_pt_.start()
+                    entry['timer'] = thread_pt_
+                    validTimers[hks] = entry 
+        except Exception as e:
+            print(eintrag)
 #            self.add_timer(parent, delay, child, exact, retrig, device, start=True)
     print('Heartbeats geladen')
 except Exception as e:
