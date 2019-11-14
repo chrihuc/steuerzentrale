@@ -78,7 +78,14 @@ try:
 #            self.add_timer(parent, delay, child, exact, retrig, device, start=True)
     print('Heartbeats geladen')
 except Exception as e:
-    print(e)
+    print(str(e))
+    try:
+        with open('hrtbt_timer.jsn') as f:
+            full = f.read()            
+        alte = json.loads(full)
+        print(alte)     
+    except:
+        pass
     print('Laden der Heartbeats fehlgeschlagen')
     toolbox.log('Laden der Heartbeats fehlgeschlagen', level=1)
 
@@ -758,6 +765,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 valid = dicti_1['valid']
                 heartbt = dicti_1['heartbeat']
                 desc = dicti_1['Description']
+                komp = dicti_1['Kompression']
+                hyst = dicti_1['Hysterese']
                 if heartbt and str(valid) == "False" and not fallingback:
                     payload = {'description':'input recovered: '+ desc,'prio':9}
                     toolbox.communication.send_message(payload, typ='new_event')                  
@@ -765,6 +774,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     last_value = value
                     writeToInflx = True
                 elif float(last_value) != float(value):
+                    writeToInflx = True
+                if str(komp) in ['None', 'False']:
                     writeToInflx = True
                 if not last_time:
                     try:
@@ -818,6 +829,18 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                         dicti[field_names[i]] = row[i]
                     doppelklick = dicti.get("Doppelklick")
                     if ct >= db_time:
+                        # Hysteres einberechnen
+                        lt = None
+                        if dicti['Value_lt'] is not None:
+                            lt = float(re_calc(dicti['Value_lt']))
+                            if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
+                                lt = lt + float(hyst)
+                        gt = None
+                        if dicti['Value_gt'] is not None:
+                            gt = float(re_calc(dicti['Value_gt']))
+                            if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
+                                gt = gt - float(hyst)                             
+                                
                         append = True
                         if str(dicti.get("last2")) != "None":
                             if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
@@ -827,11 +850,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                                 szenen.append(dicti.get("Doppel"))
                                 single = False
                         if str(doppelklick) != "True": single = True
-                        if (dicti['Value_lt'] is not None and float(re_calc(dicti['Value_lt'])) <= float(value)):
+                        if (lt is not None and lt <= float(value)):
                             append = False
                         if (dicti['Value_eq'] is not None and float(re_calc(dicti['Value_eq'])) != float(value)):
                             append = False
-                        if (dicti['Value_gt'] is not None and float(re_calc(dicti['Value_gt'])) >= float(value)):
+                        if (gt is not None and gt >= float(value)):
                             append = False
                         # Gradient
                         if (dicti['Gradient_lt'] is not None and float(re_calc(dicti['Gradient_lt'])) <= gradient):

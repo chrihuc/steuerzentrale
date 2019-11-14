@@ -92,30 +92,33 @@ class SecvestHandler(object):
     def get_faults(self):
         faults = self.alarmanlage.get_faults() 
         for fault in faults:
-            if not fault in self.faults:
-                payload = {'Szene':'SecvestInfo', 'desc':fault}
-                toolbox.communication.send_message(payload, typ='ExecSzene')
-                self.faults.append(fault)
-        for fault in self.faults:
-            if not fault in faults:
-                payload = {'Szene':'SecvestInfo', 'desc':fault + ' wieder weg.'}
-                toolbox.communication.send_message(payload, typ='ExecSzene')
-                self.faults.pop(fault)                            
+            print(fault)
+#            {'type': '5000', 'id': '1474', 'ui-string': 'Z201 A Terrassentür', 'affects-partition': ['1'], 'affects-zone': '201', 'prevents-set': True, 'prevents-reset': False, 'is-rf-warning': False}
+#            if not fault in self.faults:
+#                payload = {'Szene':'SecvestInfo', 'desc':fault}
+#                toolbox.communication.send_message(payload, typ='ExecSzene')
+#                self.faults.append(fault)
+#        for fault in self.faults:
+#            if not fault in faults:
+#                payload = {'Szene':'SecvestInfo', 'desc':fault + ' wieder weg.'}
+#                toolbox.communication.send_message(payload, typ='ExecSzene')
+#                self.faults.pop(fault)                            
         result = True
         return result 
     
     def get_alarms(self):
         alarms = self.alarmanlage.get_alarms() 
         for alarm in alarms:
-            if not alarm in self.alarms:
-                payload = {'Szene':'SecvestInfo', 'desc':alarm}
-                toolbox.communication.send_message(payload, typ='ExecSzene')
-                self.alarms.append(alarm)
-        for alarm in self.alarms:
-            if not alarm in alarms:
-                payload = {'Szene':'SecvestInfo', 'desc':alarm + ' wieder weg.'}
-                toolbox.communication.send_message(payload, typ='ExecSzene')
-                self.faults.pop(alarm)                            
+            print(alarm)
+#            if not alarm in self.alarms:
+#                payload = {'Szene':'SecvestInfo', 'desc':alarm}
+#                toolbox.communication.send_message(payload, typ='ExecSzene')
+#                self.alarms.append(alarm)
+#        for alarm in self.alarms:
+#            if not alarm in alarms:
+#                payload = {'Szene':'SecvestInfo', 'desc':alarm + ' wieder weg.'}
+#                toolbox.communication.send_message(payload, typ='ExecSzene')
+#                self.faults.pop(alarm)                            
         result = True
         return result    
     
@@ -175,17 +178,18 @@ class SecvestHandler(object):
             self.checkActive = True
             try:
                 self.check_ob_zu()
+                self.get_alarms()
+                self.get_faults()                
             except:
                 try:
                     print('einloggen secvest')
                     self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
+                    print('Eingeloggt secvest')
                     self.check_ob_zu()
                 except:
                     logged = False
             self.checkActive = False
             self.pause_monitoring()
-            self.get_alarms()
-            self.get_faults()
             time.sleep(self.cycleTime)
         if self.alarmanlage is not None:
             self.alarmanlage.logout()
