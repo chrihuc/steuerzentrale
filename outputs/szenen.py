@@ -369,6 +369,8 @@ class Szenen(object):
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
+            if szene == 'Gehen_2':
+                print(szene,' Time spend till commands: ', str(datetime.datetime.now() - start_t))                
             for idk, key in enumerate(szene_dict):
                 if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                     kommandos = cls.__return_enum__(szene_dict.get(key))
@@ -392,6 +394,8 @@ class Szenen(object):
 #==============================================================================
 # Internal
 #==============================================================================
+            if szene == 'Gehen_2':
+                print(szene,' Time spend till after commands: ', str(datetime.datetime.now() - start_t))                                 
             key = "intCmd"
             if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") ):#and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = cls.__return_enum__(szene_dict.get(key))
@@ -441,7 +445,8 @@ class Szenen(object):
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
-                    print(szene,' Time spend till follows: ', str(datetime.datetime.now() - start_t))
+                    if szene=='Gehen_2':
+                        print(szene,' Time spend till follows: ', str(datetime.datetime.now() - start_t))
                     if ex_re == 0:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
