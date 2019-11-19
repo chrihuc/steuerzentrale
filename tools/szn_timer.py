@@ -121,7 +121,9 @@ class Szenen_Timer:
                         item.get("timer").start()
                         self.store()
                     else:
-                        self.callback(child, device=device, wert='timed')
+#                        self.callback(child, device=device, wert='timed')
+                        t =  Timer(0,self.entferne_eintrag, args=[hash_id, child, device, noDelay])
+                        t.start()
                         try:
                             self.liste.remove(item)
                         except:

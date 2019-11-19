@@ -499,6 +499,8 @@ class Szenen(object):
     @classmethod
     def timer_add(cls, callback, parent, delay, child, exact, retrig, device=None, noDelay=False):
         cls.sz_t.callback = callback
+#        t = Timer(0, cls.sz_t.retrigger_add, args=[parent, delay, child, exact, retrig, device, noDelay])
+#        t.start()        
         cls.sz_t.retrigger_add(parent, delay, child, exact, retrig, device, noDelay)
 
 toolbox.communication.register_callback(Szenen.callback_receiver)

@@ -49,7 +49,15 @@ class Messaging:
             elif isinstance(eval(to), list):  # eval('Christoph') gibt error
                 to = eval(to)
             else:
-                to = [to]        
+                to = [to] 
+        else:
+            auchalle = None
+            for num, empf in enumerate(to):
+                if empf == 'Alle':
+                    auchalle = num
+            if auchalle:
+                to.pop(num)
+                to.extend(self.alle)
         success = True
         data = {'titel': titel, 'message': text, 'prio':prio}
         for empf in to:
