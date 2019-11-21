@@ -70,21 +70,17 @@ class Internal:
                     'V00FLU1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
                                        datetime.time(22, 30, 0, 0), 30, 1, 30),
                     'V01FLU1DEK1LI01':('On', 'Off', datetime.time(7, 0, 0, 0), 
-                                       datetime.time(22, 30, 0, 0), 30, 1, 30),
-                    'V00WOH1RUM1LI13':('Ambience', 'Aus', datetime.time(7, 0, 0, 0), 
-                                       datetime.time(23, 0, 0, 0), 30, 50, 25)}
+                                       datetime.time(22, 30, 0, 0), 30, 1, 30)}
         min_off_dict = {'V00ESS1DEK1LI01':20,
                         'V00KUE1DEK1LI01':10,
                         'V00KUE1DEK1LI02':10,
                         'V00FLU1DEK1LI01':45,
-                        'V01FLU1DEK1LI01':30,
-                        'V00WOH1RUM1LI13':5}
+                        'V01FLU1DEK1LI01':30}
         min_on_dict = {'V00ESS1DEK1LI01':10,
                        'V00KUE1DEK1LI01':1,
                        'V00KUE1DEK1LI02':1,
                        'V00FLU1DEK1LI01':0,
-                       'V01FLU1DEK1LI01':0,
-                       'V00WOH1RUM1LI13':20}
+                       'V01FLU1DEK1LI01':0}
         increments = ['V00KUE1DEK1LI01',
                       'V00KUE1DEK1LI02',
                       'V00FLU1DEK1LI01',

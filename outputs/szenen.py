@@ -66,6 +66,7 @@ class Szenen(object):
     kommando_dict = {}
     timeout = datetime.timedelta(hours=0, minutes=0, seconds=30)
     sz_t = szn_timer.Szenen_Timer()
+    running_list = {}
 
     def __init__ (self):
 #        self.sz_t = szn_timer.Szenen_Timer(callback = self.execute)
@@ -250,7 +251,7 @@ class Szenen(object):
             t_list = {}
         if commando in ["man", "auto"]:
             msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
-        else:
+        elif szn_id == None or szn_id in cls.running_list:
             if device in xs1_devs:
                 executed = xs1.set_device(adress, str(commando))
             elif device == "setTask":
@@ -289,6 +290,8 @@ class Szenen(object):
                 toolbox.communication.send_message(payload, typ='output', receiver=system, adress=adress)
             else:
                 executed = True
+        else:
+            executed = True                
         if executed:
 # TODO: Return True and value and write value to table
             if device not in ['Name', 'Id']:
@@ -353,6 +356,7 @@ class Szenen(object):
 # commandos to devices and internal commands
 #==============================================================================
         if erfuellt:
+            cls.running_list[szn_id] = szene
             if desc != '':
                 text = desc
             elif str(szene_dict.get("Beschreibung")) in ['None','']:
@@ -368,9 +372,7 @@ class Szenen(object):
             aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
-                interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")
-            if szene == 'Gehen_2':
-                print(szene,' Time spend till commands: ', str(datetime.datetime.now() - start_t))                
+                interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")              
             for idk, key in enumerate(szene_dict):
                 if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                     kommandos = cls.__return_enum__(szene_dict.get(key))
@@ -393,9 +395,7 @@ class Szenen(object):
                                 t.start()
 #==============================================================================
 # Internal
-#==============================================================================
-            if szene == 'Gehen_2':
-                print(szene,' Time spend till after commands: ', str(datetime.datetime.now() - start_t))                                 
+#==============================================================================                               
             key = "intCmd"
             if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") ):#and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = cls.__return_enum__(szene_dict.get(key))
@@ -428,6 +428,7 @@ class Szenen(object):
             kommandos = cls.__return_enum__(szene_dict.get("Cancels"))
             for kommando in kommandos:
                 cls.sz_t.cancel_timer(parent = szene, child = kommando)
+                cls.running_list = {key:val for key, val in cls.running_list.items() if val != kommando}  # was ist mit der Szenen die ich bin? 
 #==============================================================================
 # start timer with following actions
 # ['Szene', delay(s), exact_retrigger [0 nicht exact & retrig,1,2 nicht nicht], selben bedingungen, abhängig erfolg]                
@@ -445,8 +446,6 @@ class Szenen(object):
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
-                    if szene=='Gehen_2':
-                        print(szene,' Time spend till follows: ', str(datetime.datetime.now() - start_t))
                     if ex_re == 0:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
@@ -491,6 +490,7 @@ class Szenen(object):
                     elif ex_re == 2:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)
 #        print('Time spend on szene: ', str(datetime.datetime.now() - start_t))
+        cls.running_list.pop(szn_id)
         return erfolg
 
 

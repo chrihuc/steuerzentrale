@@ -704,6 +704,19 @@ def sendSql(sql):
                 print('could not write to DB')
     con.close()
 
+def writeToCursor(cursor, sql):
+    retrycount = 3
+    counter = 1
+    while counter <= retrycount:
+        try:
+            cursor.execute(sql)
+            counter = retrycount + 1
+        except:
+            time.sleep(.1)
+            counter += 1
+            if counter == 4:
+                print('could not write to DB')     
+
 # latching (user setting)
 # latched (from evaluation automatic) only latch after scene was found
 # persistance (user setting)
@@ -890,19 +903,24 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
 
                         if violTime is not None and latched is not None:
                             sql = 'UPDATE %s SET violTime = "%s", latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, latched, dicti.get('Id'))
-                            cur.execute(sql)
+                            writeToCursor(cur, sql)
+#                            cur.execute(sql)
                         elif violTime is not None and latched is None:  
                             sql = 'UPDATE %s SET violTime = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, dicti.get('Id'))
-                            cur.execute(sql)   
+                            writeToCursor(cur, sql)
+#                            cur.execute(sql)   
                         elif violTime is None and latched is not None:  
                             sql = 'UPDATE %s SET latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, dicti.get('Id'))
-                            cur.execute(sql)                             
+                            writeToCursor(cur, sql)                            
+#                            cur.execute(sql)                             
     #            get stting and logging
                 hks = dicti_1['HKS']
-                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
+                writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
+#                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
                 if cur.fetchone()[0] > 0:
                     setting_s(hks, value)
-                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
+                writeToCursor(cur,"SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
+#                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
                 if cur.fetchone()[0] > 0 and str(hks) != str(device) and writeToInflx:
 #                    try:
 #                        insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
