@@ -490,7 +490,7 @@ class Szenen(object):
                     elif ex_re == 2:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = False)
 #        print('Time spend on szene: ', str(datetime.datetime.now() - start_t))
-        cls.running_list.pop(szn_id)
+        #cls.running_list.pop(szn_id)
         return erfolg
 
 
