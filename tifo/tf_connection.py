@@ -326,7 +326,7 @@ class TiFo:
         self.timeout.start()
 
     def timedOut(self):
-        #aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
+        aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
         self.connect()
 
     def connect(self):
@@ -465,6 +465,10 @@ class TiFo:
     def cb_volc_vol(self, value, device, uid):
         toolbox.log(device)
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+        if value < 2500:
+            broadcast_input_value('TiFo.' + name + '.Riegel', str(1))
+        else:
+            broadcast_input_value('TiFo.' + name + '.Riegel', str(0))
         broadcast_input_value('TiFo.' + name + '.U', str(float(value)/1000))
         self.timeout_reset()
 
@@ -553,7 +557,7 @@ class TiFo:
 #        print(value)
         self.lineBricklets[temp_uid].callback(value)
         utc = datetime.datetime.utcnow()
-        writeInfluxDb(temp_uid, value, utc)
+#        writeInfluxDb(temp_uid, value, utc)
 
     def set_io16_sub(self,cmd,io,value):
         port = cmd.get('Port')
@@ -1031,7 +1035,7 @@ class TiFo:
 #                t = toolbox.OwnTimer(self.delay, function=self.thread_volc, args = [self.temp[-1]], name="Vol Curr Bricklet")
 #                self.threadliste.append(t)
 #                t.start()
-                self.volcu[-1].set_debounce_period(100)
+                self.volcu[-1].set_debounce_period(1000)
                 self.volcu[-1].set_voltage_callback_period(1000)
                 self.volcu[-1].set_current_callback_period(1000)
                 self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.volcu[-1], uid = temp_uid ))
@@ -1061,6 +1065,7 @@ class TiFo:
 #                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))
                 self.dus[-1].set_distance_callback_period(5000)
                 toolbox.log("BrickletDistanceUS", temp_uid)
+                found  = True
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                 self.master.append(BrickMaster(uid, self.ipcon))

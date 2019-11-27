@@ -66,7 +66,8 @@ class Szenen(object):
     kommando_dict = {}
     timeout = datetime.timedelta(hours=0, minutes=0, seconds=30)
     sz_t = szn_timer.Szenen_Timer()
-    running_list = {}
+    running_list = {} # gibt probleme mit changes while iterating, müsste mit locks gearbeitet werden
+    # liste locken dann ändern
 
     def __init__ (self):
 #        self.sz_t = szn_timer.Szenen_Timer(callback = self.execute)
@@ -251,7 +252,7 @@ class Szenen(object):
             t_list = {}
         if commando in ["man", "auto"]:
             msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
-        elif szn_id == None or szn_id in cls.running_list:
+        elif True: #szn_id == None or szn_id in cls.running_list:
             if device in xs1_devs:
                 executed = xs1.set_device(adress, str(commando))
             elif device == "setTask":
@@ -356,7 +357,7 @@ class Szenen(object):
 # commandos to devices and internal commands
 #==============================================================================
         if erfuellt:
-            cls.running_list[szn_id] = szene
+            #cls.running_list[szn_id] = szene
             if desc != '':
                 text = desc
             elif str(szene_dict.get("Beschreibung")) in ['None','']:
@@ -428,7 +429,7 @@ class Szenen(object):
             kommandos = cls.__return_enum__(szene_dict.get("Cancels"))
             for kommando in kommandos:
                 cls.sz_t.cancel_timer(parent = szene, child = kommando)
-                cls.running_list = {key:val for key, val in cls.running_list.items() if val != kommando}  # was ist mit der Szenen die ich bin? 
+                #cls.running_list = {key:val for key, val in cls.running_list.items() if val != kommando}  # was ist mit der Szenen die ich bin? 
 #==============================================================================
 # start timer with following actions
 # ['Szene', delay(s), exact_retrigger [0 nicht exact & retrig,1,2 nicht nicht], selben bedingungen, abhängig erfolg]                

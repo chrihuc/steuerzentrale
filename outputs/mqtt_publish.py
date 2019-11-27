@@ -75,14 +75,20 @@ class MqttClient():
         return True
 
     def receive_communication(self, payload, *args, **kwargs):
-        if toolbox.kw_unpack(kwargs,'typ') == 'output' and toolbox.kw_unpack(kwargs,'receiver') == 'MQTT':
+        if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') == 'MQTT' or toolbox.kw_unpack(kwargs,'receiver') == 'ESP'):
             adress=toolbox.kw_unpack(kwargs,'adress')
-            device = adress.split(".")[1]  
-            new_pl = {}
-            new_pl['Value'] = payload['Value']
-            new_pl['SleepTime'] = payload['SleepTime']
-            result = self.mqtt_pub("Outputs/" + device, new_pl, short=True)
-            toolbox.communication.send_message(payload, typ='return', value=result)
+            device = adress.split(".")[1] 
+#            der teil muss abgekürzt werden, wenn ein ESP der empfänger ist, auf nur das nötigste
+            if toolbox.kw_unpack(kwargs,'receiver') == 'ESP':
+                new_pl = {}
+                new_pl['Value'] = payload['Value']
+                new_pl['SleepTime'] = payload['SleepTime']
+                result = self.mqtt_pub("Outputs/" + device, new_pl, short=True)
+                toolbox.communication.send_message(payload, typ='return', value=result)
+            else:
+                payload['adress'] = toolbox.kw_unpack(kwargs,'adress')
+                result = self.mqtt_pub("Outputs/" + device, payload)
+                toolbox.communication.send_message(payload, typ='return', value=result)
 
 def ping(IP, number = 1):
     pinged = False

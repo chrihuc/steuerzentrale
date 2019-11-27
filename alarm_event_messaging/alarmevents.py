@@ -152,9 +152,6 @@ class AES:
         if url != None:
 #            req = urllib3.Request(url)
             try:
-#                response = urllib3.urlopen(req)
-#                response = urlopen(url)
-#                data = response.read()
                 
                 response = requests.get(url)
                 img = Image.open(BytesIO(response.content))                

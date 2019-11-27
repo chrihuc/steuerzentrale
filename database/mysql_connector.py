@@ -44,12 +44,13 @@ def invalidTimers(hks, desc):
     mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
     if validTimers[hks]['fallback']:
         inputs(validTimers[hks]['device'], validTimers[hks]['fallback'], fallingback=True)
-    payload = {'description':'input timed out: '+ desc,'prio':109}
 #    validTimers.remove(hks)
     validTimers.pop(hks, None)
     with open('hrtbt_timer.jsn', 'w') as fout:
-        json.dump(validTimers, fout, default=json_serial)      
-    toolbox.communication.send_message(payload, typ='new_event') 
+        json.dump(validTimers, fout, default=json_serial)        
+    payload = {'Szene':'InputTimedOut', 'desc':'input timed out: '+ desc}
+    toolbox.communication.send_message(payload, typ='ExecSzene')          
+
 
 try:
     with open('hrtbt_timer.jsn') as f:
@@ -783,8 +784,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 komp = dicti_1['Kompression']
                 hyst = dicti_1['Hysterese']
                 if heartbt and str(valid) == "False" and not fallingback:
-                    payload = {'description':'input recovered: '+ desc,'prio':9}
-                    toolbox.communication.send_message(payload, typ='new_event')                  
+                    payload = {'Szene':'InputTimedOut', 'desc':'input recovered: '+ desc}
+                    toolbox.communication.send_message(payload, typ='ExecSzene')                                     
                 if last_value is None: 
                     last_value = value
                     writeToInflx = True
