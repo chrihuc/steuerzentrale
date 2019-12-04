@@ -109,15 +109,20 @@ class Internal:
             aes.send_mail('Klingel', text='', url='http://192.168.192.36/html/cam.jpg')
         elif commd == 'Restart':
             self.restart()
+        elif commd == 'Reboot':
+            self.reboot()            
         elif commd == 'check_ext_ip':
             check_ext_ip()            
 
     def restart(self):
         constants.run = False
         aes.new_event(description="Restarting in 60", prio=9)
-        time.sleep(60)
+#        time.sleep(60)
 #        sys.exit("XS1 goodbye")
         toolbox.restart()       
+
+    def reboot(self):
+        os.system('sudo reboot')        
 
     def git_update(self):
         g = git.cmd.Git()

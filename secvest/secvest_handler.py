@@ -205,9 +205,12 @@ class SecvestHandler(object):
 
 
 def main():
-    sv = SecvestHandler()            
-    reg_id = toolbox.communication.register_callback(sv.receive_communication)            
-    sv.monitor()    
+    try:     
+        sv = SecvestHandler()            
+        reg_id = toolbox.communication.register_callback(sv.receive_communication) 
+        sv.monitor()   
+    except Exception as e:
+        print(e)    
     toolbox.communication.unregister_callback(reg_id)         
 
 if __name__ == "__main__":
