@@ -159,6 +159,9 @@ class Tradfri_lights():
     #        api(dim_command)
 #            print(l)
             for lampe in l:
+                if szene['toggle']:
+                    if lampe.light_control.state:
+                        bri = 0
                 hash_id = str(uuid.uuid4())
                 Tradfri_lights.locklist[lampe] = hash_id
                 if bri == 0:

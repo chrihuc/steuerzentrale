@@ -152,6 +152,7 @@ class Secvest(object):
         :return: A list of faults
         :rtype: list
         """
+#        {'id': '65537', 'type': '1', 'affects-partition': '1'}
         response = requests.get(self.__build_uri_for_path__(Secvest.PATH_ALARMS),
                                 headers=Secvest.HEADERS,
                                 cookies=self.cookies,

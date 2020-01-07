@@ -112,6 +112,9 @@ class SecvestHandler(object):
         return result 
     
     def get_alarms(self):
+#        {'id': '65537', 'type': '1', 'affects-partition': '1'}   1 oder 4 sabotage gehäuse 
+#        {'id': '65540', 'type': '4', 'affects-partition': '1'}   4 ist scheinbar alarm
+
         alarms = self.alarmanlage.get_alarms() 
         for alarm in alarms:
             print(alarm)

@@ -75,7 +75,7 @@ class MqttClient():
         return True
 
     def receive_communication(self, payload, *args, **kwargs):
-        if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') == 'MQTT' or toolbox.kw_unpack(kwargs,'receiver') == 'ESP'):
+        if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') in ['MQTT', 'ESP', 'Shelly']):
             adress=toolbox.kw_unpack(kwargs,'adress')
             device = adress.split(".")[1] 
 #            der teil muss abgekürzt werden, wenn ein ESP der empfänger ist, auf nur das nötigste
@@ -85,9 +85,13 @@ class MqttClient():
                 new_pl['SleepTime'] = payload['SleepTime']
                 result = self.mqtt_pub("Outputs/" + device, new_pl, short=True)
                 toolbox.communication.send_message(payload, typ='return', value=result)
+#                 mosquitto_pub -h 192.168.192.2 -t shellies/shelly1-B91B5A/relay/0/command  -m "off" -u customer -P 'wR,*BnoQ7i0fy\6hj6F'
+            elif toolbox.kw_unpack(kwargs,'receiver') == 'Shelly':
+                result = self.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'])
+                toolbox.communication.send_message(payload, typ='return', value=result)                
             else:
                 payload['adress'] = toolbox.kw_unpack(kwargs,'adress')
-                result = self.mqtt_pub("Outputs/" + device, payload)
+                result = self.mqtt_pub("Command/" + device, payload)
                 toolbox.communication.send_message(payload, typ='return', value=result)
 
 def ping(IP, number = 1):

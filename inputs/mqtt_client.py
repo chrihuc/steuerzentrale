@@ -90,7 +90,14 @@ class MqttClient:
         try:
             m_in=(json.loads(message)) #decode json data
         except ValueError:
-            print("no json code", message)
+            if "shellies" in msg.topic:
+                name = msg.topic.split("/")[1]
+                if message == "on":
+                    value = 1
+                else:
+                    value = 0
+                broadcast_input_value('MQTT.' + name, value)
+#            print("no json code", message)
         else:        
     #        print(m_in)
     #        print(msg.topic + " " + str(msg.payload))        
@@ -119,7 +126,7 @@ class MqttClient:
                         msqc.mdb_set_table(table, device, entry) 
                 elif 'SetSettings' in msg.topic:
                     table = constants.sql_tables.settings.name
-                    msqc.setting_s(m_in['Name'], m_in['Value'])                    
+                    msqc.setting_s(m_in['Name'], m_in['Value'])                      
             if 'DataRequest' in msg.topic:
                 if 'SetTable' in msg.topic:  
                     table = constants.sql_tables.cron.name
@@ -140,12 +147,12 @@ class MqttClient:
 #                    print(msqc.mdb_read_bdqs())
                     mqtt_pub("DataRequest/Answer/BDQs", msqc.mdb_read_bdqs())
                 
-
+# shellies/shelly1-B91B5A/relay/0 off
 mqtt_list = []
 mqtt.Client.connected_flag=False
 #client = None
 topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
-          "DataRequest/SetSettings/#", "Message/AlarmListClear"]
+          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#"]
 
 
 def main():
