@@ -618,6 +618,10 @@ class Sonos:
 #        print(dicti)
         return dicti
 
+    def sonos_save(self):
+        self.sonos_write_szene(self.WohnZi)
+        self.soco_get_status()
+
     def compare_status(self, dicti1, dicti2):
         for key, value in dicti1.items():
             if key in ['Pause', 'Queue', 'Radio', 'Volume']:
@@ -884,7 +888,7 @@ class Sonos:
             elif str(command) == "Play":
                 player.group.coordinator.play()
             elif str(command) == "Save":
-                player.soco_get_status()
+                player.sonos_save()
             elif str(command) == "Announce_Time":
                 player.soco_get_status()
                 lt = localtime()

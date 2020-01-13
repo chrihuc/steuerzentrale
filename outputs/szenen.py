@@ -12,6 +12,7 @@ from threading import Timer
 import uuid
 import datetime
 import time
+import psutil
 
 import constants
 
@@ -252,6 +253,12 @@ class Szenen(object):
             t_list = {}
         if commando in ["man", "auto"]:
             msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
+        elif commando in ["autoToggle"]:
+            current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
+            if current == 'auto':
+                msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
+            else:
+                msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
         elif True: #szn_id == None or szn_id in cls.running_list:
             if device in xs1_devs:
                 executed = xs1.set_device(adress, str(commando))
@@ -325,6 +332,10 @@ class Szenen(object):
         toolbox.log(szene)
         if constants.passive:
             return True
+        if psutil.cpu_percent() > 90:
+            aes.new_event(description="ProcessorLeistung zu hoch", prio=9, karenz = 0.03)
+            print("ProcessorLeistung zu hoch")
+            return False
         szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung
@@ -342,7 +353,7 @@ class Szenen(object):
             return True
 #            time.sleep(float(szene_dict.get("Delay")))            
         erfuellt = cls.__bedingung__(bedingungen)
-        if str(szene_dict.get("Latching")) != 'None':
+        if str(szene_dict.get("Latching")) != 'None' and str(szene_dict.get("LastUsed")) != 'None':
             next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
             if start_t < next_start:
                 erfuellt = False
@@ -380,6 +391,7 @@ class Szenen(object):
                     if constants.redundancy_.master:
                         delay = 0
                         for kommando in kommandos:
+                            kommando = msqc.re_calc(kommando)
                             if key in cmd_devs:
                                 t_list = cls.kommando_dict.get(szn_id)
                                 t_list.append([key,kommando])

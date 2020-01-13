@@ -340,6 +340,19 @@ def set_val_in_szenen(device, szene, value):
         sql = 'UPDATE '+constants.sql_.DB+'.'+constants.sql_tables.szenen.name+' SET '+device+' = "' + str(value) + '" WHERE Name = "' + str(szene) + '"'
         cur.execute(sql)
     con.close()
+    
+def get_val_in_szenen(device, szene):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    with con:
+        cur = con.cursor()
+        sql = 'SET SQL_SAFE_UPDATES = 0'
+        cur.execute(sql)
+        sql = 'SELECT ' + device + ' FROM ' +constants.sql_.DB+'.'+constants.sql_tables.szenen.name+' WHERE Name = "' + str(szene) + '"'
+#        SELECT V00WOH1RUM1TV01 FROM `set_Szenen` where Name = "Value"
+        cur.execute(sql)
+        results = cur.fetchall()
+    con.close()    
+    return results[0]
 
 ## alle mit dicti:
 def mdb_read_table_entry(db, entry, column='Name',recalc=True):
@@ -693,7 +706,7 @@ def sendSql(sql):
     counter = 1
     while counter <= retrycount:
         try:
-            print(sql)
+#            print(sql)
             cur.execute("SELECT "+datab)
             cur.execute(sql)
             print("success")
@@ -706,6 +719,7 @@ def sendSql(sql):
     con.close()
 
 def writeToCursor(cursor, sql):
+#    print(sql)
     retrycount = 3
     counter = 1
     while counter <= retrycount:
@@ -736,7 +750,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}
-    szenen = []
+    alle_szenen = []
     desc = None
     heartbt = None
     filtered = False
@@ -840,7 +854,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 field_names = [i[0] for i in cur.description]
                 #dicti = {key: "" for (key) in szene_columns}
                 for row in results:
-
+                    szenen = []
+                    
                     violTime = None
                     latched = None                    
                     
@@ -856,39 +871,46 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
                                 lt = lt + float(hyst)
                         gt = None
+#                        print('value_gt', dicti['Value_gt'])
                         if dicti['Value_gt'] is not None:
                             gt = float(re_calc(dicti['Value_gt']))
+#                            print('value_gt', gt)
                             if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
                                 gt = gt - float(hyst)                             
-                                
+#                        print('value_gt_1', gt)        
                         append = True
-                        if str(dicti.get("last2")) != "None":
-                            if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
-                                szenen.append(dicti.get("Dreifach"))
-                                single = False
-                            elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
-                                szenen.append(dicti.get("Doppel"))
-                                single = False
-                        if str(doppelklick) != "True": single = True
                         if (lt is not None and lt <= float(value)):
                             append = False
                         if (dicti['Value_eq'] is not None and float(re_calc(dicti['Value_eq'])) != float(value)):
                             append = False
+#                        print('value_gt_1', gt)                             
                         if (gt is not None and gt >= float(value)):
                             append = False
+#                        print('append', append)
                         # Gradient
                         if (dicti['Gradient_lt'] is not None and float(re_calc(dicti['Gradient_lt'])) <= gradient):
                             append = False
 #                        if (dicti['Gradient_eq'] is not None and float(re_calc(dicti['Gradient_eq'])) != gradient):
 #                            append = False
                         if (dicti['Gradient_gt'] is not None and float(re_calc(dicti['Gradient_gt'])) >= gradient):
-                            append = False                        
+                            append = False 
+                        if str(dicti.get("last2")) != "None" and append:
+                            if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
+                                if dicti.get("Dreifach") is not None:
+                                    szenen.append(dicti.get("Dreifach"))
+                                    single = False
+                            elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
+                                if dicti.get("Doppel") is not None:                                
+                                    szenen.append(dicti.get("Doppel"))
+                                    single = False
+                        if str(doppelklick) != "True": single = True                            
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
-                        if append and dicti.get('Immer') is not None:szenen.append(dicti.get('Immer'))
-                        if append and dicti.get('violTime') is None:
+                        if append and dicti.get('Immer') is not None:
+                            szenen.append(dicti.get('Immer'))
+                        if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                             violTime = str(ct)
-                        if not append and not dicti.get('violTime') is None:
+                        if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
                             violTime = 'NULL'
                         if append and dicti.get('persistance') is not None:
                             if dicti.get('violTime') is not None:
@@ -904,20 +926,29 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             elif szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
                             elif szenen and str(dicti.get('latched')) != "True": 
+#                                print(szenen)
                                 latched = 'True'
-
-                        if violTime is not None and latched is not None:
-                            sql = 'UPDATE %s SET violTime = "%s", latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, latched, dicti.get('Id'))
+#                        print(lt,gt,latched)
+                        # falls bedinungen erfüllt die Zeiten anpassen:
+                        lasttimes = ""
+                        if append:
+                            if str(dicti.get("last1")) != "None":
+                                lasttimes = ', last2 = "%s", last1 = "%s"' % (dicti.get("last1"), ct)
+                            else:
+                                lasttimes = ', last1 = "%s"' % (ct)
+                        if violTime is not None and latched is not None: # 
+                            sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
                             writeToCursor(cur, sql)
 #                            cur.execute(sql)
                         elif violTime is not None and latched is None:  
-                            sql = 'UPDATE %s SET violTime = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, dicti.get('Id'))
+                            sql = 'UPDATE %s SET violTime = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, dicti.get('Id'))
                             writeToCursor(cur, sql)
 #                            cur.execute(sql)   
-                        elif violTime is None and latched is not None:  
-                            sql = 'UPDATE %s SET latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, dicti.get('Id'))
+                        elif violTime is None and latched is not None:
+                            sql = 'UPDATE %s SET latched = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, lasttimes, dicti.get('Id'))
                             writeToCursor(cur, sql)                            
-#                            cur.execute(sql)                             
+#                            cur.execute(sql) 
+                    alle_szenen += szenen                            
     #            get stting and logging
                 hks = dicti_1['HKS']
                 writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
@@ -955,10 +986,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     mqtt_pub("Inputs/" + str(hks), data)
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
-            if str(dicti.get("last1")) != "None":
-                sql = 'UPDATE %s SET last2 = "%s", last1 = "%s", valid = "%s", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, dicti.get("last1"), ct, not fallingback, value, device)
-            else:
-                sql = 'UPDATE %s SET last1 = "%s", valid = "%s", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, ct, not fallingback, value, device)
+            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, device)
 #            thread_sql = Timer(1, sendSql, [sql])
             retrycount = 3
             counter = 1
@@ -986,6 +1014,6 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
 #            print(validTimers.keys())
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
-    return szenen, desc, heartbt
+    return alle_szenen, desc, heartbt
 
    
