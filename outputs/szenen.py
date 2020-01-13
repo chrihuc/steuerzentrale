@@ -255,7 +255,7 @@ class Szenen(object):
             msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
         elif commando in ["autoToggle"]:
             current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
-            if current == 'auto':
+            if 'auto' in current:
                 msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
             else:
                 msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')

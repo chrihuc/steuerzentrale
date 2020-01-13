@@ -352,7 +352,7 @@ def get_val_in_szenen(device, szene):
         cur.execute(sql)
         results = cur.fetchall()
     con.close()    
-    return results[0]
+    return results[0][0]
 
 ## alle mit dicti:
 def mdb_read_table_entry(db, entry, column='Name',recalc=True):
