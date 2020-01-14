@@ -7,6 +7,7 @@ import contextlib
 import subprocess
 import pwd, os
 import threading
+import copy
 
 from alarm_event_messaging import alarmevents as aevs
 aes = aevs.AES()
@@ -536,9 +537,11 @@ class Sonos:
     def sonos_write_szene(self, player):
         dicti = {}
         dicti['MasterZone'] = "Own"
-        posinfo = self.GetPositionInfo(player)
-        pos = self.GetPosition(player)
-        transinfo = self.GetTransportInfo(player)
+#        posinfo = self.GetPositionInfo(player)
+#        pos = self.GetPosition(player)
+        track_info = socoplayer.get_current_track_info()
+        transinfo = socoplayer.get_current_transport_info()        
+#        transinfo = self.GetTransportInfo(player)
         for zone in self.Zones:
             if zone in posinfo:
                 dicti['MasterZone'] = zone
@@ -547,16 +550,19 @@ class Sonos:
                 dicti['Pause'] = 0
             else:
                 dicti['Pause'] = 1
-            if "file" in posinfo:
-                dicti['Radio'] = 0
-            else:
-                dicti['Radio'] = 1
-            antwort = posinfo
-            pos1 = antwort.find ('<TrackURI>',0) #('*&quot;&gt;',0)
-            pos2 = antwort.find ('</TrackURI>',0) #('&lt;/res&gt;&lt;r:',0)
-            dicti['Sender'] = antwort [pos1+10:pos2]
-            dicti['TitelNr'] = int(pos[0])
-            dicti['Time'] = pos[1]
+#            if "file" in posinfo:
+#                dicti['Radio'] = 0
+#            else:
+#                dicti['Radio'] = 1
+#            antwort = posinfo
+#            pos1 = antwort.find ('<TrackURI>',0) #('*&quot;&gt;',0)
+#            pos2 = antwort.find ('</TrackURI>',0) #('&lt;/res&gt;&lt;r:',0)
+#            dicti['Sender'] = antwort [pos1+10:pos2]
+            dicti['Sender'] = track_info['uri']
+#            dicti['TitelNr'] = int(pos[0])
+            dicti['TitelNr'] = track_info['playlist_position']
+            dicti['Time'] = track_info['position']            
+#            dicti['Time'] = pos[1]
         dicti['Volume'] = self.GetVolume(player)
         if player == self.WohnZi:
             playern = "WohnZi"
@@ -577,7 +583,7 @@ class Sonos:
         mysql_connector.mdb_set_table(table.name,self.Names.get(player),dicti)
         return True
 
-    def soco_get_status(self, player, store = True, sznName=None, mainInfo=False):
+    def soco_get_status(self, player, store = True, sznName=None, mainInfo=False, toDb=False):
         dicti = {}
         track_info = player.get_current_track_info()
         transinfo = player.get_current_transport_info()
@@ -610,7 +616,12 @@ class Sonos:
             dicti['Volume'] = player.volume
             dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'        
         if store: self.Status[name] = dicti
-#        mysql_connector.mdb_set_table(table.name,sznName,dicti)  
+        print("")
+        print("")
+        print(dicti)
+        dicti2 = copy.copy(dicti)
+        del dicti2['Queue']
+        if toDb: mysql_connector.mdb_set_table(table.name,sznName,dicti2)  
 #        sonospl = player.get_sonos_playlist_by_attr('Title',name)
 #        player.remove_sonos_playlist(sonospl)
 #        player.create_sonos_playlist_from_queue(name)
@@ -618,9 +629,9 @@ class Sonos:
 #        print(dicti)
         return dicti
 
-    def sonos_save(self):
-        self.sonos_write_szene(self.WohnZi)
-        self.soco_get_status()
+    def sonos_save(self, player):
+#        self.sonos_write_szene(player)
+        self.soco_get_status(player, toDb=True)
 
     def compare_status(self, dicti1, dicti2):
         for key, value in dicti1.items():
@@ -888,7 +899,7 @@ class Sonos:
             elif str(command) == "Play":
                 player.group.coordinator.play()
             elif str(command) == "Save":
-                player.sonos_save()
+                self.sonos_save(player)
             elif str(command) == "Announce_Time":
                 player.soco_get_status()
                 lt = localtime()

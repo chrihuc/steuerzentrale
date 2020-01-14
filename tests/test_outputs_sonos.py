@@ -16,8 +16,8 @@ class TestUM(unittest.TestCase):
 
     def test_list_devices(self):
         list_devices = self.test_mod.list_devices()
-        print(list_devices)
-        print(list_devices)
+#        print(list_devices)
+#        print(list_devices)
         self.assertTrue(list_devices,
                          'Error getting devices')
 #
@@ -34,7 +34,7 @@ class TestUM(unittest.TestCase):
 #                         'Error getting commands')
 
     def test_klingel(self):
-        result = self.test_mod.set_device('Kueche', 'Pause')
+        result = self.test_mod.set_device('Wohnzimmer', 'Save')
         self.assertTrue(result,
                          'Error sending command')
 #

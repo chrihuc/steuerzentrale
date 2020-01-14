@@ -333,7 +333,7 @@ class Szenen(object):
         if constants.passive:
             return True
         if psutil.cpu_percent() > 90:
-            aes.new_event(description="ProcessorLeistung zu hoch", prio=9, karenz = 0.03)
+            aes.new_event(description="ProcessorLeistung zu hoch bei: " + szene, prio=9, karenz = 0.03)
             print("ProcessorLeistung zu hoch")
             return False
         szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)

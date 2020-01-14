@@ -425,8 +425,8 @@ class TiFo:
 
     def thread_pt(self, device):
         while constants.run:
-            toolbox.log(device)
-            toolbox.log("thread_pt", device)
+#            toolbox.log(device)
+#            toolbox.log("thread_pt", device)
             value = device.get_temperature()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(float(value)/100))
@@ -986,8 +986,8 @@ class TiFo:
                 temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
                 self.temp[-1].set_temperature_callback_period(45000)
                 self.temp[-1].register_callback(self.temp[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.temp[-1], div=100.0))
-#                thread_pt_ = threading.Timer(10, self.thread_pt, [self.temp[-1]])
-#                thread_pt_.start()
+                thread_pt_ = threading.Timer(10, self.thread_pt, [self.temp[-1]])
+                thread_pt_.start()
 #                self.threadliste.append(thread_pt_)
 #                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.temp[-1]], name="Temperature Bricklet")
 #                self.threadliste.append(t)
