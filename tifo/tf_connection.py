@@ -428,9 +428,12 @@ class TiFo:
 
     def thread_distus(self, device):
         while constants.run:
-            value = device.get_distance_value()
-            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-            broadcast_input_value('TiFo.' + name, str(value))
+            try:
+                value = device.get_distance_value()
+                name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+                broadcast_input_value('TiFo.' + name, str(value))
+            except:
+                pass
             toolbox.sleep(2)
 
     def thread_pt(self, device):
