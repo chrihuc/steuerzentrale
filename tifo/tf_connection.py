@@ -319,7 +319,7 @@ class TiFo:
                                      self.cb_connected)
         toolbox.log('TiFo init done')
         while constants.run:
-            sleep(3)
+            time.sleep(3)
         print("disconnecting")
         self.ipcon.disconnect()
 
