@@ -917,7 +917,7 @@ class TiFo:
                 #self.threadliste.append(t)
                 #t.start()
 
-                thread_pt_ = threading.Timer(30, self.thread_ambLight, [self.temp[-1]])
+                thread_pt_ = threading.Timer(30, self.thread_ambLight, [self.al[-1]])
                 thread_pt_.start()                
                 
                 found  = True
@@ -931,7 +931,7 @@ class TiFo:
                 args = self.al[-1]
                 self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
                 temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
-                thread_pt_ = threading.Timer(40, self.thread_ambLight, [self.temp[-1]])
+                thread_pt_ = threading.Timer(40, self.thread_ambLight, [self.al[-1]])
                 thread_pt_.start()                  
                 found  = True
                 toolbox.log("AmbientLight", temp_uid)
@@ -1035,7 +1035,7 @@ class TiFo:
                 self.humi[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
                 self.humi[-1].set_status_led_config(BrickletHumidityV2.STATUS_LED_CONFIG_OFF)
                 self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))
-                thread_hum_ = threading.Timer(20, self.thread_hum, [self.temp[-1]])
+                thread_hum_ = threading.Timer(20, self.thread_hum, [self.humi[-1]])
                 thread_hum_.start()
 #                self.threadliste.append(thread_hum_)
 #                t = toolbox.OwnTimer(self.delay, function=self.thread_hum, args = [self.temp[-1]], name="Humidity Bricklet")
@@ -1083,7 +1083,7 @@ class TiFo:
 #                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))
 #                self.dus[-1].set_distance_callback_period(5000)
                 
-                thread_us_ = threading.Timer(10, self.thread_distus, [self.temp[-1]])
+                thread_us_ = threading.Timer(10, self.thread_distus, [self.dus[-1]])
                 thread_us_.start()                
                 
                 toolbox.log("BrickletDistanceUS", temp_uid)
