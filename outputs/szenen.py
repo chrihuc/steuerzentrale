@@ -332,7 +332,9 @@ class Szenen(object):
         toolbox.log(szene)
         if constants.passive:
             return True
-        if psutil.cpu_percent() > 90:
+        use = psutil.cpu_percent()
+        msqc.writeInfluxDb('Vm1ZIM1SER1CP01', use, datetime.datetime.utcnow())
+        if use > 95:
             aes.new_event(description="ProcessorLeistung zu hoch bei: " + szene, prio=9, karenz = 0.03)
             print("ProcessorLeistung zu hoch")
             return False

@@ -318,6 +318,10 @@ class TiFo:
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
                                      self.cb_connected)
         toolbox.log('TiFo init done')
+        while constants.run:
+            sleep(3)
+        print("disconnecting")
+        self.ipcon.disconnect()
 
 
     def timeout_reset(self):
@@ -341,10 +345,10 @@ class TiFo:
 #                aes.new_event(description="Tifo connected: "+self.ip, prio=9)
                 break
             except Error as e:
-                toolbox.log('Connection Error: ' + str(e.description))
+                print('Connection Error: ' + str(e.description))
                 time.sleep(1)
             except socket.error as e:
-                toolbox.log('Socket error: ' + str(e))
+                print('Socket error: ' + str(e))
                 time.sleep(1)
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
@@ -409,7 +413,7 @@ class TiFo:
 
     def thread_ambLight(self, device):
         while constants.run:
-            toolbox.log(device)
+#            toolbox.log(device)
             illuminance = device.get_illuminance()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(illuminance))
@@ -422,6 +426,13 @@ class TiFo:
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name, str(value))
             toolbox.sleep(60)
+
+    def thread_distus(self, device):
+        while constants.run:
+            value = device.get_distance_value()
+            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+            broadcast_input_value('TiFo.' + name, str(value))
+            toolbox.sleep(2)
 
     def thread_pt(self, device):
         while constants.run:
@@ -442,7 +453,7 @@ class TiFo:
 
     def thread_hum(self, device):
         while constants.run:
-            toolbox.log(device)
+#            toolbox.log(device)
             value = device.get_humidity()
             name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
             broadcast_input_value('TiFo.' + name + '.HU', str(float(value)/100))
@@ -614,6 +625,7 @@ class TiFo:
                             for io in self.io16list.liste:
                                 if io.get('addr') == addr:
                                     self.set_io16_sub(cmd,io,cmd.get('Value'))
+#                                    broadcast_input_value('TiFo.' + temp_uid, str(value))
                                     success = True
                     for cmd in cmds:
                         if str(cmd.get('Value')) == '1': #erst alle auf Null setzen
@@ -807,6 +819,7 @@ class TiFo:
         relay = self.drbuids[temp_uid]
         state = bool(int(value))
         relay.set_selected_state(relaynr, state)
+        broadcast_input_value('TiFo.' + temp_uid, str(value))
 #        for cmd in uid_cmds:
 #            if (cmd.get('Value')) == float(value):
 #                uid = cmd.get('UID')
@@ -904,6 +917,10 @@ class TiFo:
                 #t = toolbox.OwnTimer(self.delay, function=self.thread_ambLight, args = [self.al[-1]], name="Ambient Light")
                 #self.threadliste.append(t)
                 #t.start()
+
+                thread_pt_ = threading.Timer(30, self.thread_ambLight, [self.temp[-1]])
+                thread_pt_.start()                
+                
                 found  = True
                 toolbox.log("AmbientLight", temp_uid)
 
@@ -915,6 +932,8 @@ class TiFo:
                 args = self.al[-1]
                 self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
                 temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
+                thread_pt_ = threading.Timer(40, self.thread_ambLight, [self.temp[-1]])
+                thread_pt_.start()                  
                 found  = True
                 toolbox.log("AmbientLight", temp_uid)
 
@@ -1017,8 +1036,8 @@ class TiFo:
                 self.humi[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
                 self.humi[-1].set_status_led_config(BrickletHumidityV2.STATUS_LED_CONFIG_OFF)
                 self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))
-#                thread_hum_ = threading.Timer(20, self.thread_hum, [self.temp[-1]])
-#                thread_hum_.start()
+                thread_hum_ = threading.Timer(20, self.thread_hum, [self.temp[-1]])
+                thread_hum_.start()
 #                self.threadliste.append(thread_hum_)
 #                t = toolbox.OwnTimer(self.delay, function=self.thread_hum, args = [self.temp[-1]], name="Humidity Bricklet")
 #                self.threadliste.append(t)
@@ -1059,11 +1078,15 @@ class TiFo:
             if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
                 self.dus.append(BrickletDistanceUS(uid, self.ipcon))
                 temp_uid = str(self.dus[-1].get_identity()[1]) +"."+ str(self.dus[-1].get_identity()[0])
-                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value_uid, device = self.dus[-1], uid = temp_uid))
-                self.dus[-1].set_distance_callback_threshold('o', 0, 0)
+#                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value_uid, device = self.dus[-1], uid = temp_uid))
+#                self.dus[-1].set_distance_callback_threshold('o', 0, 0)
                 self.dus[-1].set_moving_average(100)
 #                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))
-                self.dus[-1].set_distance_callback_period(2000)
+#                self.dus[-1].set_distance_callback_period(5000)
+                
+                thread_us_ = threading.Timer(10, self.thread_distus, [self.temp[-1]])
+                thread_us_.start()                
+                
                 toolbox.log("BrickletDistanceUS", temp_uid)
                 found  = True
 
