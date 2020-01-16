@@ -318,10 +318,7 @@ class TiFo:
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
                                      self.cb_connected)
         toolbox.log('TiFo init done')
-        while constants.run:
-            time.sleep(3)
-        print("disconnecting")
-        self.ipcon.disconnect()
+  
 
 
     def timeout_reset(self):
@@ -358,7 +355,9 @@ class TiFo:
         # Create IP Connection
         self.connect()
         while constants.run:
-            toolbox.sleep(600)
+            toolbox.sleep(3)
+        print("disconnecting")
+        self.ipcon.disconnect()
 #            for t in self.threadliste:
 #                if not t in threading.enumerate():
 ##                    print t.args
