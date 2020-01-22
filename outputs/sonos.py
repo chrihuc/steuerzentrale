@@ -694,40 +694,40 @@ class Sonos:
         while not self.compare_status(sonos_szene, self.soco_get_status(player, store=False)) and tries < 7:
             tries += 1
             try:        
-            if str(sonos_szene.get('Volume')) != 'None':
-                player.volume = sonos_szene.get('Volume')
-            zone = sonos_szene.get('MasterZone')
-            if (str(zone) != "None") and (str(zone) != "Own"):
-                zonemaster, _, _, _ = self.get_addr(str(zone))
-                if not zonemaster is None:
-                    tries = 0
-                    while tries < 4 and player.group.coordinator != zonemaster.group.coordinator:
-                        player.join(zonemaster.group.coordinator)
-                        tries += 1
-                        time.sleep(1)
-    #            else:
-    #                print("Zonemaster is none %s" % zone)
-            else:
-                if str(zone) != "None":
-                    player.unjoin()
-                    player.clear_queue()
-                    if str(sonos_szene.get('Radio')) == '1':
-    #                    print('setting radio')
-                        player.play_uri(uri=str(sonos_szene.get('Sender')), start=False, force_radio=True)  
-                    else:
-                        if isinstance(sonos_szene.get('PlayListNr'), int):
-                            playlistItem = player.get_sonos_playlist_by_attr('item_id', 'SQ:'+ str(sonos_szene.get('PlayListNr')))
-                            player.add_to_queue(playlistItem)
-                        elif str(sonos_szene.get('PlayListNr')) != 'None':
-                            playlistItem = player.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
-                            player.add_to_queue(playlistItem)
-                        player.play_from_queue(sonos_szene.get('TitelNr'), start=False)
-                        if str(sonos_szene.get('Time')) != 'None':
-                            player.seek(sonos_szene.get('Time'))
-                if (sonos_szene.get('Pause') == 1) or overrde_play:
-                    player.group.coordinator.pause()
-                elif sonos_szene.get('Pause') == 0:
-                    player.group.coordinator.play()
+                if str(sonos_szene.get('Volume')) != 'None':
+                    player.volume = sonos_szene.get('Volume')
+                zone = sonos_szene.get('MasterZone')
+                if (str(zone) != "None") and (str(zone) != "Own"):
+                    zonemaster, _, _, _ = self.get_addr(str(zone))
+                    if not zonemaster is None:
+                        tries = 0
+                        while tries < 4 and player.group.coordinator != zonemaster.group.coordinator:
+                            player.join(zonemaster.group.coordinator)
+                            tries += 1
+                            time.sleep(1)
+        #            else:
+        #                print("Zonemaster is none %s" % zone)
+                else:
+                    if str(zone) != "None":
+                        player.unjoin()
+                        player.clear_queue()
+                        if str(sonos_szene.get('Radio')) == '1':
+        #                    print('setting radio')
+                            player.play_uri(uri=str(sonos_szene.get('Sender')), start=False, force_radio=True)  
+                        else:
+                            if isinstance(sonos_szene.get('PlayListNr'), int):
+                                playlistItem = player.get_sonos_playlist_by_attr('item_id', 'SQ:'+ str(sonos_szene.get('PlayListNr')))
+                                player.add_to_queue(playlistItem)
+                            elif str(sonos_szene.get('PlayListNr')) != 'None':
+                                playlistItem = player.get_sonos_playlist_by_attr('title', str(sonos_szene.get('PlayListNr')))
+                                player.add_to_queue(playlistItem)
+                            player.play_from_queue(sonos_szene.get('TitelNr'), start=False)
+                            if str(sonos_szene.get('Time')) != 'None':
+                                player.seek(sonos_szene.get('Time'))
+                    if (sonos_szene.get('Pause') == 1) or overrde_play:
+                        player.group.coordinator.pause()
+                    elif sonos_szene.get('Pause') == 0:
+                        player.group.coordinator.play()
             except Exception as e:
                 print(e)
                 time.sleep(tries)
