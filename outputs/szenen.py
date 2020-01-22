@@ -195,7 +195,7 @@ class Szenen(object):
 #                    msqc.setting_s(inpt, '')
 #                item = settings.get(item)
                 item = msqc.setting_r(inpt)
-                valid = valid_r(inpt)
+                valid = msqc.valid_r(inpt)
                 if verbose: print(item, operand, wert)
                 if operand == '=':                          # mathematisch gleich
                     if not float(item) == float(wert):
