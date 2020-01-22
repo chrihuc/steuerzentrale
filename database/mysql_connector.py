@@ -316,7 +316,7 @@ def valid_r(inpt):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     with con:
         cur = con.cursor()
-        sql = 'SELECT valid FROM %s where HKS = "%s"' % (constants.sql_tables.settings.name, inpt)
+        sql = 'SELECT valid FROM %s WHERE HKS = "%s"' % (constants.sql_tables.inputs.name, inpt)
         cur.execute(sql)
         results = cur.fetchall()
     con.close()
