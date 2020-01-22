@@ -333,11 +333,13 @@ class TiFo:
     def connect(self):
         try:
             self.ipcon.disconnect()
+            print('disconnected: ' + self.ip)
         except:
             pass
         # Connect to brickd, will trigger cb_connected
         while True:
             try:
+                print('connecting to: ' + self.ip)
                 self.ipcon.connect(self.ip, PORT)
 #                aes.new_event(description="Tifo connected: "+self.ip, prio=9)
                 break
@@ -356,8 +358,8 @@ class TiFo:
         self.connect()
         while constants.run:
             toolbox.sleep(3)
-        print("disconnecting")
         self.ipcon.disconnect()
+        print('disconnected: ' + self.ip)
 #            for t in self.threadliste:
 #                if not t in threading.enumerate():
 ##                    print t.args
@@ -413,9 +415,12 @@ class TiFo:
     def thread_ambLight(self, device):
         while constants.run:
 #            toolbox.log(device)
-            illuminance = device.get_illuminance()
-            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-            broadcast_input_value('TiFo.' + name, str(illuminance))
+            try:
+                illuminance = device.get_illuminance()
+                name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+                broadcast_input_value('TiFo.' + name, str(illuminance))
+            except:
+                pass                
             toolbox.sleep(60)
 
     def thread_CO2(self, device):
@@ -438,11 +443,12 @@ class TiFo:
 
     def thread_pt(self, device):
         while constants.run:
-#            toolbox.log(device)
-#            toolbox.log("thread_pt", device)
-            value = device.get_temperature()
-            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-            broadcast_input_value('TiFo.' + name, str(float(value)/100))
+            try:
+                value = device.get_temperature()
+                name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+                broadcast_input_value('TiFo.' + name, str(float(value)/100))
+            except:
+                pass                
             toolbox.sleep(60)
 
     def thread_cp(self, device):
@@ -455,13 +461,15 @@ class TiFo:
 
     def thread_hum(self, device):
         while constants.run:
-#            toolbox.log(device)
-            value = device.get_humidity()
-            name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
-            broadcast_input_value('TiFo.' + name + '.HU', str(float(value)/100))
-            toolbox.sleep(10)
-            value = device.get_temperature()
-            broadcast_input_value('TiFo.' + name + '.TE', str(float(value)/100))
+            try:
+                value = device.get_humidity()
+                name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+                broadcast_input_value('TiFo.' + name + '.HU', str(float(value)/100))
+                toolbox.sleep(10)
+                value = device.get_temperature()
+                broadcast_input_value('TiFo.' + name + '.TE', str(float(value)/100))
+            except:
+                pass                 
             toolbox.sleep(60)
 
     def thread_volc(self, device):
@@ -821,7 +829,7 @@ class TiFo:
         relay = self.drbuids[temp_uid]
         state = bool(int(value))
         relay.set_selected_state(relaynr, state)
-        broadcast_input_value('TiFo.' + temp_uid, str(value))
+        broadcast_input_value('TiFo.' + temp_uid + '.' + relaynr, str(value))
 #        for cmd in uid_cmds:
 #            if (cmd.get('Value')) == float(value):
 #                uid = cmd.get('UID')
@@ -907,7 +915,7 @@ class TiFo:
                 self.al[-1].set_debounce_period(5000)
                 #self.al.set_illuminance_callback_threshold('<', 30, 30)
                 #self.al.set_analog_value_callback_period(10000)
-                #self.al.set_illuminance_callback_period(60000)
+                self.al[-1].set_illuminance_callback_period(5000)
                 #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE, self.cb_ambLight)
                 #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE_REACHED, self.cb_ambLight)
                 args = self.al[-1]
@@ -931,6 +939,7 @@ class TiFo:
                 self.al.append(BrickletAmbientLightV2(uid, self.ipcon))
                 self.al[-1].set_illuminance_callback_threshold('o', 0, 0)
                 self.al[-1].set_debounce_period(5000)
+                self.al[-1].set_illuminance_callback_period(5000)
                 args = self.al[-1]
                 self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
                 temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])

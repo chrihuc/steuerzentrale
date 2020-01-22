@@ -91,7 +91,7 @@ class MqttClient:
             m_in=(json.loads(message)) #decode json data
         except ValueError:
             if "shellies" in msg.topic:
-                name = msg.topic.split("/")[1]
+                name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[3]
                 if message == "on":
                     value = 1
                 else:
@@ -126,7 +126,10 @@ class MqttClient:
                         msqc.mdb_set_table(table, device, entry) 
                 elif 'SetSettings' in msg.topic:
                     table = constants.sql_tables.settings.name
-                    msqc.setting_s(m_in['Name'], m_in['Value'])                      
+                    msqc.setting_s(m_in['Name'], m_in['Value']) 
+                elif "shellies" in msg.topic and 'power' in msg.topic:
+                    name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[3] + '.power' 
+                    broadcast_input_value('MQTT.' + name, m_in)                    
             if 'DataRequest' in msg.topic:
                 if 'SetTable' in msg.topic:  
                     table = constants.sql_tables.cron.name

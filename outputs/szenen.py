@@ -185,20 +185,22 @@ class Szenen(object):
 #                    for j, eintrag in enumerate(wert):
 #                        bedingungen[i][j]=mysql_connector.re_calc(eintrag)
                 try:
-                    item, operand, wert = bedingung
+                    inpt, operand, wert = bedingung
                     wert = msqc.re_calc(wert)
                 except:
                     print(bedingung)
                     return False
-                if msqc.setting_r(item) == None:
-                    msqc.setting_s(bedingung, '')
+                if msqc.setting_r(inpt) == None:
+                    print(inpt, 'gibts nicht')
+#                    msqc.setting_s(inpt, '')
 #                item = settings.get(item)
-                item = msqc.setting_r(item)
+                item = msqc.setting_r(inpt)
+                valid = valid_r(inpt)
                 if verbose: print(item, operand, wert)
-                if operand == '=':
+                if operand == '=':                          # mathematisch gleich
                     if not float(item) == float(wert):
                         erfuellt = False
-                elif operand == '==':
+                elif operand == '==':                       # String gleich
                     if not str(item) == str(wert):
                         erfuellt = False
                 elif operand == '<':
@@ -219,6 +221,9 @@ class Szenen(object):
                 elif operand == 'in':
                     if not (item) in (wert):
                         erfuellt = False
+                elif operand == 'valid':
+                    if not (str(valid) == wert):
+                        erfuellt = False                        
         if verbose: print( "Ergebniss: ",erfuellt)
         return erfuellt
 
@@ -380,7 +385,7 @@ class Szenen(object):
                     text = ''
             else:
                 if device:
-                    text = '%s = %s, %s' % (device, wert, str(szene_dict.get("Beschreibung")))
+                    text = '%s, %s = %s' % (str(szene_dict.get("Beschreibung")), device, wert)
                 else:
                     text = str(szene_dict.get("Beschreibung"))
             aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz)
@@ -461,6 +466,8 @@ class Szenen(object):
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
+                    if Prio > 0:
+                        print("szene timed start", start_t, szn, dlay)
                     if ex_re == 0:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
@@ -498,6 +505,8 @@ class Szenen(object):
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and ((depErfolg == 1 and erfolg) or (depErfolg == 2 and not erfolg)):
+                    if Prio > 0:
+                        print("szene timed start", start_t, szn, dlay)                    
                     if ex_re == 0:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:

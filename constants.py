@@ -26,85 +26,34 @@ cfg_tradfri = {'Identity': '', 'PSK': '', 'Host': '', 'Key': ''}
 cfg_samsung_tv = {'IP': '', 'MAC': '00:30:1b:a0:2f:05'}
 cfg_pins = {'Besucher':'[]', 'Bewohner':'[]'}
 cfg_secvest = {'hostname':'', 'username':'', 'passwort':''}
+cfg_homematic = {'hostname':'', 'username':'', 'passwort':''}
+
+config_sections = {'Main':cfg_main 
+                   ,'XS1':cfg_xs1
+                   ,'SQL':cfg_sql
+                   ,'HUE':cfg_hue
+                   ,'MAIL':cfg_mail
+                   ,'GUI':cfg_gui
+                   ,'MQTT':cfg_mqtt
+                   ,'TRADFRI':cfg_tradfri
+                   ,'SamsungTV':cfg_samsung_tv
+                   ,'PINs':cfg_pins
+                   ,'SECVEST':cfg_secvest
+                   ,'CCU2':cfg_homematic}
 
 def init_cfg():
     try:
         config.read_file(open('./main.cfg'))
     except:
         print("couldn't open config file, new created")
-    if not config.has_section('Main'):
-        config.add_section('Main')
-    for cfg in cfg_main:
-        if not config.has_option('Main', cfg):
-            if cfg_main.get(cfg) == '':
-                value = input(cfg+': ')
-            else:
-                value = cfg_main.get(cfg)
-            config.set('Main', cfg, value)
-
-    if not config.has_section('XS1'):
-        config.add_section('XS1')
-    for cfg in cfg_xs1:
-        if not config.has_option('XS1', cfg):
-            config.set('XS1', cfg, cfg_xs1.get(cfg))
-
-    if not config.has_section('SQL'):
-        config.add_section('SQL')
-    for cfg in cfg_sql:
-        if not config.has_option('SQL', cfg):
-            if cfg_sql.get(cfg) == '':
-                value = input('SQL ' +cfg+': ')
-            else:
-                value = cfg_sql.get(cfg)
-            config.set('SQL', cfg, value)
-
-    if not config.has_section('HUE'):
-        config.add_section('HUE')
-    for cfg in cfg_hue:
-        if not config.has_option('HUE', cfg):
-            if cfg_hue.get(cfg) == '':
-                value = input('HUE ' +cfg+': ')
-            else:
-                value = cfg_hue.get(cfg)
-            config.set('HUE', cfg, value)
-
-    if not config.has_section('MAIL'):
-        config.add_section('MAIL')
-    for cfg in cfg_mail:
-        if not config.has_option('MAIL', cfg):
-            config.set('MAIL', cfg, cfg_mail.get(cfg))
-
-    if not config.has_section('GUI'):
-        config.add_section('GUI')
-    for cfg in cfg_gui:
-        if not config.has_option('GUI', cfg):
-            config.set('GUI', cfg, cfg_gui.get(cfg))
-    if not config.has_section('MQTT'):
-        config.add_section('MQTT')
-    for cfg in cfg_mqtt:
-        if not config.has_option('MQTT', cfg):
-            config.set('MQTT', cfg, cfg_mqtt.get(cfg))
-    if not config.has_section('TRADFRI'):
-        config.add_section('TRADFRI')
-    for cfg in cfg_tradfri:
-        if not config.has_option('TRADFRI', cfg):
-            config.set('TRADFRI', cfg, cfg_tradfri.get(cfg))
-    if not config.has_section('SamsungTV'):
-        config.add_section('SamsungTV')
-    for cfg in cfg_samsung_tv:
-        if not config.has_option('SamsungTV', cfg):
-            config.set('SamsungTV', cfg, cfg_samsung_tv.get(cfg)) 
-    if not config.has_section('PINs'):
-        config.add_section('PINs')            
-    for cfg in cfg_pins:
-        if not config.has_option('PINs', cfg):
-            config.set('PINs', cfg, cfg_pins.get(cfg))   
-    if not config.has_section('SECVEST'):
-        config.add_section('SECVEST')            
-    for cfg in cfg_secvest:
-        if not config.has_option('SECVEST', cfg):
-            config.set('SECVEST', cfg, cfg_secvest.get(cfg))            
-    # Writing our configuration file to 'main.cfg'
+        
+    for name, section in config_sections.items():
+        if not config.has_section(name):
+            config.add_section(name)
+        for cfg in section:
+            if not config.has_option(name, cfg):
+                config.set(name, cfg, section.get(cfg))        
+    
     with open('./main.cfg', 'w') as configfile:
         config.write(configfile)
 
@@ -202,6 +151,10 @@ for i in range(0,3):
                 hostname = config.get('SECVEST', 'hostname')
                 username = config.get('SECVEST', 'username')
                 password = config.get('SECVEST', 'passwort')
+            class ccu2:
+                hostname = config.get('CCU2', 'hostname')
+                username = config.get('CCU2', 'username')
+                password = config.get('CCU2', 'passwort')                
         except:
             init_cfg()
             continue

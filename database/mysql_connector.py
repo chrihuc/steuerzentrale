@@ -312,6 +312,16 @@ def setting_r(setting):
         con.close()
     return value
 
+def valid_r(inpt):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT valid FROM %s where HKS = "%s"' % (constants.sql_tables.settings.name, inpt)
+        cur.execute(sql)
+        results = cur.fetchall()
+    con.close()
+    return results[0][0]
+
 def settings_r_old():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
