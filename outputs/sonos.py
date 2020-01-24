@@ -616,11 +616,12 @@ class Sonos:
             dicti['Volume'] = player.volume
             dicti['Pause'] = not transinfo['current_transport_state'] == 'PLAYING'        
         if store: self.Status[name] = dicti
-        print("")
-        print("")
-        print(dicti)
+#        print("")
+#        print("")
+#        print(dicti)
         dicti2 = copy.copy(dicti)
-        del dicti2['Queue']
+        if 'Queue' in dicti2:
+            del dicti2['Queue']
         if toDb: mysql_connector.mdb_set_table(table.name,sznName,dicti2)  
 #        sonospl = player.get_sonos_playlist_by_attr('Title',name)
 #        player.remove_sonos_playlist(sonospl)

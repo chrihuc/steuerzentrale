@@ -829,7 +829,7 @@ class TiFo:
         relay = self.drbuids[temp_uid]
         state = bool(int(value))
         relay.set_selected_state(relaynr, state)
-        broadcast_input_value('TiFo.' + temp_uid + '.' + relaynr, str(value))
+        broadcast_input_value('TiFo.' + temp_uid + '.' + str(relaynr), str(value))
 #        for cmd in uid_cmds:
 #            if (cmd.get('Value')) == float(value):
 #                uid = cmd.get('UID')

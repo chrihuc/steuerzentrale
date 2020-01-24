@@ -320,7 +320,10 @@ def valid_r(inpt):
         cur.execute(sql)
         results = cur.fetchall()
     con.close()
-    return results[0][0]
+    if results:
+        return results[0][0]
+    else:
+        return True
 
 def settings_r_old():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
