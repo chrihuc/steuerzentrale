@@ -103,6 +103,11 @@ t = toolbox.OwnTimer(0, function=secvest_handler.main, args = [], name="secvest"
 threadliste.append(t)
 t.start()
 
+from inputs import homematic
+t = toolbox.OwnTimer(0, function=homematic.main, args = [], name="homematic")
+threadliste.append(t)
+t.start()
+
 try:
     from inputs import owm
     t = toolbox.OwnTimer(0, function=owm.main, args = [], name="weather")

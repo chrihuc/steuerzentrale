@@ -379,10 +379,7 @@ class Szenen(object):
             if desc != '':
                 text = desc
             elif str(szene_dict.get("Beschreibung")) in ['None','']:
-                if device:
-                    text = '%s = %s, Szene: %s' % (device, wert, '')
-                else:
-                    text = ''
+                text = ''
             else:
                 if device:
                     text = '%s, %s = %s' % (str(szene_dict.get("Beschreibung")), device, wert)

@@ -14,7 +14,8 @@ cfg_main={'eigene_IP':own_ip, 'name':'',\
         'xs1_IP':'','router_IP':'','UDP_PORT':'5000',\
         'installation_folder':'/home/pi/steuerzentrale','temp_folder':'/home/pi/temp/',\
         'gcm_ID':'depc', 'automatic_backup':'False', 'webcam_supervision':'False',\
-        'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0, 'Ext_IP':'0.0.0.0', 'OWM_key':'fillme'}
+        'tts':'False','heartbt':'125','TiFo':'[]','loglevel':0, 'Ext_IP':'0.0.0.0', 'OWM_key':'fillme'\
+        ,'pmatifolder':'/home/christoph/Nextcloud/Python/pmatic'}
 cfg_xs1 ={'USER':'admin','PASS':'admin'}
 cfg_sql ={'IP':'','USER':'','PASS':'','DB':'Steuerzentrale'}
 cfg_hue ={'IP':''}
@@ -83,6 +84,7 @@ for i in range(0,3):
             UDP_PORT = config.getint('Main', 'UDP_PORT')
             installation_folder = config.get('Main', 'installation_folder')
             temp_folder = config.get('Main', 'temp_folder')
+            pmatic_folder = config.get('Main', 'pmatifolder')
             gcm_ID = config.get('Main', 'gcm_ID')
 
             automatic_backup = config.getboolean('Main', 'automatic_backup')
