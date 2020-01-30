@@ -6,6 +6,7 @@ Created on Tue Jan 21 21:50:59 2020
 """
 
 import constants
+import sys
 
 import time
 from pyhomematic import HMConnection
@@ -13,10 +14,15 @@ from pyhomematic import HMConnection
 
 
 def systemcallback(src, *args):
-    print(src)
-    for arg in args:
-        print(arg)
-    
+    pass
+#    print(src)
+#    for arg in args:
+#        print(arg)
+   
+
+def eventcallback(address, interface_id, key, value):
+    print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value))    
+
 def main():
     pyhomematic = HMConnection(interface_id="myserver",
                                autostart=True,
@@ -27,6 +33,34 @@ def main():
 							   "ip":{
                                    "ip":"192.168.193.18",
                                    "port": 2010}})
+    
+    sleepcounter = 0
+    while sleepcounter < 20: #not pyhomematic.devices and
+        #print("Waiting for devices")
+        sleepcounter += 1
+        time.sleep(1)
+    print(pyhomematic.devices)  
+    
+    # Set an eventcallback for the doorcontact that should be called when events occur.
+    for device, value in pyhomematic.devices.items():
+    	for items, ivalues in value.items():
+    		print(items)
+    		try:
+    			ivalues.setEventCallback(eventcallback)
+    			print("done")
+    		except:
+    			pass
+    # Now open / close doorcontact and watch the eventcallback being called.
+    
+    try:
+        while constants.run:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print('interrupted!')
+    
+    # Stop the server thread so Python can exit properly.
+    pyhomematic.stop()
+    sys.exit(0)  
     
 if __name__ == "__main__":
     main()    
