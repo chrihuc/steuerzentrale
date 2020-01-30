@@ -111,6 +111,7 @@ def play_wav(input_para):
 class Sonos:
 
     Status = {}
+    FiFo = []
 
     def __init__(self):
         # Workaround
@@ -683,7 +684,7 @@ class Sonos:
                         player.play()
             except Exception as e:
                 print(e)
-                time.sleep(tries)
+                time.sleep(tries * 0.1)
                 pass
 #        print("set %s back to prev after %s tries" % (player.player_name, tries))
 
@@ -731,7 +732,7 @@ class Sonos:
                         player.group.coordinator.play()
             except Exception as e:
                 print(e)
-                time.sleep(tries)
+                time.sleep(tries * 0.1)
                 pass                    
         return True        
 
@@ -786,7 +787,8 @@ class Sonos:
                 while (len(self.Status) < len(players)) and (time.time() < mustend):
                     time.sleep(0.25)
                 success = True
-            except:
+            except Exception as e:
+                print(e)
                 pass
         # combine all zones
         success = False
@@ -816,7 +818,8 @@ class Sonos:
                 while (not soco.SoCo('192.168.192.203').get_current_transport_info()['current_transport_state'] == 'PLAYING') and (time.time() < mustend):
                     time.sleep(0.25)
                 success = True
-            except:
+            except Exception as e:
+                print(e)
                 pass
         # play file or text on PC
         play_wav(text)
@@ -893,6 +896,18 @@ class Sonos:
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
 #        print(player, command)
+        myId = 1
+        if Sonos.FiFo:
+            myId = Sonos.FiFo[-1] + 1
+        Sonos.FiFo.append(myId)
+        timeout = 0
+        while not Sonos.FiFo[0] == myId:
+            time.sleep(0.1)
+            timeout += 1
+            if timeout > 10:
+                print('Sonos Timeout')
+                Sonos.FiFo = []
+                break
         if player is not None:
             tries = 1
             try:
@@ -909,7 +924,8 @@ class Sonos:
                         if currinf['current_transport_state'] != 'STOPPED':
                             try:
                                 player.group.coordinator.pause()
-                            except:
+                            except Exception as e:
+                                print(e)
                                 pass
                     elif str(command) == "Play":
                         player.group.coordinator.play()
@@ -979,11 +995,20 @@ class Sonos:
                     elif ((str(command) != "resume") and (str(command) != "An") and (str(command) != "None")):
                         sonos_szene = mysql_connector.mdb_read_table_entry(table.name,command)
                         self.soco_read_szene(player, sonos_szene)
+                    try:
+                        del Sonos.FiFo[0]
+                    except:
+                        pass
                     return True
-            except:
+            except Exception as e:
+                print(e)
                 tries += 1
-                time.sleep(tries)
+                time.sleep(tries * 0.1)
 #            return False
+        try:
+            del Sonos.FiFo[0]
+        except:
+            pass
 
     def list_commands(self):
         comands = mysql_connector.mdb_get_table(table.name)

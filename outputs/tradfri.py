@@ -22,7 +22,7 @@ from pytradfri import Gateway
 
 aes = alarmevents.AES()
 
-max_retry = 4
+max_retry = 10
 
 class sql_object:
     def __init__(self,name,typ,columns):
@@ -49,28 +49,35 @@ def authenticate():
     constants.config.set('TRADFRI', 'Key', '')
     constants.save_config()
     return api_factory
-    
-identity = constants.tradfri_.identity
-psk = constants.tradfri_.psk
-host = constants.tradfri_.host
-if psk == '' or identity == '':
-    api_factory = authenticate()
-else:
-    api_factory = APIFactory(host=host, psk_id=identity, psk=psk)
-api = api_factory.request
-try:
-    gateway = Gateway()
-    devices_command = gateway.get_devices()
-    devices_commands = api(devices_command)
-    devices = api(devices_commands)
-    lights = [dev for dev in devices if dev.has_light_control]
-except:
-    devices_command = []
-    devices_commands = []
-    devices = []
-    lights = []
-    aes.new_event(description="Tradfri nicht erreichbar", prio=9)
-    
+
+api = None
+lights = []
+
+def connect():
+    global api, lights
+    identity = constants.tradfri_.identity
+    psk = constants.tradfri_.psk
+    host = constants.tradfri_.host
+    if psk == '' or identity == '':
+        api_factory = authenticate()
+    else:
+        api_factory = APIFactory(host=host, psk_id=identity, psk=psk)
+    api = api_factory.request
+    try:
+        gateway = Gateway()
+        devices_command = gateway.get_devices()
+        devices_commands = api(devices_command)
+        devices = api(devices_commands)
+        lights = [dev for dev in devices if dev.has_light_control]
+    except Exception as e:
+        print(e)
+        devices_command = []
+        devices_commands = []
+        devices = []
+        lights = []
+        aes.new_event(description="Tradfri nicht erreichbar", prio=9)
+
+connect()
 #for l in lights:
 #    print(l.light_control.can_set_color)
 
@@ -207,8 +214,10 @@ class Tradfri_lights():
             try:
                 api(command)
                 retry = retry_max
-            except:
+            except Exception as e:
                 retry += 1
                 time.sleep(0.05 * retry)
                 if retry >= retry_max:
                     print("Tradfri max retries reached")
+                    connect()
+                    print(e)
