@@ -10,7 +10,7 @@ import sys
 
 import time
 from pyhomematic import HMConnection
-
+from tools import toolbox
 
 
 def systemcallback(src, *args):
@@ -20,8 +20,17 @@ def systemcallback(src, *args):
 #        print(arg)
    
 
+def broadcast_input_value(Name, Value):
+    payload = {'Name':Name,'Value':Value}
+#    on server:
+#    toolbox.log(Name, Value, level=9)
+    toolbox.communication.send_message(payload, typ='InputValue')
+
 def eventcallback(address, interface_id, key, value):
-    print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value))    
+    keys = ['LEVEL', 'ACTUAL_TEMPERATURE', 'OPERATING_VOLTAGE']
+    if key in keys:
+        print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value)) 
+        broadcast_input_value('homematic.' + address + '.' + key, value)
 
 def main():
     pyhomematic = HMConnection(interface_id="myserver",
