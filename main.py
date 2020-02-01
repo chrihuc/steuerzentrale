@@ -12,25 +12,14 @@ import argparse
 
 import constants
 
-from inputs import cron
 #from inputs import udp_listener
-from inputs import xs1
-from inputs import internal
-from outputs import temp_control
 
-from tifo import tf_connection
-
-from database import mysql_connector as msqc
+#from database import mysql_connector as msqc
 
 
-
-from tools import sound_provider as sp
 from tools import toolbox
 #toolbox.log('debug on')
 
-
-
-anw = internal.Anwesenheit()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--debug', type=int, nargs='?', help='debug', default=0)
@@ -49,9 +38,9 @@ if getattr(args, 'passive') is not None:
     constants.passive = True
 
 # init
-init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}
-for setting in init_settings:
-    msqc.setting_s(setting, init_settings[setting])
+#init_settings = {'V00WOH1SRA1DI01':1,'V00WOH1SRA1DI04':1,'V00WOH1SRA1DI05':1}
+#for setting in init_settings:
+#    msqc.setting_s(setting, init_settings[setting])
 
 def start_bokeh():
     cmd = 'bokeh serve --address=192.168.192.10 --port=5050 --allow-websocket-origin=192.168.*.*:5050 bokeh/server.py'
@@ -60,66 +49,125 @@ def start_bokeh():
 threadliste = []
 
 #services = {'xs1':xs1.main}
-
-
-t = toolbox.OwnTimer(0, function=xs1.main, args = [], name="xs1")
-threadliste.append(t)
-t.start()
-
-for tf_con in constants.tifo:
-    tifo_inst = tf_connection.TiFo(tf_con)
-    t = toolbox.OwnTimer(0, function=tifo_inst.main, args = [], name="TiFo" + tf_con)
+try:
+    from inputs import xs1
+    t = toolbox.OwnTimer(0, function=xs1.main, args = [], name="xs1")
     threadliste.append(t)
     t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="xs1 not started", prio=9)
 
-t = toolbox.OwnTimer(0, function=temp_control.TempController.start, args = [], name="TempCTRL")
-threadliste.append(t)
-t.start()
-
-t = toolbox.OwnTimer(0, function=cron.periodic_supervision, args = [], name="cron")
-threadliste.append(t)
-t.start()
-
-t = toolbox.OwnTimer(0, function=anw.check_handys_service, args = [], name="anwesenheit")
-threadliste.append(t)
-t.start()
-
-t = toolbox.OwnTimer(0, function=sp.main, args = [], name="sound_prov")
-threadliste.append(t)
-t.start()
-
-from outputs import batswitch
-t = toolbox.OwnTimer(0, function=batswitch.main, args = [], name="mqtt_batswitch")
-threadliste.append(t)
-t.start()
-
-from inputs import mqtt_client
-t = toolbox.OwnTimer(0, function=mqtt_client.main, args = [], name="mqtt_inputs")
-threadliste.append(t)
-t.start()
-
-from secvest import secvest_handler
-t = toolbox.OwnTimer(0, function=secvest_handler.main, args = [], name="secvest")
-threadliste.append(t)
-t.start()
-
-from inputs import homematic
-t = toolbox.OwnTimer(0, function=homematic.main, args = [], name="homematic")
-threadliste.append(t)
-t.start()
-
+try:    
+    from tifo import tf_connection
+    for tf_con in constants.tifo:
+        tifo_inst = tf_connection.TiFo(tf_con)
+        t = toolbox.OwnTimer(0, function=tifo_inst.main, args = [], name="TiFo" + tf_con)
+        threadliste.append(t)
+        t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="TiFo not started", prio=9)    
+    
+try:    
+    from outputs import temp_control
+    t = toolbox.OwnTimer(0, function=temp_control.TempController.start, args = [], name="TempCTRL")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="TempCTRL not started", prio=9)    
+    
+try:    
+    from inputs import cron
+    t = toolbox.OwnTimer(0, function=cron.periodic_supervision, args = [], name="cron")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="cron not started", prio=9)    
+    
+try:    
+    from inputs import internal
+    anw = internal.Anwesenheit()
+    t = toolbox.OwnTimer(0, function=anw.check_handys_service, args = [], name="anwesenheit")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="anwesenheit not started", prio=9)    
+    
+try:    
+    from tools import sound_provider as sp
+    t = toolbox.OwnTimer(0, function=sp.main, args = [], name="sound_prov")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="sound_prov not started", prio=9)    
+    
+try:    
+    from outputs import batswitch
+    t = toolbox.OwnTimer(0, function=batswitch.main, args = [], name="mqtt_batswitch")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="mqtt_batswitch not started", prio=9)    
+    
+try:    
+    from inputs import mqtt_client
+    t = toolbox.OwnTimer(0, function=mqtt_client.main, args = [], name="mqtt_inputs")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="mqtt_inputs not started", prio=9)    
+    
+try:    
+    from secvest import secvest_handler
+    t = toolbox.OwnTimer(0, function=secvest_handler.main, args = [], name="secvest")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="secvest not started", prio=9)    
+    
+try:    
+    from inputs import homematic as homem_in
+    t = toolbox.OwnTimer(0, function=homem_in.main, args = [], name="homematic_inputs")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="homematic_inputs not started", prio=9)    
+    
+try:    
+    from outputs import homematic as homem_out
+    t = toolbox.OwnTimer(0, function=homem_out.main, args = [], name="homematic_outputs")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="homematic_outputs not started", prio=9)    
+    
 try:
     from inputs import owm
     t = toolbox.OwnTimer(0, function=owm.main, args = [], name="weather")
     threadliste.append(t)
     t.start()
-except:
-    aes.new_event(description="OWM not installed", prio=9)
+except Exception as e:
+    print(e)
+    aes.new_event(description="Weather not started", prio=9)
 
-import app
-t = toolbox.OwnTimer(0, function=app.main, args = [], name="flask")
-threadliste.append(t)
-t.start()
+try:
+    import app
+    t = toolbox.OwnTimer(0, function=app.main, args = [], name="flask")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="flask not started", prio=9)
 
 if constants.debug:
     toolbox.log(threadliste)

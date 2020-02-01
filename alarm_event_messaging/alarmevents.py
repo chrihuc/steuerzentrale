@@ -20,8 +20,11 @@ from io import BytesIO
 #import json
 
 import MySQLdb as mdb
-from database import mysql_connector
+
 from alarm_event_messaging import messaging
+from database import mysql_connector
+
+# maybe critical
 from outputs.mqtt_publish import mqtt_pub
 from tools import toolbox
 

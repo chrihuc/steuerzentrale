@@ -432,13 +432,18 @@ class TiFo:
             toolbox.sleep(60)
 
     def thread_distus(self, device):
+        counter = 0
         while constants.run:
             try:
                 value = device.get_distance_value()
                 name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
                 broadcast_input_value('TiFo.' + name, str(value))
+                counter = 0
             except:
-                pass
+                counter += 1
+                if counter > 20:
+                    self.timedOut()
+                    break
             toolbox.sleep(2)
 
     def thread_pt(self, device):

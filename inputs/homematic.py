@@ -29,7 +29,7 @@ def broadcast_input_value(Name, Value):
 def eventcallback(address, interface_id, key, value):
     keys = ['LEVEL', 'ACTUAL_TEMPERATURE', 'OPERATING_VOLTAGE']
     if key in keys:
-        print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value)) 
+#        print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value)) 
         broadcast_input_value('homematic.' + address + '.' + key, value)
 
 def main():
