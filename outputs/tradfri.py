@@ -69,6 +69,7 @@ def connect():
         devices_commands = api(devices_command)
         devices = api(devices_commands)
         lights = [dev for dev in devices if dev.has_light_control]
+        print('Trafdfri connected')
     except Exception as e:
         print(e)
         devices_command = []
