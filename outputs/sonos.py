@@ -911,11 +911,16 @@ class Sonos:
                 break
         if player is not None:
             tries = 1
-            try:
-                while tries < 4:
-                    player, player_ip, p_uid, playerName = self.get_addr(player)
-                    if player is None:
-                        return False
+            player, player_ip, p_uid, playerName = self.get_addr(player)
+            if player is None:
+                try:
+                    del Sonos.FiFo[0]
+                except:
+                    pass
+                print('player is none', player, command, myId, Sonos.FiFo)                        
+                return False                
+            while tries < 4:
+                try:                
                     if player in self.Devices:
                         player = self.Devices.get(str(player))
                         player, player_ip, p_uid, playerName = self.get_addr(player)
@@ -998,16 +1003,18 @@ class Sonos:
                         self.soco_read_szene(player, sonos_szene)
                     try:
                         del Sonos.FiFo[0]
+                        print('done', player, command, myId, Sonos.FiFo)
                     except:
                         pass
                     return True
-            except Exception as e:
-                print(e)
-                tries += 1
-                time.sleep(tries * 0.1)
+                except Exception as e:
+                    print(e)
+                    tries += 1
+                    time.sleep(tries * 0.1)
 #            return False
         try:
             del Sonos.FiFo[0]
+            print('done', player, command, myId, Sonos.FiFo)
         except:
             pass
 

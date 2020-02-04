@@ -23,6 +23,7 @@ class Zone(object):
         self.Id = Id
         self._set_temp = None
         self._act_temp = None
+        self._offset = 0        
         self._actuator_temp = None
         self._actuator_set = None
         
@@ -65,9 +66,20 @@ class Zone(object):
     def reference(self, value):
         self._reference = value
     
+    @property
+    def offset(self):
+        return self._offset
+    
+    @offset.setter
+    def offset(self, value):
+        try:
+            self._offset = float(value)
+        except:
+            pass
+    
     def get_set_value(self):
         setting = msqc.get_actor_value(self._reference)
-        if setting == 'Off':
+        if setting in ['Off', 'off', 'Man', 'man', 'manual']:
             self._set_temp = self._act_temp
             self.enabled = False
         else:
@@ -96,7 +108,7 @@ class Zone(object):
         self._output = value
 
     def update_setpoint(self):
-        self._actuator_set = self._actuator_temp + (self._set_temp - self._act_temp)
+        self._actuator_set = self._actuator_temp + (self._set_temp - self._act_temp) + self._offset
 #        print('Temp Control', self._actuator_temp, self._set_temp, self._act_temp)
         # rounding dependend on system
         self._actuator_set = myround(self._actuator_set)
@@ -116,7 +128,7 @@ class Zone(object):
 class TempController(object):
     
     zones = []
-    cylcetime = 1*60
+    cylcetime = 2*60
     running = False
     
     def __init__(self):
@@ -130,6 +142,7 @@ class TempController(object):
             new_zone = Zone(zone['Id'])
             new_zone.inputs = zone['inputs']
             new_zone.reference = zone['ref_value']
+            new_zone.offset = zone['offset']
             new_zone.actuator_temp_hks = zone['actor_reading']
             new_zone.output = zone['output']
             cls.zones.append(new_zone)
