@@ -97,8 +97,10 @@ class Zone(object):
 
     def update_setpoint(self):
         self._actuator_set = self._actuator_temp + (self._set_temp - self._act_temp)
+#        print('Temp Control', self._actuator_temp, self._set_temp, self._act_temp)
         # rounding dependend on system
         self._actuator_set = myround(self._actuator_set)
+#        print('Temp Set', self._actuator_set)
         return self._actuator_set
     
     def cycle(self):
@@ -114,7 +116,7 @@ class Zone(object):
 class TempController(object):
     
     zones = []
-    cylcetime = 5*60
+    cylcetime = 1*60
     running = False
     
     def __init__(self):

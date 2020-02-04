@@ -14,8 +14,8 @@ from tools import toolbox
 
 
 def systemcallback(src, *args):
-    pass
-#    print(src)
+#    pass
+    print(src)
 #    for arg in args:
 #        print(arg)
    
@@ -27,7 +27,7 @@ def broadcast_input_value(Name, Value):
     toolbox.communication.send_message(payload, typ='InputValue')
 
 def eventcallback(address, interface_id, key, value):
-    keys = ['LEVEL', 'ACTUAL_TEMPERATURE', 'OPERATING_VOLTAGE']
+    keys = ['LEVEL', 'ACTUAL_TEMPERATURE', 'OPERATING_VOLTAGE', 'SET_TEMPERATURE', 'SET_POINT_TEMPERATURE']
     if key in keys:
 #        print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value)) 
         broadcast_input_value('homematic.' + address + '.' + key, value)
@@ -35,13 +35,14 @@ def eventcallback(address, interface_id, key, value):
 def main():
     pyhomematic = HMConnection(interface_id="myserver",
                                autostart=True,
-                               systemcallback=systemcallback,
+                               eventcallback=systemcallback,
                                remotes={"rf":{
-                                   "ip":"192.168.193.18",
+                                   "ip":constants.ccu2.hostname,
                                    "port": 2001},
 							   "ip":{
-                                   "ip":"192.168.193.18",
-                                   "port": 2010}})
+                                   "ip":constants.ccu2.hostname,
+                                   "port": 2010}},
+                            rpcusername=constants.ccu2.username, rpcpassword=constants.ccu2.password)
     
     sleepcounter = 0
     while sleepcounter < 20: #not pyhomematic.devices and
@@ -60,6 +61,8 @@ def main():
     		except:
     			pass
     # Now open / close doorcontact and watch the eventcallback being called.
+    
+#    print(pyhomematic._server.getAllSystemVariables())
     
     try:
         while constants.run:

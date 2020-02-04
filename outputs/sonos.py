@@ -905,7 +905,7 @@ class Sonos:
         while Sonos.FiFo and not Sonos.FiFo[0] == myId:
             time.sleep(0.1)
             timeout += 1
-            if timeout > 50:
+            if timeout > (20 * len(Sonos.FiFo) + 10):
                 print('Sonos Timeout')
                 Sonos.FiFo = []
                 break
