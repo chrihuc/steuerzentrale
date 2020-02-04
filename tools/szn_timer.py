@@ -85,7 +85,7 @@ class Szenen_Timer:
     def cancel_timer(self,parent,child):
         found = False
         if child  == "AlarmanlagePausierenEnde":
-            print('Szene AlarmanlagePausierenEnde geloescht')
+            print(parent, 'Szene AlarmanlagePausierenEnde geloescht')
         for item in self.liste:
             if item.get("child") == child:
                 item.get("timer").cancel()
