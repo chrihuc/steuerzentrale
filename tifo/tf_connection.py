@@ -575,14 +575,14 @@ class TiFo:
         result = pr.analyze(data)
 #        print(result)
         for res in result:
-            broadcast_input_value('TiFo.' + str(device.get_identity()[1]) +"."+ str(device.get_identity()[0]), res)
+            broadcast_input_value('TiFo.' + uid, res)
         self.timeout_reset()
 
     def cb_li(self, value, device, uid):
-        temp_uid = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+#        temp_uid = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
 #        print(value)
-        self.lineBricklets[temp_uid].callback(value)
-        utc = datetime.datetime.utcnow()
+        self.lineBricklets[uid].callback(value)
+#        utc = datetime.datetime.utcnow()
 #        writeInfluxDb(temp_uid, value, utc)
 
     def set_io16_sub(self,cmd,io,value):

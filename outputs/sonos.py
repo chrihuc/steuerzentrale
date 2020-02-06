@@ -900,12 +900,12 @@ class Sonos:
         if Sonos.FiFo:
             myId = Sonos.FiFo[-1] + 1
         Sonos.FiFo.append(myId)
-        print(player, command, myId, Sonos.FiFo)
+#        print(player, command, myId, Sonos.FiFo)
         timeout = 0
         while Sonos.FiFo and not Sonos.FiFo[0] == myId:
             time.sleep(0.1)
             timeout += 1
-            if timeout > (20 * len(Sonos.FiFo) + 10):
+            if timeout > (25 * len(Sonos.FiFo) + 10):
                 print('Sonos Timeout')
                 Sonos.FiFo = []
                 break
@@ -917,7 +917,7 @@ class Sonos:
                     del Sonos.FiFo[0]
                 except:
                     pass
-                print('player is none', player, command, myId, Sonos.FiFo)                        
+#                print('player is none', player, command, myId, Sonos.FiFo)                        
                 return False                
             while tries < 4:
                 try:                
@@ -1003,7 +1003,7 @@ class Sonos:
                         self.soco_read_szene(player, sonos_szene)
                     try:
                         del Sonos.FiFo[0]
-                        print('done', player, command, myId, Sonos.FiFo)
+#                        print('done', player, command, myId, Sonos.FiFo)
                     except:
                         pass
                     return True
@@ -1014,7 +1014,7 @@ class Sonos:
 #            return False
         try:
             del Sonos.FiFo[0]
-            print('done', player, command, myId, Sonos.FiFo)
+#            print('done', player, command, myId, Sonos.FiFo)
         except:
             pass
 

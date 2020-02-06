@@ -42,7 +42,7 @@ class HM_out():
         if command == 'set_level':
             self.pyhomematic.devices[deviceName].set_level(value)
         elif command == 'set_temperature':
-#            print(deviceGroup, deviceName, value)
+            print(deviceGroup, deviceName, value)
             self.pyhomematic.devices[deviceGroup][deviceName].set_temperature(value)
 
     

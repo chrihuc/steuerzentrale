@@ -26,6 +26,7 @@ class Zone(object):
         self._offset = 0        
         self._actuator_temp = None
         self._actuator_set = None
+        self._actuator_set_old = None
         
         self._inputs = None
         self._reference = None
@@ -108,8 +109,10 @@ class Zone(object):
         self._output = value
 
     def update_setpoint(self):
+        self._actuator_set_old = self._actuator_set
         self._actuator_set = self._actuator_temp + (self._set_temp - self._act_temp) + self._offset
-#        print('Temp Control', self._actuator_temp, self._set_temp, self._act_temp)
+        if self._actuator_set == self._set_temp:
+            print('Temp Control', self._actuator_temp, self._set_temp, self._act_temp, self._offset)
         # rounding dependend on system
         self._actuator_set = myround(self._actuator_set)
 #        print('Temp Set', self._actuator_set)
@@ -120,7 +123,7 @@ class Zone(object):
         self.get_set_value()
         self.get_actuator_temp()
         self.update_setpoint()
-        if self.enabled:
+        if self.enabled and self._actuator_set_old != self._actuator_set:
             payload = {'Device':self._output,'Command':self._actuator_set}
             toolbox.communication.send_message(payload, typ='SetDevice')
         return self._actuator_set

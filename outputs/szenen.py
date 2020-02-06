@@ -441,7 +441,7 @@ class Szenen(object):
 #==============================================================================
 # cacnel timers
 #==============================================================================
-        if ((szene_dict.get("Cancels") != "") and (str(szene_dict.get("Cancels")) != "None")):
+        if ((szene_dict.get("Cancels") != "") and (str(szene_dict.get("Cancels")) != "None") and erfuellt):
             kommandos = cls.__return_enum__(szene_dict.get("Cancels"))
             for kommando in kommandos:
                 cls.sz_t.cancel_timer(parent = szene, child = kommando)
