@@ -26,6 +26,8 @@ class Zone(object):
         self._offset = 0        
         self._actuator_temp = None
         self._actuator_set = None
+        self._actuator_set_filt = 0
+        self._filt_counter    = 0        
         self._actuator_set_old = None
         
         self._inputs = None
@@ -111,10 +113,12 @@ class Zone(object):
     def update_setpoint(self):
         self._actuator_set_old = self._actuator_set
         self._actuator_set = self._actuator_temp + (self._set_temp - self._act_temp) + self._offset
-        if self._actuator_set == self._set_temp:
-            print('Temp Control', self._actuator_temp, self._set_temp, self._act_temp, self._offset)
+        self._actuator_set_filt = (self._actuator_set + self._actuator_set_filt * self._filt_counter) / (1 + self._filt_counter)
+        self._filt_counter = min(10, self._filt_counter + 1)
+#        if self._actuator_set == self._set_temp:
+#            print('Temp Control', self._actuator_temp, self._set_temp, self._act_temp, self._offset)
         # rounding dependend on system
-        self._actuator_set = myround(self._actuator_set)
+        self._actuator_set = myround(self._actuator_set_filt)
 #        print('Temp Set', self._actuator_set)
         return self._actuator_set
     

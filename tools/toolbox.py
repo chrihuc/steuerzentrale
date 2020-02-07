@@ -34,6 +34,7 @@ class OwnTimer(Thread):
         self.name = name
         self.failed = failed
         self.restartCounter = restartCounter
+        self.heartbeat = 0
         self.args = args
         self.kwargs = kwargs
         self.finished = Event()

@@ -113,20 +113,27 @@ class SecvestHandler(object):
     
     def get_alarms(self):
 #        {'id': '65537', 'type': '1', 'affects-partition': '1'}   1 oder 4 sabotage gehäuse 
-#        {'id': '65540', 'type': '4', 'affects-partition': '1'}   4 ist scheinbar alarm
+#        {'id': '65540', 'type': '4', 'affects-partition': '1'}   4 ist scheinbar Sabotage
 
         alarms = self.alarmanlage.get_alarms() 
         for alarm in alarms:
             print(alarm)
-#            if not alarm in self.alarms:
-#                payload = {'Szene':'SecvestInfo', 'desc':alarm}
-#                toolbox.communication.send_message(payload, typ='ExecSzene')
-#                self.alarms.append(alarm)
-#        for alarm in self.alarms:
-#            if not alarm in alarms:
+            if not alarm in self.alarms:
+                if alarm['type'] == '1':
+                    payload = {'Szene':'SecvestInfo', 'desc':'Einbruch'}
+                if alarm['type'] == '4':
+                    payload = {'Szene':'SecvestInfo', 'desc':'Sabotage'}                    
+                toolbox.communication.send_message(payload, typ='ExecSzene')
+                self.alarms.append(alarm)
+        for alarm in self.alarms:
+            if not alarm in alarms:
+                if alarm['type'] == '1':
+                    payload = {'Szene':'SecvestInfo', 'desc':'Einbruch'+ ' wieder weg.'}
+                if alarm['type'] == '4':
+                    payload = {'Szene':'SecvestInfo', 'desc':'Sabotage'+ ' wieder weg.'}                   
 #                payload = {'Szene':'SecvestInfo', 'desc':alarm + ' wieder weg.'}
-#                toolbox.communication.send_message(payload, typ='ExecSzene')
-#                self.faults.pop(alarm)                            
+                toolbox.communication.send_message(payload, typ='ExecSzene')
+                self.faults.pop(alarm)                            
         result = True
         return result    
     

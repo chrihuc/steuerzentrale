@@ -174,8 +174,8 @@ if constants.debug:
 
 startup = True
 #add supervision of threads
-aes.new_event(description="All Threads kicked off", prio=9)
-time.sleep(15)
+#aes.new_event(description="All Threads kicked off", prio=9)
+time.sleep(5)
 
 try:
     while constants.run:
@@ -201,13 +201,15 @@ try:
                 if t.failed:
                     if t.restartCounter >= 2:
                         aes.new_event(description="Thread running again: "+t.name, prio=9)
+                        t.restartCounter = 0
                     t.failed = False
-                    t.restartCounter = 0
         if startup and allgut:
-            startup = False
             aes.new_event(description="All Threads running", prio=9)
             toolbox.log('threads running')
-        toolbox.sleep(10)
+        elif startup:
+            aes.new_event(description="Not all threads started successfully", prio=9)
+        startup = False
+        toolbox.sleep(10)        
 except KeyboardInterrupt:
     constants.run = False
     time.sleep(5)
