@@ -175,9 +175,10 @@ if constants.debug:
 startup = True
 #add supervision of threads
 #aes.new_event(description="All Threads kicked off", prio=9)
-time.sleep(5)
+#time.sleep(5)
 
 try:
+    heartbeats = 0
     while constants.run:
         allgut = True
         for t in threadliste:
@@ -198,18 +199,22 @@ try:
                     aes.new_event(description="Couldn't restart Thread "+t.name+", killing python", prio=9)
                     toolbox.restart()
             else:
+                t.heartbeat += 1
                 if t.failed:
                     if t.restartCounter >= 2:
                         aes.new_event(description="Thread running again: "+t.name, prio=9)
                         t.restartCounter = 0
                     t.failed = False
+                if t.heartbeat < 3:
+                    allgut = False
         if startup and allgut:
             aes.new_event(description="All Threads running", prio=9)
             toolbox.log('threads running')
-        elif startup:
-            aes.new_event(description="Not all threads started successfully", prio=9)
-        startup = False
-        toolbox.sleep(10)        
+            startup = False
+        elif startup and heartbeats == 7:
+            aes.new_event(description="Not all threads started successfully in time", prio=9)
+        toolbox.sleep(5)
+        heartbeats += 1        
 except KeyboardInterrupt:
     constants.run = False
     time.sleep(5)
