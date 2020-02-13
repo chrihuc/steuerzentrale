@@ -18,6 +18,7 @@ import constants
 
 
 from tools import toolbox
+from outputs.mqtt_publish import mqtt_pub
 #toolbox.log('debug on')
 
 
@@ -184,7 +185,7 @@ try:
         for t in threadliste:
             if not t in threading.enumerate():
                 allgut = False
-                if t.restartCounter == 2:                    
+                if t.heartbeat > 12:                    
                     aes.new_event(description="Thread stopped: "+t.name, prio=9)
                 t.failed = True
                 try:
@@ -200,11 +201,12 @@ try:
                     toolbox.restart()
             else:
                 t.heartbeat += 1
+                mqtt_pub("Message/Threads/" + t.name, t.heartbeat)
                 if t.failed:
-                    if t.restartCounter >= 2:
+                    if t.heartbeat >= 12:
                         aes.new_event(description="Thread running again: "+t.name, prio=9)
                         t.restartCounter = 0
-                    t.failed = False
+                        t.failed = False
                 if t.heartbeat < 3:
                     allgut = False
         if startup and allgut:
