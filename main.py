@@ -187,6 +187,8 @@ try:
         for t in threadliste:
             if not t in threading.enumerate():
                 allgut = False
+                if startup:
+                    starting = True
                 if t.heartbeat > 12:                    
                     aes.new_event(description="Thread stopped: "+t.name, prio=9)
                 t.failed = True
@@ -215,7 +217,7 @@ try:
                 if t.heartbeat < 7:
                     starting = True                    
         if startup and not starting:
-            aes.new_event(description="All Threads running", prio=9)
+            aes.new_event(description="All Threads finally startet", prio=9)
             toolbox.log('threads running')
             startup = False
         elif startup and heartbeats == 9:

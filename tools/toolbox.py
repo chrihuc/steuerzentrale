@@ -37,6 +37,7 @@ class OwnTimer(Thread):
         self.heartbeat = 0
         self.args = args
         self.kwargs = kwargs
+        self.starting = True
         self.finished = Event()
 
     def cancel(self):
