@@ -463,8 +463,8 @@ class Szenen(object):
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and depErfolg == 0:
-                    if Prio > 0:
-                        print("szene timed start", start_t, szn, dlay)
+#                    if Prio > 0:
+#                        print("szene timed start", start_t, szn, dlay)
                     if ex_re == 0:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:
@@ -502,8 +502,8 @@ class Szenen(object):
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
                 if (immer or erfuellt) and ((depErfolg == 1 and erfolg) or (depErfolg == 2 and not erfolg)):
-                    if Prio > 0:
-                        print("szene timed start", start_t, szn, dlay)                    
+#                    if Prio > 0:
+#                        print("szene timed start", start_t, szn, dlay)                    
                     if ex_re == 0:
                         cls.timer_add(cls.execute, parent = szene,delay = float(dlay), child = szn, exact = False, retrig = True)
                     elif ex_re == 1:

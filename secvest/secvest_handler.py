@@ -94,7 +94,7 @@ class SecvestHandler(object):
         for fault in faults:
 #            {'type': '5000', 'id': '1474', 'ui-string': 'Z201 A Terrassentür', 'affects-partition': ['1'], 'affects-zone': '201', 'prevents-set': True, 'prevents-reset': False, 'is-rf-warning': False}
             if not fault['ui-string'] in self.faults:
-                print(fault)
+#                print(fault)
                 if fault['is-rf-warning']:
                     payload = {'Szene':'SecvestDebug', 'desc':'Secvest Warnung: ' + fault['ui-string']}
                     toolbox.communication.send_message(payload, typ='ExecSzene')

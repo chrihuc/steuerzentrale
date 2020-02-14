@@ -177,11 +177,13 @@ startup = True
 #add supervision of threads
 #aes.new_event(description="All Threads kicked off", prio=9)
 #time.sleep(5)
+aes.new_event(description="All Threads started", prio=9)
 
 try:
     heartbeats = 0
     while constants.run:
         allgut = True
+        starting = False
         for t in threadliste:
             if not t in threading.enumerate():
                 allgut = False
@@ -201,7 +203,8 @@ try:
                     toolbox.restart()
             else:
                 t.heartbeat += 1
-                mqtt_pub("Message/Threads/" + t.name, t.heartbeat)
+                data = {'name':t.name, 'heartbeat': t.heartbeat}
+                mqtt_pub("Message/Threads/" + t.name, data)#, retain=False)
                 if t.failed:
                     if t.heartbeat >= 12:
                         aes.new_event(description="Thread running again: "+t.name, prio=9)
@@ -209,11 +212,13 @@ try:
                         t.failed = False
                 if t.heartbeat < 3:
                     allgut = False
-        if startup and allgut:
+                if t.heartbeat < 7:
+                    starting = True                    
+        if startup and not starting:
             aes.new_event(description="All Threads running", prio=9)
             toolbox.log('threads running')
             startup = False
-        elif startup and heartbeats == 7:
+        elif startup and heartbeats == 9:
             aes.new_event(description="Not all threads started successfully in time", prio=9)
         toolbox.sleep(5)
         heartbeats += 1        
