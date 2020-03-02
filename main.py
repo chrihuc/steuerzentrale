@@ -189,9 +189,9 @@ try:
                 allgut = False
                 if startup:
                     starting = True
+                t.failed = True                    
                 if t.heartbeat > 12:                    
                     aes.new_event(description="Thread stopped: "+t.name, prio=9)
-                t.failed = True
                 try:
                     new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
                     new_t.start()
@@ -208,19 +208,24 @@ try:
                 data = {'name':t.name, 'heartbeat': t.heartbeat}
                 mqtt_pub("Message/Threads/" + t.name, data)#, retain=False)
                 if t.failed:
-                    if t.heartbeat >= 12:
-                        aes.new_event(description="Thread running again: "+t.name, prio=9)
+                    if t.heartbeat >= 10:
+                        if startup:
+                            aes.new_event(description="Thread finally started: "+t.name, prio=9)
+                        else:
+                            aes.new_event(description="Thread running again: "+t.name, prio=9)
                         t.restartCounter = 0
                         t.failed = False
                 if t.heartbeat < 3:
                     allgut = False
-                if t.heartbeat < 7:
-                    starting = True                    
+                if t.heartbeat < 10:
+                    starting = True
+                elif t.heartbeat > 13:
+                    t.starting = False                    
         if startup and not starting:
             aes.new_event(description="All Threads finally startet", prio=9)
             toolbox.log('threads running')
             startup = False
-        elif startup and heartbeats == 9:
+        elif startup and heartbeats == 19:
             aes.new_event(description="Not all threads started successfully in time", prio=9)
         toolbox.sleep(5)
         heartbeats += 1        
