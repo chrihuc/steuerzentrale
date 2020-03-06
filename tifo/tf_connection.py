@@ -281,7 +281,7 @@ class MT_Bricklet:
             if change & wert > 0:
                 name = self.uid + "." + str(bin(wert))
                 if name != None:
-                    value = bit_list & param
+                    value = wert & param
                     result = self.get_time(name, value)
                     changes[name] = result       
         self.state = param
