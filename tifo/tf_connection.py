@@ -377,10 +377,10 @@ class TiFo:
                 break
             except Error as e:
                 print('Connection Error: ' + str(e.description))
-                time.sleep(1)
+                time.sleep(10)
             except socket.error as e:
                 print('Socket error: ' + str(e))
-                time.sleep(1)
+                time.sleep(10)
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
         toolbox.log('TiFo started')
@@ -1179,7 +1179,7 @@ class TiFo:
                 break
             except Error as e:
                 toolbox.log('Enumerate Error: ' + str(e.description))
-                time.sleep(1)
+                time.sleep(10)
 
 
 class dist_us:
