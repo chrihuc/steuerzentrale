@@ -68,6 +68,7 @@ class Szenen(object):
     timeout = datetime.timedelta(hours=0, minutes=0, seconds=30)
     sz_t = szn_timer.Szenen_Timer()
     running_list = {} # gibt probleme mit changes while iterating, müsste mit locks gearbeitet werden
+    high_cpu_cnt = 0
     # liste locken dann ändern
 
     def __init__ (self):
@@ -98,7 +99,10 @@ class Szenen(object):
             else:
                 cls.threadExecute(payload['Szene'])
 
-
+    @classmethod
+    def reset_cpu_cnt(cls):
+        cls.high_cpu_cnt = 0
+        
     @classmethod
     def trigger_scenes(cls, device, value):
         szns, desc, heartbt = msqc.inputs(device,value)
@@ -342,7 +346,11 @@ class Szenen(object):
         if use > 99:
             aes.new_event(description="ProcessorLeistung zu hoch bei: " + szene, prio=9, karenz = 0.03)
             print("ProcessorLeistung zu hoch")
-            return False
+            cls.high_cpu_cnt += 1
+            if cls.high_cpu_cnt > 10:
+                t = toolbox.OwnTimer(10, function=cls.reset_cpu_cnt, name="resetcpu")
+                t.start()            
+                return False
         szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung
@@ -431,7 +439,8 @@ class Szenen(object):
 #                    #timer set to 0 for following actions
 #                    set_del.start()
                     # solution above could give timing issues
-                    msqc.setting_s(str(kommando), str(kommandos.get(kommando)))
+                    value = msqc.re_calc(str(kommandos.get(kommando)))
+                    msqc.setting_s(str(kommando), value)
             msqc.mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
         elif False:
             if str(szene_dict.get("Beschreibung")) in ['None','']:

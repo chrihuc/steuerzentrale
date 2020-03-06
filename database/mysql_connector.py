@@ -271,20 +271,26 @@ def setting_s(setting, wert):
         wert = True
     if wert in ('Aus','aus'):
         wert = False
-    data = {'Value':wert, 'Setting':setting}
-    mqtt_pub("Settings/" + setting, data)
-    thread_inflx = Timer(0, writeInfluxString, [setting, wert, utc])
-    thread_inflx.start()
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
-        if cur.fetchone()[0] == 0:
-            sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES ("' + str(wert) + '","'+ str(setting) + '")'
-        else:
-            sql = 'UPDATE '+constants.sql_tables.settings.name+' SET Value = "' + str(wert) + '" WHERE Name = "'+ str(setting) + '"'
-        cur.execute(sql)
-    con.close()
+    if 'Inputs.' in setting:
+        try:
+            inputs(setting, float(wert))
+        except:
+            print('could not set input', setting, wert)
+    else:
+        data = {'Value':wert, 'Setting':setting}
+        mqtt_pub("Settings/" + setting, data)
+        thread_inflx = Timer(0, writeInfluxString, [setting, wert, utc])
+        thread_inflx.start()
+        con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+        with con:
+            cur = con.cursor()
+            cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.settings.name+" WHERE Name = '"+setting+"'")
+            if cur.fetchone()[0] == 0:
+                sql = 'INSERT INTO '+constants.sql_tables.settings.name+' (Value, Name) VALUES ("' + str(wert) + '","'+ str(setting) + '")'
+            else:
+                sql = 'UPDATE '+constants.sql_tables.settings.name+' SET Value = "' + str(wert) + '" WHERE Name = "'+ str(setting) + '"'
+            cur.execute(sql)
+        con.close()
 
 def setting_r(setting):
     ''' try to read the setting from inputs table if not an input

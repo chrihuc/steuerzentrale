@@ -127,8 +127,11 @@ class MqttClient:
                 elif 'SetSettings' in msg.topic:
                     table = constants.sql_tables.settings.name
                     msqc.setting_s(m_in['Name'], m_in['Value']) 
-                elif "shellies" in msg.topic and 'power' in msg.topic:
-                    name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[3] + '.power' 
+                elif "shellies" in msg.topic and any([True for name in ['power', 'overtemperature', 'temperature'] if name in msg.topic]):
+                    if len(msg.topic.split("/")) > 3:
+                        name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[3] + '.' + msg.topic.split("/")[-1] 
+                    else:
+                        name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[-1]                         
                     broadcast_input_value('MQTT.' + name, m_in)                    
             if 'DataRequest' in msg.topic:
                 if 'SetTable' in msg.topic:  

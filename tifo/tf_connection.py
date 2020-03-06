@@ -31,6 +31,7 @@ from tinkerforge.bricklet_temperature import BrickletTemperature
 from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.bricklet_line import BrickletLine
+from tinkerforge.bricklet_multi_touch import BrickletMultiTouch
 from tinkerforge.brick_master import BrickMaster
 from tinkerforge.ip_connection import Error
 
@@ -256,6 +257,36 @@ class LEDStrips:
         dicti['addr'] = addr
         self.liste.append(dicti)
 
+class MT_Bricklet:
+    def __init__(self, device, uid):
+        self.device = device
+        self.uid = uid
+        self.state  = 0
+        self.times = {(1 << bit):datetime.datetime.now() for bit in range(12, -1, -1)}
+        
+    def get_time(self, name, value):
+        delta = 0
+        if value == 1:
+            self.times[name] = datetime.datetime.now()
+        elif value == 0:
+            if name in self.times:
+                delta = datetime.datetime.now() - self.times[name]
+        return delta
+        
+    def event_happened(self, param):
+        change = self.state ^ param
+        changes = {}
+        bit_list = [(1 << bit) for bit in range(12, -1, -1)]
+        for wert in bit_list:
+            if change & wert > 0:
+                name = self.uid + "." + str(bin(wert))
+                if name != None:
+                    value = bit_list & param
+                    result = self.get_time(name, value)
+                    changes[name] = result       
+        self.state = param
+        return changes
+
 class TiFo:
 
     r = [0]*16
@@ -304,6 +335,7 @@ class TiFo:
         self.unknown = []
         self.threadliste = []
         self.lineBricklets = {}
+        self.multitouchBricklets = {}
         self.dus = []
         self.ip = ip
         self.delay = 5
@@ -584,6 +616,11 @@ class TiFo:
         self.lineBricklets[uid].callback(value)
 #        utc = datetime.datetime.utcnow()
 #        writeInfluxDb(temp_uid, value, utc)
+
+    def cb_mtb(self, param, uid):
+        changes = self.multitouchBricklets[uid].event_happened(param)
+        for key, value in changes.items():
+            broadcast_input_value('TiFo.' + key, value)
 
     def set_io16_sub(self,cmd,io,value):
         port = cmd.get('Port')
@@ -1104,6 +1141,15 @@ class TiFo:
                 thread_us_.start()                
                 
                 toolbox.log("BrickletDistanceUS", temp_uid)
+                found  = True
+
+            if device_identifier == BrickletMultiTouch.DEVICE_IDENTIFIER:
+                mtb = BrickletMultiTouch(uid, self.ipcon)
+                temp_uid = str(mtb.get_identity()[1]) +"."+ str(mtb.get_identity()[0])
+                if not temp_uid in self.multitouchBricklets:
+                    self.multitouchBricklets[temp_uid] = MT_Bricklet(mtb, uid)
+                mtb.register_callback(mtb.CALLBACK_TOUCH_STATE, partial( self.cb_mtb, uid = temp_uid))
+                toolbox.log('Multitouch Bricklet', temp_uid)
                 found  = True
 
             if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
