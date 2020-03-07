@@ -265,13 +265,14 @@ class MT_Bricklet:
         self.times = {(1 << bit):datetime.datetime.now() for bit in range(12, -1, -1)}
         
     def get_time(self, name, value):
-        timedelta = datetime.datetime.now() - datetime.datetime.now()
+        secs = 0
         if value == 1:
             self.times[name] = datetime.datetime.now()
         elif value == 0:
             if name in self.times:
                 timedelta = datetime.datetime.now() - self.times[name]
-        return timedelta.total_seconds()
+                secs = timedelta.total_seconds()
+        return secs
         
     def event_happened(self, param):
         change = self.state ^ param
