@@ -647,7 +647,8 @@ class Sonos:
             if dicti1['TitelNr'] != dicti2['TitelNr']:
                 return False
         if dicti1['MasterZone'] != dicti2['MasterZone']:
-            print(dicti1['MasterZone'], dicti2['MasterZone'])
+            pass
+#            print(dicti1['MasterZone'], dicti2['MasterZone'])
 #            return False    
         return True
 
@@ -906,7 +907,7 @@ class Sonos:
             time.sleep(0.1)
             timeout += 1
             if timeout > (25 * len(Sonos.FiFo) + 10):
-                print('Sonos Timeout')
+#                print('Sonos Timeout')
                 Sonos.FiFo = []
                 break
         if player is not None:
