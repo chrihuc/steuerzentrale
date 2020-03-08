@@ -179,6 +179,8 @@ startup = True
 #time.sleep(5)
 aes.new_event(description="All Threads started", prio=9)
 
+starttime = 25
+
 try:
     heartbeats = 0
     while constants.run:
@@ -225,7 +227,7 @@ try:
             aes.new_event(description="All Threads finally startet", prio=9)
             toolbox.log('threads running')
             startup = False
-        elif startup and heartbeats == 19:
+        elif startup and heartbeats == starttime:
             aes.new_event(description="Not all threads started successfully in time", prio=9)
         toolbox.sleep(5)
         heartbeats += 1        
