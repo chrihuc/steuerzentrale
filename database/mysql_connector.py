@@ -446,16 +446,16 @@ def mdb_read_table_columns(db, columns):
     con.close()
     return liste
 
-def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc", exact=False):
+def mdb_read_table_column_filt(db, column, filt='', amount=1000, order="desc", exact=False, filt_on='Name'):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     rlist = []
     with con:
         cur = con.cursor()
         #SELECT * FROM Steuerzentrale.HIS_inputs where Name like '%Rose%' order by id desc limit 1000;
         if exact:
-            sql = 'SELECT '+column+' FROM ' + db + ' WHERE Name LIKE "' + filt + '" ORDER BY ID ' + order + ' LIMIT ' + str(amount) # % (column,db,filt,order, str(amount))
+            sql = 'SELECT '+column+' FROM ' + db + ' WHERE ' + filt_on + ' LIKE "' + filt + '" ORDER BY ID ' + order + ' LIMIT ' + str(amount) # % (column,db,filt,order, str(amount))
         else:
-            sql = 'SELECT '+column+' FROM ' + db + ' WHERE Name LIKE "%' + filt + '%" ORDER BY ID ' + order + ' LIMIT ' + str(amount)
+            sql = 'SELECT '+column+' FROM ' + db + ' WHERE ' + filt_on + ' LIKE "%' + filt + '%" ORDER BY ID ' + order + ' LIMIT ' + str(amount)
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
