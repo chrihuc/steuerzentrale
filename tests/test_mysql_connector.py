@@ -9,6 +9,7 @@ import unittest
 from database import mysql_connector as msqc
 import numpy as np
 import time
+import constants
 
 class TestUM(unittest.TestCase):
 
@@ -18,14 +19,15 @@ class TestUM(unittest.TestCase):
     def test_inputs(self):
 #        self.assertTrue(msqc.inputs('Vm1ZIM1PFL1TE01', 25.9),
 #                         'Inputs function returning wrong scenes')
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
-        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
+#        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
+        print(msqc.mdb_read_table_column_filt2(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
 #    def test_get_device_adress(self):
 #        print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')
 
