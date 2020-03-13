@@ -99,6 +99,7 @@ class SecvestHandler(object):
                     payload = {'Szene':'SecvestDebug', 'desc':'Secvest Warnung: ' + fault['ui-string']}
                     toolbox.communication.send_message(payload, typ='ExecSzene')
                 self.faults[fault['ui-string']] = fault
+        delete = []
         for stored,value in self.faults.items():
             found = False
             for fault in faults:
@@ -106,8 +107,10 @@ class SecvestHandler(object):
                     found = True
             if not found and value['is-rf-warning']: 
                 payload = {'Szene':'SecvestDebug', 'desc':'Secvest Warnung weg: ' + value['ui-string']}
-                toolbox.communication.send_message(payload, typ='ExecSzene')                
-                self.faults.pop(stored)                            
+                toolbox.communication.send_message(payload, typ='ExecSzene') 
+                delete.append(stored)
+        for item in delete:
+            self.faults.pop(item, True)                            
         result = True
         return result 
     
@@ -125,6 +128,7 @@ class SecvestHandler(object):
                     payload = {'Szene':'SecvestInfo', 'desc':'Sabotage'}                    
                 toolbox.communication.send_message(payload, typ='ExecSzene')
                 self.alarms.append(alarm)
+        delete = []                
         for alarm in self.alarms:
             if not alarm in alarms:
                 if alarm['type'] == '1':
@@ -133,7 +137,9 @@ class SecvestHandler(object):
                     payload = {'Szene':'SecvestInfo', 'desc':'Sabotage'+ ' wieder weg.'}                   
 #                payload = {'Szene':'SecvestInfo', 'desc':alarm + ' wieder weg.'}
                 toolbox.communication.send_message(payload, typ='ExecSzene')
-                self.faults.pop(alarm)                            
+                delete.append(alarm)
+        for item in delete:
+            self.alarms.pop(item, True)                              
         result = True
         return result    
     

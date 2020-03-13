@@ -43,6 +43,8 @@ except:
 
 
 class Hue_lights():
+    FiFo = []    
+    
     def __init__(self):
         self.__init_table__()
     
@@ -90,6 +92,19 @@ class Hue_lights():
 
 
     def set_device(self, device, commd):
+        myId = 1
+        if Hue_lights.FiFo:
+            myId = Hue_lights.FiFo[-1] + 1
+        Hue_lights.FiFo.append(myId)
+#        print(player, command, myId, Sonos.FiFo)
+        timeout = 0
+        while Hue_lights.FiFo and not Hue_lights.FiFo[0] == myId:
+            time.sleep(0.1)
+            timeout += 1
+            if timeout > (25 * len(Hue_lights.FiFo) + 10):
+#                print('Sonos Timeout')
+                Hue_lights.FiFo = []
+                break        
         toolbox.log(device, commd)
         h_dev = Light(hbridge, device)
         keys = ['bri', 'hue', 'sat', 'transitiontime']
@@ -107,6 +122,11 @@ class Hue_lights():
             #{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
             setting = {'hue': hue, 'bri': bri, 'sat': sat, 'an': an}
             mysql_connector.mdb_set_table(table.name,device, setting)
+            try:
+                del Hue_lights.FiFo[0]
+    #            print('done', player, command, myId, Sonos.FiFo)
+            except:
+                pass            
             return True
         elif commd == 'Umschalten':
             an = hbridge.get_light(device, 'on') 
@@ -143,6 +163,11 @@ class Hue_lights():
                     success = False
                     retry += 1
             if not success:
+                try:
+                    del Hue_lights.FiFo[0]
+        #            print('done', player, command, myId, Sonos.FiFo)
+                except:
+                    pass                
                 return success            
             time.sleep(0.5)
         command = {}
@@ -199,6 +224,11 @@ class Hue_lights():
                 aes.new_event(description=str(device) + " really not reachable", prio=1)
         except:
             success = False
-            aes.new_event(description=str(device) + " not reachable", prio=1)            
+            aes.new_event(description=str(device) + " not reachable", prio=1)    
+        try:
+            del Hue_lights.FiFo[0]
+#            print('done', player, command, myId, Sonos.FiFo)
+        except:
+            pass            
         return success
  

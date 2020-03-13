@@ -13,6 +13,9 @@ import os, sys, re
 from time import localtime,strftime
 from tools import toolbox
 
+from json import encoder
+encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+
 mqtt_list = []
 
 def handler(obj):
@@ -57,6 +60,11 @@ class MqttClient():
             if not short:
                 data['ts'] = uhr
             try:
+                if 'Value' in data:
+                    try:
+                        data['Value'] = round(float(data['Value']), 2)
+                    except:
+                        pass
                 data = json.dumps(data, default=handler, allow_nan=False)
             except:
                 self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)

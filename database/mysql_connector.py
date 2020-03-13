@@ -29,6 +29,7 @@ validTimers = {}
 locklist = {}
 persTimers = {}
 
+prozessspiegel = {}
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -278,6 +279,7 @@ def setting_s(setting, wert):
             print('could not set input', setting, wert)
     else:
         data = {'Value':wert, 'Setting':setting}
+        prozessspiegel[setting] = wert
         mqtt_pub("Settings/" + setting, data)
         thread_inflx = Timer(0, writeInfluxString, [setting, wert, utc])
         thread_inflx.start()
@@ -296,6 +298,8 @@ def setting_r(setting):
     ''' try to read the setting from inputs table if not an input
         read single setting
     '''
+    if setting in prozessspiegel and constants.prozessspiegel:
+        return prozessspiegel[setting]
     value = get_input_value(setting)
     if value is None:
         con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -1050,6 +1054,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     if counter == 4:
                         print('could not write to DB')            
 #            thread_sql.start()
+            prozessspiegel[hks] = value
         if heartbt and not fallingback:
             if hks in validTimers:
                 validTimers[hks]['timer'].cancel()

@@ -134,6 +134,7 @@ class MqttClient:
                         name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[-1]                         
                     broadcast_input_value('MQTT.' + name, m_in)                    
             if 'DataRequest' in msg.topic:
+#                print(m_in.values())
                 if 'SetTable' in msg.topic:  
                     table = constants.sql_tables.cron.name
                     for entry in m_in['payload']:
@@ -150,7 +151,7 @@ class MqttClient:
                 elif 'SzenenGruppen' in m_in.values():
                     mqtt_pub("DataRequest/Answer/SzenenGruppen", msqc.mdb_read_table_columns(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung']))
                 elif 'SzenenErinnerung' in m_in.values():
-                    print(msqc.mdb_read_table_column_filt(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
+#                    print(msqc.mdb_read_table_column_filt2(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
                     mqtt_pub("DataRequest/Answer/SzenenErinnerung", msqc.mdb_read_table_column_filt2(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
                 elif 'BDQs' in m_in.values():
 #                    print(msqc.mdb_read_bdqs())

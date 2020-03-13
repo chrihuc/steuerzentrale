@@ -298,4 +298,6 @@ class redundancy_:
 #    config.set('Main', 'eigene_IP', own_ip)
 #    save_config()
     
+prozessspiegel = False    
+    
 print(name, debug_level, own_ip, mqtt_.server)

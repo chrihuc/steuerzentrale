@@ -1150,6 +1150,8 @@ class TiFo:
                 if not temp_uid in self.multitouchBricklets:
                     self.multitouchBricklets[temp_uid] = MT_Bricklet(mtb, uid)
                 mtb.register_callback(mtb.CALLBACK_TOUCH_STATE, partial( self.cb_mtb, uid = temp_uid))
+                mtb.set_electrode_sensitivity(130)
+                mtb.recalibrate()
                 toolbox.log('Multitouch Bricklet', temp_uid)
                 found  = True
 
