@@ -274,7 +274,11 @@ def setting_s(setting, wert):
         wert = False
     if 'Inputs.' in setting:
         try:
-            inputs(setting, float(wert))
+#            inputs(setting, float(wert))
+            payload = {'Name':setting,'Value':wert}
+        #    on server:
+#            toolbox.log(Name, Value, level=9)
+            toolbox.communication.send_message(payload, typ='InputValue')            
         except:
             print('could not set input', setting, wert)
     else:
