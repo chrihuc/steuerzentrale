@@ -152,6 +152,15 @@ except Exception as e:
     print(e)
     aes.new_event(description="homematic_outputs not started", prio=9)    
     
+try:    
+    from outputs import shelly
+    t = toolbox.OwnTimer(0, function=shelly.main, args = [], name="shelly")
+    threadliste.append(t)
+    t.start()
+except Exception as e:
+    print(e)
+    aes.new_event(description="shelly not started", prio=9) 
+    
 try:
     from inputs import owm
     t = toolbox.OwnTimer(0, function=owm.main, args = [], name="weather")
