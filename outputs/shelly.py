@@ -90,7 +90,7 @@ def receive_communication(payload, *args, **kwargs):
         device = adress.split(".")[1] 
 #            der teil muss abgekürzt werden, wenn ein ESP der empfänger ist, auf nur das nötigste
         if toolbox.kw_unpack(kwargs,'receiver') == 'Shelly':
-            result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'])
+            result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'], retain=False)
             toolbox.communication.send_message(payload, typ='return', value=result) 
         elif toolbox.kw_unpack(kwargs,'receiver') == 'ShellyConf':
             ip = adress.split(".")[1] + "." + adress.split(".")[2] + "." + adress.split(".")[3] + "." + adress.split(".")[4]
