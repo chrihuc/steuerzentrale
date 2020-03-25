@@ -168,11 +168,11 @@ class AES:
             server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())
 
 
-    def new_event(self, description, to=None, prio=0, durchsage="", karenz=-1):
-        t = threading.Thread(target=self.new_event_t, args=[description, to, prio, durchsage, karenz])
+    def new_event(self, description, to=None, prio=0, durchsage="", karenz=-1, payload=None):
+        t = threading.Thread(target=self.new_event_t, args=[description, to, prio, durchsage, karenz, payload])
         t.start()
 
-    def new_event_t(self, description, to=None, prio=0, durchsage="", karenz=-1):
+    def new_event_t(self, description, to=None, prio=0, durchsage="", karenz=-1, payload=None):
         data = {"Description":description, "Durchsage":durchsage}
         mqtt_pub("AES/Prio" + str(prio), data)
         if prio == None:
@@ -206,29 +206,29 @@ class AES:
                 
 # Neu
             # Wach
-            nurwach = prio // 10000
-            prio = prio - nurwach * 10000
+            nurwach = prio // 1e5
+            prio = prio - nurwach * 1e5
             if nurwach and not str(mysql_connector.setting_r("Status")) in ["Wach", "Leise"]:
                 return True
-            anwesend = prio // 1000
-            prio = prio - anwesend * 1000
-            mail = prio // 100
-            prio = prio - mail * 100
-            stummaus = prio // 10
-            ton = prio - stummaus * 10
+            anwesend = prio // 1e4
+            prio = prio - anwesend * 1e4
+            mail = prio // 1e3
+            prio = prio - mail * 1e3
+            stummaus = prio // 1e2
+            ton = prio - stummaus * 1e2
             if nurwach and str(mysql_connector.setting_r("Status")) in ["Leise"]:
-                prio = stummaus * 10 + 8
+                prio = stummaus * 1e2 + 8
             if mail:
                 self.send_mail('Hinweis/Alarm', text=description)
             if anwesend == 1:
-                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio)
+                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio, payload=payload)
             elif anwesend == 2:
-                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio)  
-                self.mes.send_abwesend(to=to, titel="Hinweis", text=description, prio=ton)
+                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio, payload=payload)  
+                self.mes.send_abwesend(to=to, titel="Hinweis", text=description, prio=ton, payload=payload)
             elif prio > 1:
-                self.mes.send_direkt(to=to, titel="Hinweis", text=description, prio=prio)
-            mute = prio // 10
-            prio = prio - mute * 10
+                self.mes.send_direkt(to=to, titel="Hinweis", text=description, prio=prio, payload=payload)
+            mute = prio // 1e2
+            prio = prio - mute * 1e2
             if prio > 1:
                 AES.alarm_liste.addAlarm('Event', description)                
             return True

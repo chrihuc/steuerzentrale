@@ -105,13 +105,14 @@ class Szenen(object):
         
     @classmethod
     def trigger_scenes(cls, device, value):
-        szns, desc, heartbt = msqc.inputs(device,value)
+        szns, desc, heartbt, payloads = msqc.inputs(device,value)
 #        hearbeat supervision
 #        if not ((heartbt is None) or (device is None)):
 #            cls.timer_add(cls.execute, parent=None, device=desc, delay=float(heartbt), child='Input_sup', exact=True, retrig=True)
-        for szene in szns:
+#        for szene in szns:
+        for i, szene in enumerate(szns):
             if szene != None:
-                cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc)
+                cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc, payload=payloads[i])
 
     @staticmethod
     def list_commands(gruppe='default'):
@@ -336,7 +337,7 @@ class Szenen(object):
         t.start()
 
     @classmethod
-    def execute(cls, szene, check_bedingung=False, wert=0, device=None, noDelay=False, desc=''):
+    def execute(cls, szene, check_bedingung=False, wert=0, device=None, noDelay=False, desc='', payload=None):
 #        ct = datetime.datetime.now()
         toolbox.log(szene)
         if constants.passive:
@@ -393,7 +394,7 @@ class Szenen(object):
                     text = '%s, %s = %s' % (str(szene_dict.get("Beschreibung")), device, wert)
                 else:
                     text = str(szene_dict.get("Beschreibung"))
-            aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz)
+            aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")              

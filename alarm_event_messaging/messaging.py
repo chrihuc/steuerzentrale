@@ -42,7 +42,7 @@ class Messaging:
             if user.get('Name') != None:
                 self.alle.append(user.get('Name'))
 
-    def send_direkt(self, to, titel, text, prio=2):
+    def send_direkt(self, to, titel, text, prio=2, payload=None):
         if not isinstance(to, list):
             if str(to) == 'Alle' or str(to) == 'None':
                 to = self.alle
@@ -59,13 +59,13 @@ class Messaging:
                 to.pop(num)
                 to.extend(self.alle)
         success = True
-        data = {'titel': titel, 'message': text, 'prio':prio}
+        data = {'titel': titel, 'message': text, 'prio':prio, 'payload':payload}
         for empf in to:
             mqtt_pub("Message/" + empf, data)
         return success
         #response = self.gcm.json_request(registration_ids=to, data=data)
 
-    def send_zuhause(self, to, titel, text, prio=2):
+    def send_zuhause(self, to, titel, text, prio=2, payload=None):
         if not isinstance(to, list):
             if str(to) == 'Alle' or str(to) == 'None':
                 to = self.alle
@@ -74,7 +74,7 @@ class Messaging:
             else:
                 to = [to]
         success = True
-        data = {'titel': titel, 'message': text, 'prio':prio}
+        data = {'titel': titel, 'message': text, 'prio':prio, 'payload':payload}
         for empf in to:
             anw = msqc.setting_r(empf)
             if str(anw) == 'None':
@@ -84,7 +84,7 @@ class Messaging:
         return success
 
 #   deprecated
-    def send_abwesend(self, to, titel, text, prio=2):
+    def send_abwesend(self, to, titel, text, prio=2, payload=None):
         if not isinstance(to, list):
             if str(to) == 'Alle' or str(to) == 'None':
                 to = self.alle
@@ -93,7 +93,7 @@ class Messaging:
             else:
                 to = [to]
         success = True
-        data = {'titel': titel, 'message': text, 'prio':prio}
+        data = {'titel': titel, 'message': text, 'prio':prio, 'payload':payload}
         for empf in to:
             anw = msqc.setting_r(empf)
             if not eval(anw):               

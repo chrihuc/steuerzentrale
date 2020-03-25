@@ -833,10 +833,12 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
     dicti = {}
     dicti_1 = {}
     alle_szenen = []
+    alle_payloads    = []
     desc = None
     heartbt = None
     filtered = False
     writeToInflx = False
+    hks = device
     
 #    print(device,value)
 #    if 'MQTT' in device:
@@ -938,6 +940,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 #dicti = {key: "" for (key) in szene_columns}
                 for row in results:
                     szenen = []
+                    payloads = []
                     
                     violTime = None
                     latched = None                    
@@ -981,16 +984,20 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                                 if dicti.get("Dreifach") is not None:
                                     szenen.append(dicti.get("Dreifach"))
+                                    payloads.append(dicti.get("Payload"))
                                     single = False
                             elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
                                 if dicti.get("Doppel") is not None:                                
                                     szenen.append(dicti.get("Doppel"))
+                                    payloads.append(dicti.get("Payload"))
                                     single = False
                         if str(doppelklick) != "True": single = True                            
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
+                            payloads.append(dicti.get("Payload"))
                         if append and dicti.get('Immer') is not None:
                             szenen.append(dicti.get('Immer'))
+                            payloads.append(dicti.get("Payload"))
                         if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                             violTime = str(ct)
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
@@ -999,15 +1006,20 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             if dicti.get('violTime') is not None:
                                 if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
                                     szenen = []
+                                    payloads = []
                             if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
                                 szenen = []
+                                payloads = []
                         if str(dicti.get('latching')) == "True":
                             if not append and str(dicti.get('latched')) == "True":
                                 latched = 'False'
                                 # anti szene (praktisch das reset):
-                                if dicti.get('ResetSzene') is not None:szenen.append(dicti.get('ResetSzene'))
+                                if dicti.get('ResetSzene') is not None:
+                                    szenen.append(dicti.get('ResetSzene'))
+                                    payloads.append(dicti.get("Payload"))
                             elif szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
+                                payloads = []
                             elif szenen and str(dicti.get('latched')) != "True": 
 #                                print(szenen)
                                 latched = 'True'
@@ -1031,7 +1043,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             sql = 'UPDATE %s SET latched = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, lasttimes, dicti.get('Id'))
                             writeToCursor(cur, sql)                            
 #                            cur.execute(sql) 
-                    alle_szenen += szenen                            
+                    alle_szenen += szenen       
+                    alle_payloads += payloads                     
     #            get stting and logging
                 writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
 #                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
@@ -1097,7 +1110,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
 #            print(validTimers.keys())
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
-    return alle_szenen, desc, heartbt
+    return alle_szenen, desc, heartbt, alle_payloads
 
 
 

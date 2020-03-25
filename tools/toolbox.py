@@ -160,10 +160,13 @@ class communication(object):
 
     queue = []
     callbacks = {}
+    locked = False
 
     @classmethod
     def register_callback(cls, func):
         hash_id = str(uuid.uuid4())
+        while cls.locked:
+            time.sleep(.1)
         cls.callbacks[hash_id] = {'func':func,'active':True}
         return hash_id
     
@@ -175,6 +178,7 @@ class communication(object):
     @classmethod
     def send_message(cls, payload, *args, **kwargs):
         log(payload, args, kwargs, level=9)
+        cls.locked = True
         for hash_id, callbackdict in cls.callbacks.items():
             if args:
                 args_to_send =[payload].append(args)
@@ -183,6 +187,7 @@ class communication(object):
             if callbackdict['active']:
                 t = threading.Thread(target=callbackdict['func'], args=args_to_send, kwargs=kwargs)
                 t.start()
+        cls.locked = False
 #            callback(payload, *args, **kwargs)
 
 class meas_value:

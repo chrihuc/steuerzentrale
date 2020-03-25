@@ -180,12 +180,13 @@ class SecvestHandler(object):
           
     def pause_monitoring(self):
         if bool(eval(str(msqc.setting_r("PauseSecvest")))):
-            self.alarmanlage.logout()
+            if self.alarmanlage:
+                self.alarmanlage.logout()
             counter = 0
             while bool(eval(str(msqc.setting_r("PauseSecvest")))):
                 time.sleep(1)    
                 counter += 1
-                if counter > 300:
+                if counter > 3600:
                     msqc.setting_s("PauseSecvest", False)
             self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
             
