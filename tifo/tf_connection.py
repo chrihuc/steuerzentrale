@@ -914,263 +914,269 @@ class TiFo:
                      firmware_version, device_identifier, enumeration_type):
         #global self.led
         found = False
-        if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
-           enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
-            # Enumeration for LED
-            if device_identifier == LEDStrip.DEVICE_IDENTIFIER:
-                self.LEDs.append(LEDStrip(uid, self.ipcon))
-                temp_uid = str(self.LEDs[-1].get_identity()[1]) +"."+ str(self.LEDs[-1].get_identity()[0])
-                toolbox.log('LEDStrip Bricklet', temp_uid)
-                self.LEDList.addLED(self.LEDs[-1],temp_uid)
-                self.LEDs[-1].set_frame_duration(200)
-                if settings.LEDs.get(temp_uid) != None:
-                    self.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
-                    self.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
-                    found  = True
-                toolbox.log("LEDStrip", temp_uid)
-                #self.led.register_callback(self.led.CALLBACK_FRAME_RENDERED,
-                #                lambda x: __cb_frame_rendered__(self.led, x))
-                #self.led.set_rgb_values(0, self.NUM_LEDS, self.r, self.g, self.b)
-                #self.led.set_rgb_values(15, self.NUM_LEDS, self.r, self.g, self.b)
-                #self.led.set_rgb_values(30, self.NUM_LEDS, self.r, self.g, self.b)
-
-            if device_identifier == IO16.DEVICE_IDENTIFIER:
-                self.io.append(IO16(uid, self.ipcon))
-                temp_uid = str(self.io[-1].get_identity()[1]) +"."+ str(self.io[-1].get_identity()[0])
-                self.io16list.addIO(self.io[-1],temp_uid,16)
-                self.io[-1].set_debounce_period(100)
-                if settings.IO16.get(temp_uid) != None:
-                    self.io[-1].set_port_interrupt('a', settings.IO16.get(temp_uid)[0])
-                    self.io[-1].set_port_interrupt('b', settings.IO16.get(temp_uid)[1])
-                    self.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[0],'i',True)
-                    self.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[1],'i',True)
-                    self.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[2],'o',False)
-                    self.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[3],'o',False)
-                    #self.io[-1].set_port_monoflop('a', tifo_config.IO16.get(temp_uid)[4],0,tifo_config.IO16.get(temp_uid)[6])
-                    #self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
-                    self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1], uid = temp_uid ))
-                    found  = True
-                toolbox.log("IO16", temp_uid)
-
-            if device_identifier == AmbientLight.DEVICE_IDENTIFIER:
-                self.al.append(AmbientLight(uid, self.ipcon))
-                self.al[-1].set_illuminance_callback_threshold('o', 0, 0)
-                self.al[-1].set_debounce_period(5000)
-                #self.al.set_illuminance_callback_threshold('<', 30, 30)
-                #self.al.set_analog_value_callback_period(10000)
-                self.al[-1].set_illuminance_callback_period(5000)
-                #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE, self.cb_ambLight)
-                #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE_REACHED, self.cb_ambLight)
-                args = self.al[-1]
-                #self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, lambda event1, event2, event3, args=args: self.cb_ambLight(event1, event2, event3, args))
-
-                self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
-                temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
-#                thread_cb_amb = threading.Timer(60, self.thread_ambLight, [self.al[-1]])
-                #t = toolbox.OwnTimer(self.delay, function=self.thread_ambLight, args = [self.al[-1]], name="Ambient Light")
-                #self.threadliste.append(t)
-                #t.start()
-
-                thread_pt_ = threading.Timer(30, self.thread_ambLight, [self.al[-1]])
-                thread_pt_.start()                
-                
-                found  = True
-                toolbox.log("AmbientLight", temp_uid)
-
-
-            if device_identifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER:
-                self.al.append(BrickletAmbientLightV2(uid, self.ipcon))
-                self.al[-1].set_illuminance_callback_threshold('o', 0, 0)
-                self.al[-1].set_debounce_period(5000)
-                self.al[-1].set_illuminance_callback_period(5000)
-                args = self.al[-1]
-                self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
-                temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
-                thread_pt_ = threading.Timer(40, self.thread_ambLight, [self.al[-1]])
-                thread_pt_.start()                  
-                found  = True
-                toolbox.log("AmbientLight", temp_uid)
-
-            if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
-                self.co2.append(BrickletCO2(uid, self.ipcon))
-                temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
-                self.co2[-1].set_co2_concentration_callback_period(45000)
-                args = self.co2[-1]
-                self.co2[-1].register_callback(self.co2[-1].CALLBACK_CO2_CONCENTRATION, partial( self.cb_value,  device=args))
-#                thread_co2_ = threading.Timer(5, self.thread_CO2, [self.co2[-1]])
-#                thread_co2_.start()
-#                self.threadliste.append(thread_co2_)
-#                t = toolbox.OwnTimer(self.delay, function=self.thread_CO2, args = [self.co2[-1]], name="CO2 Bricklet")
-#                self.threadliste.append(t)
-#                t.start()
-                found  = True
-                toolbox.log("BrickletCO2", temp_uid)
-
-
-            if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
-                self.drb.append(BrickletDualRelay(uid, self.ipcon))
-                temp_uid = str(self.drb[-1].get_identity()[1]) +"."+ str(self.drb[-1].get_identity()[0])
-                self.drbuids[temp_uid] = BrickletDualRelay(uid, self.ipcon)
-                toolbox.log('Dual Relay Bricklet', temp_uid)
-                found  = True
-                toolbox.log("BrickletDualRelay", temp_uid)
-
-#            if device_identifier == Moisture.DEVICE_IDENTIFIER:
-#                self.moist = Moisture(uid, self.ipcon)
-#                self.moist.set_moisture_callback_period(10000)
-#                self.moist.register_callback(self.moist.CALLBACK_MOISTURE, self.cb_moisture)
-
-            if device_identifier == BrickletMotionDetector.DEVICE_IDENTIFIER:
-                self.md.append(BrickletMotionDetector(uid, self.ipcon))
-                temp_uid = str(self.md[-1].get_identity()[1]) +"."+ str(self.md[-1].get_identity()[0])
-                toolbox.log('Motion Detector Bricklet', temp_uid)
-                self.md[-1].register_callback(self.md[-1].CALLBACK_MOTION_DETECTED, partial( self.cb_md, device = self.md[-1], uid = temp_uid ))
-                self.md[-1].register_callback(self.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( self.cb_md_end, device = self.md[-1], uid = temp_uid ))
-                found  = True
-                toolbox.log("BrickletMotionDetector", temp_uid)
-
-            if device_identifier == BrickletSoundIntensity.DEVICE_IDENTIFIER:
-                self.si.append(BrickletSoundIntensity(uid, self.ipcon))
-                temp_uid = str(self.si[-1].get_identity()[1]) +"."+ str(self.si[-1].get_identity()[0])
-                toolbox.log('Sound Intensity Bricklet', temp_uid)
-                self.si[-1].set_debounce_period(60000)
-                self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
-                self.si[-1].set_intensity_callback_threshold('>',200,0)
-                found  = True
-                toolbox.log("BrickletSoundIntensity", temp_uid)
-
-            if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
-                self.ptc.append(BrickletPTC(uid, self.ipcon))
-                temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
-                self.ptc[-1].set_temperature_callback_period(45000)
-                args = [self.ptc[-1], 100.0]
-                self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.ptc[-1], div=100.0))
-#                thread_pt_ = threading.Timer(5, self.thread_pt, [self.ptc[-1]])
-#                thread_pt_.start()
-#                self.threadliste.append(thread_pt_)
-#                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.ptc[-1]], name="PT temp Bricklet")
-#                self.threadliste.append(t)
-#                t.start()
-                found  = True
-                toolbox.log("BrickletPTC", temp_uid)
-
-            if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
-                self.temp.append(BrickletTemperature(uid, self.ipcon))
-                temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
-                self.temp[-1].set_temperature_callback_period(45000)
-                self.temp[-1].register_callback(self.temp[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.temp[-1], div=100.0))
-                thread_pt_ = threading.Timer(10, self.thread_pt, [self.temp[-1]])
-                thread_pt_.start()
-#                self.threadliste.append(thread_pt_)
-#                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.temp[-1]], name="Temperature Bricklet")
-#                self.threadliste.append(t)
-#                t.start()
-                found  = True
-                toolbox.log("BrickletTemperature", temp_uid)
-
-            if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
-                self.baro.append(BrickletBarometer(uid, self.ipcon))
-                temp_uid = str(self.baro[-1].get_identity()[1]) +"."+ str(self.baro[-1].get_identity()[0])
-                self.baro[-1].set_air_pressure_callback_period(45000)
-                self.baro[-1].register_callback(self.baro[-1].CALLBACK_AIR_PRESSURE, partial( self.cb_value,  device=self.baro[-1], div=1000.0))
-#                thread_cp_ = threading.Timer(15, self.thread_cp, [self.temp[-1]])
-#                thread_cp_.start()
-#                self.threadliste.append(thread_cp_)
-#                t = toolbox.OwnTimer(self.delay, function=self.thread_cp, args = [self.temp[-1]], name="Pressure Bricklet")
-#                self.threadliste.append(t)
-#                t.start()
-                found  = True
-                toolbox.log("BrickletBarometer", temp_uid)
-
-            if device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
-                self.humi.append(BrickletHumidityV2(uid, self.ipcon))
-                temp_uid = str(self.humi[-1].get_identity()[1]) +"."+ str(self.humi[-1].get_identity()[0])
-                self.humi[-1].set_humidity_callback_configuration(45000, False, "x", 0, 0)
-                self.humi[-1].register_callback(self.humi[-1].CALLBACK_HUMIDITY, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.HU'))
-                self.humi[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
-                self.humi[-1].set_status_led_config(BrickletHumidityV2.STATUS_LED_CONFIG_OFF)
-                self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))
-                thread_hum_ = threading.Timer(20, self.thread_hum, [self.humi[-1]])
-                thread_hum_.start()
-#                self.threadliste.append(thread_hum_)
-#                t = toolbox.OwnTimer(self.delay, function=self.thread_hum, args = [self.temp[-1]], name="Humidity Bricklet")
-#                self.threadliste.append(t)
-#                t.start()
-                found  = True
-                toolbox.log("BrickletHumidityV2", temp_uid)
-
-            if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
-                self.volcu.append(BrickletVoltageCurrent(uid, self.ipcon))
-                temp_uid = str(self.volcu[-1].get_identity()[1]) +"."+ str(self.volcu[-1].get_identity()[0])
-#                thread_volc_ = threading.Timer(25, self.thread_volc, [self.temp[-1]])
-#                thread_volc_.start()
-#                self.threadliste.append(thread_volc_)
-#                t = toolbox.OwnTimer(self.delay, function=self.thread_volc, args = [self.temp[-1]], name="Vol Curr Bricklet")
-#                self.threadliste.append(t)
-#                t.start()
-                self.volcu[-1].set_debounce_period(1000)
-                self.volcu[-1].set_voltage_callback_period(1000)
-                self.volcu[-1].set_current_callback_period(1000)
-                self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.volcu[-1], uid = temp_uid ))
-                self.volcu[-1].set_voltage_callback_threshold(">", 0, 0)
-                self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.volcu[-1], uid = temp_uid ))
-                self.volcu[-1].set_current_callback_threshold(">", 0, 0)
-                found  = True
-                toolbox.log("BrickletVoltageCurrent", temp_uid)
-
-            if device_identifier == BrickletLine.DEVICE_IDENTIFIER:
-                lb = BrickletLine(uid, self.ipcon)
-                temp_uid = str(lb.get_identity()[1]) +"."+ str(lb.get_identity()[0])
-                if not temp_uid in self.lineBricklets:
-                    self.lineBricklets[temp_uid] = LineBrick(lb, uid)
-                lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
-                lb.set_debounce_period(500)
-                lb.set_reflectivity_callback_threshold('o', 3649, 3650)
-                toolbox.log('Line Bricklet', temp_uid)
-                found  = True
-
-            if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
-                self.dus.append(BrickletDistanceUS(uid, self.ipcon))
-                temp_uid = str(self.dus[-1].get_identity()[1]) +"."+ str(self.dus[-1].get_identity()[0])
-#                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value_uid, device = self.dus[-1], uid = temp_uid))
-#                self.dus[-1].set_distance_callback_threshold('o', 0, 0)
-                self.dus[-1].set_moving_average(100)
-#                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))
-#                self.dus[-1].set_distance_callback_period(5000)
-                
-                thread_us_ = threading.Timer(10, self.thread_distus, [self.dus[-1]])
-                thread_us_.start()                
-                
-                toolbox.log("BrickletDistanceUS", temp_uid)
-                found  = True
-
-            if device_identifier == BrickletMultiTouch.DEVICE_IDENTIFIER:
-                mtb = BrickletMultiTouch(uid, self.ipcon)
-                temp_uid = str(mtb.get_identity()[1]) +"."+ str(mtb.get_identity()[0])
-                if not temp_uid in self.multitouchBricklets:
-                    self.multitouchBricklets[temp_uid] = MT_Bricklet(mtb, uid)
-                mtb.register_callback(mtb.CALLBACK_TOUCH_STATE, partial( self.cb_mtb, uid = temp_uid))
-                mtb.set_electrode_sensitivity(130)
-                mtb.recalibrate()
-                toolbox.log('Multitouch Bricklet', temp_uid)
-                found  = True
-
-            if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
-                self.master.append(BrickMaster(uid, self.ipcon))
-                temp_uid = str(self.master[-1].get_identity()[0])
-                thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
-#                print(firmware_version)
-                if firmware_version[0]*100+firmware_version[1]*10+firmware_version[2] >= 232:
-                    self.master[-1].disable_status_led()
-                #thread_rs_error.start()
-                found  = True
-                toolbox.log("BrickMaster", temp_uid)
-
-            if not found:
-                toolbox.log(connected_uid, uid, device_identifier)
-                print(connected_uid, uid, device_identifier)
-            else:
-                self.delay += 5
+        while True:
+            try:
+                if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
+                   enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
+                    # Enumeration for LED
+                    if device_identifier == LEDStrip.DEVICE_IDENTIFIER:
+                        self.LEDs.append(LEDStrip(uid, self.ipcon))
+                        temp_uid = str(self.LEDs[-1].get_identity()[1]) +"."+ str(self.LEDs[-1].get_identity()[0])
+                        toolbox.log('LEDStrip Bricklet', temp_uid)
+                        self.LEDList.addLED(self.LEDs[-1],temp_uid)
+                        self.LEDs[-1].set_frame_duration(200)
+                        if settings.LEDs.get(temp_uid) != None:
+                            self.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
+                            self.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
+                            found  = True
+                        toolbox.log("LEDStrip", temp_uid)
+                        #self.led.register_callback(self.led.CALLBACK_FRAME_RENDERED,
+                        #                lambda x: __cb_frame_rendered__(self.led, x))
+                        #self.led.set_rgb_values(0, self.NUM_LEDS, self.r, self.g, self.b)
+                        #self.led.set_rgb_values(15, self.NUM_LEDS, self.r, self.g, self.b)
+                        #self.led.set_rgb_values(30, self.NUM_LEDS, self.r, self.g, self.b)
+        
+                    if device_identifier == IO16.DEVICE_IDENTIFIER:
+                        self.io.append(IO16(uid, self.ipcon))
+                        temp_uid = str(self.io[-1].get_identity()[1]) +"."+ str(self.io[-1].get_identity()[0])
+                        self.io16list.addIO(self.io[-1],temp_uid,16)
+                        self.io[-1].set_debounce_period(100)
+                        if settings.IO16.get(temp_uid) != None:
+                            self.io[-1].set_port_interrupt('a', settings.IO16.get(temp_uid)[0])
+                            self.io[-1].set_port_interrupt('b', settings.IO16.get(temp_uid)[1])
+                            self.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[0],'i',True)
+                            self.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[1],'i',True)
+                            self.io[-1].set_port_configuration('a', settings.IO16.get(temp_uid)[2],'o',False)
+                            self.io[-1].set_port_configuration('b', settings.IO16.get(temp_uid)[3],'o',False)
+                            #self.io[-1].set_port_monoflop('a', tifo_config.IO16.get(temp_uid)[4],0,tifo_config.IO16.get(temp_uid)[6])
+                            #self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
+                            self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1], uid = temp_uid ))
+                            found  = True
+                        toolbox.log("IO16", temp_uid)
+        
+                    if device_identifier == AmbientLight.DEVICE_IDENTIFIER:
+                        self.al.append(AmbientLight(uid, self.ipcon))
+                        self.al[-1].set_illuminance_callback_threshold('o', 0, 0)
+                        self.al[-1].set_debounce_period(5000)
+                        #self.al.set_illuminance_callback_threshold('<', 30, 30)
+                        #self.al.set_analog_value_callback_period(10000)
+                        self.al[-1].set_illuminance_callback_period(5000)
+                        #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE, self.cb_ambLight)
+                        #self.al.register_callback(self.al.CALLBACK_ILLUMINANCE_REACHED, self.cb_ambLight)
+                        args = self.al[-1]
+                        #self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, lambda event1, event2, event3, args=args: self.cb_ambLight(event1, event2, event3, args))
+        
+                        self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
+                        temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
+        #                thread_cb_amb = threading.Timer(60, self.thread_ambLight, [self.al[-1]])
+                        #t = toolbox.OwnTimer(self.delay, function=self.thread_ambLight, args = [self.al[-1]], name="Ambient Light")
+                        #self.threadliste.append(t)
+                        #t.start()
+        
+                        thread_pt_ = threading.Timer(30, self.thread_ambLight, [self.al[-1]])
+                        thread_pt_.start()                
+                        
+                        found  = True
+                        toolbox.log("AmbientLight", temp_uid)
+        
+        
+                    if device_identifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER:
+                        self.al.append(BrickletAmbientLightV2(uid, self.ipcon))
+                        self.al[-1].set_illuminance_callback_threshold('o', 0, 0)
+                        self.al[-1].set_debounce_period(5000)
+                        self.al[-1].set_illuminance_callback_period(5000)
+                        args = self.al[-1]
+                        self.al[-1].register_callback(self.al[-1].CALLBACK_ILLUMINANCE_REACHED, partial( self.cb_ambLight,  device=args))
+                        temp_uid = str(self.al[-1].get_identity()[1]) +"."+ str(self.al[-1].get_identity()[0])
+                        thread_pt_ = threading.Timer(40, self.thread_ambLight, [self.al[-1]])
+                        thread_pt_.start()                  
+                        found  = True
+                        toolbox.log("AmbientLight", temp_uid)
+        
+                    if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
+                        self.co2.append(BrickletCO2(uid, self.ipcon))
+                        temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
+                        self.co2[-1].set_co2_concentration_callback_period(45000)
+                        args = self.co2[-1]
+                        self.co2[-1].register_callback(self.co2[-1].CALLBACK_CO2_CONCENTRATION, partial( self.cb_value,  device=args))
+        #                thread_co2_ = threading.Timer(5, self.thread_CO2, [self.co2[-1]])
+        #                thread_co2_.start()
+        #                self.threadliste.append(thread_co2_)
+        #                t = toolbox.OwnTimer(self.delay, function=self.thread_CO2, args = [self.co2[-1]], name="CO2 Bricklet")
+        #                self.threadliste.append(t)
+        #                t.start()
+                        found  = True
+                        toolbox.log("BrickletCO2", temp_uid)
+        
+        
+                    if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
+                        self.drb.append(BrickletDualRelay(uid, self.ipcon))
+                        temp_uid = str(self.drb[-1].get_identity()[1]) +"."+ str(self.drb[-1].get_identity()[0])
+                        self.drbuids[temp_uid] = BrickletDualRelay(uid, self.ipcon)
+                        toolbox.log('Dual Relay Bricklet', temp_uid)
+                        found  = True
+                        toolbox.log("BrickletDualRelay", temp_uid)
+        
+        #            if device_identifier == Moisture.DEVICE_IDENTIFIER:
+        #                self.moist = Moisture(uid, self.ipcon)
+        #                self.moist.set_moisture_callback_period(10000)
+        #                self.moist.register_callback(self.moist.CALLBACK_MOISTURE, self.cb_moisture)
+        
+                    if device_identifier == BrickletMotionDetector.DEVICE_IDENTIFIER:
+                        self.md.append(BrickletMotionDetector(uid, self.ipcon))
+                        temp_uid = str(self.md[-1].get_identity()[1]) +"."+ str(self.md[-1].get_identity()[0])
+                        toolbox.log('Motion Detector Bricklet', temp_uid)
+                        self.md[-1].register_callback(self.md[-1].CALLBACK_MOTION_DETECTED, partial( self.cb_md, device = self.md[-1], uid = temp_uid ))
+                        self.md[-1].register_callback(self.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( self.cb_md_end, device = self.md[-1], uid = temp_uid ))
+                        found  = True
+                        toolbox.log("BrickletMotionDetector", temp_uid)
+        
+                    if device_identifier == BrickletSoundIntensity.DEVICE_IDENTIFIER:
+                        self.si.append(BrickletSoundIntensity(uid, self.ipcon))
+                        temp_uid = str(self.si[-1].get_identity()[1]) +"."+ str(self.si[-1].get_identity()[0])
+                        toolbox.log('Sound Intensity Bricklet', temp_uid)
+                        self.si[-1].set_debounce_period(60000)
+                        self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
+                        self.si[-1].set_intensity_callback_threshold('>',200,0)
+                        found  = True
+                        toolbox.log("BrickletSoundIntensity", temp_uid)
+        
+                    if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
+                        self.ptc.append(BrickletPTC(uid, self.ipcon))
+                        temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
+                        self.ptc[-1].set_temperature_callback_period(45000)
+                        args = [self.ptc[-1], 100.0]
+                        self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.ptc[-1], div=100.0))
+        #                thread_pt_ = threading.Timer(5, self.thread_pt, [self.ptc[-1]])
+        #                thread_pt_.start()
+        #                self.threadliste.append(thread_pt_)
+        #                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.ptc[-1]], name="PT temp Bricklet")
+        #                self.threadliste.append(t)
+        #                t.start()
+                        found  = True
+                        toolbox.log("BrickletPTC", temp_uid)
+        
+                    if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
+                        self.temp.append(BrickletTemperature(uid, self.ipcon))
+                        temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
+                        self.temp[-1].set_temperature_callback_period(45000)
+                        self.temp[-1].register_callback(self.temp[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.temp[-1], div=100.0))
+                        thread_pt_ = threading.Timer(10, self.thread_pt, [self.temp[-1]])
+                        thread_pt_.start()
+        #                self.threadliste.append(thread_pt_)
+        #                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.temp[-1]], name="Temperature Bricklet")
+        #                self.threadliste.append(t)
+        #                t.start()
+                        found  = True
+                        toolbox.log("BrickletTemperature", temp_uid)
+        
+                    if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
+                        self.baro.append(BrickletBarometer(uid, self.ipcon))
+                        temp_uid = str(self.baro[-1].get_identity()[1]) +"."+ str(self.baro[-1].get_identity()[0])
+                        self.baro[-1].set_air_pressure_callback_period(45000)
+                        self.baro[-1].register_callback(self.baro[-1].CALLBACK_AIR_PRESSURE, partial( self.cb_value,  device=self.baro[-1], div=1000.0))
+        #                thread_cp_ = threading.Timer(15, self.thread_cp, [self.temp[-1]])
+        #                thread_cp_.start()
+        #                self.threadliste.append(thread_cp_)
+        #                t = toolbox.OwnTimer(self.delay, function=self.thread_cp, args = [self.temp[-1]], name="Pressure Bricklet")
+        #                self.threadliste.append(t)
+        #                t.start()
+                        found  = True
+                        toolbox.log("BrickletBarometer", temp_uid)
+        
+                    if device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
+                        self.humi.append(BrickletHumidityV2(uid, self.ipcon))
+                        temp_uid = str(self.humi[-1].get_identity()[1]) +"."+ str(self.humi[-1].get_identity()[0])
+                        self.humi[-1].set_humidity_callback_configuration(45000, False, "x", 0, 0)
+                        self.humi[-1].register_callback(self.humi[-1].CALLBACK_HUMIDITY, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.HU'))
+                        self.humi[-1].set_temperature_callback_configuration(45000, False, "x", 0, 0)
+                        self.humi[-1].set_status_led_config(BrickletHumidityV2.STATUS_LED_CONFIG_OFF)
+                        self.humi[-1].register_callback(self.humi[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.humi[-1], div=100.0, ext='.TE'))
+                        thread_hum_ = threading.Timer(20, self.thread_hum, [self.humi[-1]])
+                        thread_hum_.start()
+        #                self.threadliste.append(thread_hum_)
+        #                t = toolbox.OwnTimer(self.delay, function=self.thread_hum, args = [self.temp[-1]], name="Humidity Bricklet")
+        #                self.threadliste.append(t)
+        #                t.start()
+                        found  = True
+                        toolbox.log("BrickletHumidityV2", temp_uid)
+        
+                    if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
+                        self.volcu.append(BrickletVoltageCurrent(uid, self.ipcon))
+                        temp_uid = str(self.volcu[-1].get_identity()[1]) +"."+ str(self.volcu[-1].get_identity()[0])
+        #                thread_volc_ = threading.Timer(25, self.thread_volc, [self.temp[-1]])
+        #                thread_volc_.start()
+        #                self.threadliste.append(thread_volc_)
+        #                t = toolbox.OwnTimer(self.delay, function=self.thread_volc, args = [self.temp[-1]], name="Vol Curr Bricklet")
+        #                self.threadliste.append(t)
+        #                t.start()
+                        self.volcu[-1].set_debounce_period(1000)
+                        self.volcu[-1].set_voltage_callback_period(1000)
+                        self.volcu[-1].set_current_callback_period(1000)
+                        self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_VOLTAGE_REACHED, partial( self.cb_volc_vol, device = self.volcu[-1], uid = temp_uid ))
+                        self.volcu[-1].set_voltage_callback_threshold(">", 0, 0)
+                        self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.volcu[-1], uid = temp_uid ))
+                        self.volcu[-1].set_current_callback_threshold(">", 0, 0)
+                        found  = True
+                        toolbox.log("BrickletVoltageCurrent", temp_uid)
+        
+                    if device_identifier == BrickletLine.DEVICE_IDENTIFIER:
+                        lb = BrickletLine(uid, self.ipcon)
+                        temp_uid = str(lb.get_identity()[1]) +"."+ str(lb.get_identity()[0])
+                        if not temp_uid in self.lineBricklets:
+                            self.lineBricklets[temp_uid] = LineBrick(lb, uid)
+                        lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
+                        lb.set_debounce_period(500)
+                        lb.set_reflectivity_callback_threshold('o', 3649, 3650)
+                        toolbox.log('Line Bricklet', temp_uid)
+                        found  = True
+        
+                    if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
+                        self.dus.append(BrickletDistanceUS(uid, self.ipcon))
+                        temp_uid = str(self.dus[-1].get_identity()[1]) +"."+ str(self.dus[-1].get_identity()[0])
+        #                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE, partial( self.cb_value_uid, device = self.dus[-1], uid = temp_uid))
+        #                self.dus[-1].set_distance_callback_threshold('o', 0, 0)
+                        self.dus[-1].set_moving_average(100)
+        #                self.dus[-1].register_callback(self.dus[-1].CALLBACK_DISTANCE_REACHED, partial( self.cb_dist_value, device = self.dus[-1]))
+        #                self.dus[-1].set_distance_callback_period(5000)
+                        
+                        thread_us_ = threading.Timer(10, self.thread_distus, [self.dus[-1]])
+                        thread_us_.start()                
+                        
+                        toolbox.log("BrickletDistanceUS", temp_uid)
+                        found  = True
+        
+                    if device_identifier == BrickletMultiTouch.DEVICE_IDENTIFIER:
+                        mtb = BrickletMultiTouch(uid, self.ipcon)
+                        temp_uid = str(mtb.get_identity()[1]) +"."+ str(mtb.get_identity()[0])
+                        if not temp_uid in self.multitouchBricklets:
+                            self.multitouchBricklets[temp_uid] = MT_Bricklet(mtb, uid)
+                        mtb.register_callback(mtb.CALLBACK_TOUCH_STATE, partial( self.cb_mtb, uid = temp_uid))
+                        mtb.set_electrode_sensitivity(130)
+                        mtb.recalibrate()
+                        toolbox.log('Multitouch Bricklet', temp_uid)
+                        found  = True
+        
+                    if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
+                        self.master.append(BrickMaster(uid, self.ipcon))
+                        temp_uid = str(self.master[-1].get_identity()[0])
+                        thread_rs_error = threading.Timer(60, self.thread_RSerror, [])
+        #                print(firmware_version)
+                        if firmware_version[0]*100+firmware_version[1]*10+firmware_version[2] >= 232:
+                            self.master[-1].disable_status_led()
+                        #thread_rs_error.start()
+                        found  = True
+                        toolbox.log("BrickMaster", temp_uid)
+        
+                    if not found:
+                        toolbox.log(connected_uid, uid, device_identifier)
+                        print(connected_uid, uid, device_identifier)
+                    else:
+                        self.delay += 5
+                break
+            except Error as e:
+                toolbox.log('Enumerate Error: ' + str(e.description))
+                time.sleep(10)                        
 
     def cb_connected(self, connected_reason):
         # Enumerate devices again. If we reconnected, the Bricks/Bricklets

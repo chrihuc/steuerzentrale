@@ -332,8 +332,8 @@ class Szenen(object):
         t.start()
 
     @classmethod
-    def threadExecute(cls, szene, check_bedingung=False, wert=0, device=None, desc=''):
-        t = threading.Thread(target=cls.execute, args=[szene, check_bedingung, wert, device, False, desc])
+    def threadExecute(cls, szene, check_bedingung=False, wert=0, device=None, desc='', payload=None):
+        t = threading.Thread(target=cls.execute, args=[szene, check_bedingung, wert, device, False, desc, payload])
         t.start()
 
     @classmethod

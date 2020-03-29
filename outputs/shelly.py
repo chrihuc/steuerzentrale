@@ -85,13 +85,17 @@ def main():
         time.sleep(1)      
 
 def receive_communication(payload, *args, **kwargs):
-    if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') in ['Shelly', 'ShellyConf']):
+    if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') in ['Shelly', 'ShellyConf', 'ShellyDim']):
         adress=toolbox.kw_unpack(kwargs,'adress')
         device = adress.split(".")[1] 
+        print(payload)
 #            der teil muss abgekürzt werden, wenn ein ESP der empfänger ist, auf nur das nötigste
         if toolbox.kw_unpack(kwargs,'receiver') == 'Shelly':
             result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'], retain=False)
             toolbox.communication.send_message(payload, typ='return', value=result) 
+        elif toolbox.kw_unpack(kwargs,'receiver') == 'ShellyDim':
+            result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload, retain=False)
+            toolbox.communication.send_message(payload, typ='return', value=result)             
         elif toolbox.kw_unpack(kwargs,'receiver') == 'ShellyConf':
             ip = adress.split(".")[1] + "." + adress.split(".")[2] + "." + adress.split(".")[3] + "." + adress.split(".")[4]
             shelly = Shelly(ip)
