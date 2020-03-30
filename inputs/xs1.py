@@ -13,7 +13,7 @@ from alarm_event_messaging import alarmevents as aevs
 from database import mysql_connector as msqc
 from tools import toolbox
 from outputs import xs1
-from outputs import szenen
+#from outputs import szenen
 
 #toolbox.log('debug on')
 
@@ -27,6 +27,12 @@ last_data = ""
 ezcontrol = xs1.XS1(constants.xs1_.IP)
 conn = pycurl.Curl()
 #scenes = szenen.Szenen()
+
+def broadcast_input_value(Name, Value):
+    payload = {'Name':Name,'Value':Value}
+#    on server:
+    toolbox.log(Name, Value)
+    toolbox.communication.send_message(payload, typ='InputValue')
 
 def last_data_reset():
     last_data = ""
@@ -70,7 +76,8 @@ def on_receive(data):
     if (("heartbeat" in name) and (value == 0)):
         ezcontrol.SetSwitchFunction("heartbeat", "1")
     else:
-        szenen.Szenen.trigger_scenes(name, value)
+#        szenen.Szenen.trigger_scenes(name, value)
+        broadcast_input_value(name, value)
 #    szns, desc = msqc.inputs(name,value)
 #    for szene in szns:
 #        if szene <> None:

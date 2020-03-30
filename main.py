@@ -51,11 +51,19 @@ threadliste = []
 
 #services = {'xs1':xs1.main}
 try:
+    from outputs import szenen
+except Exception as e:
+    print('szenen not started')    
+    print(e)
+    aes.new_event(description="szenen not started", prio=9)
+
+try:
     from inputs import xs1
     t = toolbox.OwnTimer(0, function=xs1.main, args = [], name="xs1")
     threadliste.append(t)
     t.start()
 except Exception as e:
+    print('xs1 not started')    
     print(e)
     aes.new_event(description="xs1 not started", prio=9)
 
@@ -85,6 +93,7 @@ try:
     threadliste.append(t)
     t.start()
 except Exception as e:
+    print('cron not started')
     print(e)
     aes.new_event(description="cron not started", prio=9)    
     

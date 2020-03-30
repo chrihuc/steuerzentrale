@@ -167,15 +167,19 @@ class Sonos:
         con.close()
 
     def socoDiscover(self):
-        if len(self.devices) == 0: 
-            self.devices = soco.discover()
-            if not self.devices:
-                aes.new_event(description="Soco discover not working", prio=9)
-                self.devices = set()
-                for ip in self.Names.keys():
-                    if toolbox.ping(ip):
-                        newP = soco.SoCo(ip)
-                        self.devices.add(newP)
+        try:
+            if len(self.devices) == 0: 
+                self.devices = soco.discover()
+                if not self.devices:
+                    aes.new_event(description="Soco discover not working", prio=9)
+                    self.devices = set()
+                    for ip in self.Names.keys():
+                        if toolbox.ping(ip):
+                            newP = soco.SoCo(ip)
+                            self.devices.add(newP)
+        except Exception as e:
+            print('sonos not started')    
+            print(e)
 #            else:
 #                aes.new_event(description="Soco discover working again", prio=9)                        
         return self.devices
