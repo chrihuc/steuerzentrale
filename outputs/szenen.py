@@ -347,7 +347,7 @@ class Szenen(object):
         if use > 99:
 #            print("ProcessorLeistung zu hoch")
             cls.high_cpu_cnt += 1
-            if cls.high_cpu_cnt > 10:
+            if cls.high_cpu_cnt > 30:
                 aes.new_event(description="ProcessorLeistung zu hoch bei: " + szene, prio=9, karenz = 0.03)
                 t = toolbox.OwnTimer(10, function=cls.reset_cpu_cnt, name="resetcpu")
                 t.start()            
