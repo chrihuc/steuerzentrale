@@ -944,6 +944,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     payloads = []
                     kondition = []
                     
+                    descri = dicti.get("Status")
+                    if descri is None:
+                        descri = ''
+                    
                     violTime = None
                     latched = None                    
                     
@@ -987,23 +991,23 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                                 if dicti.get("Dreifach") is not None:
                                     szenen.append(dicti.get("Dreifach"))
                                     payloads.append(dicti.get("Payload"))
-                                    kondition.append(desc + " " + dicti.get("Status"))
+                                    kondition.append(desc + " " + descri)
                                     single = False
                             elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
                                 if dicti.get("Doppel") is not None:                                
                                     szenen.append(dicti.get("Doppel"))
                                     payloads.append(dicti.get("Payload"))
-                                    kondition.append(desc + " " + dicti.get("Status"))
+                                    kondition.append(desc + " " + descri)
                                     single = False
                         if str(doppelklick) != "True": single = True                            
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
                             payloads.append(dicti.get("Payload"))
-                            kondition.append(desc + " " + dicti.get("Status"))
+                            kondition.append(desc + " " + descri)
                         if append and dicti.get('Immer') is not None:
                             szenen.append(dicti.get('Immer'))
                             payloads.append(dicti.get("Payload"))
-                            kondition.append(desc + " " + dicti.get("Status"))
+                            kondition.append(desc + " " + descri)
                         if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                             violTime = str(ct)
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
@@ -1025,7 +1029,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                                 if dicti.get('ResetSzene') is not None:
                                     szenen.append(dicti.get('ResetSzene'))
                                     payloads.append(dicti.get("Payload"))
-                                    kondition.append(desc + " " + dicti.get("Status"))
+                                    kondition.append(desc + " " + descri)
                             elif szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
                                 payloads = []
