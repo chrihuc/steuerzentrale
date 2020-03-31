@@ -112,7 +112,7 @@ class Szenen(object):
 #        for szene in szns:
         for i, szene in enumerate(szns):
             if szene != None:
-                cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc, payload=payloads[i])
+                cls.threadExecute(szene, check_bedingung=False, wert=value, device=desc[i], payload=payloads[i])
 
     @staticmethod
     def list_commands(gruppe='default'):

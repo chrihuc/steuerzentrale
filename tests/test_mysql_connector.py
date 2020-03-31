@@ -26,8 +26,8 @@ class TestUM(unittest.TestCase):
 #        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 1))
 #        print(msqc.inputs('MQTT.Satellite/BueroPI/ZWave/4009416294/72057594227277824', 0))
 #        print(msqc.read_inputs_dict())
-        print(msqc.inputs('Test/test', 1))
-        print(msqc.inputs('Test/test', 0))        
+        print(msqc.inputs('Inputs.ZimmerSaugen', 8))
+#        print(msqc.inputs('Test/test', 0))        
 #        print(msqc.mdb_read_table_column_filt2(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
 #    def test_get_device_adress(self):
 #        print msqlc.get_device_adress('Vm1ZIM1SAT1LI01')

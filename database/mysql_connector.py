@@ -833,7 +833,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
     dicti = {}
     dicti_1 = {}
     alle_szenen = []
-    alle_payloads    = []
+    alle_payloads = []
+    descriptions = []
     desc = None
     heartbt = None
     filtered = False
@@ -941,6 +942,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 for row in results:
                     szenen = []
                     payloads = []
+                    kondition = []
                     
                     violTime = None
                     latched = None                    
@@ -985,19 +987,23 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                                 if dicti.get("Dreifach") is not None:
                                     szenen.append(dicti.get("Dreifach"))
                                     payloads.append(dicti.get("Payload"))
+                                    kondition.append(desc + " " + dicti.get("Status"))
                                     single = False
                             elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
                                 if dicti.get("Doppel") is not None:                                
                                     szenen.append(dicti.get("Doppel"))
                                     payloads.append(dicti.get("Payload"))
+                                    kondition.append(desc + " " + dicti.get("Status"))
                                     single = False
                         if str(doppelklick) != "True": single = True                            
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
                             payloads.append(dicti.get("Payload"))
+                            kondition.append(desc + " " + dicti.get("Status"))
                         if append and dicti.get('Immer') is not None:
                             szenen.append(dicti.get('Immer'))
                             payloads.append(dicti.get("Payload"))
+                            kondition.append(desc + " " + dicti.get("Status"))
                         if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                             violTime = str(ct)
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
@@ -1007,9 +1013,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                                 if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
                                     szenen = []
                                     payloads = []
+                                    kondition = []
                             if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
                                 szenen = []
                                 payloads = []
+                                kondition = []
                         if str(dicti.get('latching')) == "True":
                             if not append and str(dicti.get('latched')) == "True":
                                 latched = 'False'
@@ -1017,9 +1025,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                                 if dicti.get('ResetSzene') is not None:
                                     szenen.append(dicti.get('ResetSzene'))
                                     payloads.append(dicti.get("Payload"))
+                                    kondition.append(desc + " " + dicti.get("Status"))
                             elif szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
                                 payloads = []
+                                kondition = []
                             elif szenen and str(dicti.get('latched')) != "True": 
 #                                print(szenen)
                                 latched = 'True'
@@ -1044,7 +1054,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             writeToCursor(cur, sql)                            
 #                            cur.execute(sql) 
                     alle_szenen += szenen       
-                    alle_payloads += payloads                     
+                    alle_payloads += payloads
+                    descriptions += kondition                     
     #            get stting and logging
                 writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
 #                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
@@ -1110,7 +1121,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
 #            print(validTimers.keys())
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
-    return alle_szenen, desc, heartbt, alle_payloads
+    return alle_szenen, descriptions, heartbt, alle_payloads
 
 
 
@@ -1170,6 +1181,7 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
             # Filtern, wenn groesser oder kleiner Messung ignorieren
             filtering = dicti_1['Filter']
             hks = dicti_1['HKS']
+            desc = dicti_1['Description']
             # könnte fallingback auch vorher definieren
             if fallingback and dicti_1['fallback'] is not None:
                 value = float(dicti_1['fallback'])
@@ -1187,7 +1199,6 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
             if not filtered:        
                 valid = dicti_1['valid']
                 heartbt = dicti_1['heartbeat']
-                desc = dicti_1['Description']
                 komp = dicti_1['Kompression']
                 hyst = dicti_1['Hysterese']
                 recSzn = dicti_1['RecoverSzn']
@@ -1248,6 +1259,7 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
                 #dicti = {key: "" for (key) in szene_columns}
                 for row in results:
                     szenen = []
+                    kondition = ''
                     
                     violTime = None
                     latched = None                    
@@ -1291,16 +1303,20 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
                             if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                                 if dicti.get("Dreifach") is not None:
                                     szenen.append(dicti.get("Dreifach"))
+                                    kondition += dicti.get("Status") + ' '
                                     single = False
                             elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
                                 if dicti.get("Doppel") is not None:                                
                                     szenen.append(dicti.get("Doppel"))
+                                    kondition += dicti.get("Status") + ' '
                                     single = False
                         if str(doppelklick) != "True": single = True                            
                         if single and append and dicti.get(setting_r("Status")) is not None: 
                             szenen.append(dicti.get(setting_r("Status")))
+                            kondition += dicti.get("Status") + ' '
                         if append and dicti.get('Immer') is not None:
                             szenen.append(dicti.get('Immer'))
+                            kondition += dicti.get("Status") + ' '
                         if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                             violTime = str(ct)
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
@@ -1309,15 +1325,20 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
                             if dicti.get('violTime') is not None:
                                 if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
                                     szenen = []
+                                    kondition = ''
                             if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
                                 szenen = []
+                                kondition = ''
                         if str(dicti.get('latching')) == "True":
                             if not append and str(dicti.get('latched')) == "True":
                                 latched = 'False'
                                 # anti szene (praktisch das reset):
-                                if dicti.get('ResetSzene') is not None:szenen.append(dicti.get('ResetSzene'))
+                                if dicti.get('ResetSzene') is not None:
+                                    szenen.append(dicti.get('ResetSzene'))
+                                    kondition += dicti.get("Status") + ' '
                             elif szenen and str(dicti.get('latched')) == "True":
                                 szenen = []
+                                kondition = ''
                             elif szenen and str(dicti.get('latched')) != "True": 
 #                                print(szenen)
                                 latched = 'True'
@@ -1341,7 +1362,8 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
                             sql = 'UPDATE %s SET latched = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, lasttimes, dicti.get('Id'))
                             writeToCursor(cur, sql)                            
 #                            cur.execute(sql) 
-                    alle_szenen += szenen                            
+                    alle_szenen += szenen 
+                    desc = desc + ' ' + kondition                           
     #            get stting and logging
                 writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
 #                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
