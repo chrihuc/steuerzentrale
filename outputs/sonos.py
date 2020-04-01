@@ -854,6 +854,9 @@ class Sonos:
                 device.unjoin()
         return True
 
+    def SoCoInput(self,player_ip,inpPlayer):
+        _, _, uid, _ = self.get_addr(str(inpPlayer))
+        self.StreamInput(player_ip,uid)
 
     def play_local_file(self, player_n, text):
         """Add a non-py file from folder ./media and subfolders to soco"""
@@ -999,7 +1002,7 @@ class Sonos:
                         time.sleep(laenge + 1)
                         self.SetPause(player_ip)
                     elif (str(command) == "EingangWohnzi"):
-                        self.StreamInput(player_ip, self.WohnZiZone)
+                        self.SoCoInput(player_ip, 'Wohnzimmer')
                     elif (str(command) == "SpeicherFavorit"):
                         self.soco_get_status(player, sznName='Favorit', mainInfo=True)                
                     elif (str(command) == "Isolieren"):
