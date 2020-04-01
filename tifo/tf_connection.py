@@ -895,20 +895,23 @@ class TiFo:
     def set_device(self, data_ev, adress=None):
 #       TODO do threaded with stop criteria
 #        TODO change to send address and check if connected
-        toolbox.log(data_ev)
-        uid = adress.split(".")[1] + '.' + adress.split(".")[2]
-        if settings.outputs.get(data_ev.get('Device')) == 'IO16o':
-            return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
-        elif settings.outputs.get(data_ev.get('Device')) == 'IO16o':
-            return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
-        elif settings.outputs.get(data_ev.get('Device')) == 'LEDs':
-            return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
-#        elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
-        elif uid in self.drbuids.keys():
-#            print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)
-            return self.set_drb(data_ev.get('Device'),data_ev.get('Value'), adress)
-        else:
-            return False
+        try:
+            toolbox.log(data_ev)
+            uid = adress.split(".")[1] + '.' + adress.split(".")[2]
+            if settings.outputs.get(data_ev.get('Device')) == 'IO16o':
+                return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
+            elif settings.outputs.get(data_ev.get('Device')) == 'IO16o':
+                return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
+            elif settings.outputs.get(data_ev.get('Device')) == 'LEDs':
+                return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
+    #        elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
+            elif uid in self.drbuids.keys():
+    #            print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)
+                return self.set_drb(data_ev.get('Device'),data_ev.get('Value'), adress)
+            else:
+                return False
+        except Error as e:
+            print(e)
 
     def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):

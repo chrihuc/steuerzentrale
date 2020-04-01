@@ -855,10 +855,10 @@ class Sonos:
         return True
 
     def SoCoInput(self,player,player_ip,inpPlayer):
-        _, _, uid, _ = self.get_addr(str(inpPlayer))
-        print(player_ip,uid)
-        player.switch_to_line_in(uid)
-        self.StreamInput(player_ip,uid)
+        master, _, uid, _ = self.get_addr(str(inpPlayer))
+        #print(player_ip,uid)
+        player.switch_to_line_in(master)
+        #self.StreamInput(player_ip,uid)
 
     def play_local_file(self, player_n, text):
         """Add a non-py file from folder ./media and subfolders to soco"""
