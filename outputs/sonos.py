@@ -929,7 +929,7 @@ class Sonos:
                     pass
 #                print('player is none', player, command, myId, Sonos.FiFo)                        
                 return False 
-            print(player, command)               
+#            print(player, command)               
             while tries < 4:
                 try:                
                     if player in self.Devices:
