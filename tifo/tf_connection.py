@@ -1167,7 +1167,7 @@ class TiFo:
                         temp_uid = str(self.aiq[-1].get_identity()[1]) +"."+ str(self.aiq[-1].get_identity()[0])
                         self.aiq[-1].set_status_led_config(0)
                         self.aiq[-1].set_iaq_index_callback_configuration(45000, False)
-                        self.aiq[-1].register_callback(self.temp[-1].CALLBACK_IAQ_INDEX, partial( self.cb_value,  device=self.aiq[-1], div=1, ext="aiq"))
+                        self.aiq[-1].register_callback(self.aiq[-1].CALLBACK_IAQ_INDEX, partial( self.cb_value,  device=self.aiq[-1], div=1, ext="aiq"))
                         found  = True
                         toolbox.log("BrickletAIQ", temp_uid)        
         
