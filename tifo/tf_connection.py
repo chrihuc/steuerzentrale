@@ -434,6 +434,12 @@ class TiFo:
         broadcast_input_value('TiFo.' + name + ext, str(value/div))
         self.timeout_reset()
 
+    def cb_values(self, value, accuracy,device,div=1.0,ext=''):
+        toolbox.log(device)
+        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+        broadcast_input_value('TiFo.' + name + ext, str(value/div))
+        self.timeout_reset()
+
     def cb_value_uid(self, value,device,div=1.0,ext='',uid=''):
         toolbox.log(device)
         name = uid
@@ -1168,7 +1174,7 @@ class TiFo:
                         temp_uid = str(self.aiq[-1].get_identity()[1]) +"."+ str(self.aiq[-1].get_identity()[0])
                         self.aiq[-1].set_status_led_config(0)
                         self.aiq[-1].set_iaq_index_callback_configuration(45000, False)
-                        self.aiq[-1].register_callback(self.aiq[-1].CALLBACK_IAQ_INDEX, partial( self.cb_value,  device=aiq, div=1.0, ext="aiq"))
+                        self.aiq[-1].register_callback(self.aiq[-1].CALLBACK_IAQ_INDEX, partial( self.cb_values,  device=aiq, div=1.0, ext="aiq"))
                         found  = True
                         toolbox.log("BrickletAIQ", temp_uid)        
         
