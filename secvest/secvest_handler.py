@@ -39,7 +39,7 @@ class SecvestHandler(object):
         success = False
         status_part = alarmanlage.get_partition(partition)
         if status_part['state'] == 'set':
-            print('ok')
+#            print('ok')
             aes.new_event(description="Secvest aktiv", prio=0)
             broadcast_input_value('Secvest.Partition' + str(partition), str(1))
             success = True
@@ -57,7 +57,7 @@ class SecvestHandler(object):
         success = False
         status_part = alarmanlage.get_partition(partition)
         if status_part['state'] == 'unset':
-            print('ok')
+#            print('ok')
             aes.new_event(description="Secvest deaktiviert", prio=0)
             broadcast_input_value('Secvest.Partition' + str(partition), str(0))
             success = True

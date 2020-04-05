@@ -32,6 +32,7 @@ from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.bricklet_line import BrickletLine
 from tinkerforge.bricklet_multi_touch import BrickletMultiTouch
+from tinkerforge.bricklet_air_quality import BrickletAirQuality
 from tinkerforge.brick_master import BrickMaster
 from tinkerforge.ip_connection import Error
 
@@ -332,6 +333,7 @@ class TiFo:
         self.humi = []
         self.co2 = []
         self.volcu = []
+        self.aiq = {}
         self.moist = None
         self.unknown = []
         self.threadliste = []
@@ -1159,6 +1161,15 @@ class TiFo:
                         mtb.recalibrate()
                         toolbox.log('Multitouch Bricklet', temp_uid)
                         found  = True
+        
+                    if device_identifier == BrickletAirQuality.DEVICE_IDENTIFIER:
+                        self.aiq.append(BrickletAirQuality(uid, self.ipcon))
+                        temp_uid = str(self.aiq[-1].get_identity()[1]) +"."+ str(self.aiq[-1].get_identity()[0])
+                        self.aiq[-1].set_status_led_config(0)
+                        self.aiq[-1].set_iaq_index_callback_configuration(45000, False)
+                        self.aiq[-1].register_callback(self.temp[-1].CALLBACK_IAQ_INDEX, partial( self.cb_value,  device=self.aiq[-1], div=1, ext="aiq"))
+                        found  = True
+                        toolbox.log("BrickletAIQ", temp_uid)        
         
                     if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                         self.master.append(BrickMaster(uid, self.ipcon))
