@@ -333,7 +333,7 @@ class TiFo:
         self.humi = []
         self.co2 = []
         self.volcu = []
-        self.aiq = {}
+        self.aiq = []
         self.moist = None
         self.unknown = []
         self.threadliste = []
