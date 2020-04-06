@@ -440,6 +440,14 @@ class TiFo:
         broadcast_input_value('TiFo.' + uid + ext, str(value/div))
         self.timeout_reset()
 
+    def cb_aiq_values(self, aiq, acc, temp, hum, pres, accuracy,device,uid=''):
+        toolbox.log(device)
+        broadcast_input_value('TiFo.' + uid + '.aiq', str(aiq/1.0))
+        broadcast_input_value('TiFo.' + uid + '.temp', str(temp/100.0))
+        broadcast_input_value('TiFo.' + uid + '.hum', str(hum/100.0))
+        broadcast_input_value('TiFo.' + uid + '.pres', str(pres/100.0))
+        self.timeout_reset()
+
     def cb_value_uid(self, value,device,div=1.0,ext='',uid=''):
         toolbox.log(device)
         name = uid
@@ -1173,14 +1181,17 @@ class TiFo:
                         self.aiq.append(BrickletAirQuality(uid, self.ipcon))
                         temp_uid = str(self.aiq[-1].get_identity()[1]) +"."+ str(self.aiq[-1].get_identity()[0])
                         aiq.set_status_led_config(0)
-                        aiq.set_iaq_index_callback_configuration(45000, False)
-                        aiq.set_humidity_callback_configuration(45000, False, 'o', 0, 0)
-                        aiq.set_air_pressure_callback_configuration(45000, False, 'o', 0, 0)
-                        aiq.set_temperature_callback_configuration(45000, False, 'o', 0, 0)
-                        aiq.register_callback(aiq.CALLBACK_IAQ_INDEX, partial( self.cb_values,  device=aiq, div=1.0, ext=".aiq", uid=temp_uid))
-                        aiq.register_callback(aiq.CALLBACK_TEMPERATURE, partial( self.cb_value,  device=aiq, div=100.0, ext=".temp", uid=temp_uid))
-                        aiq.register_callback(aiq.CALLBACK_HUMIDITY, partial( self.cb_value,  device=aiq, div=100.0, ext=".hum", uid=temp_uid))
-                        aiq.register_callback(aiq.CALLBACK_AIR_PRESSURE, partial( self.cb_value,  device=aiq, div=100.0, ext=".pres", uid=temp_uid))
+#                        aiq.set_iaq_index_callback_configuration(45000, False)
+#                        aiq.set_humidity_callback_configuration(45000, False, 'o', 0, 0)
+#                        aiq.set_air_pressure_callback_configuration(45000, False, 'o', 0, 0)
+#                        aiq.set_temperature_callback_configuration(45000, False, 'o', 0, 0)
+#                        aiq.register_callback(aiq.CALLBACK_IAQ_INDEX, partial( self.cb_values,  device=aiq, div=1.0, ext=".aiq", uid=temp_uid))
+#                        aiq.register_callback(aiq.CALLBACK_TEMPERATURE, partial( self.cb_value,  device=aiq, div=100.0, ext=".temp", uid=temp_uid))
+#                        aiq.register_callback(aiq.CALLBACK_HUMIDITY, partial( self.cb_value,  device=aiq, div=100.0, ext=".hum", uid=temp_uid))
+#                        aiq.register_callback(aiq.CALLBACK_AIR_PRESSURE, partial( self.cb_value,  device=aiq, div=100.0, ext=".pres", uid=temp_uid))
+                        
+                        aiq.set_all_values_callback_configuration(45000, False)
+                        aiq.register_callback(aiq.CALLBACK_ALL_VALUES, partial( self.cb_value,  device=aiq, uid=temp_uid))
                         found  = True
                         toolbox.log("BrickletAIQ", temp_uid)        
         
