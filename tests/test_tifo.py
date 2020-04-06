@@ -23,7 +23,7 @@ class TestUM(unittest.TestCase):
     def setUp(self):
         constants.debug = True
         constants.debug_level = 8
-        self.test_mod2 = tf_connection.TiFo('192.168.192.2')
+        self.test_mod2 = tf_connection.TiFo('192.168.193.30')
         self.test_mod2.main()
 #        time.sleep(75)
 #        self.test_mod2.connect()        

@@ -440,12 +440,14 @@ class TiFo:
         broadcast_input_value('TiFo.' + uid + ext, str(value/div))
         self.timeout_reset()
 
-    def cb_aiq_values(self, aiq, acc, temp, hum, pres, accuracy,device,uid=''):
-        toolbox.log(device)
-        broadcast_input_value('TiFo.' + uid + '.aiq', str(aiq/1.0))
-        broadcast_input_value('TiFo.' + uid + '.temp', str(temp/100.0))
-        broadcast_input_value('TiFo.' + uid + '.hum', str(hum/100.0))
-        broadcast_input_value('TiFo.' + uid + '.pres', str(pres/100.0))
+    def cb_aiq_values(self, *args, **kwargs):
+#        print(args)
+#        print(kwargs)
+#        toolbox.log(device)
+        broadcast_input_value('TiFo.' + kwargs.uid + '.aiq', str(args[0]/1.0))
+        broadcast_input_value('TiFo.' + kwargs.uid + '.temp', str(args[2]/100.0))
+        broadcast_input_value('TiFo.' + kwargs.uid + '.hum', str(args[3]/100.0))
+        broadcast_input_value('TiFo.' + kwargs.uid + '.pres', str(args[4]/100.0))
         self.timeout_reset()
 
     def cb_value_uid(self, value,device,div=1.0,ext='',uid=''):
@@ -1190,8 +1192,8 @@ class TiFo:
 #                        aiq.register_callback(aiq.CALLBACK_HUMIDITY, partial( self.cb_value,  device=aiq, div=100.0, ext=".hum", uid=temp_uid))
 #                        aiq.register_callback(aiq.CALLBACK_AIR_PRESSURE, partial( self.cb_value,  device=aiq, div=100.0, ext=".pres", uid=temp_uid))
                         
-                        aiq.set_all_values_callback_configuration(45000, False)
-                        aiq.register_callback(aiq.CALLBACK_ALL_VALUES, partial( self.cb_value,  device=aiq, uid=temp_uid))
+                        self.aiq[-1].set_all_values_callback_configuration(45000, False)
+                        self.aiq[-1].register_callback(self.aiq[-1].CALLBACK_ALL_VALUES, partial( self.cb_aiq_values,  device=aiq, uid=temp_uid))
                         found  = True
                         toolbox.log("BrickletAIQ", temp_uid)        
         
