@@ -444,10 +444,10 @@ class TiFo:
 #        print(args)
 #        print(kwargs)
 #        toolbox.log(device)
-        broadcast_input_value('TiFo.' + kwargs.uid + '.aiq', str(args[0]/1.0))
-        broadcast_input_value('TiFo.' + kwargs.uid + '.temp', str(args[2]/100.0))
-        broadcast_input_value('TiFo.' + kwargs.uid + '.hum', str(args[3]/100.0))
-        broadcast_input_value('TiFo.' + kwargs.uid + '.pres', str(args[4]/100.0))
+        broadcast_input_value('TiFo.' + kwargs['uid'] + '.aiq', str(args[0]/1.0))
+        broadcast_input_value('TiFo.' + kwargs['uid'] + '.temp', str(args[2]/100.0))
+        broadcast_input_value('TiFo.' + kwargs['uid'] + '.hum', str(args[3]/100.0))
+        broadcast_input_value('TiFo.' + kwargs['uid'] + '.pres', str(args[4]/100.0))
         self.timeout_reset()
 
     def cb_value_uid(self, value,device,div=1.0,ext='',uid=''):
