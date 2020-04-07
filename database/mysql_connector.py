@@ -944,16 +944,17 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     payloads = []
                     kondition = []
                     
-                    descri = dicti.get("Status")
-                    if descri is None:
-                        descri = ''
-                    
                     violTime = None
                     latched = None                    
                     
                     single = True
                     for i in range (0,len(row)):
                         dicti[field_names[i]] = row[i]
+                        
+                    descri = dicti.get("Status")
+                    if descri is None:
+                        descri = ''                        
+                        
                     doppelklick = dicti.get("Doppelklick")
                     if ct >= db_time:
                         # Hysteres einberechnen

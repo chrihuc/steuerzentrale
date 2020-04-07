@@ -301,7 +301,9 @@ class Szenen(object):
     #                                t = threading.Thread(target=interner_befehl, args=[commando])
     #                                t.start()
             elif device in msqc.tables.akt_type_dict['Local']:
+#                print(msqc.tables.akt_cmd_tbl_dict[device], commando)
                 com_set = msqc.mdb_read_table_entry(db=msqc.tables.akt_cmd_tbl_dict[device], entry=commando)
+#                print(com_set)
                 payload = {'Device': device, 'Szene': commando, 'Szene_id': szn_id}
                 if com_set: payload.update(com_set)
                 system = adress.split(".")[0]
@@ -347,11 +349,12 @@ class Szenen(object):
         if use > 99:
 #            print("ProcessorLeistung zu hoch")
             cls.high_cpu_cnt += 1
-            if cls.high_cpu_cnt > 30:
-                aes.new_event(description="ProcessorLeistung zu hoch bei: " + szene, prio=9, karenz = 0.03)
+            if cls.high_cpu_cnt > float(msqc.setting_r('CPUthresh')):
+                aes.new_event(description="ProcessorLeistung zu hoch bei: " + szene, prio=9, karenz = 10)
                 t = toolbox.OwnTimer(10, function=cls.reset_cpu_cnt, name="resetcpu")
-                t.start()            
-                return False
+                t.start()
+                if eval(msqc.setting_r('CPUcontrol')):
+                    return False
         szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung
