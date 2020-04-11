@@ -504,6 +504,7 @@ class TiFo:
                 value = device.get_temperature()
                 name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
                 broadcast_input_value('TiFo.' + name, str(float(value)/100))
+                self.timeout_reset()
             except:
                 pass                
             toolbox.sleep(60)
