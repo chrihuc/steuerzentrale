@@ -27,6 +27,7 @@ from tinkerforge.bricklet_co2 import BrickletCO2
 from tinkerforge.bricklet_motion_detector import BrickletMotionDetector
 from tinkerforge.bricklet_sound_intensity import BrickletSoundIntensity
 from tinkerforge.bricklet_ptc import BrickletPTC
+from tinkerforge.bricklet_ptc_v2 import BrickletPTCV2
 from tinkerforge.bricklet_temperature import BrickletTemperature
 from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
@@ -1076,6 +1077,17 @@ class TiFo:
         #                t = toolbox.OwnTimer(self.delay, function=self.thread_pt, args = [self.ptc[-1]], name="PT temp Bricklet")
         #                self.threadliste.append(t)
         #                t.start()
+                        found  = True
+                        toolbox.log("BrickletPTC", temp_uid)
+        
+                    if device_identifier == BrickletPTCV2.DEVICE_IDENTIFIER:
+                        tptc = BrickletPTCV2(uid, self.ipcon)
+                        self.ptc.append(tptc)
+                        temp_uid = str(self.ptc[-1].get_identity()[1]) +"."+ str(self.ptc[-1].get_identity()[0])
+                        tptc.set_temperature_callback_configuration(45000, False, 'o', 0, 0)
+                        tptc.set_wire_mode(4)
+#                        args = [self.ptc[-1], 100.0]
+                        self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value_uid,  device=self.ptc[-1], div=100.0, uid=temp_uid))
                         found  = True
                         toolbox.log("BrickletPTC", temp_uid)
         
