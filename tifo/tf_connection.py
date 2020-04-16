@@ -499,7 +499,7 @@ class TiFo:
                 if counter > 20:
                     self.timedOut()
                     break
-            toolbox.sleep(2)
+            toolbox.sleep(0.5)
 
     def thread_pt(self, device):
         while constants.run:
