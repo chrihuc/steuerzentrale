@@ -251,12 +251,14 @@ class LineBrick:
 class LEDStrips:
     def __init__(self):
         self.liste = []
+        self.keys = []
 
     def addLED(self, LED,addr):
         global liste
         dicti = {}
         dicti["LED"] = LED
         dicti['addr'] = addr
+        self.keys.append(addr)
         self.liste.append(dicti)
 
 class MT_Bricklet:
@@ -369,13 +371,13 @@ class TiFo:
     def connect(self):
         try:
             self.ipcon.disconnect()
-            print('disconnected: ' + self.ip)
+#            print('disconnected: ' + self.ip)
         except:
             pass
         # Connect to brickd, will trigger cb_connected
         while True:
             try:
-                print('connecting to: ' + self.ip)
+#                print('connecting to: ' + self.ip)
                 self.ipcon.connect(self.ip, PORT)
 #                aes.new_event(description="Tifo connected: "+self.ip, prio=9)
                 break
@@ -383,7 +385,7 @@ class TiFo:
                 print('Connection Error: ' + str(e.description))
                 time.sleep(10)
             except socket.error as e:
-                print('Socket error: ' + str(e))
+#                print('Socket error: ' + str(e))
                 time.sleep(10)
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
@@ -777,7 +779,7 @@ class TiFo:
                     time.sleep(wartezeit)
 
 
-    def set_LED(self, **kwargs):
+    def set_LED(self, adress, **kwargs):
 #        device, rot, gruen, blau, transitiontime, transition=ANSTEIGEND
         device = kwargs.get('Device')
 #        range check kwargs
@@ -807,10 +809,15 @@ class TiFo:
             return False
 #        gradient
 #        lauflicht
-        LEDDict = settings.LEDsOut.get(device)
-        uid = LEDDict.get('UID')
-        start = LEDDict.get('Start')
-        ende = LEDDict.get('Ende')
+#        LEDDict = settings.LEDsOut.get(device)
+#        uid = LEDDict.get('UID')
+#        start = LEDDict.get('Start')
+#        ende = LEDDict.get('Ende')
+        
+        uid = adress.split(".")[1] + '.' + adress.split(".")[2]
+        start = int(adress.split(".")[3])
+        ende = int(adress.split(".")[4])
+        
         toolbox.log(uid, start, ende)
 #        TODO vectorize
         delta_r = 0
@@ -922,8 +929,9 @@ class TiFo:
                 return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
             elif settings.outputs.get(data_ev.get('Device')) == 'IO16o':
                 return self.set_io16(data_ev.get('Device'),data_ev.get('Value'))
-            elif settings.outputs.get(data_ev.get('Device')) == 'LEDs':
-                return self.set_LED(**data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
+#            elif settings.outputs.get(data_ev.get('Device')) == 'LEDs':
+            elif uid in self.LEDList.keys:
+                return self.set_LED(adress, **data_ev) #data_ev.get('Device'),data_ev.get('red'),data_ev.get('green'),data_ev.get('blue'),data_ev.get('transitiontime'))
     #        elif settings.outputs.get(data_ev.get('Device')) == 'DualRelay':
             elif uid in self.drbuids.keys():
     #            print(data_ev.get('Device'), adress, data_ev.get('Value'), adress)

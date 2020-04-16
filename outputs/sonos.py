@@ -906,6 +906,9 @@ class Sonos:
     def set_device(self, player, command, text=''):
         # TODO: clean up this section
 #        print(player, command)
+        if command == 'discover':
+            self.socoDiscover()
+            return True
         myId = 1
         if Sonos.FiFo:
             myId = Sonos.FiFo[-1] + 1
