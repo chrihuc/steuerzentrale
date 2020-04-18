@@ -853,10 +853,13 @@ class TiFo:
                 delta_pb = 0
             gradient = True
 
+
         for LED in self.LEDList.liste:
             if LED.get('addr') == uid:
                 typ = LED['typ']
-                print(typ)
+                batch = 16
+                if typ == 2:
+                    batch = 2048
                 toolbox.log('Bricklet found')
                 laenge = (ende-start)
                 if proc != None and 0 <= proc <= 100:
@@ -864,8 +867,8 @@ class TiFo:
                 elif proc != None and proc < 0:
                     laenge = 0
                 if (transitiontime == None or transitiontime <= 0) and not gradient:
-                    while (laenge) > 16:
-                        laenge = 16
+                    while (laenge) > batch:
+                        laenge = batch
 #                         TODO check that command is executed
 #                        while not (red, green, blue) == LED.get('LED').get_rgb_values(start, laenge):
                         if typ == 1:
