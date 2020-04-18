@@ -17,6 +17,7 @@ import socket
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.bricklet_io16 import IO16
 from tinkerforge.bricklet_led_strip import LEDStrip
+from tinkerforge.bricklet_led_strip_v2 import BrickletLEDStripV2
 from tinkerforge.bricklet_ambient_light import AmbientLight
 from tinkerforge.bricklet_ambient_light_v2 import BrickletAmbientLightV2
 from tinkerforge.bricklet_moisture import Moisture
@@ -460,9 +461,9 @@ class TiFo:
         broadcast_input_value('TiFo.' + name + ext, str(value/div))
         self.timeout_reset()
 
-    def cb_dist_value(self, value,device,div=1.0,ext='', threshold=20):
+    def cb_dist_value(self, value,device,div=1.0,ext='', threshold=20, name='none.none'):
         toolbox.log(device)
-        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
+#        name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + ext, str(value/div))
         device.set_distance_callback_threshold('o', value-threshold, value+threshold)
         self.timeout_reset()        
@@ -967,6 +968,16 @@ class TiFo:
                         #self.led.set_rgb_values(0, self.NUM_LEDS, self.r, self.g, self.b)
                         #self.led.set_rgb_values(15, self.NUM_LEDS, self.r, self.g, self.b)
                         #self.led.set_rgb_values(30, self.NUM_LEDS, self.r, self.g, self.b)
+        
+                    if device_identifier == BrickletLEDStripV2.DEVICE_IDENTIFIER:
+                        self.LEDs.append(BrickletLEDStripV2(uid, self.ipcon))
+                        temp_uid = str(self.LEDs[-1].get_identity()[1]) +"."+ str(self.LEDs[-1].get_identity()[0])
+                        toolbox.log('LEDStrip Bricklet', temp_uid)
+                        self.LEDList.addLED(self.LEDs[-1],temp_uid)
+                        self.LEDs[-1].set_frame_duration(200)
+                        self.LEDs[-1].set_chip_type(2812)
+                        found  = True
+                        toolbox.log("LEDStrip", temp_uid)
         
                     if device_identifier == IO16.DEVICE_IDENTIFIER:
                         self.io.append(IO16(uid, self.ipcon))
