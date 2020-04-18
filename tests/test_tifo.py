@@ -25,7 +25,10 @@ class TestUM(unittest.TestCase):
         constants.debug_level = 8
         self.test_mod2 = tf_connection.TiFo('192.168.193.30')
         self.test_mod2.main()
-#        time.sleep(75)
+
+#        time.sleep(20)
+        
+
 #        self.test_mod2.connect()        
 #        self.test_mod3 = tf_connection.TiFo('192.168.193.102')
 #        self.test_mod3.main()
@@ -43,6 +46,7 @@ class TestUM(unittest.TestCase):
 
     def test_connect_2_conns(self):
         toolbox.log('test')
+        self.test_mod2.set_LED(adress='TiFo.6EiYxB.LbV.0.150',Device='123',transitiontime=0,red=0,green=0,blue=0)
 
         
 #        self.test_mod2.main()

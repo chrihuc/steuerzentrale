@@ -826,6 +826,9 @@ class TiFo:
         delta_r = 0
         delta_g = 0
         delta_b = 0
+        red_i = red
+        green_i = green
+        blue_i = blue
         if str(red_1) == 'None' and str(green_1) == 'None' and str(blue_1) == 'None':
             red = [int(red)]*16
             green = [int(green)]*16
@@ -853,6 +856,7 @@ class TiFo:
         for LED in self.LEDList.liste:
             if LED.get('addr') == uid:
                 typ = LED['typ']
+                print(typ)
                 toolbox.log('Bricklet found')
                 laenge = (ende-start)
                 if proc != None and 0 <= proc <= 100:
@@ -867,11 +871,15 @@ class TiFo:
                         if typ == 1:
                             LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
                         else:
-                            LED.get('LED').set_led_values(start,[red,green,blue]*laenge)
+                            rgb = [red_i,green_i,blue_i]*laenge
+                            LED.get('LED').set_led_values(start,rgb)
                         start += laenge
                         laenge = (ende-start)
                     else:
-                        LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
+                        if typ == 1:
+                            LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
+                        else:
+                            LED.get('LED').set_led_values(start,[red_i,green_i,blue_i]*laenge)
                 elif not (transitiontime == None or transitiontime <= 0):
 #                    Ansteigend
                     if transition == ANSTEIGEND:
