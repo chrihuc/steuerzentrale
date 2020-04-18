@@ -254,11 +254,12 @@ class LEDStrips:
         self.liste = []
         self.keys = []
 
-    def addLED(self, LED,addr):
+    def addLED(self, LED,addr,typ=1):
         global liste
         dicti = {}
         dicti["LED"] = LED
         dicti['addr'] = addr
+        dicti['typ'] = typ
         self.keys.append(addr)
         self.liste.append(dicti)
 
@@ -851,6 +852,7 @@ class TiFo:
 
         for LED in self.LEDList.liste:
             if LED.get('addr') == uid:
+                typ = LED['typ']
                 toolbox.log('Bricklet found')
                 laenge = (ende-start)
                 if proc != None and 0 <= proc <= 100:
@@ -862,7 +864,10 @@ class TiFo:
                         laenge = 16
 #                         TODO check that command is executed
 #                        while not (red, green, blue) == LED.get('LED').get_rgb_values(start, laenge):
-                        LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
+                        if typ == 1:
+                            LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
+                        else:
+                            LED.get('LED').set_led_values(start,[red,green,blue]*laenge)
                         start += laenge
                         laenge = (ende-start)
                     else:
@@ -973,7 +978,7 @@ class TiFo:
                         self.LEDs.append(BrickletLEDStripV2(uid, self.ipcon))
                         temp_uid = str(self.LEDs[-1].get_identity()[1]) +"."+ str(self.LEDs[-1].get_identity()[0])
                         toolbox.log('LEDStrip Bricklet', temp_uid)
-                        self.LEDList.addLED(self.LEDs[-1],temp_uid)
+                        self.LEDList.addLED(self.LEDs[-1],temp_uid, typ=2)
                         self.LEDs[-1].set_frame_duration(200)
                         self.LEDs[-1].set_chip_type(2812)
                         found  = True
