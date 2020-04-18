@@ -977,6 +977,7 @@ class TiFo:
                         self.LEDs[-1].set_frame_duration(200)
                         self.LEDs[-1].set_chip_type(2812)
                         found  = True
+                        self.LEDs[-1].set_status_led_config(0)
                         toolbox.log("LEDStrip", temp_uid)
         
                     if device_identifier == IO16.DEVICE_IDENTIFIER:
