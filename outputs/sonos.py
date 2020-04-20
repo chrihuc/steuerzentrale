@@ -170,6 +170,7 @@ class Sonos:
         try:
             if len(self.devices) == 0: 
                 self.devices = soco.discover()
+#                aes.new_event(description="Soco discover " + str(len(self.devices)) + " gefunden", prio=9)
                 if not self.devices:
                     aes.new_event(description="Soco discover not working", prio=9)
                     self.devices = set()

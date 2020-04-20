@@ -134,10 +134,10 @@ def handler(obj):
     else:
         raise TypeError('Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj)))
 
-def kw_unpack(kwargs, searched_key):
+def kw_unpack(kwargs, searched_key, default=False):
     if searched_key in kwargs:
         return kwargs[searched_key]
-    return False
+    return default
 
 def sleep(interval):
     counter = 0
