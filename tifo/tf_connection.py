@@ -818,8 +818,14 @@ class TiFo:
 #        ende = LEDDict.get('Ende')
         
         uid = adress.split(".")[1] + '.' + adress.split(".")[2]
-        start = int(adress.split(".")[3])
-        ende = int(adress.split(".")[4])
+        if toolbox.kw_unpack(kwargs, 'start'):
+            start = int(str(toolbox.kw_unpack(kwargs, 'start')))
+        else:
+            start = int(adress.split(".")[3])
+        if toolbox.kw_unpack(kwargs, 'ende'):
+            ende = int(str(toolbox.kw_unpack(kwargs, 'ende')))
+        else:
+            ende = int(adress.split(".")[4])  
         
         toolbox.log(uid, start, ende)
 #        TODO vectorize
