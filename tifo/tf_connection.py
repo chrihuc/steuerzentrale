@@ -796,7 +796,7 @@ class TiFo:
             blue = int(kwargs.get('green',0))
             red = int(kwargs.get('blue',0))
 
-            transitiontime = int(str(kwargs.get('transitiontime')))
+            transitiontime = kwargs.get('transitiontime')
             transition = kwargs.get('transition',ANSTEIGEND)
             proc = kwargs.get('percentage',None)
 
@@ -816,6 +816,8 @@ class TiFo:
 #        uid = LEDDict.get('UID')
 #        start = LEDDict.get('Start')
 #        ende = LEDDict.get('Ende')
+        if transitiontime:
+            transitiontime = int(str(transitiontime))
         
         uid = adress.split(".")[1] + '.' + adress.split(".")[2]
         if toolbox.kw_unpack(kwargs, 'start'):
