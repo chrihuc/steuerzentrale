@@ -796,7 +796,7 @@ class TiFo:
             blue = int(kwargs.get('green',0))
             red = int(kwargs.get('blue',0))
 
-            transitiontime = kwargs.get('transitiontime')
+            transitiontime = int(str(kwargs.get('transitiontime')))
             transition = kwargs.get('transition',ANSTEIGEND)
             proc = kwargs.get('percentage',None)
 
