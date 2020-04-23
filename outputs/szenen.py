@@ -368,7 +368,7 @@ class Szenen(object):
         # wir warten erstmal den Delay ab, und prüfen dann die Bedingung, das ermöglicht eine Persitenz des Inputs
         # e.g. Temp fällt unter 0 Grad, 30sec später prüfen wir die Bedingung, gilt sie (kein neuer Messwert) führen wir die Szene aus
         if (str(szene_dict.get("Delay")) != "None") and (float(szene_dict.get("Delay")) > 0) and not noDelay:
-            cls.timer_add(cls.execute, parent = szene,delay = float(szene_dict.get("Delay")), child = szene, exact = False, retrig = False, noDelay=True)
+            cls.timer_add(cls.execute, parent = szene,delay = float(szene_dict.get("Delay")), child = szene, exact = False, retrig = True, noDelay=True)
             return True
 #            time.sleep(float(szene_dict.get("Delay")))            
         erfuellt = cls.__bedingung__(bedingungen)

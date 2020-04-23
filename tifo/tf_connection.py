@@ -894,16 +894,22 @@ class TiFo:
                     if transition == ANSTEIGEND:
                         wartezeit = float(transitiontime) / (ende-start)
                         for birne in range(start,ende):
-                            LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+                            if typ == 1:
+                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+                            else:
+                                LED.get('LED').set_led_values(birne,[red_i,green_i,blue_i]*1)
                             time.sleep(wartezeit)
                     elif transition == ABSTEIGEND:
                         wartezeit = float(transitiontime) / (ende-start)
                         for birne in list(reversed(range(start,ende))):
-                            LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+                            if typ == 1:
+                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+                            else:
+                                LED.get('LED').set_led_values(birne,[red_i,green_i,blue_i]*1)
                             time.sleep(wartezeit)
                     elif transition == ZUSAMMEN:
                         self._set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime)
-                else:
+                else:   # also mit gradient
                     for birne in range(start,(start+laenge)):
                         LED.get('LED').set_rgb_values(birne, 1, [int(red)]*16, [int(green)]*16, [int(blue)]*16)
                         red += delta_pr
