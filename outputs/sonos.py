@@ -166,11 +166,12 @@ class Sonos:
                 results = cur.fetchall()
         con.close()
 
-    def socoDiscover(self):
+    def socoDiscover(self, forced=False):
         try:
-            if len(self.devices) == 0: 
+            if len(self.devices) == 0 or forced: 
                 self.devices = soco.discover()
 #                aes.new_event(description="Soco discover " + str(len(self.devices)) + " gefunden", prio=9)
+                mysql_connector.setting_s("SonosZonen", len(self.devices))
                 if not self.devices:
                     aes.new_event(description="Soco discover not working", prio=9)
                     self.devices = set()
@@ -908,7 +909,7 @@ class Sonos:
         # TODO: clean up this section
 #        print(player, command)
         if command == 'discover':
-            self.socoDiscover()
+            self.socoDiscover(forced=True)
             return True
         myId = 1
         if Sonos.FiFo:
