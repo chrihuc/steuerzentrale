@@ -854,17 +854,17 @@ class TiFo:
             green_1 = int(green_1)
             blue_1 = int(blue_1)
             if not str(red_1) == 'None':
-                delta_r = int(red_1) - int(red)
+                delta_r = abs(int(red_1) - int(red))
                 delta_pr = float(delta_r) / laenge
             else:
                 delta_pr = 0
             if not str(green_1) == 'None':
-                delta_g = (int(green_1) -int(green))
+                delta_g = abs(int(green_1) -int(green))
                 delta_pg = float(delta_g) / laenge
             else:
                 delta_pg = 0
             if not str(blue_1) == 'None':
-                delta_b = (int(blue_1) - int(blue))
+                delta_b = abs(int(blue_1) - int(blue))
                 delta_pb = float(delta_b) / laenge
             else:
                 delta_pb = 0
