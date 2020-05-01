@@ -870,7 +870,6 @@ class TiFo:
                 delta_pb = 0
             gradient = True
             steps = (delta_r + delta_g + delta_b) * laenge
-            print(steps)
 
 
         for LED in self.LEDList.liste:
@@ -909,31 +908,32 @@ class TiFo:
                 elif not (transitiontime == None or transitiontime <= 0):
 #                    Ansteigend licht für licht direkt zur farbe
                     wartezeit = float(transitiontime) / steps
-                    print(wartezeit)
                     LED['busy'] = True
                     while ( (red_1-red)!=0 or (green_1-green)!=0 or (blue_1-blue)!=0 ) and typ!=1 and not LED['stop']:
-                        for birne in range(start,ende):
-                            if (red_1-red)!=0:
-                                if red_1 > red:
-                                    red_1 -= 1
-                                else:
-                                    red_1 += 1
+                        if (red_1-red)!=0:
+                            if red_1 > red:
+                                red_1 -= 1
+                            else:
+                                red_1 += 1
+                            for birne in range(start,ende):
                                 LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
                                 time.sleep(wartezeit)
-                            if (green_1-green)!=0:
-                                if green_1 > green:
-                                    green_1 -= 1
-                                else:
-                                    green_1 += 1
+                        if (green_1-green)!=0:
+                            if green_1 > green:
+                                green_1 -= 1
+                            else:
+                                green_1 += 1
+                            for birne in range(start,ende):
                                 LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
-                                time.sleep(wartezeit) 
-                            if (blue_1-blue)!=0:
-                                if blue_1 > blue:
-                                    blue_1 -= 1
-                                else:
-                                    blue_1 += 1
-                                LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)                                    
-                                time.sleep(wartezeit)                                
+                                time.sleep(wartezeit)
+                        if (blue_1-blue)!=0:
+                            if blue_1 > blue:
+                                blue_1 -= 1
+                            else:
+                                blue_1 += 1
+                            for birne in range(start,ende):
+                                LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
+                                time.sleep(wartezeit)                               
                     LED['busy'] = False
 #                    if transition == ANSTEIGEND:
 #                        wartezeit = float(transitiontime) / (ende-start)
