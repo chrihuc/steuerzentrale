@@ -850,6 +850,9 @@ class TiFo:
             gradient = False
         else:
             laenge = (ende-start)
+            red_1 = int(red_1)
+            green_1 = int(green_1)
+            blue_1 = int(blue_1)
             if not str(red_1) == 'None':
                 delta_r = int(red_1) - int(red)
                 delta_pr = float(delta_r) / laenge
