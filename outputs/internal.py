@@ -49,7 +49,7 @@ def check_ext_ip(notify=True):
         broadcast_input_value("Internal.CheckExtIp", 1)
         if ip != constants.ext_IP or notify:
             constants.ext_IP = ip
-            aes.new_event(description="New IP "+ip, prio=108)
+            aes.new_event(description="New IP "+ip, prio=1008)
             constants.config.set('Main', 'Ext_IP', ip)
             constants.save_config()
         else:

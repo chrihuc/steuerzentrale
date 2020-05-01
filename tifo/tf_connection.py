@@ -260,6 +260,8 @@ class LEDStrips:
         dicti["LED"] = LED
         dicti['addr'] = addr
         dicti['typ'] = typ
+        dicti['busy'] = False
+        dicti['stop'] = False
         self.keys.append(addr)
         self.liste.append(dicti)
 
@@ -396,10 +398,11 @@ class TiFo:
     def main(self):
         # Create IP Connection
         self.connect()
-        while constants.run:
+        while constants.run and not constants.test:
             toolbox.sleep(3)
-        self.ipcon.disconnect()
-        print('disconnected: ' + self.ip)
+        if not constants.test:
+            self.disconnect()
+
 #            for t in self.threadliste:
 #                if not t in threading.enumerate():
 ##                    print t.args
@@ -412,6 +415,9 @@ class TiFo:
 #                    aes.new_event(description="Restarted Thread: "+t.name, prio=1)
 
 
+    def disconnect(self):
+        self.ipcon.disconnect()
+        print('disconnected: ' + self.ip)
 
     def thread_RSerror(self):
         while constants.run:
@@ -860,10 +866,15 @@ class TiFo:
             else:
                 delta_pb = 0
             gradient = True
+            steps = (delta_r + delta_g + delta_b) * laenge
 
 
         for LED in self.LEDList.liste:
             if LED.get('addr') == uid:
+                while LED['busy']:
+                    LED['stop'] = True
+                    time.sleep(0.1)
+                LED['stop'] = False
                 typ = LED['typ']
                 batch = 16
                 if typ == 2:
@@ -883,34 +894,62 @@ class TiFo:
                             LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
                         else:
                             rgb = [red_i,green_i,blue_i]*laenge
-                            LED.get('LED').set_led_values(start,rgb)
+                            LED.get('LED').set_led_values(start*3,rgb)
                         start += laenge
                         laenge = (ende-start)
                     else:
                         if typ == 1:
                             LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
                         else:
-                            LED.get('LED').set_led_values(start,[red_i,green_i,blue_i]*laenge)
+                            LED.get('LED').set_led_values(start*3,[red_i,green_i,blue_i]*laenge)
                 elif not (transitiontime == None or transitiontime <= 0):
-#                    Ansteigend
-                    if transition == ANSTEIGEND:
-                        wartezeit = float(transitiontime) / (ende-start)
+#                    Ansteigend licht für licht direkt zur farbe
+                    wartezeit = float(transitiontime) / steps
+                    LED['busy'] = True
+                    while ( (red_1-red)!=0 or (green_1-green)!=0 or (blue_1-blue)!=0 ) and typ!=1 and not LED['stop']:
                         for birne in range(start,ende):
-                            if typ == 1:
-                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
-                            else:
-                                LED.get('LED').set_led_values(birne,[red_i,green_i,blue_i]*1)
-                            time.sleep(wartezeit)
-                    elif transition == ABSTEIGEND:
-                        wartezeit = float(transitiontime) / (ende-start)
-                        for birne in list(reversed(range(start,ende))):
-                            if typ == 1:
-                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
-                            else:
-                                LED.get('LED').set_led_values(birne,[red_i,green_i,blue_i]*1)
-                            time.sleep(wartezeit)
-                    elif transition == ZUSAMMEN:
-                        self._set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime)
+                            if (red_1-red)!=0:
+                                if red_1 > red:
+                                    red_1 -= 1
+                                else:
+                                    red_1 += 1
+                                LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
+                                time.sleep(wartezeit)
+                            if (green_1-green)!=0:
+                                if green_1 > green:
+                                    green_1 -= 1
+                                else:
+                                    green_1 += 1
+                                LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
+                                time.sleep(wartezeit) 
+                            if (blue_1-blue)!=0:
+                                if blue_1 > blue:
+                                    green_1 -= 1
+                                else:
+                                    green_1 += 1
+                                LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)                                    
+                                time.sleep(wartezeit)                                
+                    LED['busy'] = False
+#                    if transition == ANSTEIGEND:
+#                        wartezeit = float(transitiontime) / (ende-start)
+#                        for birne in range(start,ende):
+#                            if typ == 1:
+#                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+#                            else:
+#                                print(birne,[red_i,green_i,blue_i]*1)
+#                                LED.get('LED').set_led_values(birne*3,[red_i,green_i,blue_i]*1)
+#                            time.sleep(wartezeit)
+#                    elif transition == ABSTEIGEND:
+#                        wartezeit = float(transitiontime) / (ende-start)
+#                        for birne in list(reversed(range(start,ende))):
+#                            if typ == 1:
+#                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+#                            else:
+#                                LED.get('LED').set_led_values(birne*3,[red_i,green_i,blue_i]*1)
+#                            time.sleep(wartezeit)
+#                    elif transition == ZUSAMMEN:
+#                        self._set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime)
+                        
                 else:   # also mit gradient
                     for birne in range(start,(start+laenge)):
                         LED.get('LED').set_rgb_values(birne, 1, [int(red)]*16, [int(green)]*16, [int(blue)]*16)
