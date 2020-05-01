@@ -927,9 +927,9 @@ class TiFo:
                                 time.sleep(wartezeit) 
                             if (blue_1-blue)!=0:
                                 if blue_1 > blue:
-                                    green_1 -= 1
+                                    blue_1 -= 1
                                 else:
-                                    green_1 += 1
+                                    blue_1 += 1
                                 LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)                                    
                                 time.sleep(wartezeit)                                
                     LED['busy'] = False
