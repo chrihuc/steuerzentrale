@@ -1220,6 +1220,11 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
                     writeToInflx = True
                 if str(komp) in ['None', 'False']:
                     writeToInflx = True
+                if str(komp) in ['Bool']:
+                    if float(value) != float(last_value) and float(last_value) == 0:
+                        writeToInflx = True   
+                    else:
+                        writeToInflx = False
                 if not last_time:
                     try:
                         last_time = dicti_1['last1']
