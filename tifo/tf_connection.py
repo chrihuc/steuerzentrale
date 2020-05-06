@@ -115,7 +115,7 @@ class io16Dict:
         dicti["valueB"] = 0
         times = []
         for cnt in range(0,length):
-            times.append(datetime.datetime.now())
+            times.append(datetime.datetime.now() - datetime.timedelta(minutes=1))
         dicti["times"] = times
         self.liste.append(dicti)
 
