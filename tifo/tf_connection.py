@@ -606,6 +606,8 @@ class TiFo:
         #print self.io16list.getTimeDiff(device,interrupt_mask, port)
         if value == nc_pos:
             Value = self.io16list.getTimeDiff(device,interrupt_mask, port)
+            if Value == 0: # nach dem neustart ist das 0
+                Value = 1
         else:
             Value = 0
             if not thread:

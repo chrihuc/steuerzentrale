@@ -31,7 +31,7 @@ def eventcallback(address, interface_id, key, value):
 #    print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value))
     if key in keys:
 #        print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value)) 
-        broadcast_input_value('homematic.' + address + '.' + key, value)
+        broadcast_input_value('homematic.' + address + '.' + key, float(value))
 
 def main():
     pyhomematic = HMConnection(interface_id="myserver",
