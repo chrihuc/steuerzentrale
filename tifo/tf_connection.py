@@ -1080,7 +1080,8 @@ class TiFo:
                             #self.io[-1].set_port_monoflop('a', tifo_config.IO16.get(temp_uid)[4],0,tifo_config.IO16.get(temp_uid)[6])
                             #self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
                             self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1], uid = temp_uid ))
-                            self.thread_io16(device = self.io[-1], uid = temp_uid)
+                            thread_io_ = threading.Timer(0, self.thread_io16, [self.al[-1],temp_uid])
+                            thread_io_.start()                                 
                             found  = True
                         toolbox.log("IO16", temp_uid)
         
