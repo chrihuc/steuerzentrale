@@ -575,7 +575,10 @@ class TiFo:
                 result = device.get_port(port)
                 for i in range(0,7):
                     mask = 1 << i
-                    self.cb_interrupt(port,mask,result,device,uid,thread=True)
+                    try:
+                        self.cb_interrupt(port,mask,result,device,uid,thread=True)
+                    except Exception as e:
+                        print(e)
             time.sleep(30)
 
     def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid, thread=False):

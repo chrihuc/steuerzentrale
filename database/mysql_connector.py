@@ -1410,7 +1410,7 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
                     mqtt_pub("Inputs/" + str(hks), data)
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
-            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, device)
+            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s", time = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, ct, device)
 #            thread_sql = Timer(1, sendSql, [sql])
             retrycount = 3
             counter = 1

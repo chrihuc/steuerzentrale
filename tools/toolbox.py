@@ -179,14 +179,21 @@ class communication(object):
     def send_message(cls, payload, *args, **kwargs):
         log(payload, args, kwargs, level=9)
         cls.locked = True
-        for hash_id, callbackdict in cls.callbacks.items():
-            if args:
-                args_to_send =[payload].append(args)
-            else:
-                args_to_send =[payload]
-            if callbackdict['active']:
-                t = threading.Thread(target=callbackdict['func'], args=args_to_send, kwargs=kwargs)
-                t.start()
+
+        #for hash_id, callbackdict in cls.callbacks.items():
+        keys = list(cls.callbacks.keys())
+        for key in keys:
+            if key in cls.callbacks:
+                callbackdict = cls.callbacks[key]   
+                
+                if args:
+                    args_to_send =[payload].append(args)
+                else:
+                    args_to_send =[payload]
+                if callbackdict['active']:
+                    t = threading.Thread(target=callbackdict['func'], args=args_to_send, kwargs=kwargs)
+                    t.start()         
+                
         cls.locked = False
 #            callback(payload, *args, **kwargs)
 
