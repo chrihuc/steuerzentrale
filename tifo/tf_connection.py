@@ -567,8 +567,18 @@ class TiFo:
         name = str(device.get_identity()[1]) +"."+ str(device.get_identity()[0])
         broadcast_input_value('TiFo.' + name + '.I', str(float(value)/100))
         self.timeout_reset()
+        
+    def thread_io16(self, device, uid):
+        while constants.run:
+            ports = ['a','b']
+            for port in ports:
+                result = device.get_port(port)
+                for i in range(0,7):
+                    mask = 1 << i
+                    self.cb_interrupt(port,mask,result,device,uid,thread=True)
+            time.sleep(30)
 
-    def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid):
+    def cb_interrupt(self, port, interrupt_mask, value_mask, device, uid, thread=False):
         toolbox.log(device)
         #print('Interrupt on port: ' + port + str(bin(interrupt_mask)))
         #print('Value: ' + str(bin(value_mask)))
@@ -598,7 +608,8 @@ class TiFo:
             Value = self.io16list.getTimeDiff(device,interrupt_mask, port)
         else:
             Value = 0
-            self.io16list.setTime(device,interrupt_mask, port)
+            if not thread:
+                self.io16list.setTime(device,interrupt_mask, port)
         #print dicti
         for name in namelist:
             broadcast_input_value('TiFo.' + name, Value)
@@ -1069,6 +1080,7 @@ class TiFo:
                             #self.io[-1].set_port_monoflop('a', tifo_config.IO16.get(temp_uid)[4],0,tifo_config.IO16.get(temp_uid)[6])
                             #self.io[-1].set_port_monoflop('b', tifo_config.IO16.get(temp_uid)[5],0,tifo_config.IO16.get(temp_uid)[6])
                             self.io[-1].register_callback(self.io[-1].CALLBACK_INTERRUPT, partial( self.cb_interrupt, device = self.io[-1], uid = temp_uid ))
+                            self.thread_io16(device = self.io[-1], uid = temp_uid)
                             found  = True
                         toolbox.log("IO16", temp_uid)
         
