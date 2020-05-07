@@ -897,6 +897,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     writeToInflx = True
                 if str(komp) in ['None', 'False']:
                     writeToInflx = True
+                if str(komp) in ['Bool']:
+                    if float(last_value) == 0.0 or float(value) == 0.0 and float(last_value) != float(value):
+                        writeToInflx = True   
+                    else:
+                        writeToInflx = False
                 if not last_time:
                     try:
                         last_time = dicti_1['last1']
@@ -1097,7 +1102,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     mqtt_pub("Inputs/" + str(hks), data)
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered:
-            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, device)
+            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s", time = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, ct, device)
 #            thread_sql = Timer(1, sendSql, [sql])
             retrycount = 3
             counter = 1
@@ -1129,7 +1134,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
     return alle_szenen, descriptions, heartbt, alle_payloads
 
 
-
+"""
 def new_input(device, value):
     dvce_dict = {  'HKS' : device
                  , 'Description' : device
@@ -1440,3 +1445,4 @@ def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
     return alle_szenen, desc, heartbt
+"""
