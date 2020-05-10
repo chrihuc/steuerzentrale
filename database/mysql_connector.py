@@ -898,7 +898,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 if str(komp) in ['None', 'False']:
                     writeToInflx = True
                 if str(komp) in ['Bool']:
-                    if float(last_value) == 0.0 or float(value) == 0.0 and float(last_value) != float(value):
+                    if (float(last_value) == 0.0 or float(value) == 0.0) and float(last_value) != float(value):
                         writeToInflx = True   
                     else:
                         writeToInflx = False
