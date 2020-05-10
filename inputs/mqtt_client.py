@@ -134,9 +134,7 @@ class MqttClient:
                         name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[-1]                         
                     broadcast_input_value('MQTT.' + name, m_in) 
                 elif "shellies" in msg.topic:
-                    print(msg.topic)
-                    print(msg.replace('/','.'))
-                    broadcast_input_value('MQTT.' + msg.replace('/','.'), m_in)
+                    broadcast_input_value('MQTT.' + msg.topic.replace('/','.'), m_in)
             if 'DataRequest' in msg.topic:
 #                print(m_in.values())
                 if 'SetTable' in msg.topic:  
