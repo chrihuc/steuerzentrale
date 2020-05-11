@@ -884,6 +884,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 komp = dicti_1['Kompression']
                 hyst = dicti_1['Hysterese']
                 recSzn = dicti_1['RecoverSzn']
+                offset = dicti_1['offset']
+                if str(offset) != 'None':
+                    offset = float(offset)
+                    value = float(value) + offset
                 if heartbt and str(valid) == "False" and not fallingback:
                     payload = {'Szene':'InputTimedOut', 'desc':'input recovered: '+ desc}
                     toolbox.communication.send_message(payload, typ='ExecSzene')
