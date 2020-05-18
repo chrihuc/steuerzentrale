@@ -161,6 +161,7 @@ class LineBrick:
         self.value = 0
         self.value_h = 0
         self.value_d = 0
+        self.pulsTime = datetime.datetime.now()
         self.name = str(self.device.get_identity()[1]) +"."+ str(self.device.get_identity()[0])
         lt = localtime()
         sekunde = int(strftime("%S", lt))    
@@ -172,16 +173,35 @@ class LineBrick:
         self.readout_h = threading.Timer(self.hour - (minute * 60) - sekunde, self.evaluate_h)
         self.readout_h.start()
         self.readout_d = threading.Timer(self.day - (stunde * 3600) - (minute * 60) - sekunde, self.evaluate_d)
-        self.readout_d.start()        
+        self.readout_d.start()       
+        self.reset = threading.Timer(60, self.reset_delta)         
         toolbox.log('line Bricklet created', level=5)
      
+    def reset_delta(self):
+        self.pulsTime = datetime.datetime.now()
+        broadcast_input_value('TiFo.' + self.name + '.raw', str(0))
+        
     def callback(self, value):
         self.min = min(self.min, value)
         self.max = max(self.max, value)
-        if value < self.gwl:
+        if value < self.gwl and self.state == 1:
+            self.state = 0
+            delta = datetime.datetime.now() - self.pulsTime
+            self.pulsTime = datetime.datetime.now()
+            broadcast_input_value('TiFo.' + self.name + '.raw', str(delta.total_seconds()/30))
+            self.reset.cancel()
+            self.reset = threading.Timer(2*delta, self.reset_delta)
+            self.reset.start()            
+        elif value < self.gwl:
             self.state = 0
         if value > self.gwh and self.state == 0:
             self.state = 1
+            delta = datetime.datetime.now() - self.pulsTime
+            self.pulsTime = datetime.datetime.now()
+            broadcast_input_value('TiFo.' + self.name + '.raw', str(delta.total_seconds()/30))
+            self.reset.cancel()
+            self.reset = threading.Timer(2*delta, self.reset_delta)
+            self.reset.start()              
             self.counter += 1
             self.value_h += 1
             self.value_d += 1

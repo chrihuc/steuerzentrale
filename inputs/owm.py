@@ -11,6 +11,7 @@ import pytz
 import constants
 from tools import toolbox
 from outputs.mqtt_publish import mqtt_pub
+from database import mysql_connector as msqc
 
 import pyowm
 
@@ -104,7 +105,8 @@ def main():
 #                print("Wind Boeen Failed")              
         
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
-        result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - 7d;')
+        regentage = msqc.setting_r('minDohneRasenS') # 7
+        result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(regentage) + 'd;')
         points=list(result.get_points())
         broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
         
