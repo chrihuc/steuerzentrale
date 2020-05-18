@@ -106,9 +106,11 @@ def main():
         
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         regentage = msqc.setting_r('minDohneRasenS') # 7
-        result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(regentage) + 'd;')
-        points=list(result.get_points())
-        broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
+        print(regentage)
+        if str(regentage) != 'None':
+            result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(regentage) + 'd;')
+            points=list(result.get_points())
+            broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
         
         retries = 0
         while retries < 3:
