@@ -106,7 +106,7 @@ def main():
         
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         regentage = msqc.setting_r('minDohneRasenS') # 7
-        print(regentage)
+#        print(regentage)
         if str(regentage) != 'None':
             result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(int(float(regentage))) + 'd;')
             points=list(result.get_points())
