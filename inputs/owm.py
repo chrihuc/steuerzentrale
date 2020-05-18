@@ -108,7 +108,7 @@ def main():
         regentage = msqc.setting_r('minDohneRasenS') # 7
         print(regentage)
         if str(regentage) != 'None':
-            result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(regentage) + 'd;')
+            result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(int(regentage)) + 'd;')
             points=list(result.get_points())
             broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
         
