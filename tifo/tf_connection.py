@@ -188,7 +188,8 @@ class LineBrick:
             self.state = 0
             delta = datetime.datetime.now() - self.pulsTime
             self.pulsTime = datetime.datetime.now()
-            broadcast_input_value('TiFo.' + self.name + '.raw', str(delta.total_seconds()/30))
+            if delta.total_seconds() > 0: 
+                broadcast_input_value('TiFo.' + self.name + '.raw', str(30/delta.total_seconds()))
             self.reset.cancel()
             self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
             self.reset.start()            
@@ -198,7 +199,8 @@ class LineBrick:
             self.state = 1
             delta = datetime.datetime.now() - self.pulsTime
             self.pulsTime = datetime.datetime.now()
-            broadcast_input_value('TiFo.' + self.name + '.raw', str(delta.total_seconds()/30))
+            if delta.total_seconds() > 0: 
+                broadcast_input_value('TiFo.' + self.name + '.raw', str(30/delta.total_seconds()))
             self.reset.cancel()
             self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
             self.reset.start()              
