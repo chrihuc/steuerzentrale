@@ -133,7 +133,7 @@ class MqttClient:
                     else:
                         name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[-1]                         
                     broadcast_input_value('MQTT.' + name, m_in) 
-                elif "shellies" == msg.topic.split("/")[0] and not 'status' in msg.topic:
+                elif "shellies" == msg.topic.split("/")[0] and not 'status' in msg.topic and not 'announce' in msg.topic:
                     broadcast_input_value('MQTT.' + msg.topic.replace('/','.'), m_in)
             if 'DataRequest' in msg.topic:
 #                print(m_in.values())
