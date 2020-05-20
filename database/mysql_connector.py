@@ -196,7 +196,10 @@ def re_calc(inpt):
         lst = eval(str(inpt))
         if lst[0] == "sett":
             value = setting_r(lst[1])
-            return float(value)
+            try:
+                return float(value)
+            except:
+                return value
         else:
             for num, sub in enumerate(lst):
                 if "sett" in str(sub):

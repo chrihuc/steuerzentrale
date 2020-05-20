@@ -393,10 +393,15 @@ class Szenen(object):
             elif str(szene_dict.get("Beschreibung")) in ['None','']:
                 text = ''
             else:
-                if device:
-                    text = '%s, %s = %s' % (str(szene_dict.get("Beschreibung")), device, wert)
+                beschr = ''
+                if 'sett' in szene_dict.get("Beschreibung") and '[' in szene_dict.get("Beschreibung"):
+                    beschr = msqc.re_calc(szene_dict.get("Beschreibung"))
                 else:
-                    text = str(szene_dict.get("Beschreibung"))
+                    beschr = szene_dict.get("Beschreibung")
+                if device:
+                    text = '%s, %s = %s' % (str(beschr), device, wert)
+                else:
+                    text = str(beschr)
             aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
