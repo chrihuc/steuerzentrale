@@ -50,7 +50,7 @@ owm = pyowm.OWM(constants.owm_key, language="de")
 def get_rain():
     with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-niederschlag-10min/ch.meteoschweiz.messwerte-niederschlag-10min_de.json") as url:
         data = json.loads(url.read().decode())
-        rain, rain1, rain2 = 0
+        rain, rain1, rain2 = 0,0,0
         for section in data:
             if section == 'features':
                 for feature in data['features']:
