@@ -186,13 +186,13 @@ class LineBrick:
         self.max = max(self.max, value)
         if value < self.gwl and self.state == 1:
             self.state = 0
-            delta = datetime.datetime.now() - self.pulsTime
-            self.pulsTime = datetime.datetime.now()
-            if delta.total_seconds() > 0.5: 
-                broadcast_input_value('TiFo.' + self.name + '.raw', str(25/delta.total_seconds()))
-            self.reset.cancel()
-            self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
-            self.reset.start()            
+#            delta = datetime.datetime.now() - self.pulsTime
+#            self.pulsTime = datetime.datetime.now()
+#            if delta.total_seconds() > 0.5: 
+#                broadcast_input_value('TiFo.' + self.name + '.raw', str(25/delta.total_seconds()))
+#            self.reset.cancel()
+#            self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
+#            self.reset.start()            
         elif value < self.gwl:
             self.state = 0
         if value > self.gwh and self.state == 0:
@@ -200,7 +200,7 @@ class LineBrick:
             delta = datetime.datetime.now() - self.pulsTime
             self.pulsTime = datetime.datetime.now()
             if delta.total_seconds() > 0.5: 
-                broadcast_input_value('TiFo.' + self.name + '.raw', str(35/delta.total_seconds()))
+                broadcast_input_value('TiFo.' + self.name + '.raw', str(60/delta.total_seconds()))
             self.reset.cancel()
             self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
             self.reset.start()              
@@ -398,6 +398,7 @@ class TiFo:
 
     def connect(self):
         try:
+            self.LEDList = LEDStrips()
             self.ipcon.disconnect()
 #            print('disconnected: ' + self.ip)
         except:

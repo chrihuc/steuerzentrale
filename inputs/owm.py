@@ -50,11 +50,17 @@ owm = pyowm.OWM(constants.owm_key, language="de")
 def get_rain():
     with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-niederschlag-10min/ch.meteoschweiz.messwerte-niederschlag-10min_de.json") as url:
         data = json.loads(url.read().decode())
+        rain, rain1, rain2 = 0
         for section in data:
             if section == 'features':
                 for feature in data['features']:
                     if feature['properties']['station_name'] == 'Bözberg':
-                        return feature['properties']['value']
+                        rain = feature['properties']['value']
+                    if feature['properties']['station_name'] == 'Buchs / Aarau':
+                        rain1 = feature['properties']['value']
+                    if feature['properties']['station_name'] == 'Stetten':
+                        rain2 = feature['properties']['value']
+        return rain, rain1, rain2
 
 def get_wind():
     with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-windgeschwindigkeit-kmh-10min/ch.meteoschweiz.messwerte-windgeschwindigkeit-kmh-10min_de.json") as url:
@@ -79,10 +85,12 @@ def main():
         retries = 0
         while retries < 3:        
             try:
-                rain = get_rain()
-                broadcast_input_value('Wetter/Regen', rain)
+                rain, rain1, rain2 = get_rain()
+                broadcast_input_value('Wetter/Regen', (rain + rain1 + rain2)/3)
+                broadcast_input_value('Wetter/RegenWarnung', max(rain, rain1, rain2))
                 retries = 3
-            except:
+            except Exception as e:
+                print(e)
                 retries += 1                
 #                print("Regen Failed")   
         retries = 0
