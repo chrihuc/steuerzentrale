@@ -199,10 +199,10 @@ class LineBrick:
             self.state = 1
             delta = datetime.datetime.now() - self.pulsTime
             self.pulsTime = datetime.datetime.now()
-            if delta.total_seconds() > 0.5: 
+            if delta.total_seconds() > 0.2: 
                 broadcast_input_value('TiFo.' + self.name + '.raw', str(60/delta.total_seconds()))
             self.reset.cancel()
-            self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
+            self.reset = threading.Timer(3*delta.total_seconds(), self.reset_delta)
             self.reset.start()              
             self.counter += 1
             self.value_h += 1
