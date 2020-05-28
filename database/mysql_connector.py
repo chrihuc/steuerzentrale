@@ -209,13 +209,16 @@ def re_calc(inpt):
         lst = eval(str(inpt))
         if lst[0] == "internal":
             if setting_r(lst[1]) == 'BDQs':
-                value = 'BDQs: '.join(mdb_read_bdqs())
-                return value
+                value = mdb_read_bdqs()
+                if value:
+                    return 'BDQs: '.join(value)    
+                else:
+                    return False            
         else:
             for num, sub in enumerate(lst):
                 if "sett" in str(sub):
                     lst[num] = re_calc(sub)
-            return lst        
+            return lst
     else:
         return inpt
 
