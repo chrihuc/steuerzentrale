@@ -74,11 +74,15 @@ def get_wind():
 def get_boeen():
     with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-wind-boeenspitze-kmh-10min/ch.meteoschweiz.messwerte-wind-boeenspitze-kmh-10min_de.json") as url:
         data = json.loads(url.read().decode())
+        boee1, boee2 = 0, 0
         for section in data:
             if section == 'features':
                 for feature in data['features']:
                     if feature['id'] == 'BUS':
-                        return feature['properties']['value']  
+                        boee1 = feature['properties']['value']
+                    if feature['id'] == 'PSI':
+                        boee2 = feature['properties']['value']                        
+        return max(boee1, boee2)  
 
 def main():
     while constants.run:
@@ -86,6 +90,7 @@ def main():
         while retries < 3:        
             try:
                 rain, rain1, rain2 = get_rain()
+                broadcast_input_value('Wetter/RegenBOZ', rain)
                 broadcast_input_value('Wetter/Regen', (rain + rain1 + rain2)/3)
                 broadcast_input_value('Wetter/RegenWarnung', max(rain, rain1, rain2))
                 retries = 3
@@ -118,7 +123,7 @@ def main():
         if str(regentage) != 'None':
             result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(int(float(regentage))) + 'd;')
             points=list(result.get_points())
-            broadcast_input_value('Wetter/Regen7d', points[0]['sum'])        
+            broadcast_input_value('Wetter/Regen7d', points[0]['sum']/10)        
         
         retries = 0
         while retries < 3:
@@ -153,4 +158,4 @@ def main():
 #                print("OWM Failed")
                 retries += 1
                 pass
-        toolbox.sleep(60*10)
+        toolbox.sleep(60*1)

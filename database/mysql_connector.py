@@ -208,10 +208,12 @@ def re_calc(inpt):
     elif "internal" in str(inpt):
         lst = eval(str(inpt))
         if lst[0] == "internal":
-            if setting_r(lst[1]) == 'BDQs':
+            if lst[1] == 'BDQs':
                 value = mdb_read_bdqs()
                 if value:
-                    return 'BDQs: '.join(value)    
+                    text = 'BDQs: '+''.join(value) 
+#                    print(text)
+                    return text   
                 else:
                     return False            
         else:

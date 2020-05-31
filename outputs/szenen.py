@@ -393,16 +393,13 @@ class Szenen(object):
             elif str(szene_dict.get("Beschreibung")) in ['None','']:
                 text = ''
             else:
-                beschr = ''
-                if 'sett' in szene_dict.get("Beschreibung") and '[' in szene_dict.get("Beschreibung"):
-                    beschr = msqc.re_calc(szene_dict.get("Beschreibung"))
-                else:
-                    beschr = szene_dict.get("Beschreibung")
+                beschr = szene_dict.get("Beschreibung")
                 if device:
                     text = '%s, %s = %s' % (str(beschr), device, wert)
                 else:
                     text = str(beschr)
-            aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
+            if text != 'False':
+                aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")              
