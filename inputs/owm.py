@@ -82,7 +82,7 @@ def get_boeen():
                         boee1 = feature['properties']['value']
                     if feature['id'] == 'PSI':
                         boee2 = feature['properties']['value']                        
-        return max(boee1, boee2)  
+        return boee1, boee2
 
 def main():
     while constants.run:
@@ -104,16 +104,18 @@ def main():
                 winds = get_wind()
                 broadcast_input_value('Wetter/Wind', winds) 
                 retries = 3
-            except:
+            except Exception as e:
+                print(e)
                 retries += 1
 #                print("Wind Failed") 
         retries = 0
         while retries < 3:             
             try:            
-                boeen = get_boeen()
-                broadcast_input_value('Wetter/Boeen', boeen)   
+                boee1, boee2 = get_boeen()
+                broadcast_input_value('Wetter/Boeen', max(boee1,boee2))   
                 retries = 3
-            except:
+            except Exception as e:
+                print(e)
                 retries += 1
 #                print("Wind Boeen Failed")              
         
