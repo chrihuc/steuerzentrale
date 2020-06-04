@@ -44,6 +44,13 @@ class HM_out():
         elif command == 'set_temperature':
 #            print(deviceGroup, deviceName, value)
             self.pyhomematic.devices[deviceGroup][deviceName].set_temperature(value)
+        elif command == 'unlock':
+#            print(deviceGroup, deviceName, value)
+            self.pyhomematic.devices[deviceGroup][deviceName].unlock()
+        elif command == 'lock':
+#            print(deviceGroup, deviceName, value)
+            # rf, QEQ0054751
+            self.pyhomematic.devices[deviceGroup][deviceName].lock()            
 
     
     
