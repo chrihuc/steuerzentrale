@@ -159,7 +159,6 @@ class MqttClient:
 #                    print(msqc.mdb_read_bdqs())
                     mqtt_pub("DataRequest/Answer/BDQs", msqc.mdb_read_bdqs())
                 elif 'InputsErinnerungen' in m_in.values():
-                    print(msqc.mdb_read_table_columns(constants.sql_tables.inputs.name, ['Name','last_Value','Beschreibung','Payload']))
                     mqtt_pub("DataRequest/Answer/InputsErinnerungen", msqc.mdb_read_table_columns(constants.sql_tables.inputs.name, ['Name','last_Value','Beschreibung','Payload']))                    
                 
 # shellies/shelly1-B91B5A/relay/0 off

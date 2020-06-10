@@ -851,9 +851,12 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
     try:
         value = float(value)
     except Exception as e:
-        print(e)
-        print(device)
-        return [], [], None, []
+        try:
+            value = float(value['value'])
+        except Exception as e:
+            print(e)
+            print(device)
+            return [], [], None, []
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     dicti = {}
     dicti_1 = {}

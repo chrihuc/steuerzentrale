@@ -51,11 +51,18 @@ def check_ext_ip(notify=True):
             constants.ext_IP = ip
             aes.new_event(description="New IP "+ip, prio=1008)
             constants.config.set('Main', 'Ext_IP', ip)
+            url = 'https://infomaniak.com/nic/update?hostname=dyn.huckle.ch'
+            username = 'schaltzentrale'
+            password = 'DsjyimGNR8he3730j6ZF'
+            requests.get(url, auth=(username, password)).content
             constants.save_config()
         else:
             pass
     except:
-        pass
+        url = 'https://infomaniak.com/nic/update?hostname=dyn.huckle.ch'
+        username = 'schaltzentrale'
+        password = 'DsjyimGNR8he3730j6ZF'
+        requests.get(url, auth=(username, password)).content
 #            aes.new_event(description="Old IP "+ip, prio=8)
 
 class Internal:

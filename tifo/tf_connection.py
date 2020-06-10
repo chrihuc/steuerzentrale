@@ -177,9 +177,12 @@ class LineBrick:
         self.reset = threading.Timer(60, self.reset_delta)         
         toolbox.log('line Bricklet created', level=5)
      
-    def reset_delta(self):
+    def reset_delta(self, value=190):
         #self.pulsTime = datetime.datetime.now()
-        broadcast_input_value('TiFo.' + self.name + '.raw', str(0))
+        broadcast_input_value('TiFo.' + self.name + '.raw', str(60/value))
+        if value < 180:
+            self.reset = threading.Timer(value, self.reset_delta, [value*2])
+            self.reset.start()         
         
     def callback(self, value):
         self.min = min(self.min, value)
@@ -202,7 +205,7 @@ class LineBrick:
             if delta.total_seconds() > 0.2: 
                 broadcast_input_value('TiFo.' + self.name + '.raw', str(60/delta.total_seconds()))
             self.reset.cancel()
-            self.reset = threading.Timer(3*delta.total_seconds(), self.reset_delta)
+            self.reset = threading.Timer(delta.total_seconds(), self.reset_delta, [delta.total_seconds()*2])
             self.reset.start()              
             self.counter += 1
             self.value_h += 1
