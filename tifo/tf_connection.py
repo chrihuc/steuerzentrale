@@ -182,7 +182,11 @@ class LineBrick:
         broadcast_input_value('TiFo.' + self.name + '.raw', str(60/value))
         if value < 180:
             self.reset = threading.Timer(value, self.reset_delta, [value*2])
-            self.reset.start()         
+            self.reset.start()
+        else:
+            broadcast_input_value('TiFo.' + self.name + '.raw', 0)
+            time.sleep(5)
+            broadcast_input_value('TiFo.' + self.name + '.raw', 0)
         
     def callback(self, value):
         self.min = min(self.min, value)
