@@ -21,6 +21,11 @@ from tools import toolbox
 from outputs.mqtt_publish import mqtt_pub
 #toolbox.log('debug on')
 
+def broadcast_input_value(Name, Value):
+    payload = {'Name':Name,'Value':Value}
+#    on server:
+    toolbox.log(Name, Value)
+    toolbox.communication.send_message(payload, typ='InputValue')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--debug', type=int, nargs='?', help='debug', default=0)
@@ -196,7 +201,7 @@ startup = True
 #aes.new_event(description="All Threads kicked off", prio=9)
 #time.sleep(5)
 aes.new_event(description="All Threads started", prio=9)
-#toolbox.broadcast_input_value('Inputs.Status.Main', 0)
+broadcast_input_value('Inputs.Status.Main', 0)
 
 starttime = 25
 
@@ -213,7 +218,7 @@ try:
                 t.failed = True                    
                 if t.heartbeat > 12:                    
                     aes.new_event(description="Thread stopped: "+t.name, prio=9)
-#                    toolbox.broadcast_input_value('Inputs.Status.Main', 5)
+                    broadcast_input_value('Inputs.Status.Main', 5)
                 try:
                     new_t = toolbox.OwnTimer(0, name=t.name, function=t.function, args = t.args)
                     new_t.start()
@@ -235,7 +240,7 @@ try:
                             aes.new_event(description="Thread finally started: "+t.name, prio=9)
                         else:
                             aes.new_event(description="Thread running again: "+t.name, prio=9)
-#                            toolbox.broadcast_input_value('Inputs.Status.Main', 10)
+                            broadcast_input_value('Inputs.Status.Main', 10)
                         t.restartCounter = 0
                         t.failed = False
                 if t.heartbeat < 3:
@@ -247,11 +252,11 @@ try:
         if startup and not starting:
             aes.new_event(description="All Threads finally startet", prio=9)
             toolbox.log('threads running')
-            toolbox.broadcast_input_value('Inputs.Status.Main', 10)
+            broadcast_input_value('Inputs.Status.Main', 10)
             startup = False
         elif startup and heartbeats == starttime:
             aes.new_event(description="Not all threads started successfully in time", prio=9)
-#            toolbox.broadcast_input_value('Inputs.Status.Main', 5)
+            broadcast_input_value('Inputs.Status.Main', 5)
         toolbox.sleep(5)
         heartbeats += 1        
 except KeyboardInterrupt:
