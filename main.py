@@ -253,6 +253,7 @@ try:
             aes.new_event(description="All Threads finally startet", prio=9)
             toolbox.log('threads running')
             broadcast_input_value('Inputs.Status.Main', 10)
+            broadcast_input_value('Inputs.Autostart', 1)
             startup = False
         elif startup and heartbeats == starttime:
             aes.new_event(description="Not all threads started successfully in time", prio=9)

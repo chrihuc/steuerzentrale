@@ -125,7 +125,10 @@ def main():
         if str(regentage) != 'None':
             result = client.query('SELECT sum("value") FROM "A00TER1GEN1RE01" WHERE time >= now() - ' + str(int(float(regentage))) + 'd;')
             points=list(result.get_points())
-            broadcast_input_value('Wetter/Regen7d', points[0]['sum']/10)        
+            if points:
+                broadcast_input_value('Wetter/Regen7d', points[0]['sum']/10)
+            else:
+                broadcast_input_value('Wetter/Regen7d', 0)
         
         retries = 0
         while retries < 3:

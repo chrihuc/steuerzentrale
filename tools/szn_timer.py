@@ -104,6 +104,10 @@ class Szenen_Timer:
                     if delay > 0:
                         t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device, noDelay])
                         item["timer"] = t
+                        item['parent'] = parent
+                        item['exact'] = exact
+                        item["retrig"] = retrig 
+                        item["delay"] = delay
                         item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                         item.get("timer").start()
                         self.store()
@@ -119,6 +123,10 @@ class Szenen_Timer:
                     if delay > 0:
                         t =  Timer(delay,self.entferne_eintrag, args=[hash_id, child, device, noDelay])
                         item["timer"] = t
+                        item['parent'] = parent
+                        item['exact'] = exact
+                        item["retrig"] = retrig 
+                        item["delay"] = delay
                         item['due'] = datetime.datetime.now() + datetime.timedelta(0,delay)
                         item.get("timer").start()
                         self.store()

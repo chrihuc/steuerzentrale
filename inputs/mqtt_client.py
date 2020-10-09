@@ -135,6 +135,8 @@ class MqttClient:
                     broadcast_input_value('MQTT.' + name, m_in) 
                 elif "shellies" == msg.topic.split("/")[0] and not 'status' in msg.topic and not 'announce' in msg.topic:
                     broadcast_input_value('MQTT.' + msg.topic.replace('/','.'), m_in)
+                elif "logging" in msg.topic:
+                    print(m_in)
             if 'DataRequest' in msg.topic:
 #                print(m_in.values())
                 if 'SetTable' in msg.topic:  
@@ -166,7 +168,7 @@ mqtt_list = []
 mqtt.Client.connected_flag=False
 #client = None
 topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
-          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#"]
+          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#"]
 
 
 def main():
