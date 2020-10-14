@@ -114,6 +114,14 @@ class MqttClient:
                         device = m_in['Device']
                         command = m_in['Command']
                         broadcast_exec_comm(device, command)
+                elif 'Enable' in msg.topic:
+                    if 'Szene' in msg.topic:
+                        szene = msg.topic.split('/')[2]
+                        what = m_in['Enabled']
+                        if what == "true":
+                            msqc.set_val_in_szenen('Enabled', szene, True)
+                        elif what == "false":
+                            msqc.set_val_in_szenen('Enabled', szene, False)                            
                 elif 'AlarmOk' in msg.topic:
                     if 'uuid' in m_in.keys():
                         aes.alarm_liste.delAlarm(m_in['uuid'])
@@ -153,7 +161,7 @@ class MqttClient:
                 elif 'GetSettings' in m_in.values():
                     mqtt_pub("DataRequest/Answer/Settings", msqc.mdb_get_table(constants.sql_tables.settings.name)) 
                 elif 'SzenenGruppen' in m_in.values():
-                    mqtt_pub("DataRequest/Answer/SzenenGruppen", msqc.mdb_read_table_columns(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung']))
+                    mqtt_pub("DataRequest/Answer/SzenenGruppen", msqc.mdb_read_table_columns(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung','Enabled']))
                 elif 'SzenenErinnerung' in m_in.values():
 #                    print(msqc.mdb_read_table_column_filt2(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
                     mqtt_pub("DataRequest/Answer/SzenenErinnerung", msqc.mdb_read_table_column_filt2(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
@@ -168,7 +176,7 @@ mqtt_list = []
 mqtt.Client.connected_flag=False
 #client = None
 topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
-          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#"]
+          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#",'Enable/#']
 
 
 def main():

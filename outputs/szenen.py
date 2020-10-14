@@ -376,6 +376,8 @@ class Szenen(object):
             next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
             if start_t < next_start:
                 erfuellt = False
+        if str(szene_dict.get("Enabled")) == "False":
+            erfuellt = False
         if str(szene_dict.get("Karenz")) != 'None':
             Karenz = (szene_dict.get("Karenz"))
         else:
