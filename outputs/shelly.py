@@ -55,8 +55,8 @@ class Shelly(object):
                                 verify=False)
         return response.json()     
     
-    def set_setting(self, data, nr=0):
-        response = requests.post(self.__build_uri_for_path__("/settings/relay/" + str(nr)),
+    def set_setting(self, data, channel="/settings/relay/0"):
+        response = requests.post(self.__build_uri_for_path__("/settings/relay/"),
 #                      headers=Secvest.PUT_HEADERS,
                       data=data,
                       cookies=self.cookies,
@@ -87,16 +87,22 @@ def main():
 def receive_communication(payload, *args, **kwargs):
     if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') in ['Shelly', 'ShellyConf', 'ShellyDim']):
         adress=toolbox.kw_unpack(kwargs,'adress')
-        device = adress.split(".")[1] 
-        print(payload)
+        device = adress.split(".")[1]
+        ip = None
+        try:
+            ip = adress.split(".")[3]
+            ip = ip.replace(":", ".")
+        except:
+            pass
+#        print(payload)
 #            der teil muss abgekürzt werden, wenn ein ESP der empfänger ist, auf nur das nötigste
 #        einschalten der shelly switches scheint nur über channel zu gehen
         if toolbox.kw_unpack(kwargs,'receiver') == 'Shelly' and payload['Channel'] is None:
             result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'], retain=False)
             toolbox.communication.send_message(payload, typ='return', value=result) 
-        elif toolbox.kw_unpack(kwargs,'receiver') == 'Shelly' and payload['Channel'] is not None:
-            result = mqtt_publish.mqtt_pub("shellies/" + device + payload['Channel'], payload, retain=False)
-            toolbox.communication.send_message(payload, typ='return', value=result)             
+        elif toolbox.kw_unpack(kwargs,'receiver') == 'Shelly' and payload['Channel'] is not None and ip is not None:
+            shelly = Shelly(ip) 
+            shelly.set_setting(payload['Value'], payload['Channel'])            
         elif toolbox.kw_unpack(kwargs,'receiver') == 'ShellyDim':
             result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload, retain=False)
             toolbox.communication.send_message(payload, typ='return', value=result)             
