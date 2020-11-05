@@ -783,7 +783,8 @@ class Sonos:
     def durchsage(self,text):
         success = False
         players = list(soco.discover())
-        while not success:
+        errCount = 0
+        while not success and errCount < 10:
             try:
                 self.Status = {}
                 # save all zones
@@ -796,10 +797,12 @@ class Sonos:
                 success = True
             except Exception as e:
                 print(e)
+                errCount += 1
                 pass
         # combine all zones
         success = False
-        while not success:
+        errCount = 0
+        while not success and errCount < 10:
             try:
                 for player in players:
                     if 'S1' in player.get_speaker_info()[u'model_number']:
@@ -827,6 +830,7 @@ class Sonos:
                 success = True
             except Exception as e:
                 print(e)
+                errCount += 1
                 pass
         # play file or text on PC
         play_wav(text)

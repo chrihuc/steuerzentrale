@@ -978,6 +978,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 #dicti = {key: "" for (key) in szene_columns}
                 for row in results:
                     szenen = []
+                    latchMerker = False
                     payloads = []
                     kondition = []
                     
@@ -1050,29 +1051,33 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             violTime = str(ct)
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
                             violTime = 'NULL'
+                        if append:
+                            latchMerker = True
                         if append and dicti.get('persistance') is not None:
                             if dicti.get('violTime') is not None:
                                 if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
                                     szenen = []
                                     payloads = []
                                     kondition = []
+                                    latchMerker = False
                             if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
                                 szenen = []
                                 payloads = []
                                 kondition = []
+                                latchMerker = False
                         if str(dicti.get('latching')) == "True":
-                            if not append and str(dicti.get('latched')) == "True":
+                            if not latchMerker and str(dicti.get('latched')) == "True":
                                 latched = 'False'
                                 # anti szene (praktisch das reset):
                                 if dicti.get('ResetSzene') is not None:
                                     szenen.append(dicti.get('ResetSzene'))
                                     payloads.append(dicti.get("Payload"))
                                     kondition.append(desc + " " + descri)
-                            elif szenen and str(dicti.get('latched')) == "True":
+                            elif latchMerker and str(dicti.get('latched')) == "True":
                                 szenen = []
                                 payloads = []
                                 kondition = []
-                            elif szenen and str(dicti.get('latched')) != "True": 
+                            elif latchMerker and str(dicti.get('latched')) != "True": 
 #                                print(szenen)
                                 latched = 'True'
 #                        print(lt,gt,latched)

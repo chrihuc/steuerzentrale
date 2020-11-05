@@ -56,7 +56,7 @@ class Shelly(object):
         return response.json()     
     
     def set_setting(self, data, channel="/settings/relay/0"):
-        response = requests.post(self.__build_uri_for_path__("/settings/relay/"),
+        response = requests.post(self.__build_uri_for_path__(channel),
 #                      headers=Secvest.PUT_HEADERS,
                       data=data,
                       cookies=self.cookies,

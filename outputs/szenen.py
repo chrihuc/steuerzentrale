@@ -192,43 +192,43 @@ class Szenen(object):
                 try:
                     inpt, operand, wert = bedingung
                     wert = msqc.re_calc(wert)
+                    if msqc.setting_r(inpt) == None:
+                        print(inpt, 'gibts nicht')
+    #                    msqc.setting_s(inpt, '')
+    #                item = settings.get(item)
+                    item = msqc.setting_r(inpt)
+                    valid = msqc.valid_r(inpt)
+                    if verbose: print(item, operand, wert)
+                    if operand == '=':                          # mathematisch gleich
+                        if not float(item) == float(wert):
+                            erfuellt = False
+                    elif operand == '==':                       # String gleich
+                        if not str(item) == str(wert):
+                            erfuellt = False
+                    elif operand == '<':
+                        if not float(item) < float(str(wert)):
+                            erfuellt = False
+                    elif operand == '>':
+                        if not float(item) > float(str(wert)):
+                            erfuellt = False
+                    elif operand == '<=':
+                        if not float(item) <= float(wert):
+                            erfuellt = False
+                    elif operand == '>=':
+                        if not float(item) >= float(wert):
+                            erfuellt = False
+                    elif operand == '!':
+                        if (item) == (wert):
+                            erfuellt = False
+                    elif operand == 'in':
+                        if not (item) in (wert):
+                            erfuellt = False
+                    elif operand == 'valid':
+                        if not (str(valid) == wert):
+                            erfuellt = False   
                 except:
                     print(bedingung)
                     return False
-                if msqc.setting_r(inpt) == None:
-                    print(inpt, 'gibts nicht')
-#                    msqc.setting_s(inpt, '')
-#                item = settings.get(item)
-                item = msqc.setting_r(inpt)
-                valid = msqc.valid_r(inpt)
-                if verbose: print(item, operand, wert)
-                if operand == '=':                          # mathematisch gleich
-                    if not float(item) == float(wert):
-                        erfuellt = False
-                elif operand == '==':                       # String gleich
-                    if not str(item) == str(wert):
-                        erfuellt = False
-                elif operand == '<':
-                    if not float(item) < float(str(wert)):
-                        erfuellt = False
-                elif operand == '>':
-                    if not float(item) > float(str(wert)):
-                        erfuellt = False
-                elif operand == '<=':
-                    if not float(item) <= float(wert):
-                        erfuellt = False
-                elif operand == '>=':
-                    if not float(item) >= float(wert):
-                        erfuellt = False
-                elif operand == '!':
-                    if (item) == (wert):
-                        erfuellt = False
-                elif operand == 'in':
-                    if not (item) in (wert):
-                        erfuellt = False
-                elif operand == 'valid':
-                    if not (str(valid) == wert):
-                        erfuellt = False                        
         if verbose: print( "Ergebniss: ",erfuellt)
         return erfuellt
 
