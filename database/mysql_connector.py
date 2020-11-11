@@ -190,7 +190,8 @@ def re_calc(inpt):
                     return lst[1][0] + lst[1][1]
                 elif lst[0] == "sub_calc":
                     return lst[1][0] - lst[1][1]                
-        except:
+        except Exception as e:
+            print(e)
             return inpt
     elif "sett" in str(inpt):
         lst = eval(str(inpt))
@@ -198,7 +199,8 @@ def re_calc(inpt):
             value = setting_r(lst[1])
             try:
                 return float(value)
-            except:
+            except Exception as e:
+                print(e)
                 return value
         else:
             for num, sub in enumerate(lst):
@@ -295,9 +297,11 @@ def setting_s(setting, wert):
     if 'Inputs.' in setting:
         try:
 #            inputs(setting, float(wert))
+#            wert = re_calc(wert)
             payload = {'Name':setting,'Value':wert}
         #    on server:
 #            toolbox.log(Name, Value, level=9)
+#            print(payload)
             toolbox.communication.send_message(payload, typ='InputValue')            
         except:
             print('could not set input', setting, wert)
@@ -843,6 +847,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
 #    i = 0
     ct = datetime.datetime.now()
     utc = datetime.datetime.utcnow()
+#    if 'inputs' in device:
+#        print(value,device)
     try:
         last_time = locklist[device]
     except KeyError:

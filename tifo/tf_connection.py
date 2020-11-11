@@ -181,7 +181,7 @@ class LineBrick:
         #self.pulsTime = datetime.datetime.now()
         broadcast_input_value('TiFo.' + self.name + '.raw', str(60/value))
         if value < 180:
-            self.reset = threading.Timer(value*3, self.reset_delta, [value*2])
+            self.reset = threading.Timer(value*3, self.reset_delta, [value*4])
             self.reset.start()
         else:
             broadcast_input_value('TiFo.' + self.name + '.raw', 0)
