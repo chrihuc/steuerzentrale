@@ -141,6 +141,7 @@ class io16Dict:
                 index = int(log(addr,2))
                 times = ios.get("times")
                 timedelta = datetime.datetime.now() - times[index]
+                times[index] = datetime.datetime.now()
                 #times[index] = 0
                 ios["times"] = times
                 return timedelta.total_seconds()
@@ -644,9 +645,9 @@ class TiFo:
             #if Value == 0: # nach dem neustart ist das 0
             #   Value = 1
         else:
-            Value = 0
-            if not thread:
-                self.io16list.setTime(device,interrupt_mask, port)
+            Value = -1 * self.io16list.getTimeDiff(device,interrupt_mask, port)
+#            if not thread:
+#                self.io16list.setTime(device,interrupt_mask, port)
         #print dicti
         for name in namelist:
             broadcast_input_value('TiFo.' + name, Value)
@@ -1019,6 +1020,7 @@ class TiFo:
             self.command_queue[adress] = None
         except:
             print("konnte tfled nicht ausführen")
+            self.connect()
         return True
 
     def set_drb(self, device, value, adress):

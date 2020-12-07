@@ -60,12 +60,14 @@ def check_ext_ip(notify=True):
             url = 'https://infomaniak.com/nic/update?hostname=cloud.huckle.ch'
             requests.get(url, auth=(username, password)).content
             url = 'https://infomaniak.com/nic/update?hostname=huckle.ch'
-            requests.get(url, auth=(username, password)).content            
+            requests.get(url, auth=(username, password)).content   
+            url = 'https://infomaniak.com/nic/update?hostname=grafana.huckle.ch'
+            requests.get(url, auth=(username, password)).content               
             constants.save_config()
         else:
             pass
     except:
-        url = 'https://infomaniak.com/nic/update?hostname=dyn.huckle.ch'
+        url = 'https://infomaniak.com/nic/update?hostname=www.huckle.ch'
         username = 'schaltzentrale'
         password = 'DsjyimGNR8he3730j6ZF'
         requests.get(url, auth=(username, password)).content

@@ -179,7 +179,7 @@ class MqttClient:
 mqtt_list = []
 mqtt.Client.connected_flag=False
 #client = None
-topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
+topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Message/BdqOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
           "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#",'Enable/#']
 
 
