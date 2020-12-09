@@ -141,7 +141,7 @@ class io16Dict:
                 index = int(log(addr,2))
                 times = ios.get("times")
                 timedelta = datetime.datetime.now() - times[index]
-                times[index] = datetime.datetime.now()
+#                times[index] = datetime.datetime.now()
                 #times[index] = 0
                 ios["times"] = times
                 return timedelta.total_seconds()
@@ -642,12 +642,14 @@ class TiFo:
         #print self.io16list.getTimeDiff(device,interrupt_mask, port)
         if value == nc_pos:
             Value = self.io16list.getTimeDiff(device,interrupt_mask, port)
+            if not thread:
+                self.io16list.setTime(device,interrupt_mask, port)            
             #if Value == 0: # nach dem neustart ist das 0
             #   Value = 1
         else:
             Value = -1 * self.io16list.getTimeDiff(device,interrupt_mask, port)
-#            if not thread:
-#                self.io16list.setTime(device,interrupt_mask, port)
+            if not thread:
+                self.io16list.setTime(device,interrupt_mask, port)
         #print dicti
         for name in namelist:
             broadcast_input_value('TiFo.' + name, Value)
