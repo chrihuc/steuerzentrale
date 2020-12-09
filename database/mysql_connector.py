@@ -1185,6 +1185,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #            print(validTimers.keys())
     con.close()
 #    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
+    if persTimer:
+        for idx, szene in enumerate(alle_szenen):
+            payload = {'Szene':szene, 'desc':descriptions[idx]}
+            toolbox.communication.send_message(payload, typ='ExecSzene')
     return alle_szenen, descriptions, heartbt, alle_payloads
 
 
