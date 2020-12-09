@@ -32,6 +32,7 @@ persTimers = {}
 inputs_dict = {}
 prozessspiegel = {}
 
+
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
 
@@ -843,7 +844,7 @@ def read_inputs_dict():
 # violation time (from evaluation automatic)
 # funktioniert bei einem Deadband vieillicht nicht, wert muss neu ankommen..
 # sollte über interne kommunikation mit ExecSzene' möglich sein.
-def inputs(device, value, add_to_mqtt=True, fallingback=False):
+def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #    i = 0
     ct = datetime.datetime.now()
     utc = datetime.datetime.utcnow()
@@ -936,7 +937,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                 if str(komp) in ['None', 'False']:
                     writeToInflx = True
                 if str(komp) in ['Bool']:
-                    if (float(last_value) == 0.0 or float(value) == 0.0) and float(last_value) != float(value):
+                    if (float(last_value) <= 0.0 and float(value) >= 0.0) or (float(last_value) >= 0.0 and float(value) <= 0.0):
                         writeToInflx = True   
                     else:
                         writeToInflx = False
@@ -1030,7 +1031,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
 #                        if (dicti['Gradient_eq'] is not None and float(re_calc(dicti['Gradient_eq'])) != gradient):
 #                            append = False
                         if (dicti['Gradient_gt'] is not None and float(re_calc(dicti['Gradient_gt'])) >= gradient):
-                            append = False 
+                            append = False
+                        if append and persTimer and dicti.get('violTime') is None: 
+                            # Bedingungen sind erfüllt aber die Funktion wurde getimed ausgelöst, Peristtime, aber in der Zwischenzeit wurde schon resettiert
+                            append = False
                         if str(dicti.get("last2")) != "None" and append:
                             if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                                 if dicti.get("Dreifach") is not None:
@@ -1055,22 +1059,28 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                             kondition.append(desc + " " + descri)
                         if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                             violTime = str(ct)
+                            # hier können wir dann den timer starten, oder besser dort wo wir auch wissen, das pesistence gibt
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
                             violTime = 'NULL'
                         if append:
                             latchMerker = True
-                        if append and dicti.get('persistance') is not None:
-                            if dicti.get('violTime') is not None:
-                                if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
+                        if append and dicti.get('persistance') is not None:  # wir hätten was auszufühern aber persistence ist grösser null
+                            if dicti.get('violTime') is not None:  # Zeit der ersten Bedinungsverletzung ist eingetragen
+                                if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')): # persistence zeit ist noch nicht abgelaufen
                                     szenen = []
                                     payloads = []
                                     kondition = []
                                     latchMerker = False
                             if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
+                                # bedingung wurde jetzt gerade erfüllt, aber wir müssen persistence abwarten
                                 szenen = []
                                 payloads = []
                                 kondition = []
                                 latchMerker = False
+                                # wir starten einen timer um zu schauen ob der Wert sich in der Persistence Zeit nicht erholt hat:
+                                if not persTimer:
+                                    thread_persis = Timer(int(dicti.get('persistance')), inputs, [device, value, False, False, True])
+                                    thread_persis.start()                                
                         if str(dicti.get('latching')) == "True":
                             if not latchMerker and str(dicti.get('latched')) == "True":
                                 latched = 'False'
@@ -1110,13 +1120,14 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     alle_payloads += payloads
                     descriptions += kondition                     
     #            get stting and logging
-                writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
+                # deprecated
+#                writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
 #                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
-                if cur.fetchone()[0] > 0:
-                    setting_s(hks, value)
+#                if cur.fetchone()[0] > 0:
+#                    setting_s(hks, value)
                 writeToCursor(cur,"SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
 #                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-                if cur.fetchone()[0] > 0 and str(hks) != str(device) and writeToInflx:
+                if cur.fetchone()[0] > 0 and str(hks) != str(device) and writeToInflx and not persTimer:
 #                    try:
 #                        insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
 #                        cur.execute(insertstatement)
@@ -1144,7 +1155,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                     data = {"Value":value, "HKS":hks}
                     mqtt_pub("Inputs/" + str(hks), data)
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
-        if not filtered:
+        if not filtered and not persTimer:
             sql = 'UPDATE %s SET valid = "%s", last_Value = "%s", time = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, ct, device)
 #            thread_sql = Timer(1, sendSql, [sql])
             retrycount = 3
@@ -1160,7 +1171,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False):
                         print('could not write to DB')            
 #            thread_sql.start()
             prozessspiegel[hks] = value
-        if heartbt and not fallingback:
+        if heartbt and not fallingback and not persTimer:
             if hks in validTimers:
                 validTimers[hks]['timer'].cancel()
             entry = {'hks' : hks, 'desc' : desc, 'device':device, 'fallback':dicti_1['fallback']}
