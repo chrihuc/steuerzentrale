@@ -28,7 +28,7 @@ from outputs import samsung
 from outputs import satellites
 try:
     from outputs import sonos
-        sn = sonos.Sonos()
+    sn = sonos.Sonos()
 except Exception as e:
     print(e)
     sn = None
