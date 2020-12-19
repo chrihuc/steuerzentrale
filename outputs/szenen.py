@@ -28,8 +28,10 @@ from outputs import samsung
 from outputs import satellites
 try:
     from outputs import sonos
+        sn = sonos.Sonos()
 except Exception as e:
     print(e)
+    sn = None
 from outputs import xs1
 
 from tools import szn_timer
@@ -46,7 +48,7 @@ except KeyError:
 
 xs1 = xs1.XS1()
 hues = hue.Hue_lights()
-sn = sonos.Sonos()
+
 tv = samsung.TV()
 sat = satellites.Satellite()
 interna = internal.Internal()
