@@ -1057,7 +1057,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                             szenen.append(dicti.get('Immer'))
                             payloads.append(dicti.get("Payload"))
                             kondition.append(desc + " " + descri)
-                        if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
+                        #if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
+                        if append and (dicti.get('violTime') is None or dicti.get('persistance') is None): # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                             violTime = str(ct)
                             # hier können wir dann den timer starten, oder besser dort wo wir auch wissen, das pesistence gibt
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)

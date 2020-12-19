@@ -26,7 +26,10 @@ from outputs import hue
 from outputs import internal
 from outputs import samsung
 from outputs import satellites
-from outputs import sonos
+try:
+    from outputs import sonos
+except Exception as e:
+    print(e)
 from outputs import xs1
 
 from tools import szn_timer
