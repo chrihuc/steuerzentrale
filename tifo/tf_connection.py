@@ -405,14 +405,15 @@ class TiFo:
         self.connect()
 
     def connect(self):
-        try:
-            self.LEDList = LEDStrips()
-            self.ipcon.disconnect()
-#            print('disconnected: ' + self.ip)
-        except:
-            pass
+
         # Connect to brickd, will trigger cb_connected
         while True:
+            try:
+                self.LEDList = LEDStrips()
+                self.ipcon.disconnect()
+    #            print('disconnected: ' + self.ip)
+            except:
+                pass            
             try:
 #                print('connecting to: ' + self.ip)
                 self.ipcon.connect(self.ip, PORT)
