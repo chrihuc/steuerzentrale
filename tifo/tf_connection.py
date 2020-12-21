@@ -404,7 +404,7 @@ class TiFo:
         aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
         self.connect()
 
-    def connect(self, execCmd):
+    def connect(self, *execCmd, **kwargs):
 
         # Connect to brickd, will trigger cb_connected
         while True:
@@ -429,7 +429,7 @@ class TiFo:
                 time.sleep(10)
         if execCmd:
             if execCmd[0] == "LEDStrips":
-                self.set_LED(execCmd[1], execCmd[2])
+                self.set_LED(execCmd[1], kwargs)
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
         toolbox.log('TiFo started')
