@@ -404,19 +404,21 @@ class TiFo:
         aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
         self.connect()
 
-    def connect(self):
+    def connect(self, execCmd):
 
         # Connect to brickd, will trigger cb_connected
         while True:
             try:
                 self.LEDList = LEDStrips()
                 self.ipcon.disconnect()
+                time.sleep(2)
     #            print('disconnected: ' + self.ip)
-            except:
-                pass            
+            except Error as e:
+                print('Disconnect Error: ' + str(e.description))            
             try:
-#                print('connecting to: ' + self.ip)
+                print('connecting to: ' + self.ip)
                 self.ipcon.connect(self.ip, PORT)
+                print('connected')
 #                aes.new_event(description="Tifo connected: "+self.ip, prio=9)
                 break
             except Error as e:
@@ -425,6 +427,9 @@ class TiFo:
             except socket.error as e:
 #                print('Socket error: ' + str(e))
                 time.sleep(10)
+        if execCmd:
+            if execCmd[0] == "LEDStrips":
+                self.set_LED(execCmd[1], execCmd[2])
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
         toolbox.log('TiFo started')
@@ -1023,7 +1028,7 @@ class TiFo:
             self.command_queue[adress] = None
         except:
             print("konnte tfled nicht ausführen")
-            self.connect()
+            self.connect("LEDStrips", adress, kwargs)
         return True
 
     def set_drb(self, device, value, adress):

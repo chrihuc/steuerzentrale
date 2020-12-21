@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+erre#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import soco
