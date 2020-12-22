@@ -285,7 +285,8 @@ class Szenen(object):
                 else:
                     executed = mes.send_zuhause(to=str(commando[0]), titel="Setting", text=str(commando[1]))
             elif device in sns_devs:
-                executed = sn.set_device(adress, commando, text)
+                if sn:
+                    executed = sn.set_device(adress, commando, text)
             elif device in hue_devs:
                 executed = hues.set_device(adress, commando)
     #            for kommando in kommandos:

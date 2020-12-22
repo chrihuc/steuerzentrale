@@ -380,6 +380,7 @@ class TiFo:
         self.ip = ip
         self.delay = 5
         self.timeoutTime = 300
+        self.connectverbose = False
         self.timeout = threading.Timer(self.timeoutTime, self.timedOut)
 
         self.ipcon = IPConnection()
@@ -414,19 +415,24 @@ class TiFo:
                 time.sleep(2)
     #            print('disconnected: ' + self.ip)
             except Error as e:
-                print('Disconnect Error: ' + str(e.description))            
+                if self.connectverbose:
+                    print('Disconnect Error: ' + str(e.description))            
             try:
-                print('connecting to: ' + self.ip)
+                if self.connectverbose:
+                    print('connecting to: ' + self.ip)
                 self.ipcon.connect(self.ip, PORT)
-                print('connected')
+                if self.connectverbose:
+                    print('connected')
 #                aes.new_event(description="Tifo connected: "+self.ip, prio=9)
                 break
             except Error as e:
-                print('Connection Error: ' + str(e.description))
+                if self.connectverbose:
+                    print('Connection Error: ' + str(e.description))
                 time.sleep(10)
             except socket.error as e:
 #                print('Socket error: ' + str(e))
                 time.sleep(10)
+        self.connectverbose = True
         if execCmd:
             if execCmd[0] == "LEDStrips":
                 self.set_LED(execCmd[1], kwargs)
@@ -1028,7 +1034,7 @@ class TiFo:
             self.command_queue[adress] = None
         except:
             print("konnte tfled nicht ausführen")
-            self.connect("LEDStrips", adress, kwargs)
+            self.connect("LEDStrips", adress, **kwargs)
         return True
 
     def set_drb(self, device, value, adress):
