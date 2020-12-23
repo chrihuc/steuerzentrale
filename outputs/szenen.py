@@ -396,10 +396,10 @@ class Szenen(object):
 #==============================================================================
         if erfuellt:
             #cls.running_list[szn_id] = szene
-            if desc != '':
+#            if desc != '':
+#                text = desc
+            if str(szene_dict.get("Beschreibung")) in ['None','']:
                 text = desc
-            elif str(szene_dict.get("Beschreibung")) in ['None','']:
-                text = ''
             else:
                 beschr = szene_dict.get("Beschreibung")
                 if device:
