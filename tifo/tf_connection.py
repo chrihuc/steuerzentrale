@@ -435,7 +435,7 @@ class TiFo:
         self.connectverbose = True
         if execCmd:
             if execCmd[0] == "LEDStrips":
-                self.set_LED(execCmd[1], kwargs)
+                self.set_LED(execCmd[1], **kwargs)
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
         toolbox.log('TiFo started')
