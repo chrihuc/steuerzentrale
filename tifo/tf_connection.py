@@ -434,8 +434,10 @@ class TiFo:
                 time.sleep(10)
         self.connectverbose = True
         if execCmd:
-            if execCmd[0] == "LEDStrips":
+            if execCmd[0] == "LEDStrips" and kwargs:
                 self.set_LED(execCmd[1], **kwargs)
+            else:
+                print('no kwargs')
         toolbox.communication.register_callback(self.receive_communication)
         time.sleep(5)
         toolbox.log('TiFo started')
@@ -853,7 +855,7 @@ class TiFo:
 
     def set_LED(self, adress, **kwargs):
 #        device, rot, gruen, blau, transitiontime, transition=ANSTEIGEND
-        device = kwargs.get('Device')
+#        device = kwargs.get('Device')
         self.command_queue[adress] = kwargs 
         try:
     #        range check kwargs
