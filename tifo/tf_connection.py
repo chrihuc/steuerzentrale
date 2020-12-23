@@ -1036,7 +1036,7 @@ class TiFo:
             self.command_queue[adress] = None
         except:
             print("konnte tfled nicht ausführen")
-            self.connect("LEDStrips", adress, **kwargs)
+#            self.connect("LEDStrips", adress, **kwargs)
         return True
 
     def set_drb(self, device, value, adress):
