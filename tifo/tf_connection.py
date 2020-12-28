@@ -857,186 +857,191 @@ class TiFo:
 #        device, rot, gruen, blau, transitiontime, transition=ANSTEIGEND
 #        device = kwargs.get('Device')
         self.command_queue[adress] = kwargs 
-        try:
-    #        range check kwargs
+        tries = 0
+        while tries < 4 and tries >= 0:
             try:
-                for varia in ['red','green','blue']:
-                    if int(kwargs.get(varia)) > 255:
-                        kwargs[varia] = 255
-                    if int(kwargs.get(varia)) < 0:
-                        kwargs[varia] = 0
-                green = int(kwargs.get('red',0))
-                blue = int(kwargs.get('green',0))
-                red = int(kwargs.get('blue',0))
-    
-                transitiontime = kwargs.get('transitiontime')
-                transition = kwargs.get('transition',ANSTEIGEND)
-                proc = kwargs.get('percentage',None)
-    
-                red_1 = kwargs.get('blue_1','None')
-                green_1 = kwargs.get('red_1','None')
-                blue_1 = kwargs.get('green_1','None')
-    
-                red_2 = int(kwargs.get('blue_2',0))
-                green_2 = int(kwargs.get('red_2',0))
-                blue_2 = int(kwargs.get('green_2',0))
-            except:
-                print(kwargs)
-                return False
-    #        gradient
-    #        lauflicht
-    #        LEDDict = settings.LEDsOut.get(device)
-    #        uid = LEDDict.get('UID')
-    #        start = LEDDict.get('Start')
-    #        ende = LEDDict.get('Ende')
-            if transitiontime:
-                transitiontime = int(str(transitiontime))
-            
-            uid = adress.split(".")[1] + '.' + adress.split(".")[2]
-            if toolbox.kw_unpack(kwargs, 'start'):
-                start = int(str(toolbox.kw_unpack(kwargs, 'start')))
-            else:
-                start = int(adress.split(".")[3])
-            if toolbox.kw_unpack(kwargs, 'ende'):
-                ende = int(str(toolbox.kw_unpack(kwargs, 'ende')))
-            else:
-                ende = int(adress.split(".")[4])  
-            
-            toolbox.log(uid, start, ende)
-    #        TODO vectorize
-            delta_r = 0
-            delta_g = 0
-            delta_b = 0
-            red_i = red
-            green_i = green
-            blue_i = blue
-            if str(red_1) == 'None' and str(green_1) == 'None' and str(blue_1) == 'None':
-                red = [int(red)]*16
-                green = [int(green)]*16
-                blue = [int(blue)]*16
-                gradient = False
-            else:
-                laenge = (ende-start)
-                red_1 = int(red_1)
-                green_1 = int(green_1)
-                blue_1 = int(blue_1)
-                if not str(red_1) == 'None':
-                    delta_r = abs(int(red_1) - int(red))
-                    delta_pr = float(delta_r) / laenge
+        #        range check kwargs
+                try:
+                    for varia in ['red','green','blue']:
+                        if int(kwargs.get(varia)) > 255:
+                            kwargs[varia] = 255
+                        if int(kwargs.get(varia)) < 0:
+                            kwargs[varia] = 0
+                    green = int(kwargs.get('red',0))
+                    blue = int(kwargs.get('green',0))
+                    red = int(kwargs.get('blue',0))
+        
+                    transitiontime = kwargs.get('transitiontime')
+                    transition = kwargs.get('transition',ANSTEIGEND)
+                    proc = kwargs.get('percentage',None)
+        
+                    red_1 = kwargs.get('blue_1','None')
+                    green_1 = kwargs.get('red_1','None')
+                    blue_1 = kwargs.get('green_1','None')
+        
+                    red_2 = int(kwargs.get('blue_2',0))
+                    green_2 = int(kwargs.get('red_2',0))
+                    blue_2 = int(kwargs.get('green_2',0))
+                except:
+                    print(kwargs)
+                    return False
+        #        gradient
+        #        lauflicht
+        #        LEDDict = settings.LEDsOut.get(device)
+        #        uid = LEDDict.get('UID')
+        #        start = LEDDict.get('Start')
+        #        ende = LEDDict.get('Ende')
+                if transitiontime:
+                    transitiontime = int(str(transitiontime))
+                
+                uid = adress.split(".")[1] + '.' + adress.split(".")[2]
+                if toolbox.kw_unpack(kwargs, 'start'):
+                    start = int(str(toolbox.kw_unpack(kwargs, 'start')))
                 else:
-                    delta_pr = 0
-                if not str(green_1) == 'None':
-                    delta_g = abs(int(green_1) -int(green))
-                    delta_pg = float(delta_g) / laenge
+                    start = int(adress.split(".")[3])
+                if toolbox.kw_unpack(kwargs, 'ende'):
+                    ende = int(str(toolbox.kw_unpack(kwargs, 'ende')))
                 else:
-                    delta_pg = 0
-                if not str(blue_1) == 'None':
-                    delta_b = abs(int(blue_1) - int(blue))
-                    delta_pb = float(delta_b) / laenge
+                    ende = int(adress.split(".")[4])  
+                
+                toolbox.log(uid, start, ende)
+        #        TODO vectorize
+                delta_r = 0
+                delta_g = 0
+                delta_b = 0
+                red_i = red
+                green_i = green
+                blue_i = blue
+                if str(red_1) == 'None' and str(green_1) == 'None' and str(blue_1) == 'None':
+                    red = [int(red)]*16
+                    green = [int(green)]*16
+                    blue = [int(blue)]*16
+                    gradient = False
                 else:
-                    delta_pb = 0
-                gradient = True
-                steps = (delta_r + delta_g + delta_b) * laenge
-    
-    
-            for LED in self.LEDList.liste:
-                if LED.get('addr') == uid:
-                    while LED['busy']:
-                        LED['stop'] = True
-                        time.sleep(0.1)
-                    LED['stop'] = False
-                    typ = LED['typ']
-                    batch = 16
-                    if typ == 2:
-                        batch = 2048
-                    toolbox.log('Bricklet found')
                     laenge = (ende-start)
-                    if proc != None and 0 <= proc <= 100:
-                        laenge = int(float(proc)/100 * laenge)
-                    elif proc != None and proc < 0:
-                        laenge = 0
-                    if (transitiontime == None or transitiontime <= 0) and not gradient:
-                        while (laenge) > batch:
-                            laenge = batch
-    #                         TODO check that command is executed
-    #                        while not (red, green, blue) == LED.get('LED').get_rgb_values(start, laenge):
-                            if typ == 1:
-                                LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
+                    red_1 = int(red_1)
+                    green_1 = int(green_1)
+                    blue_1 = int(blue_1)
+                    if not str(red_1) == 'None':
+                        delta_r = abs(int(red_1) - int(red))
+                        delta_pr = float(delta_r) / laenge
+                    else:
+                        delta_pr = 0
+                    if not str(green_1) == 'None':
+                        delta_g = abs(int(green_1) -int(green))
+                        delta_pg = float(delta_g) / laenge
+                    else:
+                        delta_pg = 0
+                    if not str(blue_1) == 'None':
+                        delta_b = abs(int(blue_1) - int(blue))
+                        delta_pb = float(delta_b) / laenge
+                    else:
+                        delta_pb = 0
+                    gradient = True
+                    steps = (delta_r + delta_g + delta_b) * laenge
+        
+        
+                for LED in self.LEDList.liste:
+                    if LED.get('addr') == uid:
+                        while LED['busy']:
+                            LED['stop'] = True
+                            time.sleep(0.1)
+                        LED['stop'] = False
+                        typ = LED['typ']
+                        batch = 16
+                        if typ == 2:
+                            batch = 2048
+                        toolbox.log('Bricklet found')
+                        laenge = (ende-start)
+                        if proc != None and 0 <= proc <= 100:
+                            laenge = int(float(proc)/100 * laenge)
+                        elif proc != None and proc < 0:
+                            laenge = 0
+                        if (transitiontime == None or transitiontime <= 0) and not gradient:
+                            while (laenge) > batch:
+                                laenge = batch
+        #                         TODO check that command is executed
+        #                        while not (red, green, blue) == LED.get('LED').get_rgb_values(start, laenge):
+                                if typ == 1:
+                                    LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
+                                else:
+                                    rgb = [red_i,green_i,blue_i]*laenge
+                                    LED.get('LED').set_led_values(start*3,rgb)
+                                start += laenge
+                                laenge = (ende-start)
                             else:
-                                rgb = [red_i,green_i,blue_i]*laenge
-                                LED.get('LED').set_led_values(start*3,rgb)
-                            start += laenge
-                            laenge = (ende-start)
-                        else:
-                            if typ == 1:
-                                LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
-                            else:
-                                LED.get('LED').set_led_values(start*3,[red_i,green_i,blue_i]*laenge)
-                    elif not (transitiontime == None or transitiontime <= 0):
-    #                    Ansteigend licht für licht direkt zur farbe
-                        wartezeit = float(transitiontime) / steps
-                        LED['busy'] = True
-                        while ( (red_1-red)!=0 or (green_1-green)!=0 or (blue_1-blue)!=0 ) and typ!=1 and not LED['stop']:
-                            if (red_1-red)!=0:
-                                if red_1 > red:
-                                    red_1 -= 1
+                                if typ == 1:
+                                    LED.get('LED').set_rgb_values(start, laenge, red, green, blue)
                                 else:
-                                    red_1 += 1
-                                for birne in range(start,ende):
-                                    LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
-                                    time.sleep(wartezeit)
-                            if (green_1-green)!=0:
-                                if green_1 > green:
-                                    green_1 -= 1
-                                else:
-                                    green_1 += 1
-                                for birne in range(start,ende):
-                                    LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
-                                    time.sleep(wartezeit)
-                            if (blue_1-blue)!=0:
-                                if blue_1 > blue:
-                                    blue_1 -= 1
-                                else:
-                                    blue_1 += 1
-                                for birne in range(start,ende):
-                                    LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
-                                    time.sleep(wartezeit)                               
-                        LED['busy'] = False
-    #                    if transition == ANSTEIGEND:
-    #                        wartezeit = float(transitiontime) / (ende-start)
-    #                        for birne in range(start,ende):
-    #                            if typ == 1:
-    #                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
-    #                            else:
-    #                                print(birne,[red_i,green_i,blue_i]*1)
-    #                                LED.get('LED').set_led_values(birne*3,[red_i,green_i,blue_i]*1)
-    #                            time.sleep(wartezeit)
-    #                    elif transition == ABSTEIGEND:
-    #                        wartezeit = float(transitiontime) / (ende-start)
-    #                        for birne in list(reversed(range(start,ende))):
-    #                            if typ == 1:
-    #                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
-    #                            else:
-    #                                LED.get('LED').set_led_values(birne*3,[red_i,green_i,blue_i]*1)
-    #                            time.sleep(wartezeit)
-    #                    elif transition == ZUSAMMEN:
-    #                        self._set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime)
-                            
-                    else:   # also mit gradient
-                        for birne in range(start,(start+laenge)):
-                            LED.get('LED').set_rgb_values(birne, 1, [int(red)]*16, [int(green)]*16, [int(blue)]*16)
-                            red += delta_pr
-                            green += delta_pg
-                            blue += delta_pb
-                        for birne in range((start+laenge),ende):
-                            LED.get('LED').set_rgb_values(birne, 1, [int(red_2)]*16, [int(green_2)]*16, [int(blue_2)]*16)
-    #        TODO Transition, 4 types
-    #        von links nach rechts (ansteigend), von rechts nach links (absteigend)
-    #        alle zusammen, beides
-            self.command_queue[adress] = None
-        except:
+                                    LED.get('LED').set_led_values(start*3,[red_i,green_i,blue_i]*laenge)
+                        elif not (transitiontime == None or transitiontime <= 0):
+        #                    Ansteigend licht für licht direkt zur farbe
+                            wartezeit = float(transitiontime) / steps
+                            LED['busy'] = True
+                            while ( (red_1-red)!=0 or (green_1-green)!=0 or (blue_1-blue)!=0 ) and typ!=1 and not LED['stop']:
+                                if (red_1-red)!=0:
+                                    if red_1 > red:
+                                        red_1 -= 1
+                                    else:
+                                        red_1 += 1
+                                    for birne in range(start,ende):
+                                        LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
+                                        time.sleep(wartezeit)
+                                if (green_1-green)!=0:
+                                    if green_1 > green:
+                                        green_1 -= 1
+                                    else:
+                                        green_1 += 1
+                                    for birne in range(start,ende):
+                                        LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
+                                        time.sleep(wartezeit)
+                                if (blue_1-blue)!=0:
+                                    if blue_1 > blue:
+                                        blue_1 -= 1
+                                    else:
+                                        blue_1 += 1
+                                    for birne in range(start,ende):
+                                        LED.get('LED').set_led_values(birne*3,[red_1,green_1,blue_1]*1)
+                                        time.sleep(wartezeit)                               
+                            LED['busy'] = False
+        #                    if transition == ANSTEIGEND:
+        #                        wartezeit = float(transitiontime) / (ende-start)
+        #                        for birne in range(start,ende):
+        #                            if typ == 1:
+        #                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+        #                            else:
+        #                                print(birne,[red_i,green_i,blue_i]*1)
+        #                                LED.get('LED').set_led_values(birne*3,[red_i,green_i,blue_i]*1)
+        #                            time.sleep(wartezeit)
+        #                    elif transition == ABSTEIGEND:
+        #                        wartezeit = float(transitiontime) / (ende-start)
+        #                        for birne in list(reversed(range(start,ende))):
+        #                            if typ == 1:
+        #                                LED.get('LED').set_rgb_values(birne, 1, red, green, blue)
+        #                            else:
+        #                                LED.get('LED').set_led_values(birne*3,[red_i,green_i,blue_i]*1)
+        #                            time.sleep(wartezeit)
+        #                    elif transition == ZUSAMMEN:
+        #                        self._set_LED_zusammen(LED,start,ende,red,green,blue,transitiontime)
+                                
+                        else:   # also mit gradient
+                            for birne in range(start,(start+laenge)):
+                                LED.get('LED').set_rgb_values(birne, 1, [int(red)]*16, [int(green)]*16, [int(blue)]*16)
+                                red += delta_pr
+                                green += delta_pg
+                                blue += delta_pb
+                            for birne in range((start+laenge),ende):
+                                LED.get('LED').set_rgb_values(birne, 1, [int(red_2)]*16, [int(green_2)]*16, [int(blue_2)]*16)
+        #        TODO Transition, 4 types
+        #        von links nach rechts (ansteigend), von rechts nach links (absteigend)
+        #        alle zusammen, beides
+                self.command_queue[adress] = None
+                tries = -1
+            except:
+                tries += 1
+        if tries > 3:
             print("konnte tfled nicht ausführen")
-#            self.connect("LEDStrips", adress, **kwargs)
+    #            self.connect("LEDStrips", adress, **kwargs)
         return True
 
     def set_drb(self, device, value, adress):

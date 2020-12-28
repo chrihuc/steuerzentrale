@@ -405,7 +405,7 @@ class Szenen(object):
                 if device:
                     text = '%s, %s = %s' % (str(beschr), device, wert)
                 else:
-                    text = str(beschr)
+                    text = '%s %s' % (str(beschr), desc)
             if text != 'False':
                 aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
             interlocks = {}
