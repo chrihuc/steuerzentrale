@@ -857,8 +857,6 @@ class TiFo:
     def set_LED(self, adress, **kwargs):
 #        device, rot, gruen, blau, transitiontime, transition=ANSTEIGEND
 #        device = kwargs.get('Device')
-        print(adress)
-        print(kwargs)
         self.command_queue[adress] = kwargs 
         tries = 0
         while tries < 4 and tries >= 0:
@@ -1114,7 +1112,7 @@ class TiFo:
                             self.LEDs[-1].set_chip_type(settings.LEDs.get(temp_uid)[0])
                             self.LEDs[-1].set_frame_duration(settings.LEDs.get(temp_uid)[1])
                             found  = True
-                        toolbox.log("LEDStrip", temp_uid)
+                        toolbox.log("LEDStrip", temp_uid, level=8)
                         #self.led.register_callback(self.led.CALLBACK_FRAME_RENDERED,
                         #                lambda x: __cb_frame_rendered__(self.led, x))
                         #self.led.set_rgb_values(0, self.NUM_LEDS, self.r, self.g, self.b)
@@ -1130,7 +1128,7 @@ class TiFo:
                         self.LEDs[-1].set_chip_type(2812)
                         found  = True
                         self.LEDs[-1].set_status_led_config(0)
-                        toolbox.log("LEDStrip", temp_uid)
+                        toolbox.log("LEDStrip", temp_uid, level=8)
         
                     if device_identifier == IO16.DEVICE_IDENTIFIER:
                         self.io.append(IO16(uid, self.ipcon))
@@ -1150,7 +1148,7 @@ class TiFo:
                             thread_io_ = threading.Timer(0, self.thread_io16, [self.io[-1],temp_uid])
                             thread_io_.start()                                 
                             found  = True
-                        toolbox.log("IO16", temp_uid)
+                        toolbox.log("IO16", temp_uid, level=8)
         
                     if device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                         self.al.append(AmbientLight(uid, self.ipcon))
@@ -1175,7 +1173,7 @@ class TiFo:
                         thread_pt_.start()                
                         
                         found  = True
-                        toolbox.log("AmbientLight", temp_uid)
+                        toolbox.log("AmbientLight", temp_uid, level=8)
         
         
                     if device_identifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER:
@@ -1189,7 +1187,7 @@ class TiFo:
                         thread_pt_ = threading.Timer(40, self.thread_ambLight, [self.al[-1]])
                         thread_pt_.start()                  
                         found  = True
-                        toolbox.log("AmbientLight", temp_uid)
+                        toolbox.log("AmbientLight", temp_uid, level=8)
         
                     if device_identifier == BrickletCO2.DEVICE_IDENTIFIER:
                         self.co2.append(BrickletCO2(uid, self.ipcon))
@@ -1204,7 +1202,7 @@ class TiFo:
         #                self.threadliste.append(t)
         #                t.start()
                         found  = True
-                        toolbox.log("BrickletCO2", temp_uid)
+                        toolbox.log("BrickletCO2", temp_uid, level=8)
         
         
                     if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:
@@ -1213,7 +1211,7 @@ class TiFo:
                         self.drbuids[temp_uid] = BrickletDualRelay(uid, self.ipcon)
                         toolbox.log('Dual Relay Bricklet', temp_uid)
                         found  = True
-                        toolbox.log("BrickletDualRelay", temp_uid)
+                        toolbox.log("BrickletDualRelay", temp_uid, level=8)
         
         #            if device_identifier == Moisture.DEVICE_IDENTIFIER:
         #                self.moist = Moisture(uid, self.ipcon)
@@ -1227,7 +1225,7 @@ class TiFo:
                         self.md[-1].register_callback(self.md[-1].CALLBACK_MOTION_DETECTED, partial( self.cb_md, device = self.md[-1], uid = temp_uid ))
                         self.md[-1].register_callback(self.md[-1].CALLBACK_DETECTION_CYCLE_ENDED, partial( self.cb_md_end, device = self.md[-1], uid = temp_uid ))
                         found  = True
-                        toolbox.log("BrickletMotionDetector", temp_uid)
+                        toolbox.log("BrickletMotionDetector", temp_uid, level=8)
         
                     if device_identifier == BrickletSoundIntensity.DEVICE_IDENTIFIER:
                         self.si.append(BrickletSoundIntensity(uid, self.ipcon))
@@ -1237,7 +1235,7 @@ class TiFo:
                         self.si[-1].register_callback(self.si[-1].CALLBACK_INTENSITY_REACHED, partial( self.cb_si, device = self.si[-1], uid = temp_uid ))
                         self.si[-1].set_intensity_callback_threshold('>',200,0)
                         found  = True
-                        toolbox.log("BrickletSoundIntensity", temp_uid)
+                        toolbox.log("BrickletSoundIntensity", temp_uid, level=8)
         
                     if device_identifier == BrickletPTC.DEVICE_IDENTIFIER:
                         self.ptc.append(BrickletPTC(uid, self.ipcon))
@@ -1252,7 +1250,7 @@ class TiFo:
         #                self.threadliste.append(t)
         #                t.start()
                         found  = True
-                        toolbox.log("BrickletPTC", temp_uid)
+                        toolbox.log("BrickletPTC", temp_uid, level=8)
         
                     if device_identifier == BrickletPTCV2.DEVICE_IDENTIFIER:
                         tptc = BrickletPTCV2(uid, self.ipcon)
@@ -1263,7 +1261,7 @@ class TiFo:
 #                        args = [self.ptc[-1], 100.0]
                         self.ptc[-1].register_callback(self.ptc[-1].CALLBACK_TEMPERATURE, partial( self.cb_value_uid,  device=self.ptc[-1], div=100.0, uid=temp_uid))
                         found  = True
-                        toolbox.log("BrickletPTC", temp_uid)
+                        toolbox.log("BrickletPTC", temp_uid, level=8)
         
                     if device_identifier == BrickletTemperature.DEVICE_IDENTIFIER:
                         self.temp.append(BrickletTemperature(uid, self.ipcon))
@@ -1277,7 +1275,7 @@ class TiFo:
         #                self.threadliste.append(t)
         #                t.start()
                         found  = True
-                        toolbox.log("BrickletTemperature", temp_uid)
+                        toolbox.log("BrickletTemperature", temp_uid, level=8)
         
                     if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
                         self.baro.append(BrickletBarometer(uid, self.ipcon))
@@ -1291,7 +1289,7 @@ class TiFo:
         #                self.threadliste.append(t)
         #                t.start()
                         found  = True
-                        toolbox.log("BrickletBarometer", temp_uid)
+                        toolbox.log("BrickletBarometer", temp_uid, level=8)
         
                     if device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
                         self.humi.append(BrickletHumidityV2(uid, self.ipcon))
@@ -1308,7 +1306,7 @@ class TiFo:
         #                self.threadliste.append(t)
         #                t.start()
                         found  = True
-                        toolbox.log("BrickletHumidityV2", temp_uid)
+                        toolbox.log("BrickletHumidityV2", temp_uid, level=8)
         
                     if device_identifier == BrickletVoltageCurrent.DEVICE_IDENTIFIER:
                         self.volcu.append(BrickletVoltageCurrent(uid, self.ipcon))
@@ -1327,7 +1325,7 @@ class TiFo:
                         self.volcu[-1].register_callback(self.volcu[-1].CALLBACK_CURRENT_REACHED, partial( self.cb_volc_cur, device = self.volcu[-1], uid = temp_uid ))
                         self.volcu[-1].set_current_callback_threshold(">", 0, 0)
                         found  = True
-                        toolbox.log("BrickletVoltageCurrent", temp_uid)
+                        toolbox.log("BrickletVoltageCurrent", temp_uid, level=8)
         
                     if device_identifier == BrickletLine.DEVICE_IDENTIFIER:
                         lb = BrickletLine(uid, self.ipcon)
@@ -1337,7 +1335,7 @@ class TiFo:
                         lb.register_callback(lb.CALLBACK_REFLECTIVITY_REACHED, partial( self.cb_li, device = lb, uid = temp_uid ))
                         lb.set_debounce_period(500)
                         lb.set_reflectivity_callback_threshold('o', 3649, 3650)
-                        toolbox.log('Line Bricklet', temp_uid)
+                        toolbox.log('Line Bricklet', temp_uid, level=8)
                         found  = True
         
                     if device_identifier == BrickletDistanceUS.DEVICE_IDENTIFIER:
@@ -1352,7 +1350,7 @@ class TiFo:
                         thread_us_ = threading.Timer(10, self.thread_distus, [self.dus[-1]])
                         thread_us_.start()                
                         
-                        toolbox.log("BrickletDistanceUS", temp_uid)
+                        toolbox.log("BrickletDistanceUS", temp_uid, level=8)
                         found  = True
         
                     if device_identifier == BrickletMultiTouch.DEVICE_IDENTIFIER:
@@ -1363,7 +1361,7 @@ class TiFo:
                         mtb.register_callback(mtb.CALLBACK_TOUCH_STATE, partial( self.cb_mtb, uid = temp_uid))
                         mtb.set_electrode_sensitivity(130)
                         mtb.recalibrate()
-                        toolbox.log('Multitouch Bricklet', temp_uid)
+                        toolbox.log('Multitouch Bricklet', temp_uid, level=8)
                         found  = True
         
                     if device_identifier == BrickletAirQuality.DEVICE_IDENTIFIER:
@@ -1383,7 +1381,7 @@ class TiFo:
                         self.aiq[-1].set_all_values_callback_configuration(45000, False)
                         self.aiq[-1].register_callback(self.aiq[-1].CALLBACK_ALL_VALUES, partial( self.cb_aiq_values,  device=aiq, uid=temp_uid))
                         found  = True
-                        toolbox.log("BrickletAIQ", temp_uid)        
+                        toolbox.log("BrickletAIQ", temp_uid, level=8)        
         
                     if device_identifier == BrickMaster.DEVICE_IDENTIFIER:
                         self.master.append(BrickMaster(uid, self.ipcon))
@@ -1394,7 +1392,7 @@ class TiFo:
                             self.master[-1].disable_status_led()
                         #thread_rs_error.start()
                         found  = True
-                        toolbox.log("BrickMaster", temp_uid)
+                        toolbox.log("BrickMaster", temp_uid, level=8)
         
                     if not found:
                         toolbox.log(connected_uid, uid, device_identifier)
