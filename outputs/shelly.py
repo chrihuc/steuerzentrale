@@ -85,7 +85,7 @@ def main():
         time.sleep(1)      
 
 def receive_communication(payload, *args, **kwargs):
-    if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') in ['Shelly', 'ShellyConf', 'ShellyDim']):
+    if toolbox.kw_unpack(kwargs,'typ') == 'output' and (toolbox.kw_unpack(kwargs,'receiver') in ['Shelly', 'ShellyConf', 'ShellyDim', 'WLED']):
         adress=toolbox.kw_unpack(kwargs,'adress')
         device = adress.split(".")[1]
         ip = None
@@ -110,7 +110,13 @@ def receive_communication(payload, *args, **kwargs):
             ip = adress.split(".")[1] + "." + adress.split(".")[2] + "." + adress.split(".")[3] + "." + adress.split(".")[4]
             shelly = Shelly(ip)
             sw_toggle = {'btn_type': payload['Value']}
-            shelly.set_setting(sw_toggle)            
+            shelly.set_setting(sw_toggle)    
+            
+        elif toolbox.kw_unpack(kwargs,'receiver') == 'WLED':
+            print(device)
+            print(payload)
+            result = mqtt_publish.mqtt_pub(device + "/api", payload, retain=False)
+            toolbox.communication.send_message(payload, typ='return', value=result)                
     
 
 toolbox.communication.register_callback(receive_communication)
