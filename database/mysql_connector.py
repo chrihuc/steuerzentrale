@@ -214,7 +214,7 @@ def re_calc(inpt):
             if lst[1] == 'BDQs':
                 value = mdb_read_bdqs()
                 if value:
-                    text = 'BDQs: '+''.join(value) 
+                    text = 'BDQs: '+' '.join(value) 
 #                    print(text)
                     return text   
                 else:

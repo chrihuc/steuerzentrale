@@ -113,8 +113,8 @@ def receive_communication(payload, *args, **kwargs):
             shelly.set_setting(sw_toggle)    
             
         elif toolbox.kw_unpack(kwargs,'receiver') == 'WLED':
-            print(device)
-            print(payload)
+#            print(device)
+#            print(payload)
             result = mqtt_publish.mqtt_pub(device + "/api", payload, retain=False)
             toolbox.communication.send_message(payload, typ='return', value=result)                
     
