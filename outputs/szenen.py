@@ -406,7 +406,7 @@ class Szenen(object):
                     text = '%s, %s = %s' % (str(beschr), device, wert)
                 else:
                     text = '%s %s' % (str(beschr), desc)
-            if not text.find('False') or len(text) > 6:
+            if not text.find('False') or len(text) > 8:
                 aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
