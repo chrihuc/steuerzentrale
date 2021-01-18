@@ -236,9 +236,9 @@ class LineBrick:
         broadcast_input_value('TiFo.' + self.name + '.day', str(self.value_d))
         broadcast_input_value('TiFo.' + self.name + '.minimum', str(self.min))
         broadcast_input_value('TiFo.' + self.name + '.maximum', str(self.max))
-        if self.min > 0 and (self.max - self.min) > 600:
-            self.gwl = self.min + 200
-            self.gwh = self.max - 200
+        if self.min > 0 and (self.max - self.min) > 300:
+            self.gwl = self.min + 75
+            self.gwh = self.max - 75
         self.value_d = 0   
         self.min = 9999
         self.max = 0     
