@@ -116,6 +116,11 @@ def receive_communication(payload, *args, **kwargs):
 #            print(device)
 #            print(payload)
             result = mqtt_publish.mqtt_pub(device + "/api", payload, retain=False)
+            if int(payload['bri']) > 0:
+                payload['bri'] = round(payload['bri'])   
+                payload.pop('ps', None)
+                payload['on'] = True                
+                mqtt_publish.mqtt_pub(device + "/api", payload, retain=False)
             toolbox.communication.send_message(payload, typ='return', value=result)                
     
 
