@@ -1208,7 +1208,7 @@ class TiFo:
                     if device_identifier == BrickletCO2V2.DEVICE_IDENTIFIER:
                         self.co2.append(BrickletCO2V2(uid, self.ipcon))
                         temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
-                        self.co2[-1].set_co2_concentration_callback_configuration(45000, False)
+                        self.co2[-1].set_co2_concentration_callback_configuration(45000, False, 'x', 0, 0)
                         args = self.co2[-1]
                         self.co2[-1].register_callback(self.co2[-1].CALLBACK_CO2_CONCENTRATION, partial( self.cb_value,  device=args))
                         found  = True
