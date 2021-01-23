@@ -25,6 +25,7 @@ from tinkerforge.bricklet_voltage_current import BrickletVoltageCurrent
 from tinkerforge.bricklet_distance_us import BrickletDistanceUS
 from tinkerforge.bricklet_dual_relay import BrickletDualRelay
 from tinkerforge.bricklet_co2 import BrickletCO2
+from tinkerforge.bricklet_co2_v2 import BrickletCO2V2
 from tinkerforge.bricklet_motion_detector import BrickletMotionDetector
 from tinkerforge.bricklet_sound_intensity import BrickletSoundIntensity
 from tinkerforge.bricklet_ptc import BrickletPTC
@@ -1203,6 +1204,15 @@ class TiFo:
         #                t.start()
                         found  = True
                         toolbox.log("BrickletCO2", temp_uid, level=8)
+                        
+                    if device_identifier == BrickletCO2V2.DEVICE_IDENTIFIER:
+                        self.co2.append(BrickletCO2V2(uid, self.ipcon))
+                        temp_uid = str(self.co2[-1].get_identity()[1]) +"."+ str(self.co2[-1].get_identity()[0])
+                        self.co2[-1].set_co2_concentration_callback_configuration(45000, False)
+                        args = self.co2[-1]
+                        self.co2[-1].register_callback(self.co2[-1].CALLBACK_CO2_CONCENTRATION, partial( self.cb_value,  device=args))
+                        found  = True
+                        toolbox.log("BrickletCO2V2", temp_uid, level=8)                        
         
         
                     if device_identifier == BrickletDualRelay.DEVICE_IDENTIFIER:

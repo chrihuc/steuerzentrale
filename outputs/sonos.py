@@ -710,11 +710,11 @@ class Sonos:
                 if (str(zone) != "None") and (str(zone) != "Own"):
                     zonemaster, _, _, _ = self.get_addr(str(zone))
                     if not zonemaster is None:
-                        tries = 0
-                        print('2',player.group,zonemaster.group)
-                        while tries < 4 and player.group.coordinator != zonemaster.group.coordinator:
+                        tries2 = 0
+                        print('2',player.group,zonemaster.group) # goes into a loop
+                        while tries2 < 4 and player.group.coordinator != zonemaster.group.coordinator:
                             player.join(zonemaster.group.coordinator)
-                            tries += 1
+                            tries2 += 1
                             time.sleep(1)
         #            else:
         #                print("Zonemaster is none %s" % zone)
