@@ -31,6 +31,7 @@ from tinkerforge.bricklet_sound_intensity import BrickletSoundIntensity
 from tinkerforge.bricklet_ptc import BrickletPTC
 from tinkerforge.bricklet_ptc_v2 import BrickletPTCV2
 from tinkerforge.bricklet_temperature import BrickletTemperature
+from tinkerforge.bricklet_thermocouple_v2 import BrickletThermocoupleV2
 from tinkerforge.bricklet_barometer import BrickletBarometer
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.bricklet_line import BrickletLine
@@ -1288,6 +1289,16 @@ class TiFo:
         #                t.start()
                         found  = True
                         toolbox.log("BrickletTemperature", temp_uid, level=8)
+        
+                    if device_identifier == BrickletThermocoupleV2.DEVICE_IDENTIFIER:
+                        self.temp.append(BrickletThermocoupleV2(uid, self.ipcon))
+                        temp_uid = str(self.temp[-1].get_identity()[1]) +"."+ str(self.temp[-1].get_identity()[0])
+                        self.temp[-1].set_temperature_callback_configuration(10000, False, "x", 0, 0)
+                        self.temp[-1].register_callback(self.temp[-1].CALLBACK_TEMPERATURE, partial( self.cb_value,  device=self.temp[-1], div=100.0))
+                        #thread_pt_ = threading.Timer(10, self.thread_pt, [self.temp[-1]])
+                        #thread_pt_.start()
+                        found  = True
+                        toolbox.log("BrickletThermocoupleV2", temp_uid, level=8)        
         
                     if device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
                         self.baro.append(BrickletBarometer(uid, self.ipcon))
