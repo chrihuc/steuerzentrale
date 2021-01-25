@@ -271,7 +271,8 @@ try:
 except KeyboardInterrupt:
     constants.run = False
     with open('inputs_table.jsn', 'w') as fout:
-        json.dump(msqc.inputs_table, fout, default=json_serial)    
+        json.dump(msqc.inputs_table, fout, default=json_serial)  
+    print("db saved")
     time.sleep(5)
     for t in threadliste:
         if t in threading.enumerate():
