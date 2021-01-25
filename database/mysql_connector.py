@@ -631,6 +631,8 @@ def read_inputs_to_inputs_table():
     inputs_table = {}
     for line in liste:
         inputs_table[line['Id']] = line
+    print("table loaded")
+    print(inputs_table)
 
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     ''' set table
