@@ -1210,9 +1210,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 
 read_inputs_to_inputs_table()
 
-while constants.run:
-    time.sleep(1)
-
-with open('inputs_table.jsn', 'w') as fout:
-    json.dump(inputs_table, fout, default=json_serial) 
-print("table written")
+def main(): 
+    while constants.run:
+        time.sleep(1)
+    
+    with open('inputs_table.jsn', 'w') as fout:
+        json.dump(inputs_table, fout, default=json_serial) 
+    print("table written")

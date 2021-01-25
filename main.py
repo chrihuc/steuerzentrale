@@ -15,7 +15,6 @@ import constants
 
 #from inputs import udp_listener
 
-from database import mysql_connector as msqc
 
 
 from tools import toolbox
@@ -63,6 +62,16 @@ def start_bokeh():
 threadliste = []
 
 #services = {'xs1':xs1.main}
+try:
+    from database import mysql_connector as msqc
+    t = toolbox.OwnTimer(0, function=msqc.main, args = [], name="msqc")
+    threadliste.append(t)
+    t.start()    
+except Exception as e:
+    print('database connector not started')    
+    print(e)
+    aes.new_event(description="database connector not started", prio=9)
+
 try:
     from outputs import szenen
 except Exception as e:
