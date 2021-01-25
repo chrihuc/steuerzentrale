@@ -323,7 +323,8 @@ class MT_Bricklet:
                 if name != None:
                     value = wert & param
                     result = self.get_time(name, value)
-                    changes[name] = result       
+                    #changes[name] = result     
+                    changes[name] = value 
         self.state = param
         return changes
 
