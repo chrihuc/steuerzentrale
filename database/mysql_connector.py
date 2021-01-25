@@ -632,7 +632,7 @@ def read_inputs_to_inputs_table():
     for line in liste:
         inputs_table[line['Id']] = line
     print("table loaded")
-    print(inputs_table)
+#    print(inputs_table)
 
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     ''' set table
@@ -1209,3 +1209,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 
 
 read_inputs_to_inputs_table()
+
+while constants.run:
+    time.sleep(1)
+
+with open('inputs_table.jsn', 'w') as fout:
+    json.dump(inputs_table, fout, default=json_serial) 
+print("table written")

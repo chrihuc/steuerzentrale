@@ -269,10 +269,7 @@ try:
         toolbox.sleep(5)
         heartbeats += 1        
 except KeyboardInterrupt:
-    constants.run = False
-    with open('inputs_table.jsn', 'w') as fout:
-        json.dump(msqc.inputs_table, fout, default=json_serial)  
-    print("db saved")
+    constants.run = False 
     time.sleep(5)
     for t in threadliste:
         if t in threading.enumerate():
