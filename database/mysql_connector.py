@@ -32,6 +32,11 @@ persTimers = {}
 inputs_dict = {}
 prozessspiegel = {}
 
+# den Inputs table als Dict abbilden, ID ist der Key, die Reihe dann der Val
+# jede Reihe ist ein dictionary
+inputs_table = {}
+
+
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -620,6 +625,13 @@ def mdb_get_table(db):
     con.close()
     return rlist
 
+def read_inputs_to_inputs_table():
+    global inputs_table
+    liste = mdb_get_table(constants.sql_tables.inputs.name)
+    inputs_table = {}
+    for line in liste:
+        inputs_table[line['Id']] = line
+
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     ''' set table
         table = table name to change
@@ -865,7 +877,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #            print(device)
             return [], [], None, []
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    dicti = {}
+    
     dicti_1 = {}
     alle_szenen = []
     alle_payloads = []
@@ -993,6 +1005,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                     latched = None                    
                     
                     single = True
+                    dicti = {}
                     for i in range (0,len(row)):
                         dicti[field_names[i]] = row[i]
                         
@@ -1193,315 +1206,4 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     return alle_szenen, descriptions, heartbt, alle_payloads
 
 
-"""
-def new_input(device, value):
-    dvce_dict = {  'HKS' : device
-                 , 'Description' : device
-                 , 'Setting' : False
-                 , 'Logging' : True
-                 , 'Id' : None
-                 , 'Name' : device
-                 , 'Filter' : None
-                 , 'debounce' : None
-                 , 'heartbeat' : None
-                 , 'valid' : True
-                 , 'last_value' : value
-                 , 'fallback' : None
-                 , 'RecoverSzn' : None
-                 , 'Kompression' : False
-                 }
-
-def inputs_neu(device, value, add_to_mqtt=True, fallingback=False):
-    if not inputs_dict:
-        read_inputs_dict()
-    ct = datetime.datetime.now()
-    utc = datetime.datetime.utcnow()
-   
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-
-    alle_szenen = []
-    
-    if not device in inputs_dict:
-        pass
-    desc = None
-    heartbt = None
-    filtered = False
-    writeToInflx = False
-    
-#    print(device,value)
-#    if 'MQTT' in device:
-#        add_to_mqtt = False
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
-        if cur.fetchone()[0] == 0:
-            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
-            cur.execute(sql)
-        else:
-#            get last value and last time
-            sql = 'SELECT * FROM %s WHERE Name = "%s"' % (constants.sql_tables.inputs.name, str(device))
-            cur.execute(sql)
-            results_1 = cur.fetchall()
-            field_names_1 = [i[0] for i in cur.description]
-            for row in results_1:
-                for i in range (0,len(row)):
-                    dicti_1[field_names_1[i]] = row[i]
-            last_value = dicti_1['last_Value']            
-            # Filtern, wenn groesser oder kleiner Messung ignorieren
-            filtering = dicti_1['Filter']
-            hks = dicti_1['HKS']
-            desc = dicti_1['Description']
-            # könnte fallingback auch vorher definieren
-            if fallingback and dicti_1['fallback'] is not None:
-                value = float(dicti_1['fallback'])
-            try:
-                filtering = eval(filtering)
-            except:
-                filtering = [None, None]
-            if filtering[0]:
-                if float(value) <= filtering[0]:
-                    filtered = True
-            if filtering[1]:
-                if float(value) >= filtering[1]:
-                    filtered = True
-                    
-            if not filtered:        
-                valid = dicti_1['valid']
-                heartbt = dicti_1['heartbeat']
-                komp = dicti_1['Kompression']
-                hyst = dicti_1['Hysterese']
-                recSzn = dicti_1['RecoverSzn']
-                if heartbt and str(valid) == "False" and not fallingback:
-                    payload = {'Szene':'InputTimedOut', 'desc':'input recovered: '+ desc}
-                    toolbox.communication.send_message(payload, typ='ExecSzene')
-                    if recSzn:
-                        payload = {'Szene':recSzn}
-                        toolbox.communication.send_message(payload, typ='ExecSzene')                                    
-                if last_value is None: 
-                    last_value = value
-                    writeToInflx = True
-                elif float(last_value) != float(value):
-                    writeToInflx = True
-                if str(komp) in ['None', 'False']:
-                    writeToInflx = True
-                if str(komp) in ['Bool']:
-                    if float(last_value) == 0.0 or float(value) == 0.0:
-                        writeToInflx = True   
-                    else:
-                        writeToInflx = False
-                if not last_time:
-                    try:
-                        last_time = dicti_1['last1']
-                    except:
-                        last_time = ct - datetime.timedelta(hours=1)
-                debounce = dicti_1['debounce']
-                if str(last_time) == 'None': last_time = ct - datetime.timedelta(hours=1)
-                if debounce is None:
-                    db_time = ct
-                else:
-                    db_time = last_time + datetime.timedelta(seconds=debounce)
-    #                print('input debouncing ', ct, db_time)
-                if ct >= db_time:
-                    locklist[device] = ct
-                deltaT = ct - last_time
-                deltaTm = deltaT.total_seconds() / 60
-                gradient = 0
-                if deltaTm > 0:
-                    try:
-                        deltaX = float(value) - float(last_value)
-                        gradient = deltaX #/ deltaTm
-                    except:
-                        print(value, last_value, device)
-                else:
-                    gradient = float(value) - float(last_value)
-                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
-    #            cur.execute(sql)
-    
-                sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
-                value = str(value)
-#                sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
-#                sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
-#                sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
-    #            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
-    #            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
-                sql2 =  ' AND (enabled = "True" OR enabled is NULL)'
-                sql2 = sql2 + ';'
-#                print(sql2)
-                cur.execute(sql + sql2)
-                results = cur.fetchall()
-                field_names = [i[0] for i in cur.description]
-                #dicti = {key: "" for (key) in szene_columns}
-                for row in results:
-                    szenen = []
-                    kondition = ''
-                    
-                    violTime = None
-                    latched = None                    
-                    
-                    single = True
-                    for i in range (0,len(row)):
-                        dicti[field_names[i]] = row[i]
-                    doppelklick = dicti.get("Doppelklick")
-                    if ct >= db_time:
-                        # Hysteres einberechnen
-                        lt = None
-                        if dicti['Value_lt'] is not None:
-                            lt = float(re_calc(dicti['Value_lt']))
-                            if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
-                                lt = lt + float(hyst)
-                        gt = None
-#                        print('value_gt', dicti['Value_gt'])
-                        if dicti['Value_gt'] is not None:
-                            gt = float(re_calc(dicti['Value_gt']))
-#                            print('value_gt', gt)
-                            if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
-                                gt = gt - float(hyst)                             
-#                        print('value_gt_1', gt)        
-                        append = True
-                        if (lt is not None and lt <= float(value)):
-                            append = False
-                        if (dicti['Value_eq'] is not None and float(re_calc(dicti['Value_eq'])) != float(value)):
-                            append = False
-#                        print('value_gt_1', gt)                             
-                        if (gt is not None and gt >= float(value)):
-                            append = False
-#                        print('append', append)
-                        # Gradient
-                        if (dicti['Gradient_lt'] is not None and float(re_calc(dicti['Gradient_lt'])) <= gradient):
-                            append = False
-#                        if (dicti['Gradient_eq'] is not None and float(re_calc(dicti['Gradient_eq'])) != gradient):
-#                            append = False
-                        if (dicti['Gradient_gt'] is not None and float(re_calc(dicti['Gradient_gt'])) >= gradient):
-                            append = False 
-                        if str(dicti.get("last2")) != "None" and append:
-                            if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
-                                if dicti.get("Dreifach") is not None:
-                                    szenen.append(dicti.get("Dreifach"))
-                                    kondition += dicti.get("Status") + ' '
-                                    single = False
-                            elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
-                                if dicti.get("Doppel") is not None:                                
-                                    szenen.append(dicti.get("Doppel"))
-                                    kondition += dicti.get("Status") + ' '
-                                    single = False
-                        if str(doppelklick) != "True": single = True                            
-                        if single and append and dicti.get(setting_r("Status")) is not None: 
-                            szenen.append(dicti.get(setting_r("Status")))
-                            kondition += dicti.get("Status") + ' '
-                        if append and dicti.get('Immer') is not None:
-                            szenen.append(dicti.get('Immer'))
-                            kondition += dicti.get("Status") + ' '
-                        if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
-                            violTime = str(ct)
-                        if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
-                            violTime = 'NULL'
-                        if append and dicti.get('persistance') is not None:
-                            if dicti.get('violTime') is not None:
-                                if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')):
-                                    szenen = []
-                                    kondition = ''
-                            if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
-                                szenen = []
-                                kondition = ''
-                        if str(dicti.get('latching')) == "True":
-                            if not append and str(dicti.get('latched')) == "True":
-                                latched = 'False'
-                                # anti szene (praktisch das reset):
-                                if dicti.get('ResetSzene') is not None:
-                                    szenen.append(dicti.get('ResetSzene'))
-                                    kondition += dicti.get("Status") + ' '
-                            elif szenen and str(dicti.get('latched')) == "True":
-                                szenen = []
-                                kondition = ''
-                            elif szenen and str(dicti.get('latched')) != "True": 
-#                                print(szenen)
-                                latched = 'True'
-#                        print(lt,gt,latched)
-                        # falls bedinungen erfüllt die Zeiten anpassen:
-                        lasttimes = ""
-                        if append:
-                            if str(dicti.get("last1")) != "None":
-                                lasttimes = ', last2 = "%s", last1 = "%s"' % (dicti.get("last1"), ct)
-                            else:
-                                lasttimes = ', last1 = "%s"' % (ct)
-                        if violTime is not None and latched is not None: # 
-                            sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
-                            writeToCursor(cur, sql)
-#                            cur.execute(sql)
-                        elif violTime is not None and latched is None:  
-                            sql = 'UPDATE %s SET violTime = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, dicti.get('Id'))
-                            writeToCursor(cur, sql)
-#                            cur.execute(sql)   
-                        elif violTime is None and latched is not None:
-                            sql = 'UPDATE %s SET latched = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, lasttimes, dicti.get('Id'))
-                            writeToCursor(cur, sql)                            
-#                            cur.execute(sql) 
-                    alle_szenen += szenen 
-                    desc = desc + ' ' + kondition                           
-    #            get stting and logging
-                writeToCursor(cur, "SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
-#                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
-                if cur.fetchone()[0] > 0:
-                    setting_s(hks, value)
-                writeToCursor(cur,"SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-#                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-                if cur.fetchone()[0] > 0 and str(hks) != str(device) and writeToInflx:
-#                    try:
-#                        insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-#                        cur.execute(insertstatement)
-#                    except:
-#                        try:
-#                            ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % (constants.sql_tables.his_inputs.name, hks)
-#                            cur.execute(ist)
-#                            insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-#                            cur.execute(insertstatement)
-#                        except:
-#                            pass
-                    thread_inflx = Timer(0, writeInfluxDb, [hks, value, utc])
-                    thread_inflx.start()
-#                            print(insertstatement)
-    
-    #                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
-    #                ist = "SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s'" % (constants.sql_tables.his_inputs.name, datab, hks)
-    #                cur.execute(ist)
-    #                if not cur.fetchall():
-    #                    ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(5,2)" % (constants.sql_tables.his_inputs.name, hks)
-    #                    cur.execute(ist)
-    
-    
-                if str(hks) != str(device) and add_to_mqtt:
-                    data = {"Value":value, "HKS":hks}
-                    mqtt_pub("Inputs/" + str(hks), data)
-                    mqtt_pub("Inputs/HKS/" + str(hks), data)
-        if not filtered:
-            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s", time = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, ct, device)
-#            thread_sql = Timer(1, sendSql, [sql])
-            retrycount = 3
-            counter = 1
-            while counter <= retrycount:
-                try:
-                    cur.execute(sql)
-                    counter = retrycount + 1
-                except:
-                    time.sleep(.1)
-                    counter += 1
-                    if counter == 4:
-                        print('could not write to DB')            
-#            thread_sql.start()
-            prozessspiegel[hks] = value
-        if heartbt and not fallingback:
-            if hks in validTimers:
-                validTimers[hks]['timer'].cancel()
-            entry = {'hks' : hks, 'desc' : desc, 'device':device, 'fallback':dicti_1['fallback']}
-            entry['due'] = datetime.datetime.now() + datetime.timedelta(0,int(heartbt))
-            thread_pt_ = Timer(int(heartbt), invalidTimers, [hks, desc])
-            thread_pt_.start()
-            entry['timer'] = thread_pt_
-            validTimers[hks] = entry
-            with open('hrtbt_timer.jsn', 'w') as fout:
-                json.dump(validTimers, fout, default=json_serial)            
-#            print(validTimers.keys())
-    con.close()
-#    print('Time spend on inputs: ', str(datetime.datetime.now() - ct))
-    return alle_szenen, desc, heartbt
-"""
+read_inputs_to_inputs_table()

@@ -92,6 +92,7 @@ def main():
                 rain, rain1, rain2 = get_rain()
                 broadcast_input_value('Wetter/RegenBOZ', rain)
                 broadcast_input_value('Wetter/Regen', (rain + rain1 + rain2)/3)
+                #print("Wetter Regen: ", max(rain, rain1, rain2))
                 broadcast_input_value('Wetter/RegenWarnung', max(rain, rain1, rain2))
                 retries = 3
             except Exception as e:

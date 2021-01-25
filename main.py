@@ -9,17 +9,25 @@ import threading
 import time, sys
 import os
 import argparse
+import json
 
 import constants
 
 #from inputs import udp_listener
 
-#from database import mysql_connector as msqc
+from database import mysql_connector as msqc
 
 
 from tools import toolbox
 from outputs.mqtt_publish import mqtt_pub
 #toolbox.log('debug on')
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    return 'not json serializable' #TypeError ("Type %s not serializable" % type(obj))
 
 def broadcast_input_value(Name, Value):
     payload = {'Name':Name,'Value':Value}
@@ -262,6 +270,8 @@ try:
         heartbeats += 1        
 except KeyboardInterrupt:
     constants.run = False
+    with open('inputs_table.jsn', 'w') as fout:
+        json.dump(msqc.inputs_table, fout, default=json_serial)    
     time.sleep(5)
     for t in threadliste:
         if t in threading.enumerate():
