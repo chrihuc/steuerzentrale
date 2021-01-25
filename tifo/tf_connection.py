@@ -306,7 +306,7 @@ class MT_Bricklet:
         
     def get_time(self, name, value):
         secs = 0
-        if value == 1:
+        if value > 0:
             self.times[name] = datetime.datetime.now()
         elif value == 0:
             if name in self.times:
@@ -324,8 +324,8 @@ class MT_Bricklet:
                 if name != None:
                     value = wert & param
                     result = self.get_time(name, value)
-                    #changes[name] = result     
-                    changes[name] = value 
+                    changes[name] = result     
+                    #changes[name] = value 
         self.state = param
         return changes
 
@@ -435,7 +435,8 @@ class TiFo:
             except socket.error as e:
 #                print('Socket error: ' + str(e))
                 time.sleep(10)
-        self.connectverbose = True
+        # falls wir das reconnecten testen wollen
+        self.connectverbose = False
         if execCmd:
             if execCmd[0] == "LEDStrips" and kwargs:
                 time.sleep(10)
