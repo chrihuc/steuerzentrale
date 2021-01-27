@@ -897,7 +897,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
-        if not inputs_table[device]:
+        if not device in inputs_table:
             inputs_table[device] = {'Name'       :device
                                    ,'HKS'        :device
                                    ,'Description':device
