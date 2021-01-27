@@ -159,6 +159,7 @@ def main():
                 data = {'Value':value, 'Min':minimum, 'Max':maximum, 'Status':most_common(stati), 'Regen':rain}
                 mqtt_pub("Wetter/Jetzt", data)
                 broadcast_input_value('Internal.OWM', 1)
+                broadcast_input_value('Wetter/Aussentemp', value) 
                 retries = 3
             except:
 #                print("OWM Failed")

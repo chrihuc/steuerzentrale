@@ -860,6 +860,7 @@ def read_inputs_dict():
 # sollte über interne kommunikation mit ExecSzene' möglich sein.
 def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #    i = 0
+    global inputs_table
     ct = datetime.datetime.now()
     utc = datetime.datetime.utcnow()
 #    if 'inputs' in device:
@@ -896,6 +897,13 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
+        if not inputs_table[device]:
+            inputs_table[device] = {'Name'       :device
+                                   ,'HKS'        :device
+                                   ,'Description':device
+                                   ,'Logging'    :True
+                                   ,'Doppelklick':True
+                                   }
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
             cur.execute(sql)
@@ -908,6 +916,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
             for row in results_1:
                 for i in range (0,len(row)):
                     dicti_1[field_names_1[i]] = row[i]
+            dicti_2 = inputs_table[device]
             last_value = dicti_1['last_Value']            
             # Filtern, wenn groesser oder kleiner Messung ignorieren
             filtering = dicti_1['Filter']
@@ -996,7 +1005,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                 cur.execute(sql + sql2)
                 results = cur.fetchall()
                 field_names = [i[0] for i in cur.description]
-                #dicti = {key: "" for (key) in szene_columns}
+                # wenn wir dann interne sachen nehmen:
+                results2 = [item for item in dicti_2 if item['Name'] == device]
                 for row in results:
                     szenen = []
                     latchMerker = False
@@ -1115,11 +1125,14 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #                        print(lt,gt,latched)
                         # falls bedinungen erfüllt die Zeiten anpassen:
                         lasttimes = ""
+                        # debug
                         if append:
                             if str(dicti.get("last1")) != "None":
                                 lasttimes = ', last2 = "%s", last1 = "%s"' % (dicti.get("last1"), ct)
                             else:
                                 lasttimes = ', last1 = "%s"' % (ct)
+                        if device == 'Wetter/RegenWarnung':
+                            print('UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id')))                                
                         if violTime is not None and latched is not None: # 
                             sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
                             writeToCursor(cur, sql)
