@@ -1006,7 +1006,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                 results = cur.fetchall()
                 field_names = [i[0] for i in cur.description]
                 # wenn wir dann interne sachen nehmen:
-                results2 = [item for item in dicti_2 if item['Name'] == device]
+                results2 = [item for item in inputs_table if item['Name'] == device]
                 for row in results:
                     szenen = []
                     latchMerker = False
