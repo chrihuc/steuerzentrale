@@ -17,6 +17,14 @@ import copy
 from tools import toolbox
 import json
 
+from flask import Flask
+from flask_table import Table, Col
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+   return "Hello world"
+
 # TODO: reconnect of MQTT
 
 #client = mqtt.Client(constants.name + '_mysql_con')
@@ -897,13 +905,18 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
-        if not device in inputs_table:
-            inputs_table[device] = {'Name'       :device
+        if not device in [item['Name'] for key, item in inputs_table.items()]:
+            ids = [int(key) for key in inputs_table.keys()]
+            ids.sort()
+            new_id = ids[-1] + 10
+            # stimmt nicht, muss id sein nicht device, wie verändern, damit ich weiterhin iteraten kann?
+            inputs_table[new_id] = {'Name'       :device
                                    ,'HKS'        :device
                                    ,'Description':device
                                    ,'Logging'    :True
                                    ,'Doppelklick':True
                                    }
+            print('new Item with id: ', str(new_id))
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
             cur.execute(sql)
@@ -1006,7 +1019,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                 results = cur.fetchall()
                 field_names = [i[0] for i in cur.description]
                 # wenn wir dann interne sachen nehmen:
-                results2 = [item for key, item in inputs_table.items() if item['Name'] == device]
+                inputs_table_c = copy.copy(inputs_table)
+                results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
                 for row in results:
                     szenen = []
                     latchMerker = False
@@ -1127,15 +1141,20 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         lasttimes = ""
                         # debug
                         if append:
+                            inputs_table[dicti['Id']]['last1'] = ct
                             if str(dicti.get("last1")) != "None":
                                 lasttimes = ', last2 = "%s", last1 = "%s"' % (dicti.get("last1"), ct)
+                                inputs_table[dicti['Id']]['last2'] = dicti.get("last1")
                             else:
                                 lasttimes = ', last1 = "%s"' % (ct)
                         if device == 'Wetter/RegenWarnung':
-                            print('UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id')))                                
+                            print(value)
+                            print('UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id')))
+                            print(violTime is not None and latched is not None)                                
                         if violTime is not None and latched is not None: # 
                             sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
                             writeToCursor(cur, sql)
+                            inputs_table[dicti['Id']]['violTime'] = violTime
 #                            cur.execute(sql)
                         elif violTime is not None and latched is None:  
                             sql = 'UPDATE %s SET violTime = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, dicti.get('Id'))
@@ -1224,8 +1243,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 read_inputs_to_inputs_table()
 
 def main(): 
-    while constants.run:
-        time.sleep(1)
+    app.run()
+#    while constants.run:
+#        time.sleep(1)
     
     with open('inputs_table.jsn', 'w') as fout:
         json.dump(inputs_table, fout, default=json_serial) 
