@@ -18,7 +18,7 @@ from tools import toolbox
 import json
 
 from flask import Flask
-#from flask_table import Table, Col
+from flask_table import Table, Col
 app = Flask(__name__)
 
 @app.route("/")
@@ -825,7 +825,7 @@ def sendSql(sql):
 
 def writeToCursor(cursor, sql):
 #    print(sql)
-    retrycount = 3
+    retrycount = 10
     counter = 1
     while counter <= retrycount:
         try:
@@ -834,8 +834,8 @@ def writeToCursor(cursor, sql):
         except:
             time.sleep(.1)
             counter += 1
-            if counter == 4:
-                print('could not write to DB')
+            if counter > 8:
+                print('could not write to DB', sql)
     if "8613" in sql:
         print(sql, counter)
 
@@ -1246,7 +1246,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 read_inputs_to_inputs_table()
 
 def main(): 
-    app.run()
+    app.run(host='0.0.0.0', port=6666)
 #    while constants.run:
 #        time.sleep(1)
     
