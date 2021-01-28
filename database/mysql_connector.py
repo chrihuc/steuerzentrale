@@ -18,7 +18,7 @@ from tools import toolbox
 import json
 
 from flask import Flask
-from flask_table import Table, Col
+#from flask_table import Table, Col
 app = Flask(__name__)
 
 @app.route("/")
