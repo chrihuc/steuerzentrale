@@ -835,7 +835,9 @@ def writeToCursor(cursor, sql):
             time.sleep(.1)
             counter += 1
             if counter == 4:
-                print('could not write to DB')     
+                print('could not write to DB')
+    if "8613" in sql:
+        print(sql, counter)
 
 def read_inputs_dict():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -1149,9 +1151,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                             else:
                                 lasttimes = ', last1 = "%s"' % (ct)
                         if device == 'Wetter/RegenWarnung':
-                            print(value)
+#                            print(value)
                             print('UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id')))
-                            print(violTime is not None and latched is not None)                                
+#                            print(violTime is not None and latched is not None)                                
                         if violTime is not None and latched is not None: # 
                             sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
                             writeToCursor(cur, sql)
