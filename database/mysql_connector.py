@@ -929,7 +929,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
             for row in results_1:
                 for i in range (0,len(row)):
                     dicti_1[field_names_1[i]] = row[i]
-            dicti_2 = inputs_table[device]
+            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
+            #dicti_2 = results2[device]
             last_value = dicti_1['last_Value']            
             # Filtern, wenn groesser oder kleiner Messung ignorieren
             filtering = dicti_1['Filter']
@@ -1020,7 +1021,6 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                 field_names = [i[0] for i in cur.description]
                 # wenn wir dann interne sachen nehmen:
                 inputs_table_c = copy.copy(inputs_table)
-                results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
                 for row in results:
                     szenen = []
                     latchMerker = False
