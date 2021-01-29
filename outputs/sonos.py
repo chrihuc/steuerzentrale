@@ -712,7 +712,7 @@ class Sonos:
                     if not zonemaster is None:
                         tries2 = 0
                         print('2',player.group,zonemaster.group) # goes into a loop
-                        while tries2 < 4 and player.group.coordinator != zonemaster.group.coordinator:
+                        while tries2 < 12 and player.group.coordinator != zonemaster.group.coordinator:
                             player.join(zonemaster.group.coordinator)
                             tries2 += 1
                             time.sleep(1)

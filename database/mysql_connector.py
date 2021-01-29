@@ -827,12 +827,14 @@ def writeToCursor(cursor, sql):
 #    print(sql)
     retrycount = 10
     counter = 1
-    while counter <= retrycount:
+    success = False
+    while counter <= retrycount and not success:
         try:
             cursor.execute(sql)
-            counter = retrycount + 1
+            success = True
+#            counter = retrycount + 1
         except:
-            time.sleep(.1)
+            time.sleep(.15)
             counter += 1
             if counter > 8:
                 print('could not write to DB', sql)
@@ -1150,9 +1152,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                                 inputs_table[dicti['Id']]['last2'] = dicti.get("last1")
                             else:
                                 lasttimes = ', last1 = "%s"' % (ct)
-                        if device == 'Wetter/RegenWarnung':
+#                        if device == 'Wetter/RegenWarnung':
 #                            print(value)
-                            print('UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id')))
+#                            print('UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id')))
 #                            print(violTime is not None and latched is not None)                                
                         if violTime is not None and latched is not None: # 
                             sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
@@ -1245,10 +1247,14 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 
 read_inputs_to_inputs_table()
 
-def main(): 
+def apptask():
     app.run(host='0.0.0.0', port=6666)
-#    while constants.run:
-#        time.sleep(1)
+    
+def main(): 
+    apptimer = Timer(0, apptask)
+    apptimer.start()     
+    while constants.run:
+        time.sleep(1)
     
     with open('inputs_table.jsn', 'w') as fout:
         json.dump(inputs_table, fout, default=json_serial) 
