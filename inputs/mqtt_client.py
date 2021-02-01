@@ -86,6 +86,8 @@ class MqttClient:
     #    print(msg.topic + " " + str(msg.payload))
         message = str(msg.payload.decode("utf-8"))
         retained = msg.retain
+        if 'PicoVoice' in msg.topic:
+            pass
     #    print(retained)
         try:
             m_in=(json.loads(message)) #decode json data
@@ -187,7 +189,7 @@ mqtt_list = []
 mqtt.Client.connected_flag=False
 #client = None
 topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Message/BdqOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
-          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#",'Enable/#', 'Inputs/PicoVoice/']
+          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#",'Enable/#', 'Inputs/PicoVoice/#']
 
 
 def main():
