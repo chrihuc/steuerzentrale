@@ -964,9 +964,9 @@ class Sonos:
                     elif str(command) == "Save":
                         self.sonos_save(player)
                     elif str(command) == "Mute":
-                        player.mute(True)  
+                        player.mute = True  
                     elif str(command) == "Unmute":
-                        player.mute(False)                          
+                        player.mute = False                          
                     elif str(command) == "Announce_Time":
                         player.soco_get_status()
                         lt = localtime()
