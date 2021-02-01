@@ -406,6 +406,7 @@ class TiFo:
 
     def timedOut(self):
         aes.new_event(description="Tifo timedOut: "+self.ip, prio=9)
+        broadcast_input_value('TiFo.master.' + self.ip, str(0))
         self.connect()
 
     def connect(self, *execCmd, **kwargs):
@@ -1417,6 +1418,7 @@ class TiFo:
                         #thread_rs_error.start()
                         found  = True
                         toolbox.log("BrickMaster", temp_uid, level=8)
+                        
         
                     if not found:
                         toolbox.log(connected_uid, uid, device_identifier)
@@ -1435,6 +1437,7 @@ class TiFo:
         while True:
             try:
                 self.ipcon.enumerate()
+                broadcast_input_value('TiFo.master.' + self.ip, str(1))
                 break
             except Error as e:
                 toolbox.log('Enumerate Error: ' + str(e.description))

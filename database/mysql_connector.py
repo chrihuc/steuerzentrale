@@ -1159,7 +1159,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         if violTime is not None and latched is not None: # 
                             sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
                             writeToCursor(cur, sql)
-                            inputs_table[dicti['Id']]['violTime'] = violTime
+         # ACHTUNG musste wie die nächste Zeile sein:                   
+                            #inputs_table[dicti['Id']]['violTime'] = violTime
+                            results2[0][dicti['Id']]['violTime'] = violTime
 #                            cur.execute(sql)
                         elif violTime is not None and latched is None:  
                             sql = 'UPDATE %s SET violTime = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, dicti.get('Id'))
@@ -1248,7 +1250,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 read_inputs_to_inputs_table()
 
 def apptask():
-    app.run(host='0.0.0.0', port=6666)
+    app.run(host='0.0.0.0', port=4444)
     
 def main(): 
     apptimer = Timer(0, apptask)
