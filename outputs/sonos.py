@@ -963,6 +963,10 @@ class Sonos:
                         player.group.coordinator.play()
                     elif str(command) == "Save":
                         self.sonos_save(player)
+                    elif str(command) == "Mute":
+                        player.mute(True)  
+                    elif str(command) == "Unmute":
+                        player.mute(False)                          
                     elif str(command) == "Announce_Time":
                         player.soco_get_status()
                         lt = localtime()
