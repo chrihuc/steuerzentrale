@@ -103,9 +103,16 @@ class MqttClient:
     #        print(msg.topic + " " + str(msg.payload))        
             if not retained:
                 if 'Inputs' in msg.topic:
-                    name = msg.topic[7:]
-                    if 'Value' in m_in.keys():
-                        broadcast_input_value('MQTT.' + name, float(m_in['Value']))
+                    if 'PicoVoice' in msg.topic:
+                        command = m_in['intent']
+                        if 'location' in m_in['slots']: command += m_in['slots']['location']
+                        if 'state' in m_in['slots']: command += m_in['slots']['state']
+                        if 'color' in m_in['slots']: command += m_in['slots']['color']
+                        broadcast_input_value('Voice.' + command, 1)
+                    else:
+                        name = msg.topic[7:]
+                        if 'Value' in m_in.keys():
+                            broadcast_input_value('MQTT.' + name, float(m_in['Value']))
                 elif 'Command' in msg.topic:
                     if 'Szene' in msg.topic:
                         szene = msg.topic.split('/')[2]
@@ -180,7 +187,7 @@ mqtt_list = []
 mqtt.Client.connected_flag=False
 #client = None
 topics = ["Inputs/ESP/#", "Command/#", "Message/AlarmOk", "Message/BdqOk", "Inputs/Satellite/#", "DataRequest/Request/#", "DataRequest/SetTable/#", 
-          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#",'Enable/#']
+          "DataRequest/SetSettings/#", "Message/AlarmListClear", "shellies/#", "logging/#",'Enable/#', 'Inputs/PicoVoice/']
 
 
 def main():
