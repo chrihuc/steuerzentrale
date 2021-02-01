@@ -63,7 +63,7 @@ cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs  + trads_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
 
-porcupine = mdb_read_table_entry(constants.sql_tables.szenen.name, 'Porcupine')
+porcupine = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, 'Porcupine')
 
 # TODO Tests split adress from hks
 # Add Aktor_bedingung
