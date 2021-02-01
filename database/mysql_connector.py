@@ -1161,7 +1161,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                             writeToCursor(cur, sql)
          # ACHTUNG musste wie die nächste Zeile sein:                   
                             #inputs_table[dicti['Id']]['violTime'] = violTime
-                            results2[0][dicti['Id']]['violTime'] = violTime
+#                            results2[0][dicti['Id']]['violTime'] = violTime
 #                            cur.execute(sql)
                         elif violTime is not None and latched is None:  
                             sql = 'UPDATE %s SET violTime = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, dicti.get('Id'))
