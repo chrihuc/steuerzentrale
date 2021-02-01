@@ -34,6 +34,11 @@ def broadcast_exec_comm(device, command):
 #    on server:
     toolbox.communication.send_message(payload, typ='SetDevice')
 
+def broadcast_exec_voice(device, command):
+    payload = {'Device':device, 'Command':command}
+#    on server:
+    toolbox.communication.send_message(payload, typ='SetDeviceVoice')
+
 class MqttClient:
     def __init__(self, ip, topics):
         self.port = 1883
@@ -107,9 +112,11 @@ class MqttClient:
                 if 'Inputs' in msg.topic:
                     if 'PicoVoice' in msg.topic:
                         command = m_in['intent']
-                        if 'location' in m_in['slots']: command += m_in['slots']['location']
-                        if 'state' in m_in['slots']: command += m_in['slots']['state']
-                        if 'color' in m_in['slots']: command += m_in['slots']['color']
+                        if 'location' in m_in['slots']: command += "." + m_in['slots']['location']
+                        if 'state' in m_in['slots']: command += "." + m_in['slots']['state']
+                        if 'color' in m_in['slots']: command += "." + m_in['slots']['color']
+                        if 'location' in m_in['slots'] and 'state' in m_in['slots']:
+                            broadcast_exec_voice(m_in['intent'] + "." + m_in['slots']['location'], m_in['slots']['state'])
                         broadcast_input_value('Voice.' + command, 1)
                     else:
                         name = msg.topic[7:]

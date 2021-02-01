@@ -63,6 +63,8 @@ cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs  + trads_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
 
+porcupine = mdb_read_table_entry(constants.sql_tables.szenen.name, 'Porcupine')
+
 # TODO Tests split adress from hks
 # Add Aktor_bedingung
 
@@ -88,6 +90,11 @@ class Szenen(object):
     def callback_receiver(cls, payload, *args, **kwargs):
         if toolbox.kw_unpack(kwargs,'typ') == 'SetDevice':
             cls.threadSetDevice(payload['Device'], payload['Command'])
+        if toolbox.kw_unpack(kwargs,'typ') == 'SetDeviceVoice':
+            for key, val in porcupine.items():
+                if val == payload['Device']:
+                    print(key, val)
+                    cls.threadSetDevice(key, payload['Command'])            
         if toolbox.kw_unpack(kwargs,'typ') == 'return':
             if 'szn_id' in payload:
                 t_list = cls.kommando_dict.get(payload['szn_id'])
