@@ -464,6 +464,8 @@ class Szenen(object):
                     # solution above could give timing issues
                     value = msqc.re_calc(str(kommandos.get(kommando)))
                     msqc.setting_s(str(kommando), value)
+                    payload = {'Setting':str(kommando), 'Value':value}
+                    toolbox.communication.send_message(payload, typ='Setting')
             msqc.mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
         elif False:
             if str(szene_dict.get("Beschreibung")) in ['None','']:

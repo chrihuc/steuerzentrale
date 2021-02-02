@@ -888,6 +888,8 @@ def read_inputs_dict():
 # violation time (from evaluation automatic)
 # funktioniert bei einem Deadband vieillicht nicht, wert muss neu ankommen..
 # sollte über interne kommunikation mit ExecSzene' möglich sein.
+    
+# im ersten schritt nur noch vom Dict lesen und auf SQL und Dict schreiben
 def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #    i = 0
     global inputs_table
