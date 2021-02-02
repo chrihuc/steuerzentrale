@@ -21,15 +21,20 @@ from flask import Flask
 from flask_table import Table, Col
 app = Flask(__name__)
 
+# den Inputs table als Dict abbilden, ID ist der Key, die Reihe dann der Val
+# jede Reihe ist ein dictionary
+inputs_table = {}
+
 class ItemTable(Table):
     name = Col('Name')
-    description = Col('Description')
+    description = Col('HKS')
 
 @app.route("/")
 def hello():
-    items = [dict(name='Name1', description='Description1'),
-    dict(name='Name2', description='Description2'),
-    dict(name='Name3', description='Description3')]
+#    items = [dict(name='Name1', description='Description1'),
+#    dict(name='Name2', description='Description2'),
+#    dict(name='Name3', description='Description3')]
+    items = [inputs_table]
     
     table = ItemTable(items)
     
@@ -50,9 +55,7 @@ persTimers = {}
 inputs_dict = {}
 prozessspiegel = {}
 
-# den Inputs table als Dict abbilden, ID ist der Key, die Reihe dann der Val
-# jede Reihe ist ein dictionary
-inputs_table = {}
+
 
 
 
