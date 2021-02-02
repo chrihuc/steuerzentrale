@@ -34,7 +34,9 @@ def hello():
 #    items = [dict(name='Name1', description='Description1'),
 #    dict(name='Name2', description='Description2'),
 #    dict(name='Name3', description='Description3')]
-    items = [inputs_table]
+    items = [item for key, item in inputs_table.items()]
+    for key, item in items.items():
+        item['name'] = item['Name']
     
     table = ItemTable(items)
     
