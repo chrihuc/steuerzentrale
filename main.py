@@ -202,7 +202,7 @@ except Exception as e:
     aes.new_event(description="Weather not started", prio=9)
 
 try:
-    from inputs import kodi
+    from outputs import kodi
     t = toolbox.OwnTimer(0, function=kodi.main, args = [], name="kodi")
     threadliste.append(t)
     t.start()
