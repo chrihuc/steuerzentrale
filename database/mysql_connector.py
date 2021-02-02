@@ -21,9 +21,21 @@ from flask import Flask
 from flask_table import Table, Col
 app = Flask(__name__)
 
+class ItemTable(Table):
+    name = Col('Name')
+    description = Col('Description')
+
 @app.route("/")
 def hello():
-   return "Hello world"
+    items = [dict(name='Name1', description='Description1'),
+    dict(name='Name2', description='Description2'),
+    dict(name='Name3', description='Description3')]
+    
+    table = ItemTable(items)
+
+    print(table.html())
+    
+    return table.html()
 
 # TODO: reconnect of MQTT
 
