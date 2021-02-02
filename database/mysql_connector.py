@@ -1246,6 +1246,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         print('could not write to DB')            
 #            thread_sql.start()
             prozessspiegel[hks] = value
+            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
+            for item in results2:
+                item['last_Value'] = value
+                item['time']       = ct
         if heartbt and not fallingback and not persTimer:
             if hks in validTimers:
                 validTimers[hks]['timer'].cancel()
