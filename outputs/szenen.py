@@ -488,13 +488,17 @@ class Szenen(object):
                 szn = kommando[0]
                 dlay = kommando[1]
                 ex_re = kommando[2]
-                immer = False
+                depBed = False
                 depErfolg = 0
                 if len(kommando) > 3:
-                    immer = not kommando[3]
+                    if kommando[3] == 'negiert':
+                        depBed = not erfuellt
+                    else:
+                        depBed = not kommando[3]
+                        depBed = depBed or erfuellt
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
-                if (immer or erfuellt) and depErfolg == 0:
+                if depBed and depErfolg == 0:
 #                    if Prio > 0:
 #                        print("szene timed start", start_t, szn, dlay)
                     if ex_re == 0:
