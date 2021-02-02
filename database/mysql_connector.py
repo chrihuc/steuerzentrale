@@ -32,10 +32,8 @@ def hello():
     dict(name='Name3', description='Description3')]
     
     table = ItemTable(items)
-
-    print(table.html())
     
-    return table.html()
+    return table.__html__()
 
 # TODO: reconnect of MQTT
 
