@@ -26,8 +26,10 @@ app = Flask(__name__)
 inputs_table = {}
 
 class ItemTable(Table):
-    name = Col('Name')
-    description = Col('HKS')
+    Name = Col('Name')
+    HKS = Col('HKS')
+    last_Value = Col('last_Value')
+    time = Col('time')
 
 @app.route("/")
 def hello():
@@ -35,8 +37,9 @@ def hello():
 #    dict(name='Name2', description='Description2'),
 #    dict(name='Name3', description='Description3')]
     items = [item for key, item in inputs_table.items()]
-    for key, item in items.items():
-        item['name'] = item['Name']
+#    for item in items:
+#        item['name'] = item['Name']
+#        item['name'] = item['Name']
     
     table = ItemTable(items)
     
@@ -932,6 +935,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
             inputs_table[new_id] = {'Name'       :device
                                    ,'HKS'        :device
                                    ,'Description':device
+                                   ,'last_Value' :value
+                                   ,'time'       :ct
                                    ,'Logging'    :True
                                    ,'Doppelklick':True
                                    }
