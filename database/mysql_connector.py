@@ -83,10 +83,11 @@ class Item(object):
 
     @classmethod
     def get_sorted_by(cls, sort, reverse=False):
-        return sorted(
-            cls.get_elements(),
-            key=lambda x: getattr(x, sort),
-            reverse=reverse)
+        return cls.get_elements()
+#        return sorted(
+#            cls.get_elements(),
+#            key=lambda x: getattr(x, sort),
+#            reverse=reverse)
 
     @classmethod
     def get_element_by_id(cls, Id):
