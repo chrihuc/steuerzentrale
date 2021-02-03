@@ -66,7 +66,7 @@ def index():
 def flask_link(Id):
     element = Item.get_element_by_id(Id)
     return '<h1>{}</h1><p>{}</p><hr><small>Id: {}</small>'.format(
-        element.name, element.description, element.Id)
+        element.Name, element.HKS, element.Id)
 
 
 class Item(object):
