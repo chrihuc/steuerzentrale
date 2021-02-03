@@ -17,8 +17,8 @@ import copy
 from tools import toolbox
 import json
 
-from flask import Flask
-from flask_table import Table, Col
+from flask import Flask, Markup, request, url_for
+from flask_table import Table, Col, LinkCol
 app = Flask(__name__)
 
 # den Inputs table als Dict abbilden, ID ist der Key, die Reihe dann der Val
@@ -31,19 +31,80 @@ class ItemTable(Table):
     last_Value = Col('last_Value')
     time = Col('time')
 
-@app.route("/")
-def hello():
+app = Flask(__name__)
+
+
+class SortableTable(Table):
+    Id = Col('ID')
+    Name = Col('Name')
+    HKS = Col('HKS')
+    last_Value = Col('last_Value')
+    time = Col('time')
+    link = LinkCol(
+        'Link', 'flask_link', url_kwargs=dict(Id='Id'), allow_sort=False)
+    allow_sort = True
+
+    def sort_url(self, col_key, reverse=False):
+        if reverse:
+            direction = 'desc'
+        else:
+            direction = 'asc'
+        return url_for('index', sort=col_key, direction=direction)
+
+
+@app.route('/')
+def index():
+    sort = request.args.get('sort', 'id')
+    reverse = (request.args.get('direction', 'asc') == 'desc')
+    table = SortableTable(Item.get_sorted_by(sort, reverse),
+                          sort_by=sort,
+                          sort_reverse=reverse)
+    return table.__html__()
+
+
+@app.route('/item/<int:id>')
+def flask_link(Id):
+    element = Item.get_element_by_id(Id)
+    return '<h1>{}</h1><p>{}</p><hr><small>id: {}</small>'.format(
+        element.name, element.description, element.id)
+
+
+class Item(object):
+    """ a little fake database """
+    def __init__(self):#, Id, name, description):
+        pass
+#        self.id = Id
+#        self.name = name
+#        self.description = description
+
+    @classmethod
+    def get_elements(cls):
+        return [item for key, item in inputs_table.items()]
+
+    @classmethod
+    def get_sorted_by(cls, sort, reverse=False):
+        return sorted(
+            cls.get_elements(),
+            key=lambda x: getattr(x, sort),
+            reverse=reverse)
+
+    @classmethod
+    def get_element_by_id(cls, Id):
+        return [i for i in cls.get_elements() if i.Id == Id][0]
+
+#@app.route("/")
+#def hello():
 #    items = [dict(name='Name1', description='Description1'),
 #    dict(name='Name2', description='Description2'),
 #    dict(name='Name3', description='Description3')]
-    items = [item for key, item in inputs_table.items()]
+#    items = [item for key, item in inputs_table.items()]
 #    for item in items:
 #        item['name'] = item['Name']
 #        item['name'] = item['Name']
     
-    table = ItemTable(items)
+#    table = ItemTable(items)
     
-    return table.__html__()
+#    return table.__html__()
 
 # TODO: reconnect of MQTT
 
