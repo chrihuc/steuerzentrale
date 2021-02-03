@@ -56,7 +56,7 @@ class SortableTable(Table):
 def index():
     sort = request.args.get('sort', 'Id')
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTable(Item.get_sorted_by(sort, reverse),
+    table = SortableTable(InputsDB.get_sorted_by(sort, reverse),
                           sort_by=sort,
                           sort_reverse=reverse)
     return table.__html__()
@@ -64,23 +64,33 @@ def index():
 
 @app.route('/item/<int:Id>')
 def flask_link(Id):
-    element = Item.get_element_by_id(Id)
+    element = InputsDB.get_element_by_id(Id)
     return '<h1>{}</h1><p>{}</p><hr><small>Id: {}</small>'.format(
         element.Name, element.HKS, element.Id)
 
 
-class Item(object):
+class InputsDB(object):
+    elements = []
+    lock     = False
     """ a little fake database """
     def __init__(self, element):#, Id, name, description):
         self.Id = element['Id']
         self.Name = element['Name']
         self.HKS = element['HKS']
         self.last_Value = element['last_Value']
-        self.time = element['time']        
+        self.time = element['time']
+        self.dict = element
+        while InputsDB.lock:
+            time.sleep(0.01)
+        InputsDB.elements.add(self)
 
     @classmethod
     def get_elements(cls):
-        return [Item(item) for key, item in inputs_table.items()]
+        return cls.elements
+
+    @classmethod
+    def build(cls):
+        return [InputsDB(item) for key, item in inputs_table.items()]
 
     @classmethod
     def get_sorted_by(cls, sort, reverse=False):
@@ -91,7 +101,32 @@ class Item(object):
 
     @classmethod
     def get_element_by_id(cls, Id):
-        return [i for i in cls.get_elements() if i.Id == Id][0]
+        cls.lock = True
+        results = [i for i in cls.elements if i.Id == Id]
+        cls.lock = False
+        if len(results) > 0:
+            return results[0]
+        return False
+    
+    @classmethod
+    def get_elements_by_name(cls, Name):
+        cls.lock = True
+        results = [i for i in cls.elements if i.Name == Name]
+        cls.lock = False
+        return results  
+    
+    @classmethod
+    def get_as_list(cls):
+        liste = []
+        for element in cls.elements:
+            item = {}
+            item['Id'] = element.Id
+            item['Name'] = element.Name
+            item['HKS'] = element.HKS
+            item['last_Value'] = element.last_Value
+            item['time'] = element.time
+            liste.add(item)
+        return liste    
 
 #@app.route("/")
 #def hello():
@@ -720,6 +755,7 @@ def read_inputs_to_inputs_table():
     for line in liste:
         inputs_table[line['Id']] = line
     print("table loaded")
+    InputsDB.build()
 #    print(inputs_table)
 
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
@@ -991,12 +1027,15 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     with con:
         cur = con.cursor()
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
-        if not device in [item['Name'] for key, item in inputs_table.items()]:
-            ids = [int(key) for key in inputs_table.keys()]
-            ids.sort()
-            new_id = ids[-1] + 10
+#        if not device in [item['Name'] for key, item in inputs_table.items()]:
+        if len(InputsDB.get_elements_by_name(device)) == 0:
+#            ids = [int(key) for key in inputs_table.keys()]
+#            ids.sort()
+#            new_id = ids[-1] + 10
+            new_id = InputsDB.get_sorted_by('Id', True)[0] + 10
             # stimmt nicht, muss id sein nicht device, wie verändern, damit ich weiterhin iteraten kann?
-            inputs_table[new_id] = {'Name'       :device
+#            inputs_table[new_id] = {'Name'       :device
+            newItem              = {'Name'       :device
                                    ,'HKS'        :device
                                    ,'Description':device
                                    ,'last_Value' :value
@@ -1005,6 +1044,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                                    ,'Doppelklick':True
                                    ,'Id'         : new_id
                                    }
+            InputsDB(newItem)
             print('new Item with id: ', str(new_id))
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
@@ -1019,8 +1059,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                 for i in range (0,len(row)):
                     dicti_1[field_names_1[i]] = row[i]
             # wenn wir dann interne sachen nehmen:
-            inputs_table_c = copy.copy(inputs_table)                    
-            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
+#            inputs_table_c = copy.copy(inputs_table)                    
+#            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
             #dicti_2 = results2[device]
             last_value = dicti_1['last_Value']            
             # Filtern, wenn groesser oder kleiner Messung ignorieren
@@ -1311,10 +1351,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         print('could not write to DB')            
 #            thread_sql.start()
             prozessspiegel[hks] = value
-            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
+#            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
+            results2 = InputsDB.get_elements_by_name(device)
             for item in results2:
-                item['last_Value'] = value
-                item['time']       = ct
+                item.last_Value = value
+                item.time       = ct
         if heartbt and not fallingback and not persTimer:
             if hks in validTimers:
                 validTimers[hks]['timer'].cancel()
@@ -1348,5 +1389,5 @@ def main():
         time.sleep(1)
     
     with open('inputs_table.jsn', 'w') as fout:
-        json.dump(inputs_table, fout, default=json_serial) 
+        json.dump(InputsDB.get_as_list(), fout, default=json_serial) 
     print("table written")
