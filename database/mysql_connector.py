@@ -82,7 +82,7 @@ class InputsDB(object):
         self.dict = element
         while InputsDB.lock:
             time.sleep(0.01)
-        InputsDB.elements.add(self)
+        InputsDB.elements.Add(self)
 
     @classmethod
     def get_elements(cls):
@@ -125,7 +125,7 @@ class InputsDB(object):
             item['HKS'] = element.HKS
             item['last_Value'] = element.last_Value
             item['time'] = element.time
-            liste.add(item)
+            liste.Add(item)
         return liste    
 
 #@app.route("/")
