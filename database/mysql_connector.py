@@ -17,7 +17,7 @@ import copy
 from tools import toolbox
 import json
 
-from flask import Flask, Markup, request, url_for
+from flask import Flask, Markup, request, url_for, render_template, redirect
 from flask_table import Table, Col, LinkCol
 app = Flask(__name__)
 
@@ -40,6 +40,10 @@ class SortableTable(Table):
     HKS = Col('HKS')
     last_Value = Col('last_Value')
     time = Col('time')
+#    heartbeat
+#    latching = Col('latching')
+    latched= Col('latched')
+#    persistance= Col('persistance')
     link = LinkCol(
         'Link', 'flask_link', url_kwargs=dict(Id='Id'), allow_sort=False)
     allow_sort = True
@@ -62,11 +66,30 @@ def index():
     return table.__html__()
 
 
-@app.route('/item/<int:Id>')
+@app.route('/item/<int:Id>', methods=['GET', 'POST'])
 def flask_link(Id):
-    element = InputsDB.get_element_by_id(Id)
-    return '<h1>{}</h1><p>{}</p><hr><small>Id: {}</small>'.format(
-        element.Name, element.HKS, element.Id)
+    error = ""
+    if request.method == 'POST':
+        # Form being submitted; grab data from form.
+        first_name = request.form['firstname']
+        last_name = request.form['lastname']
+
+        # Validate form data
+        if len(first_name) == 0 or len(last_name) == 0:
+            # Form data failed validation; try again
+            error = "Please supply both first and last name"
+        else:
+            # Form data is valid; move along
+            return redirect(url_for('thank_you'))
+
+    # Render the sign-up page
+    return render_template('input_el_template.html', message=error)
+
+#@app.route('/item/<int:Id>')
+#def flask_link(Id):
+#    element = InputsDB.get_element_by_id(Id)
+#    return '<h1>{}</h1><p>{}</p><hr><small>Id: {}</small>'.format(
+#        element.Name, element.HKS, element.Id)
 
 
 class InputsDB(object):
@@ -79,6 +102,15 @@ class InputsDB(object):
         self.HKS = element['HKS']
         self.last_Value = element['last_Value']
         self.time = element['time']
+        self.heartbeat = None
+        if 'heartbeat' in element: self.heartbeat = element['heartbeat']
+        self.latching = None
+        if 'latching' in element: self.latching = element['latching']
+        self.latched = None
+        if 'latched' in element: self.latched = element['latched']
+        self.persistance = None
+        if 'persistance' in element: self.persistance = element['persistance']
+        
         self.dict = element
         while InputsDB.lock:
             time.sleep(0.01)
@@ -125,6 +157,10 @@ class InputsDB(object):
             item['HKS'] = element.HKS
             item['last_Value'] = element.last_Value
             item['time'] = element.time
+            item['heartbeat'] = element.heartbeat
+            item['latching'] = element.latching
+            item['latched'] = element.latched
+            item['persistance'] = element.persistance
             liste.append(item)
         return liste    
 
