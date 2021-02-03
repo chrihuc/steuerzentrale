@@ -71,23 +71,23 @@ def flask_link(Id):
 
 class Item(object):
     """ a little fake database """
-    def __init__(self):#, Id, name, description):
-        pass
-#        self.id = Id
-#        self.name = name
-#        self.description = description
+    def __init__(self, element):#, Id, name, description):
+        self.Id = element['Id']
+        self.Name = element['Name']
+        self.HKS = element['HKS']
+        self.last_Value = element['last_Value']
+        self.time = element['time']        
 
     @classmethod
     def get_elements(cls):
-        return [item for key, item in inputs_table.items()]
+        return [Item(item) for key, item in inputs_table.items()]
 
     @classmethod
     def get_sorted_by(cls, sort, reverse=False):
-        return cls.get_elements()
-#        return sorted(
-#            cls.get_elements(),
-#            key=lambda x: getattr(x, sort),
-#            reverse=reverse)
+        return sorted(
+            cls.get_elements(),
+            key=lambda x: getattr(x, sort),
+            reverse=reverse)
 
     @classmethod
     def get_element_by_id(cls, Id):
