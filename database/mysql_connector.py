@@ -71,12 +71,12 @@ def flask_link(Id):
     error = ""
     element = InputsDB.get_element_by_id(Id)
     if request.method == 'GET':
-        request.form['firstname'] = element.Name
-        request.form['lastname'] = element.HKS
+        request.form.Name.data = element.Name
+        request.form.HKS.data = element.HKS
     if request.method == 'POST':
         # Form being submitted; grab data from form.
-        first_name = request.form['firstname']
-        last_name = request.form['lastname']
+        first_name = request.form['Name']
+        last_name = request.form['HKS']
 
         # Validate form data
         if len(first_name) == 0 or len(last_name) == 0:
