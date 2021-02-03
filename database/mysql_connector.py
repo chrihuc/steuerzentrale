@@ -1032,7 +1032,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #            ids = [int(key) for key in inputs_table.keys()]
 #            ids.sort()
 #            new_id = ids[-1] + 10
-            new_id = InputsDB.get_sorted_by('Id', True)[0] + 10
+            new_id = InputsDB.get_sorted_by('Id', True)[0].Id + 10
             # stimmt nicht, muss id sein nicht device, wie verändern, damit ich weiterhin iteraten kann?
 #            inputs_table[new_id] = {'Name'       :device
             newItem              = {'Name'       :device
