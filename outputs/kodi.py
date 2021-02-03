@@ -33,9 +33,7 @@ class kodi_client():
         
     def stop(self):
         try:
-            players = self.my_kodi.Player.GetActivePlayers()['result']
-            for player in players:
-                self.my_kodi.Player.Stop(player)
+            self.my_kodi.Input.Back()
         except Exception as e:
             pass
         
