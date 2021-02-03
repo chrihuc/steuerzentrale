@@ -69,6 +69,10 @@ def index():
 @app.route('/item/<int:Id>', methods=['GET', 'POST'])
 def flask_link(Id):
     error = ""
+    element = InputsDB.get_element_by_id(Id)
+    if request.method == 'GET':
+        request.form['firstname'] = element.Name
+        request.form['lastname'] = element.HKS
     if request.method == 'POST':
         # Form being submitted; grab data from form.
         first_name = request.form['firstname']
