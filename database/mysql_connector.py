@@ -54,7 +54,7 @@ class SortableTable(Table):
 
 @app.route('/')
 def index():
-    sort = request.args.get('sort', 'id')
+    sort = request.args.get('sort', 'Id')
     reverse = (request.args.get('direction', 'asc') == 'desc')
     table = SortableTable(Item.get_sorted_by(sort, reverse),
                           sort_by=sort,
@@ -62,11 +62,11 @@ def index():
     return table.__html__()
 
 
-@app.route('/item/<int:id>')
+@app.route('/item/<int:Id>')
 def flask_link(Id):
     element = Item.get_element_by_id(Id)
-    return '<h1>{}</h1><p>{}</p><hr><small>id: {}</small>'.format(
-        element.name, element.description, element.id)
+    return '<h1>{}</h1><p>{}</p><hr><small>Id: {}</small>'.format(
+        element.name, element.description, element.Id)
 
 
 class Item(object):
