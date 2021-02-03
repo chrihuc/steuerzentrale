@@ -1002,6 +1002,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                                    ,'time'       :ct
                                    ,'Logging'    :True
                                    ,'Doppelklick':True
+                                   ,'Id'         : new_id
                                    }
             print('new Item with id: ', str(new_id))
         if cur.fetchone()[0] == 0:
