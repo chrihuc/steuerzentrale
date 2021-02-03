@@ -19,17 +19,25 @@ import json
 
 from flask import Flask, Markup, request, url_for, render_template, redirect
 from flask_table import Table, Col, LinkCol
+
+from flask_wtf import FlaskForm
+from wtforms import StringField
+
 app = Flask(__name__)
 
 # den Inputs table als Dict abbilden, ID ist der Key, die Reihe dann der Val
 # jede Reihe ist ein dictionary
 inputs_table = {}
 
-class ItemTable(Table):
-    Name = Col('Name')
-    HKS = Col('HKS')
-    last_Value = Col('last_Value')
-    time = Col('time')
+class MyForm(FlaskForm):
+    Name = StringField('Name')
+    HKS  = StringField('HKS')
+
+#class ItemTable(Table):
+#    Name = Col('Name')
+#    HKS = Col('HKS')
+#    last_Value = Col('last_Value')
+#    time = Col('time')
 
 app = Flask(__name__)
 
@@ -70,9 +78,10 @@ def index():
 def flask_link(Id):
     error = ""
     element = InputsDB.get_element_by_id(Id)
+    form = MyForm()
     if request.method == 'GET':
-        request.form.Name.data = element.Name
-        request.form.HKS.data = element.HKS
+        form.Name.data = element.Name
+        form.HKS.data = element.HKS
     if request.method == 'POST':
         # Form being submitted; grab data from form.
         first_name = request.form['Name']
