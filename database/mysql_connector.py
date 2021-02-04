@@ -92,7 +92,7 @@ def flask_link(Id):
         return redirect(url_for('thank_you'))
 
     # Render the sign-up page
-    return render_template('input_el_template.html', message=error, form=form,
+    return render_template('input_el_template.html', message=error, form=form, Id=Id,
                                 title="Update Profile") #form_action=form_action
 
 #@app.route('/item/<int:Id>')
