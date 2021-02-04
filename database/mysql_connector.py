@@ -37,12 +37,20 @@ inputs_table = {}
 class MyForm(FlaskForm):
     Name = StringField('Name')
     HKS  = StringField('HKS')
+    Description  = StringField('Description')
+    Status  = StringField('Status')
+    Logging  = StringField('Logging')
+    Doppelklick  = StringField('Doppelklick')
+    last1  = StringField('last1')
+    Filter  = StringField('Filter')
 
 
 class SortableTable(Table):
     Id = Col('ID')
     Name = Col('Name')
     HKS = Col('HKS')
+    Description = Col('Description')
+    Status = Col('Status')
     time = Col('time')
     last_Value = Col('last_Value')
     Value_lt =  Col('Value_lt')
