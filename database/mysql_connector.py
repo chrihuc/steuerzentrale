@@ -82,24 +82,19 @@ def flask_link(Id):
     error = ""
     element = InputsDB.get_element_by_id(Id)
     form = MyForm()
+    form_action = url_for('index', sort=col_key, direction=direction)
     if request.method == 'GET':
         form.Name.data = element.Name
         form.HKS.data = element.HKS
     if request.method == 'POST':
         # Form being submitted; grab data from form.
-        first_name = request.form['Name']
-        last_name = request.form['HKS']
 
-        # Validate form data
-        if len(first_name) == 0 or len(last_name) == 0:
-            # Form data failed validation; try again
-            error = "Please supply both first and last name"
-        else:
-            # Form data is valid; move along
-            return redirect(url_for('thank_you'))
+#        return redirect(url_for('thank_you'))
+        return form.Name.data
 
     # Render the sign-up page
-    return render_template('input_el_template.html', message=error)
+    return render_template('input_el_template.html', message=error, form=form,
+                               form_action=form_action, title="Update Profile")
 
 #@app.route('/item/<int:Id>')
 #def flask_link(Id):
