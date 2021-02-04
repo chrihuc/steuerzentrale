@@ -25,6 +25,10 @@ from wtforms import StringField
 
 app = Flask(__name__)
 
+import os
+SECRET_KEY = os.urandom(32)
+app.config['SECRET_KEY'] = SECRET_KEY
+
 # den Inputs table als Dict abbilden, ID ist der Key, die Reihe dann der Val
 # jede Reihe ist ein dictionary
 inputs_table = {}
