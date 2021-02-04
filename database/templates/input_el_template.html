@@ -1,6 +1,6 @@
 
 
-<form method="POST" action={{ url_for('flask_link', variable=Id) }}>
+<form method="POST" action={{ url_for('flask_link', Id=Id) }}>
     {{ form.csrf_token }}
     {{ form.Name.label }} {{ form.Name(size=20) }}
     {{ form.HKS.label }} {{ form.HKS(size=20) }}

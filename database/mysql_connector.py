@@ -70,10 +70,12 @@ class SortableTable(Table):
 @app.route('/')
 def index():
     sort = request.args.get('sort', 'Id')
+    filt = request.args.get('filter', '')
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTable(InputsDB.get_sorted_by(sort, reverse),
+    table = SortableTable(InputsDB.get_sorted_by(sort, reverse, filt),
                           sort_by=sort,
-                          sort_reverse=reverse)
+                          sort_reverse=reverse,
+                          filt_by=filt)
     return table.__html__()
 
 
@@ -89,7 +91,7 @@ def flask_link(Id):
     if request.method == 'POST':
         # Form being submitted; grab data from form.
         print(form.Name.data)
-        return redirect(url_for('thank_you'))
+        return 'thank_you'
 
     # Render the sign-up page
     return render_template('input_el_template.html', message=error, form=form, Id=Id,
@@ -135,9 +137,10 @@ class InputsDB(object):
         return [InputsDB(item) for key, item in inputs_table.items()]
 
     @classmethod
-    def get_sorted_by(cls, sort, reverse=False):
+    def get_sorted_by(cls, sort, reverse=False, filt='', filtkey='Name'):
+        elements = [element for element in cls.get_elements() if filt in element.Name]
         return sorted(
-            cls.get_elements(),
+            elements,
             key=lambda x: getattr(x, sort),
             reverse=reverse)
 
@@ -1426,7 +1429,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 read_inputs_to_inputs_table()
 
 def apptask():
-    app.run(host='0.0.0.0', port=4444, debug=True)
+    app.run(host='0.0.0.0', port=4444)
     
 def main(): 
     apptimer = Timer(0, apptask)
