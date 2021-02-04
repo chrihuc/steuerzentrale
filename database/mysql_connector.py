@@ -82,7 +82,7 @@ def flask_link(Id):
     error = ""
     element = InputsDB.get_element_by_id(Id)
     form = MyForm()
-    form_action = url_for('index')
+#    form_action = url_for('index')
     if request.method == 'GET':
         form.Name.data = element.Name
         form.HKS.data = element.HKS
@@ -1426,7 +1426,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 read_inputs_to_inputs_table()
 
 def apptask():
-    app.run(host='0.0.0.0', port=4444)
+    app.run(host='0.0.0.0', port=4444, debug=True)
     
 def main(): 
     apptimer = Timer(0, apptask)
