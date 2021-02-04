@@ -43,6 +43,11 @@ class MyForm(FlaskForm):
     Doppelklick  = StringField('Doppelklick')
     last1  = StringField('last1')
     Filter  = StringField('Filter')
+    offset  = StringField('offset')
+    debounce  = StringField('debounce')
+    heartbeat  = StringField('heartbeat')
+    latching  = StringField('latching')
+    persistance  = StringField('persistance')
 
 
 class SortableTable(Table):
@@ -98,6 +103,11 @@ def flask_link(Id):
         form.Doppelklick.data = element.Doppelklick
         form.last1.data = element.last1
         form.Filter.data = element.Filter
+        form.offset.data = element.offset
+        form.debounce.data = element.debounce
+        form.heartbeat.data = element.heartbeat
+        form.latching.data = element.latching
+        form.persistance.data = element.persistance
     if request.method == 'POST':
         # Form being submitted; grab data from form.
         print(form.Name.data)

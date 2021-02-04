@@ -671,7 +671,6 @@ class Sonos:
                 self.SetVolume(player_ip, dicti.get('Volume'))
                 if dicti['MasterZone'] != '':
                     master = self.get_player(dicti['MasterZone'])
-                    print('1',master)
                     player.join(master.group.coordinator)
                     break
         #            self.CombineZones(player_ip, dicti['MasterZone'])
@@ -688,7 +687,6 @@ class Sonos:
                         if str(dicti['Time']) != 'None':
                             self.Seek(player_ip, "REL_TIME", dicti['Time'])
                     if not dicti['Pause']:
-#                        print(dicti)
                         player.play()
             except Exception as e:
                 print(e)
@@ -711,8 +709,7 @@ class Sonos:
                     zonemaster, _, _, _ = self.get_addr(str(zone))
                     if not zonemaster is None:
                         tries2 = 0
-                        print('2',player.group,zonemaster.group) # goes into a loop
-                        while tries2 < 12 and player.group.coordinator != zonemaster.group.coordinator:
+                        while tries2 < 30 and player.group.coordinator != zonemaster.group.coordinator:
                             player.join(zonemaster.group.coordinator)
                             tries2 += 1
                             time.sleep(1)
@@ -735,7 +732,6 @@ class Sonos:
                             player.play_from_queue(sonos_szene.get('TitelNr'), start=False)
                             if str(sonos_szene.get('Time')) != 'None':
                                 player.seek(sonos_szene.get('Time'))
-                    print('3,',player.group.coordinator)
                     if (sonos_szene.get('Pause') == 1) or overrde_play:
                         player.group.coordinator.pause()
                     elif sonos_szene.get('Pause') == 0:
@@ -758,7 +754,6 @@ class Sonos:
             else:
                 _, z_ip, _, _ = self.get_addr(str(zone))
                 to_att = soco.SoCo(z_ip)
-                print('4,',to_att.group.coordinator)
                 socoplayer.join(to_att.group.coordinator)
         else:
             zoneown = socoplayer.uid #self.sonos_zonen.get(str(player))
@@ -950,7 +945,6 @@ class Sonos:
                         player, player_ip, p_uid, playerName = self.get_addr(player)
                     # playerName = self.Names.get(player)
                     if str(command) == "Pause":
-                        print('5', player.group)
                         currinf = player.group.coordinator.get_current_transport_info()
                         if currinf['current_transport_state'] != 'STOPPED':
                             try:
@@ -959,7 +953,6 @@ class Sonos:
                                 print(e)
                                 pass
                     elif str(command) == "Play":
-                        print('6', player.group)
                         player.group.coordinator.play()
                     elif str(command) == "Save":
                         self.sonos_save(player)

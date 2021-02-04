@@ -3,12 +3,17 @@
 <form method="POST" action={{ url_for('flask_link', Id=Id) }}>
     {{ form.csrf_token }}
     <br>{{ form.Name.label }} {{ form.Name(size=20) }}</br>
-    <p>{{ form.HKS.label }} {{ form.HKS(size=20) }}</p>
-    <p>{{ form.Description.label }} {{ form.Description(size=20) }}
+    <p>{{ form.HKS.label }}</p> <p>{{ form.HKS(size=20) }}</p>
+    <p>{{ form.Description.label }}</p> <p> {{ form.Description(size=20) }}
         {{ form.Status.label }} {{ form.Status(size=20) }}</p>
-    <br>{{ form.Logging.label }} {{ form.Logging(size=20) }}</br>
-    <br>{{ form.Doppelklick.label }} {{ form.Doppelklick(size=20) }}</br>
-    <br>{{ form.last1.label }} {{ form.last1(size=20) }}</br>
-    <br>{{ form.Filter.label }} {{ form.Filter(size=20) }}</br>
+    <br>{{ form.Logging.label }}</br> <br>{{ form.Logging(size=20) }}</br>
+    <br>{{ form.Doppelklick.label }}</br> <br>{{{ form.Doppelklick(size=20) }}</br>
+    <br>{{ form.last1.label }}</br> <br>{{{ form.last1(size=20) }}</br>
+    <br>{{ form.Filter.label }}</br> <br>{{{ form.Filter(size=20) }}</br>
+    <br>{{ form.offset.label }}</br> <br>{{{ form.offset(size=20) }}</br>
+    <br>{{ form.debounce.label }}</br> <br>{{{ form.debounce(size=20) }}</br>
+    <br>{{ form.heartbeat.label }}</br> <br>{{{ form.heartbeat(size=20) }}</br>
+    <br>{{ form.latching.label }}</br> <br>{{{ form.latching(size=20) }}</br>
+    <br>{{ form.persistance.label }}</br> <br>{{{ form.persistance(size=20) }}</br>
     <input type="submit" value="Go">
 </form>
