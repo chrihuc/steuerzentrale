@@ -74,8 +74,7 @@ def index():
     reverse = (request.args.get('direction', 'asc') == 'desc')
     table = SortableTable(InputsDB.get_sorted_by(sort, reverse, filt),
                           sort_by=sort,
-                          sort_reverse=reverse,
-                          filt_by=filt)
+                          sort_reverse=reverse)
     return table.__html__()
 
 
