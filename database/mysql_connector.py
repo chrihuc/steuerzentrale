@@ -38,12 +38,6 @@ class MyForm(FlaskForm):
     Name = StringField('Name')
     HKS  = StringField('HKS')
 
-#class ItemTable(Table):
-#    Name = Col('Name')
-#    HKS = Col('HKS')
-#    last_Value = Col('last_Value')
-#    time = Col('time')
-
 
 class SortableTable(Table):
     Id = Col('ID')
@@ -96,11 +90,6 @@ def flask_link(Id):
     return render_template('input_el_template.html', message=error, form=form, Id=Id,
                                 title="Update Profile") #form_action=form_action
 
-#@app.route('/item/<int:Id>')
-#def flask_link(Id):
-#    element = InputsDB.get_element_by_id(Id)
-#    return '<h1>{}</h1><p>{}</p><hr><small>Id: {}</small>'.format(
-#        element.Name, element.HKS, element.Id)
 
 
 class InputsDB(object):
@@ -176,26 +165,7 @@ class InputsDB(object):
             liste.append(item)
         return liste    
 
-#@app.route("/")
-#def hello():
-#    items = [dict(name='Name1', description='Description1'),
-#    dict(name='Name2', description='Description2'),
-#    dict(name='Name3', description='Description3')]
-#    items = [item for key, item in inputs_table.items()]
-#    for item in items:
-#        item['name'] = item['Name']
-#        item['name'] = item['Name']
-    
-#    table = ItemTable(items)
-    
-#    return table.__html__()
 
-# TODO: reconnect of MQTT
-
-#client = mqtt.Client(constants.name + '_mysql_con')
-#client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
-#client.connect(constants.mqtt_.server)
-#client.loop_start()
 datab = constants.sql_.DB
 
 validTimers = {}
@@ -1344,6 +1314,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                             sql = 'UPDATE %s SET latched = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, lasttimes, dicti.get('Id'))
                             writeToCursor(cur, sql)                            
 #                            cur.execute(sql) 
+                        elem = InputsDB.get_element_by_id(dicti.get('Id'))
+                        if elem:
+                            elem.latched = latched
                     alle_szenen += szenen       
                     alle_payloads += payloads
                     descriptions += kondition                     
