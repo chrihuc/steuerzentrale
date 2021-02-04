@@ -43,8 +43,11 @@ class SortableTable(Table):
     Id = Col('ID')
     Name = Col('Name')
     HKS = Col('HKS')
-    last_Value = Col('last_Value')
     time = Col('time')
+    last_Value = Col('last_Value')
+    Value_lt =  Col('Value_lt')
+    Value_eq =  Col('Value_eq')   
+    Value_gt =  Col('Value_gt')   
 #    heartbeat
 #    latching = Col('latching')
     latched= Col('latched')
@@ -81,6 +84,12 @@ def flask_link(Id):
     if request.method == 'GET':
         form.Name.data = element.Name
         form.HKS.data = element.HKS
+        form.Description.data = element.Description
+        form.Status.data = element.Status
+        form.Logging.data = element.Logging
+        form.Doppelklick.data = element.Doppelklick
+        form.last1.data = element.last1
+        form.Filter.data = element.Filter
     if request.method == 'POST':
         # Form being submitted; grab data from form.
         print(form.Name.data)
@@ -97,11 +106,38 @@ class InputsDB(object):
     lock     = False
     """ a little fake database """
     def __init__(self, element):#, Id, name, description):
-        self.Id = element['Id']
+        if 'Id' in element:
+            self.Id = element['Id']
+        else:
+            new_id = InputsDB.get_max_id()
+            if new_id:
+                self.Id = new_id
+                print('New Item with Id: ' + str(new_id))
+            else:
+                return False 
+            
         self.Name = element['Name']
-        self.HKS = element['HKS']
-        self.last_Value = element['last_Value']
-        self.time = element['time']
+            
+        self.HKS = element['Name']
+        if 'HKS' in element: self.HKS = element['HKS']
+        self.Description = element['HKS']
+        if 'Description' in element: self.Description = element['Description']      
+        self.Status = None
+        if 'Status' in element: self.Status = element['Status']   
+        self.Logging = True
+        if 'Logging' in element: self.Logging = element['Logging'] 
+        self.Doppelklick = False
+        if 'Doppelklick' in element: self.Doppelklick = element['Doppelklick'] 
+        self.last1 = None
+        if 'last1' in element: self.last1 = element['last1'] 
+        self.last2 = None
+        if 'last2' in element: self.last2 = element['last2']  
+        self.Filter = None
+        if 'Filter' in element: self.Filter = element['Filter'] 
+        self.offset = None
+        if 'offset' in element: self.offset = element['offset'] 
+        self.debounce = None
+        if 'debounce' in element: self.debounce = element['debounce']          
         self.heartbeat = None
         if 'heartbeat' in element: self.heartbeat = element['heartbeat']
         self.latching = None
@@ -110,12 +146,76 @@ class InputsDB(object):
         if 'latched' in element: self.latched = element['latched']
         self.persistance = None
         if 'persistance' in element: self.persistance = element['persistance']
+        self.violTime = None
+        if 'violTime' in element: self.violTime = element['violTime']   
+        self.valid = True
+        if 'valid' in element: self.valid = element['valid'] 
+        self.enabled = True
+        if 'enabled' in element: self.enabled = element['enabled']         
+        self.last_Value = element['last_Value']
+        self.time = element['time']        
+        self.fallback = None
+        if 'fallback' in element: self.fallback = element['fallback']          
+        self.RecoverSzn = None
+        if 'RecoverSzn' in element: self.RecoverSzn = element['RecoverSzn'] 
+        self.Value_lt = None
+        if 'Value_lt' in element: self.Value_lt = element['Value_lt'] 
+        self.Value_eq = None
+        if 'Value_eq' in element: self.Value_eq = element['Value_eq'] 
+        self.Value_gt = None
+        if 'Value_gt' in element: self.Value_gt = element['Value_gt'] 
+        self.Hysterese = None
+        if 'Hysterese' in element: self.Hysterese = element['Hysterese'] 
+        self.Kompression = None
+        if 'Kompression' in element: self.Kompression = element['Kompression']
+        
+        self.Immer = None
+        if 'Immer' in element: self.Immer = element['Immer'] 
+        self.ResetSzene = None
+        if 'ResetSzene' in element: self.ResetSzene = element['ResetSzene'] 
+        self.Wach = None
+        if 'Wach' in element: self.Wach = element['Wach'] 
+        self.Wecken = None
+        if 'Wecken' in element: self.Wecken = element['Wecken'] 
+        self.Schlafen = None
+        if 'Schlafen' in element: self.Schlafen = element['Schlafen'] 
+        self.Schlummern = None
+        if 'Schlummern' in element: self.Schlummern = element['Schlummern'] 
+        self.Leise = None
+        if 'Leise' in element: self.Leise = element['Leise'] 
+        self.AmGehen = None
+        if 'AmGehen' in element: self.AmGehen = element['AmGehen'] 
+        self.Gegangen = None
+        if 'Gegangen' in element: self.Gegangen = element['Gegangen'] 
+        self.Abwesend = None
+        if 'Abwesend' in element: self.Abwesend = element['Abwesend'] 
+        self.Urlaub = None
+        if 'Urlaub' in element: self.Urlaub = element['Urlaub'] 
+        self.Besuch = None
+        if 'Besuch' in element: self.Besuch = element['Besuch'] 
+        self.Doppel = None
+        if 'Doppel' in element: self.Doppel = element['Doppel'] 
+        self.Dreifach = None
+        if 'Dreifach' in element: self.Dreifach = element['Dreifach'] 
+        self.Alarm = None
+        if 'Alarm' in element: self.Alarm = element['Alarm'] 
+        self.Payload = None
+        if 'Payload' in element: self.Payload = element['Payload'] 
+        
         
         self.dict = element
         while InputsDB.lock:
             time.sleep(0.01)
         InputsDB.elements.append(self)
 
+    @classmethod
+    def get_max_id(cls):
+        t_list = cls.get_sorted_by('Id', True)
+        if t_list:
+            return t_list[0].Id + 10
+        else:
+            return None
+  
     @classmethod
     def get_elements(cls):
         return cls.elements
@@ -1047,23 +1147,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
         cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
 #        if not device in [item['Name'] for key, item in inputs_table.items()]:
         if len(InputsDB.get_elements_by_name(device)) == 0:
-#            ids = [int(key) for key in inputs_table.keys()]
-#            ids.sort()
-#            new_id = ids[-1] + 10
-            new_id = InputsDB.get_sorted_by('Id', True)[0].Id + 10
-            # stimmt nicht, muss id sein nicht device, wie verändern, damit ich weiterhin iteraten kann?
-#            inputs_table[new_id] = {'Name'       :device
             newItem              = {'Name'       :device
-                                   ,'HKS'        :device
-                                   ,'Description':device
                                    ,'last_Value' :value
                                    ,'time'       :ct
-                                   ,'Logging'    :True
-                                   ,'Doppelklick':True
-                                   ,'Id'         : new_id
                                    }
             InputsDB(newItem)
-            print('new Item with id: ', str(new_id))
         if cur.fetchone()[0] == 0:
             sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
             cur.execute(sql)
