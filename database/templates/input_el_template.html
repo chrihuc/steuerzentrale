@@ -1,26 +1,8 @@
 
 
-<form method="POST">
-    <p>
-        <label for="first">Name</label>
-        <input id="first" name="Name" type="text">
-    </p>
-    <p>
-        <label for="last">HKS</label>
-        <input id="last" name="HKS" type="text">
-    </p>      
-    <input type="submit" value="Save Changes">
-</form>
-<form method="post" action="{{ form_action }}">
-    <fieldset>
-        <legend></legend>
-        {{ render_field(form.Name) }}
-        {{ render_field(form.HKS)}}
-    </fieldset>    
-    <input type="submit" class="button" value="Save"/>
-</form>  
 <form method="POST" action="/">
     {{ form.csrf_token }}
     {{ form.Name.label }} {{ form.Name(size=20) }}
+    {{ form.HKS.label }} {{ form.HKS(size=20) }}
     <input type="submit" value="Go">
 </form>
