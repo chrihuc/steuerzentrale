@@ -22,10 +22,11 @@ from flask_table import Table, Col, LinkCol
 
 from flask_wtf import FlaskForm
 from wtforms import StringField
+import os
 
 app = Flask(__name__)
 
-import os
+
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
 
@@ -42,8 +43,6 @@ class MyForm(FlaskForm):
 #    HKS = Col('HKS')
 #    last_Value = Col('last_Value')
 #    time = Col('time')
-
-app = Flask(__name__)
 
 
 class SortableTable(Table):
