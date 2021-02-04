@@ -1385,10 +1385,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         lasttimes = ""
                         # debug
                         if append:
-                            inputs_table[dicti['Id']]['last1'] = ct
                             if str(dicti.get("last1")) != "None":
                                 lasttimes = ', last2 = "%s", last1 = "%s"' % (dicti.get("last1"), ct)
-                                inputs_table[dicti['Id']]['last2'] = dicti.get("last1")
                             else:
                                 lasttimes = ', last1 = "%s"' % (ct)
 #                        if device == 'Wetter/RegenWarnung':

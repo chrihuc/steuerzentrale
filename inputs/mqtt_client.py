@@ -113,6 +113,7 @@ class MqttClient:
                     if 'PicoVoice' in msg.topic:
                         command = m_in['intent']
                         if 'location' in m_in['slots']: command += "." + m_in['slots']['location']
+                        if 'device' in m_in['slots']: command += "." + m_in['slots']['device']
                         if 'state' in m_in['slots']: command += "." + m_in['slots']['state']
                         if 'color' in m_in['slots']: command += "." + m_in['slots']['color']
                         if 'location' in m_in['slots'] and 'state' in m_in['slots']:
