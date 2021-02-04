@@ -120,7 +120,7 @@ class InputsDB(object):
             
         self.HKS = element['Name']
         if 'HKS' in element: self.HKS = element['HKS']
-        self.Description = element['HKS']
+        self.Description = element['Name']
         if 'Description' in element: self.Description = element['Description']      
         self.Status = None
         if 'Status' in element: self.Status = element['Status']   
