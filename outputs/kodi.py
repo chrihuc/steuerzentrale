@@ -27,7 +27,7 @@ class kodi_client():
 
     def slideshow(self):
         try:
-            self.my_kodi.Player.Open(item={"directory":"/storage/pictures/"})
+            self.my_kodi.Player.Open(item={"directory":"/storage/pictures/"}, options={"repeat": "all", "shuffled": True})
         except Exception as e:
             pass
         

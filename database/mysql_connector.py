@@ -95,22 +95,13 @@ def flask_link(Id):
     form = MyForm()
 #    form_action = url_for('index')
     if request.method == 'GET':
-        form.Name.data = element.Name
-        form.HKS.data = element.HKS
-        form.Description.data = element.Description
-        form.Status.data = element.Status
-        form.Logging.data = element.Logging
-        form.Doppelklick.data = element.Doppelklick
-        form.last1.data = element.last1
-        form.Filter.data = element.Filter
-        form.offset.data = element.offset
-        form.debounce.data = element.debounce
-        form.heartbeat.data = element.heartbeat
-        form.latching.data = element.latching
-        form.persistance.data = element.persistance
+        for item, value in form.__dict__.items():
+            if item in element.__dict__:
+                setattr(getattr(form, item),'data',getattr(element, item))
     if request.method == 'POST':
-        # Form being submitted; grab data from form.
-        print(form.Name.data)
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and not item in []:
+                setattr(element, item, getattr(getattr(form, item), 'data'))
         return 'thank_you'
 
     # Render the sign-up page
@@ -122,6 +113,7 @@ def flask_link(Id):
 class InputsDB(object):
     elements = []
     lock     = False
+    datasets = 0
     """ a little fake database """
     def __init__(self, element):#, Id, name, description):
         if 'Id' in element:
@@ -239,8 +231,24 @@ class InputsDB(object):
         return cls.elements
 
     @classmethod
+    def periodic_save(cls):
+        thread_pt = Timer(60, cls.periodic_save)
+        thread_pt.start()    
+        cls.save_to_file()
+        return True
+
+    @classmethod
     def build(cls):
-        return [InputsDB(item) for key, item in inputs_table.items()]
+        result = None
+        if type(inputs_table) == dict:
+            result = [InputsDB(item) for key, item in inputs_table.items()]
+        else:
+            result = [InputsDB(item) for item in inputs_table]
+        cls.datasets = len(result)
+        print('Input Datensätze geladen: ' + str(cls.datasets))
+        thread_pt = Timer(60, cls.periodic_save)
+        thread_pt.start()         
+        return result
 
     @classmethod
     def get_sorted_by(cls, sort, reverse=False, filt='', filtkey='Name'):
@@ -270,19 +278,26 @@ class InputsDB(object):
     def get_as_list(cls):
         liste = []
         for element in cls.elements:
-            item = {}
-            item['Id'] = element.Id
-            item['Name'] = element.Name
-            item['HKS'] = element.HKS
-            item['last_Value'] = element.last_Value
-            item['time'] = element.time
-            item['heartbeat'] = element.heartbeat
-            item['latching'] = element.latching
-            item['latched'] = element.latched
-            item['persistance'] = element.persistance
-            liste.append(item)
+#            item = {}
+#            item['Id'] = element.Id
+#            item['Name'] = element.Name
+#            item['HKS'] = element.HKS
+#            item['last_Value'] = element.last_Value
+#            item['time'] = element.time
+#            item['heartbeat'] = element.heartbeat
+#            item['latching'] = element.latching
+#            item['latched'] = element.latched
+#            item['persistance'] = element.persistance
+#            liste.append(item)
+            liste.append(element.__dict__)
         return liste    
 
+    @classmethod
+    def save_to_file(cls):
+        with open('inputs_table.jsn', 'w') as fout:
+            json.dump(cls.get_as_list(), fout, default=json_serial) 
+        cls.datasets = len(cls.get_as_list())
+        print('Input Datensätze geschrieben: ' + str(cls.datasets))
 
 datab = constants.sql_.DB
 
@@ -884,15 +899,25 @@ def mdb_get_table(db):
     con.close()
     return rlist
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def read_inputs_to_inputs_table():
     global inputs_table
-    liste = mdb_get_table(constants.sql_tables.inputs.name)
     inputs_table = {}
-    for line in liste:
-        inputs_table[line['Id']] = line
-    print("table loaded")
+    # neu
+    try:
+        with open('inputs_table.jsn') as f:
+            inptsjsn = f.read()            
+        inputs_table = json.loads(inptsjsn)
+        print("table loaded from file") 
+    except Exception as e:
+        print(e)
+        liste = mdb_get_table(constants.sql_tables.inputs.name)
+        for line in liste:
+            inputs_table[line['Id']] = line
+        print("table loaded from DB")        
     InputsDB.build()
 #    print(inputs_table)
+
 
 def mdb_set_table(table, device, commands, primary = 'Name', translate = False):
     ''' set table
@@ -1091,7 +1116,8 @@ def writeToCursor(cursor, sql):
             if counter > 8:
                 print('could not write to DB', sql)
     if "8613" in sql:
-        print(sql, counter)
+        pass
+#        print(sql, counter)
 
 def read_inputs_dict():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -1513,6 +1539,7 @@ def main():
     while constants.run:
         time.sleep(1)
     
-    with open('inputs_table.jsn', 'w') as fout:
-        json.dump(InputsDB.get_as_list(), fout, default=json_serial) 
+#    with open('inputs_table.jsn', 'w') as fout:
+#        json.dump(InputsDB.get_as_list(), fout, default=json_serial) 
+    InputsDB.save_to_file()
     print("table written")
