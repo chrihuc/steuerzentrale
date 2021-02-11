@@ -198,7 +198,7 @@ class AES:
                     insertstatement = 'INSERT INTO '+table.name+'(description, prio, acknowledged, Date) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
                 else:
                     insertstatement = 'INSERT INTO '+table.name+'(description, prio, Date) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
-                cur.execute(insertstatement)
+#                cur.execute(insertstatement)
 #            if str(mysql_connector.setting_r("Status")) == "Wach":
 #                anwesend = True
 #            else:

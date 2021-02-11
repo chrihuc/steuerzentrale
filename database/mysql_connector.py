@@ -24,6 +24,72 @@ from flask_wtf import FlaskForm
 from wtforms import StringField
 import os
 
+from database.intern_db import DatabaseIntern, convert_to
+
+properties_iptDB = { 'Id':          (None, int)
+                    ,'Name':        ('HKS', str)
+                    ,'HKS':         ('HKS', str)
+                    ,'Value':       (0, float)
+                    ,'time':        (None, datetime.datetime)
+                    ,'Description': (None, str)
+                    ,'Status' :     (None, str)
+                    ,'Logging' :    (True, bool)
+                    ,'Doppelklick' :(False, bool)
+                    ,'last1' :      (None, datetime.datetime)
+                    ,'last2' :      (None, datetime.datetime)
+                    ,'Filter' :     (None, str)
+                    ,'offset' :     (None, float)
+                    ,'debounce' :   (None, int)
+                    ,'heartbeat' :  (None, int)
+                    ,'latching' :   (None, bool)
+                    ,'latched' :    (None, bool)
+                    ,'persistance' :(None, int)
+                    ,'violTime' :   (None, datetime.datetime)
+                    ,'valid' :      (True, bool)
+                    ,'enabled' :    (True, bool)
+                    ,'fallback':    (None, float)
+                    ,'RecoverSzn':  (None, str)
+                    ,'Value_lt':    (None, str)
+                    ,'Value_eq':    (None, str)
+                    ,'Value_gt':    (None, str)
+                    ,'Hysterese':   (None, float)
+                    ,'Kompression': (None, str)
+                    
+                    ,'Immer':       (None, str)
+                    ,'ResetSzene':  (None, str)
+                    ,'Wach':        (None, str)
+                    ,'Wecken':      (None, str)
+                    ,'Schlafen':    (None, str)
+                    ,'Schlummern':  (None, str)
+                    ,'Leise':       (None, str)
+                    ,'AmGehen':     (None, str)
+                    ,'Gegangen':    (None, str)
+                    ,'Abwesend':    (None, str)
+                    ,'Urlaub':      (None, str)
+                    ,'Besuch':      (None, str)
+                    ,'Doppel':      (None, str)
+                    ,'Dreifach':    (None, str)
+                    ,'Alarm':       (None, str)
+                    ,'Payload':     (None, str)
+                    
+                    ,'debug':       (False, bool)
+                    }
+
+
+device_props =[ 'HKS'
+               ,'Description'
+               ,'Logging'
+               ,'Filter'
+               ,'offset'
+               ,'debounce'
+               ,'heartbeat'
+               ,'valid'
+               ,'Kompression'
+               ,'fallback'
+               ]
+
+InputsDatabase = DatabaseIntern(properties_iptDB, 'inputs_table.jsn')
+
 app = Flask(__name__)
 
 
@@ -47,7 +113,31 @@ class MyForm(FlaskForm):
     debounce  = StringField('debounce')
     heartbeat  = StringField('heartbeat')
     latching  = StringField('latching')
+#    violTime = StringField('violTime')
     persistance  = StringField('persistance')
+    Kompression  = StringField('Kompression')
+    enabled      = StringField('enabled')
+    Immer          = StringField('Immer')
+    Value_lt          = StringField('Value_lt')
+    Value_eq          = StringField('Value_eq')
+    Value_gt          = StringField('Value_gt') 
+    Hysterese          = StringField('Hysterese')
+    ResetSzene     = StringField('ResetSzene')
+    Wach           = StringField('Wach') 
+    Wecken         = StringField('Wecken') 
+    Schlafen       = StringField('Schlafen') 
+    Schlummern     = StringField('Schlummern')
+    Leise          = StringField('Leise') 
+    AmGehen        = StringField('AmGehen') 
+    Gegangen       = StringField('Gegangen') 
+    Abwesend       = StringField('Abwesend') 
+    Urlaub         = StringField('Urlaub') 
+    Besuch         = StringField('Besuch') 
+    Doppel         = StringField('Doppel') 
+    Dreifach       = StringField('Dreifach') 
+    Alarm          = StringField('Alarm') 
+    Payload        = StringField('Payload')     
+    debug          = StringField('debug') 
 
 
 class SortableTable(Table):
@@ -57,16 +147,22 @@ class SortableTable(Table):
     Description = Col('Description')
     Status = Col('Status')
     time = Col('time')
-    last_Value = Col('last_Value')
+    Value = Col('Value')
     Value_lt =  Col('Value_lt')
     Value_eq =  Col('Value_eq')   
-    Value_gt =  Col('Value_gt')   
+    Value_gt =  Col('Value_gt') 
+    violTime = Col('violTime')
 #    heartbeat
-#    latching = Col('latching')
+    latching = Col('latching')
     latched= Col('latched')
-#    persistance= Col('persistance')
+    latched= Col('latched')
+    persistance= Col('persistance')
     link = LinkCol(
-        'Link', 'flask_link', url_kwargs=dict(Id='Id'), allow_sort=False)
+        'Edit', 'flask_link', url_kwargs=dict(Id='Id'), allow_sort=False)
+    new = LinkCol(
+        'New Trigger', 'new_trig', url_kwargs=dict(Id='Id'))    
+    delet = LinkCol(
+        'Delete', 'delete_id', url_kwargs=dict(Id='Id'))
     allow_sort = True
 
     def sort_url(self, col_key, reverse=False):
@@ -80,18 +176,35 @@ class SortableTable(Table):
 @app.route('/')
 def index():
     sort = request.args.get('sort', 'Id')
-    filt = request.args.get('filter', '')
+    filtby = request.args.get('filterby', '')
+    filterkey = request.args.get('filterkey', '')
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTable(InputsDB.get_sorted_by(sort, reverse, filt),
+    table = SortableTable(InputsDatabase.get_sorted_by(sort, reverse, filtby, filterkey),
                           sort_by=sort,
-                          sort_reverse=reverse)
+                          sort_reverse=reverse,
+                          border=True)
     return table.__html__()
+
+@app.route('/new/<int:Id>')
+def new_trig(Id):
+    InputsDatabase.new_trigger(Id)
+    return 'New Trigger created'
+
+@app.route('/delete/<int:Id>', methods=['GET', 'POST'])
+def delete_id(Id):    
+    if request.method == 'POST':
+        print('delete ID')
+        InputsDatabase.del_element(Id)
+        return 'ID deleted'
+    elif request.method == 'GET':
+        return render_template('delete_form.html')    
 
 
 @app.route('/item/<int:Id>', methods=['GET', 'POST'])
 def flask_link(Id):
     error = ""
-    element = InputsDB.get_element_by_id(Id)
+    element  = InputsDatabase.get_element_by_id(Id)
+    elements = InputsDatabase.get_elements_by_name(element.Name)
     form = MyForm()
 #    form_action = url_for('index')
     if request.method == 'GET':
@@ -100,204 +213,18 @@ def flask_link(Id):
                 setattr(getattr(form, item),'data',getattr(element, item))
     if request.method == 'POST':
         for item, value in form.__dict__.items():
-            if item in element.__dict__ and not item in []:
-                setattr(element, item, getattr(getattr(form, item), 'data'))
+            if item in element.__dict__ and item in properties_iptDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_iptDB[item][1]))
+            if item in device_props:
+                for subel in elements:
+                    if item in subel.__dict__:
+                        setattr(subel, item, convert_to(getattr(getattr(form, item), 'data'), properties_iptDB[item][1]))                    
         return 'thank_you'
 
     # Render the sign-up page
     return render_template('input_el_template.html', message=error, form=form, Id=Id,
                                 title="Update Profile") #form_action=form_action
 
-
-
-class InputsDB(object):
-    elements = []
-    lock     = False
-    datasets = 0
-    """ a little fake database """
-    def __init__(self, element):#, Id, name, description):
-        if 'Id' in element:
-            self.Id = element['Id']
-        else:
-            new_id = InputsDB.get_max_id()
-            if new_id:
-                self.Id = new_id
-                print('New Item with Id: ' + str(new_id))
-            else:
-                return False 
-            
-        self.Name = element['Name']
-            
-        self.HKS = element['Name']
-        if 'HKS' in element: self.HKS = element['HKS']
-        self.Description = element['Name']
-        if 'Description' in element: self.Description = element['Description']      
-        self.Status = None
-        if 'Status' in element: self.Status = element['Status']   
-        self.Logging = True
-        if 'Logging' in element: self.Logging = element['Logging'] 
-        self.Doppelklick = False
-        if 'Doppelklick' in element: self.Doppelklick = element['Doppelklick'] 
-        self.last1 = None
-        if 'last1' in element: self.last1 = element['last1'] 
-        self.last2 = None
-        if 'last2' in element: self.last2 = element['last2']  
-        self.Filter = None
-        if 'Filter' in element: self.Filter = element['Filter'] 
-        self.offset = None
-        if 'offset' in element: self.offset = element['offset'] 
-        self.debounce = None
-        if 'debounce' in element: self.debounce = element['debounce']          
-        self.heartbeat = None
-        if 'heartbeat' in element: self.heartbeat = element['heartbeat']
-        self.latching = None
-        if 'latching' in element: self.latching = element['latching']
-        self.latched = None
-        if 'latched' in element: self.latched = element['latched']
-        self.persistance = None
-        if 'persistance' in element: self.persistance = element['persistance']
-        self.violTime = None
-        if 'violTime' in element: self.violTime = element['violTime']   
-        self.valid = True
-        if 'valid' in element: self.valid = element['valid'] 
-        self.enabled = True
-        if 'enabled' in element: self.enabled = element['enabled']         
-        self.last_Value = element['last_Value']
-        self.time = element['time']        
-        self.fallback = None
-        if 'fallback' in element: self.fallback = element['fallback']          
-        self.RecoverSzn = None
-        if 'RecoverSzn' in element: self.RecoverSzn = element['RecoverSzn'] 
-        self.Value_lt = None
-        if 'Value_lt' in element: self.Value_lt = element['Value_lt'] 
-        self.Value_eq = None
-        if 'Value_eq' in element: self.Value_eq = element['Value_eq'] 
-        self.Value_gt = None
-        if 'Value_gt' in element: self.Value_gt = element['Value_gt'] 
-        self.Hysterese = None
-        if 'Hysterese' in element: self.Hysterese = element['Hysterese'] 
-        self.Kompression = None
-        if 'Kompression' in element: self.Kompression = element['Kompression']
-        
-        self.Immer = None
-        if 'Immer' in element: self.Immer = element['Immer'] 
-        self.ResetSzene = None
-        if 'ResetSzene' in element: self.ResetSzene = element['ResetSzene'] 
-        self.Wach = None
-        if 'Wach' in element: self.Wach = element['Wach'] 
-        self.Wecken = None
-        if 'Wecken' in element: self.Wecken = element['Wecken'] 
-        self.Schlafen = None
-        if 'Schlafen' in element: self.Schlafen = element['Schlafen'] 
-        self.Schlummern = None
-        if 'Schlummern' in element: self.Schlummern = element['Schlummern'] 
-        self.Leise = None
-        if 'Leise' in element: self.Leise = element['Leise'] 
-        self.AmGehen = None
-        if 'AmGehen' in element: self.AmGehen = element['AmGehen'] 
-        self.Gegangen = None
-        if 'Gegangen' in element: self.Gegangen = element['Gegangen'] 
-        self.Abwesend = None
-        if 'Abwesend' in element: self.Abwesend = element['Abwesend'] 
-        self.Urlaub = None
-        if 'Urlaub' in element: self.Urlaub = element['Urlaub'] 
-        self.Besuch = None
-        if 'Besuch' in element: self.Besuch = element['Besuch'] 
-        self.Doppel = None
-        if 'Doppel' in element: self.Doppel = element['Doppel'] 
-        self.Dreifach = None
-        if 'Dreifach' in element: self.Dreifach = element['Dreifach'] 
-        self.Alarm = None
-        if 'Alarm' in element: self.Alarm = element['Alarm'] 
-        self.Payload = None
-        if 'Payload' in element: self.Payload = element['Payload'] 
-        
-        
-        self.dict = element
-        while InputsDB.lock:
-            time.sleep(0.01)
-        InputsDB.elements.append(self)
-
-    @classmethod
-    def get_max_id(cls):
-        t_list = cls.get_sorted_by('Id', True)
-        if t_list:
-            return t_list[0].Id + 10
-        else:
-            return None
-  
-    @classmethod
-    def get_elements(cls):
-        return cls.elements
-
-    @classmethod
-    def periodic_save(cls):
-        thread_pt = Timer(60, cls.periodic_save)
-        thread_pt.start()    
-        cls.save_to_file()
-        return True
-
-    @classmethod
-    def build(cls):
-        result = None
-        if type(inputs_table) == dict:
-            result = [InputsDB(item) for key, item in inputs_table.items()]
-        else:
-            result = [InputsDB(item) for item in inputs_table]
-        cls.datasets = len(result)
-        print('Input Datensätze geladen: ' + str(cls.datasets))
-        thread_pt = Timer(60, cls.periodic_save)
-        thread_pt.start()         
-        return result
-
-    @classmethod
-    def get_sorted_by(cls, sort, reverse=False, filt='', filtkey='Name'):
-        elements = [element for element in cls.get_elements() if filt in element.Name]
-        return sorted(
-            elements,
-            key=lambda x: getattr(x, sort),
-            reverse=reverse)
-
-    @classmethod
-    def get_element_by_id(cls, Id):
-        cls.lock = True
-        results = [i for i in cls.elements if i.Id == Id]
-        cls.lock = False
-        if len(results) > 0:
-            return results[0]
-        return False
-    
-    @classmethod
-    def get_elements_by_name(cls, Name):
-        cls.lock = True
-        results = [i for i in cls.elements if i.Name == Name]
-        cls.lock = False
-        return results  
-    
-    @classmethod
-    def get_as_list(cls):
-        liste = []
-        for element in cls.elements:
-#            item = {}
-#            item['Id'] = element.Id
-#            item['Name'] = element.Name
-#            item['HKS'] = element.HKS
-#            item['last_Value'] = element.last_Value
-#            item['time'] = element.time
-#            item['heartbeat'] = element.heartbeat
-#            item['latching'] = element.latching
-#            item['latched'] = element.latched
-#            item['persistance'] = element.persistance
-#            liste.append(item)
-            liste.append(element.__dict__)
-        return liste    
-
-    @classmethod
-    def save_to_file(cls):
-        with open('inputs_table.jsn', 'w') as fout:
-            json.dump(cls.get_as_list(), fout, default=json_serial) 
-        cls.datasets = len(cls.get_as_list())
-        print('Input Datensätze geschrieben: ' + str(cls.datasets))
 
 datab = constants.sql_.DB
 
@@ -322,10 +249,11 @@ def json_serial(obj):
 
 def invalidTimers(hks, desc):
     print('input timed out: ', desc)
-    commands = {'valid': 'False'}
-    mdb_set_table(constants.sql_tables.inputs.name, hks, commands, primary='HKS')
-    if validTimers[hks]['fallback']:
-        inputs(validTimers[hks]['device'], validTimers[hks]['fallback'], fallingback=True)
+    hkses = InputsDatabase.get_elements_by_hks(hks)
+    for item in hkses:
+        item.valid = False
+    if hkses and hkses[0].fallback:
+        inputs(hkses[0].Name, hkses[0].fallback, fallingback=True)
 #    validTimers.remove(hks)
     validTimers.pop(hks, None)
     with open('hrtbt_timer.jsn', 'w') as fout:
@@ -538,32 +466,35 @@ def writeInfluxString(key, value, utc):
 def get_input_value(hks):
     """ returns the value from an input device
     """
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+#    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     value = None
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT last_Value FROM %s.%s WHERE HKS = '%s'" % (datab, constants.sql_tables.inputs.name, hks))
-#        if cur.fetchone()[0] != 0:
-#            con.close()
-#            return False
-        results = cur.fetchall()
-        for row in results:
-            value = row[0]
-    con.close()
+#    with con:
+#        cur = con.cursor()
+#        cur.execute("SELECT last_Value FROM %s.%s WHERE HKS = '%s'" % (datab, constants.sql_tables.inputs.name, hks))
+##        if cur.fetchone()[0] != 0:
+##            con.close()
+##            return False
+#        results = cur.fetchall()
+#        for row in results:
+#            value = row[0]
+#    con.close()
+    triggers = [item for item in InputsDatabase.elements if item.HKS == hks]
+    if triggers:
+        value = triggers[0].Value
     return value
 
 def inputs_r():
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    dicti = {}
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT HKS, last_Value FROM '+constants.sql_tables.inputs.name
-        cur.execute(sql)
-        results = cur.fetchall()
-#        field_names = [i[0] for i in cur.description]
-        for row in results:
-            dicti[row[0]] = str(row[1])
-    con.close()
+#    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    dicti = InputsDatabase.get_all_vals_as_dict()
+#    with con:
+#        cur = con.cursor()
+#        sql = 'SELECT HKS, last_Value FROM '+constants.sql_tables.inputs.name
+#        cur.execute(sql)
+#        results = cur.fetchall()
+##        field_names = [i[0] for i in cur.description]
+#        for row in results:
+#            dicti[row[0]] = str(row[1])
+#    con.close()
     return dicti
 
 def setting_s(setting, wert):
@@ -810,23 +741,24 @@ def mdb_read_table_column_filt2(db, column, filt='', amount=1000, order="desc", 
     return liste
 
 def mdb_read_bdqs(amount=1000, order="desc"):
-    db = constants.sql_tables.inputs.name
-    column = 'description'
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    rlist = []
-    with con:
-        cur = con.cursor()
-        #SELECT * FROM Steuerzentrale.HIS_inputs where Name like '%Rose%' order by id desc limit 1000;
-        sql = 'SELECT %s FROM %s WHERE valid LIKE "False" ORDER BY ID %s LIMIT %s' % (column, db, order, amount)
-        cur.execute(sql)
-        results = cur.fetchall()
-        for row in results:
-            rlist.append(row[0])
+#    db = constants.sql_tables.inputs.name
+#    column = 'description'
+#    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    rlist = [item.Description for item in InputsDatabase.elements if item.valid == False]
+    rlist = list(set(rlist))
+#    with con:
+#        cur = con.cursor()
+#        #SELECT * FROM Steuerzentrale.HIS_inputs where Name like '%Rose%' order by id desc limit 1000;
+#        sql = 'SELECT %s FROM %s WHERE valid LIKE "False" ORDER BY ID %s LIMIT %s' % (column, db, order, amount)
+#        cur.execute(sql)
+#        results = cur.fetchall()
+#        for row in results:
+#            rlist.append(row[0])
 #            if type(row[0]) == datetime.datetime:
 #                rlist.append((int(row[0].strftime("%s"))))
 #            else:
 #                rlist.append(eval(str(row[0])))
-    con.close()
+#    con.close()
     return rlist
 
 def mdb_add_table_entry(table, values, primary = 'Id'):
@@ -901,7 +833,7 @@ def mdb_get_table(db):
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def read_inputs_to_inputs_table():
-    global inputs_table
+#    global inputs_table
     inputs_table = {}
     # neu
     try:
@@ -915,7 +847,9 @@ def read_inputs_to_inputs_table():
         for line in liste:
             inputs_table[line['Id']] = line
         print("table loaded from DB")        
-    InputsDB.build()
+#    InputsDB.build(inputs_table)
+    return inputs_table
+    
 #    print(inputs_table)
 
 
@@ -1039,6 +973,7 @@ def get_device_adress(device):
 
 
 def getSzenenSources(szene):
+    # für gui veraltet
     if szene in ['', None]:
         return [],[]
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -1152,7 +1087,7 @@ def read_inputs_dict():
 # im ersten schritt nur noch vom Dict lesen und auf SQL und Dict schreiben
 def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #    i = 0
-    global inputs_table
+#    global inputs_table
     ct = datetime.datetime.now()
     utc = datetime.datetime.utcnow()
 #    if 'inputs' in device:
@@ -1183,42 +1118,44 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     writeToInflx = False
     hks = device
     
-#    print(device,value)
-#    if 'MQTT' in device:
-#        add_to_mqtt = False
+    results2, last_val = InputsDatabase.new_value(device, value, ct, not fallingback)
+
     with con:
-        cur = con.cursor()
-        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
+#        cur = con.cursor()
+#        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
 #        if not device in [item['Name'] for key, item in inputs_table.items()]:
-        if len(InputsDB.get_elements_by_name(device)) == 0:
-            newItem              = {'Name'       :device
-                                   ,'last_Value' :value
-                                   ,'time'       :ct
-                                   }
-            InputsDB(newItem)
-        if cur.fetchone()[0] == 0:
-            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
-            cur.execute(sql)
-        else:
+#        if cur.fetchone()[0] == 0:
+        if True:
+#            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
+#            cur.execute(sql)
+#        else:
 #            get last value and last time
-            sql = 'SELECT * FROM %s WHERE Name = "%s"' % (constants.sql_tables.inputs.name, str(device))
-            cur.execute(sql)
-            results_1 = cur.fetchall()
-            field_names_1 = [i[0] for i in cur.description]
-            for row in results_1:
-                for i in range (0,len(row)):
-                    dicti_1[field_names_1[i]] = row[i]
+#            sql = 'SELECT * FROM %s WHERE Name = "%s"' % (constants.sql_tables.inputs.name, str(device))
+#            cur.execute(sql)
+#            results_1 = cur.fetchall()
+#            field_names_1 = [i[0] for i in cur.description]
+#            for row in results_1:
+#                for i in range (0,len(row)):
+#                    dicti_1[field_names_1[i]] = row[i]
+#            last_value = dicti_1['last_Value']         
+                    
+            trigger_0 = results2[0]
+            last_value = last_val            
+            
             # wenn wir dann interne sachen nehmen:
 #            inputs_table_c = copy.copy(inputs_table)                    
-#            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
             #dicti_2 = results2[device]
-            last_value = dicti_1['last_Value']            
+                       
             # Filtern, wenn groesser oder kleiner Messung ignorieren
-            filtering = dicti_1['Filter']
-            hks = dicti_1['HKS']
+#            filtering = dicti_1['Filter']
+            filtering = trigger_0.Filter
+#            hks = dicti_1['HKS']
+            hks = trigger_0.HKS
             # könnte fallingback auch vorher definieren
-            if fallingback and dicti_1['fallback'] is not None:
-                value = float(dicti_1['fallback'])
+#            if fallingback and dicti_1['fallback'] is not None:
+            if fallingback and trigger_0.fallback is not None:
+#                value = float(dicti_1['fallback'])
+                value = float(trigger_0.fallback)
             try:
                 filtering = eval(filtering)
             except:
@@ -1231,14 +1168,37 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                     filtered = True
                     
             if not filtered:        
-                valid = dicti_1['valid']
-                heartbt = dicti_1['heartbeat']
-                desc = dicti_1['Description']
-                komp = dicti_1['Kompression']
-                hyst = dicti_1['Hysterese']
-                recSzn = dicti_1['RecoverSzn']
-                offset = dicti_1['offset']
+#                valid =   dicti_1['valid']
+#                heartbt = dicti_1['heartbeat']
+#                desc =    dicti_1['Description']
+#                komp =    dicti_1['Kompression']
+#                hyst =    dicti_1['Hysterese']
+#                recSzn =  dicti_1['RecoverSzn']
+#                offset =  dicti_1['offset']
+#                last1 =   dicti_1['last1']
+#                debounce = dicti_1['debounce']
+                
+                valid =   trigger_0.valid
+                heartbt = trigger_0.heartbeat
+                desc =    trigger_0.Description
+                komp =    trigger_0.Kompression
+                hyst =    trigger_0.Hysterese
+                recSzn =  trigger_0.RecoverSzn
+                offset =  trigger_0.offset
+                last1 =   trigger_0.last1
+#                last1 =   datetime.datetime.strptime(trigger_0.last1, '%Y-%m-%dT%H:%M:%S.%f')
+                debounce = trigger_0.debounce
+                if type(debounce) == str and len(debounce) == 0:
+                    debounce = 0
+                if debounce:
+                    debounce = int(debounce)
+                
+#                if trigger_0.Name == 'TiFo.6QGwm1.vYN.a0b1':
+#                    print(value, last_value, komp)
+                
                 if str(offset) != 'None':
+                    if type(offset) == str and len(offset) == 0:
+                        offset = 0
                     offset = float(offset)
                     value = float(value) + offset
                 if heartbt and str(valid) == "False" and not fallingback:
@@ -1261,10 +1221,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         writeToInflx = False
                 if not last_time:
                     try:
-                        last_time = dicti_1['last1']
+                        last_time = last1
                     except:
                         last_time = ct - datetime.timedelta(hours=1)
-                debounce = dicti_1['debounce']
                 if str(last_time) == 'None': last_time = ct - datetime.timedelta(hours=1)
                 if debounce is None:
                     db_time = ct
@@ -1284,24 +1243,25 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         print(value, last_value, device)
                 else:
                     gradient = float(value) - float(last_value)
-                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
+#                sql = 'UPDATE '+constants.sql_tables.inputs.name+' SET Gradient = "'+str(gradient)+'" WHERE Name = "' + str(device) +'"'
     #            cur.execute(sql)
     
-                sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
+#                sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' WHERE Name = "' + str(device) +'"'
                 value = str(value)
 #                sql2 = ' AND ((Value_lt > "' + value + '" OR Value_lt is NULL )'
 #                sql2 = sql2 + ' AND (Value_eq = "' + value  + '" OR Value_eq is NULL )'
 #                sql2 = sql2 + ' AND (Value_gt < "' + value  + '" OR Value_gt is NULL )'
     #            sql2 = sql2 + ' AND (Gradient_lt > "' + str(gradient) + '" OR Gradient_lt is NULL )'
     #            sql2 = sql2 + ' AND (Gradient_gt < "' + str(gradient) + '" OR Gradient_gt is NULL )'
-                sql2 =  ' AND (enabled = "True" OR enabled is NULL)'
-                sql2 = sql2 + ';'
+#                sql2 =  ' AND (enabled = "True" OR enabled is NULL)'
+#                sql2 = sql2 + ';'
 #                print(sql2)
-                cur.execute(sql + sql2)
-                results = cur.fetchall()
-                field_names = [i[0] for i in cur.description]
+#                cur.execute(sql + sql2)
+#                results = cur.fetchall()
+#                field_names = [i[0] for i in cur.description]
 
-                for row in results:
+#                for row in results:
+                for trigger in results2:
                     szenen = []
                     latchMerker = False
                     payloads = []
@@ -1311,25 +1271,29 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                     latched = None                    
                     
                     single = True
-                    dicti = {}
-                    for i in range (0,len(row)):
-                        dicti[field_names[i]] = row[i]
+#                    dicti = {}
+#                    for i in range (0,len(row)):
+#                        dicti[field_names[i]] = row[i]
+                    
+                    dicti = trigger.get_as_dict()
+                    if trigger.debug:
+                        print(dicti)
                         
                     descri = dicti.get("Status")
                     if descri is None:
                         descri = ''                        
                         
                     doppelklick = dicti.get("Doppelklick")
-                    if ct >= db_time:
+                    if ct >= db_time and trigger.enabled and str(trigger.enabled) == "True":
                         # Hysteres einberechnen
                         lt = None
-                        if dicti['Value_lt'] is not None:
+                        if dicti['Value_lt'] and dicti['Value_lt'] != '':
                             lt = float(re_calc(dicti['Value_lt']))
                             if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
                                 lt = lt + float(hyst)
                         gt = None
 #                        print('value_gt', dicti['Value_gt'])
-                        if dicti['Value_gt'] is not None:
+                        if dicti['Value_gt'] and dicti['Value_gt'] != '':
                             gt = float(re_calc(dicti['Value_gt']))
 #                            print('value_gt', gt)
                             if hyst is not None and str(dicti.get('latching')) == "True" and str(dicti.get('latched')) == "True":
@@ -1338,22 +1302,23 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         append = True
                         if (lt is not None and lt <= float(value)):
                             append = False
-                        if (dicti['Value_eq'] is not None and float(re_calc(dicti['Value_eq'])) != float(value)):
+                        if (dicti['Value_eq'] and dicti['Value_eq'] != '' and float(re_calc(dicti['Value_eq'])) != float(value)):
                             append = False
 #                        print('value_gt_1', gt)                             
                         if (gt is not None and gt >= float(value)):
                             append = False
 #                        print('append', append)
                         # Gradient
-                        if (dicti['Gradient_lt'] is not None and float(re_calc(dicti['Gradient_lt'])) <= gradient):
-                            append = False
+#                        if (dicti['Gradient_lt'] is not None and float(re_calc(dicti['Gradient_lt'])) <= gradient):
+#                            append = False
 #                        if (dicti['Gradient_eq'] is not None and float(re_calc(dicti['Gradient_eq'])) != gradient):
 #                            append = False
-                        if (dicti['Gradient_gt'] is not None and float(re_calc(dicti['Gradient_gt'])) >= gradient):
-                            append = False
+#                        if (dicti['Gradient_gt'] is not None and float(re_calc(dicti['Gradient_gt'])) >= gradient):
+#                            append = False
                         if append and persTimer and dicti.get('violTime') is None: 
                             # Bedingungen sind erfüllt aber die Funktion wurde getimed ausgelöst, Peristtime, aber in der Zwischenzeit wurde schon resettiert
                             append = False
+                            return None
                         if str(dicti.get("last2")) != "None" and append:
                             if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                                 if dicti.get("Dreifach") is not None:
@@ -1378,20 +1343,22 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                             kondition.append(desc + " " + descri)
                         #if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                         if append and (dicti.get('violTime') is None or dicti.get('persistance') is None): # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
-                            violTime = str(ct)
+                            violTime = ct
                             # hier können wir dann den timer starten, oder besser dort wo wir auch wissen, das pesistence gibt
                         if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
-                            violTime = 'NULL'
+                            violTime = None
                         if append:
                             latchMerker = True
                         if append and dicti.get('persistance') is not None:  # wir hätten was auszufühern aber persistence ist grösser null
+                            if type(dicti.get('persistance')) == str and len(dicti.get('persistance')) == 0:
+                                dicti['persistance'] = 0
                             if dicti.get('violTime') is not None:  # Zeit der ersten Bedinungsverletzung ist eingetragen
-                                if ct - dicti.get("violTime") < datetime.timedelta(seconds=dicti.get('persistance')): # persistence zeit ist noch nicht abgelaufen
+                                if ct - dicti.get("violTime") < datetime.timedelta(seconds=int(dicti.get('persistance'))): # persistence zeit ist noch nicht abgelaufen
                                     szenen = []
                                     payloads = []
                                     kondition = []
                                     latchMerker = False
-                            if dicti.get('violTime') is None and datetime.timedelta(seconds=dicti.get('persistance')) > datetime.timedelta(seconds=0):
+                            if dicti.get('violTime') is None and datetime.timedelta(seconds=int(dicti.get('persistance'))) > datetime.timedelta(seconds=0):
                                 # bedingung wurde jetzt gerade erfüllt, aber wir müssen persistence abwarten
                                 szenen = []
                                 payloads = []
@@ -1415,38 +1382,46 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                                 kondition = []
                             elif latchMerker and str(dicti.get('latched')) != "True": 
 #                                print(szenen)
-                                latched = 'True'
+                                latched = True
 #                        print(lt,gt,latched)
                         # falls bedinungen erfüllt die Zeiten anpassen:
-                        lasttimes = ""
-                        # debug
+#                        lasttimes = ""
+                        if trigger.debug:
+                            print(append)                        
+                        elem = InputsDatabase.get_element_by_id(dicti.get('Id'))
                         if append:
-                            if str(dicti.get("last1")) != "None":
-                                lasttimes = ', last2 = "%s", last1 = "%s"' % (dicti.get("last1"), ct)
-                            else:
-                                lasttimes = ', last1 = "%s"' % (ct)
+                            if elem:
+                                elem.last2= elem.last1
+                                elem.last1 = ct
+#                            if str(dicti.get("last1")) != "None":
+#                                lasttimes = ', last2 = "%s", last1 = "%s"' % (dicti.get("last1"), ct)
+#                            else:
+#                                lasttimes = ', last1 = "%s"' % (ct)
 #                        if device == 'Wetter/RegenWarnung':
 #                            print(value)
 #                            print('UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id')))
-#                            print(violTime is not None and latched is not None)                                
-                        if violTime is not None and latched is not None: # 
-                            sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
-                            writeToCursor(cur, sql)
-         # ACHTUNG musste wie die nächste Zeile sein:                   
-                            #inputs_table[dicti['Id']]['violTime'] = violTime
-#                            results2[0][dicti['Id']]['violTime'] = violTime
-#                            cur.execute(sql)
-                        elif violTime is not None and latched is None:  
-                            sql = 'UPDATE %s SET violTime = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, dicti.get('Id'))
-                            writeToCursor(cur, sql)
-#                            cur.execute(sql)   
-                        elif violTime is None and latched is not None:
-                            sql = 'UPDATE %s SET latched = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, lasttimes, dicti.get('Id'))
-                            writeToCursor(cur, sql)                            
-#                            cur.execute(sql) 
-                        elem = InputsDB.get_element_by_id(dicti.get('Id'))
+#                            print(violTime is not None and latched is not None) 
                         if elem:
-                            elem.latched = latched
+                            elem.violTime = violTime 
+                            if latched:
+                                elem.latched  = latched
+#                        if violTime is not None and latched is not None: # 
+##                            sql = 'UPDATE %s SET violTime = "%s"%s, latched = "%s" WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, latched, dicti.get('Id'))
+##                            writeToCursor(cur, sql)
+#                            if elem:
+#                                elem.latched  = latched
+#                                elem.violTime = violTime
+#                        elif violTime is not None and latched is None:  
+##                            sql = 'UPDATE %s SET violTime = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, violTime, lasttimes, dicti.get('Id'))
+##                            writeToCursor(cur, sql)
+#                            if elem:
+#                                elem.violTime = violTime
+#                        elif violTime is None and latched is not None:
+##                            sql = 'UPDATE %s SET latched = "%s"%s WHERE Id = "%s"' % (constants.sql_tables.inputs.name, latched, lasttimes, dicti.get('Id'))
+##                            writeToCursor(cur, sql)                            
+#                            if elem:
+#                                elem.latched  = latched
+
                     alle_szenen += szenen       
                     alle_payloads += payloads
                     descriptions += kondition                     
@@ -1456,30 +1431,12 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Setting = 'True'")
 #                if cur.fetchone()[0] > 0:
 #                    setting_s(hks, value)
-                writeToCursor(cur,"SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-#                cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
-                if cur.fetchone()[0] > 0 and str(hks) != str(device) and writeToInflx and not persTimer:
-#                    try:
-#                        insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-#                        cur.execute(insertstatement)
-#                    except:
-#                        try:
-#                            ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(8,3)" % (constants.sql_tables.his_inputs.name, hks)
-#                            cur.execute(ist)
-#                            insertstatement = 'INSERT INTO %s (%s, Date) VALUES(%s, NOW())' % (constants.sql_tables.his_inputs.name, hks, value)
-#                            cur.execute(insertstatement)
-#                        except:
-#                            pass
+                
+#                writeToCursor(cur,"SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"' AND Logging = 'True'")
+#                if cur.fetchone()[0] > 0 and str(hks) != str(device) and writeToInflx and not persTimer:
+                if results2 and results2[0].Logging and str(hks) != str(device) and writeToInflx and not persTimer:
                     thread_inflx = Timer(0, writeInfluxDb, [hks, value, utc])
                     thread_inflx.start()
-#                            print(insertstatement)
-    
-    #                insertstatement = 'INSERT INTO '+constants.sql_tables.his_inputs.name+'(Name, Value, Date) VALUES("' + str(hks) + '",' + str(value) + ', NOW())'
-    #                ist = "SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND table_schema = '%s' AND column_name = '%s'" % (constants.sql_tables.his_inputs.name, datab, hks)
-    #                cur.execute(ist)
-    #                if not cur.fetchall():
-    #                    ist = "ALTER TABLE `%s` ADD `%s` DECIMAL(5,2)" % (constants.sql_tables.his_inputs.name, hks)
-    #                    cur.execute(ist)
     
     
                 if str(hks) != str(device) and add_to_mqtt:
@@ -1487,30 +1444,26 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                     mqtt_pub("Inputs/" + str(hks), data)
                     mqtt_pub("Inputs/HKS/" + str(hks), data)
         if not filtered and not persTimer:
-            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s", time = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, ct, device)
+#            sql = 'UPDATE %s SET valid = "%s", last_Value = "%s", time = "%s" WHERE Name = "%s" AND (enabled = "True" OR enabled is NULL)' % (constants.sql_tables.inputs.name, not fallingback, value, ct, device)
 #            thread_sql = Timer(1, sendSql, [sql])
-            retrycount = 3
-            counter = 1
-            while counter <= retrycount:
-                try:
-                    cur.execute(sql)
-                    counter = retrycount + 1
-                except:
-                    time.sleep(.1)
-                    counter += 1
-                    if counter == 4:
-                        print('could not write to DB')            
+#            retrycount = 3
+#            counter = 1
+#            while counter <= retrycount:
+#                try:
+#                    cur.execute(sql)
+#                    counter = retrycount + 1
+#                except:
+#                    time.sleep(.1)
+#                    counter += 1
+#                    if counter == 4:
+#                        print('could not write to DB')            
 #            thread_sql.start()
             prozessspiegel[hks] = value
 #            results2 = [item for key, item in inputs_table_c.items() if item['Name'] == device]
-            results2 = InputsDB.get_elements_by_name(device)
-            for item in results2:
-                item.last_Value = value
-                item.time       = ct
         if heartbt and not fallingback and not persTimer:
             if hks in validTimers:
                 validTimers[hks]['timer'].cancel()
-            entry = {'hks' : hks, 'desc' : desc, 'device':device, 'fallback':dicti_1['fallback']}
+            entry = {'hks' : hks, 'desc' : desc, 'device':device, 'fallback':trigger_0.fallback}
             entry['due'] = datetime.datetime.now() + datetime.timedelta(0,int(heartbt))
             thread_pt_ = Timer(int(heartbt), invalidTimers, [hks, desc])
             thread_pt_.start()
@@ -1527,8 +1480,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
             toolbox.communication.send_message(payload, typ='ExecSzene')
     return alle_szenen, descriptions, heartbt, alle_payloads
 
-
-read_inputs_to_inputs_table()
+#print(read_inputs_to_inputs_table())
+print('baue')
+InputsDatabase.build(read_inputs_to_inputs_table())
 
 def apptask():
     app.run(host='0.0.0.0', port=4444)
@@ -1541,5 +1495,5 @@ def main():
     
 #    with open('inputs_table.jsn', 'w') as fout:
 #        json.dump(InputsDB.get_as_list(), fout, default=json_serial) 
-    InputsDB.save_to_file()
+    InputsDatabase.save_to_file()
     print("table written")

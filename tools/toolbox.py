@@ -150,8 +150,11 @@ def sleep(interval):
 
 def restart():
     constants.run = False
-    exectext = "sudo svc -du /etc/service/steuerzentrale"
-    os.system(exectext)    
+#    exectext = "sudo svc -du /etc/service/steuerzentrale"
+    exectext = "sudo systemctl enable steuerzentrale"
+    os.system(exectext)  
+    exectext = "sudo systemctl restart steuerzentrale"
+    os.system(exectext)     
     exectext = "sudo killall python3"
     os.system(exectext)
     sys.exit()    

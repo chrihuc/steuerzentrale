@@ -3,6 +3,9 @@
 Created on Mon Feb 22 18:43:14 2016
 
 @author: christoph
+
+veraltet!!!!!!
+
 """
 
 import threading

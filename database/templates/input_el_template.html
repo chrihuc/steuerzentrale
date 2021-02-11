@@ -2,18 +2,154 @@
 
 <form method="POST" action={{ url_for('flask_link', Id=Id) }}>
     {{ form.csrf_token }}
-    <br>{{ form.Name.label(size=10) }}                 {{ form.Name(size=10) }}       </br>
-    <p> {{ form.HKS.label }}        </p> <p>  {{ form.HKS(size=20) }}        </p>
-    <p> {{ form.Description.label }}</p> <p>  {{ form.Description(size=20) }}
-        {{ form.Status.label }}               {{ form.Status(size=20) }}     </p>
-    <p> {{ form.Logging.label }}    </p> <p>  {{ form.Logging(size=20) }}    </p>
-    <p> {{ form.Doppelklick.label }}</p> <p>  {{ form.Doppelklick(size=20) }}</p>
-    <p> {{ form.last1.label }}      </p> <p>  {{ form.last1(size=20) }}      </p>
-    <p> {{ form.Filter.label }}     </p> <p>  {{ form.Filter(size=20) }}     </p>
-    <p> {{ form.offset.label }}     </p> <p>  {{ form.offset(size=20) }}     </p>
-    <p> {{ form.debounce.label }}   </p> <p>  {{ form.debounce(size=20) }}   </p>
-    <p> {{ form.heartbeat.label }}  </p> <p>  {{ form.heartbeat(size=20) }}  </p>
-    <p> {{ form.latching.label }}   </p> <p>  {{ form.latching(size=20) }}   </p>
-    <p> {{ form.persistance.label(size=20) }}</p> <p>  {{ form.persistance(size=20) }}</p>
+    
+   <table>
+    <tr>
+      <td align="right">{{ form.Name.label }} :</td>
+      <td align="left">{{ form.Name(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.HKS.label }}:</td>
+      <td align="left">{{ form.HKS(size=20) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Description.label }}:</td>
+      <td align="left">{{ form.Description(size=20) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Status.label }}:</td>
+      <td align="left">{{ form.Status(size=20) }}</td>
+    </tr>    
+    <tr>
+      <td align="right">{{ form.Logging.label }}:</td>
+      <td align="left">{{ form.Logging(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Doppelklick.label }}:</td>
+      <td align="left">{{ form.Doppelklick(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.last1.label }}:</td>
+      <td align="left">{{ form.last1(size=20) }}</td>
+    </tr>    
+    <tr>
+      <td align="right">{{ form.Filter.label }}:</td>
+      <td align="left">{{ form.Filter(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.offset.label }}:</td>
+      <td align="left">{{ form.offset(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.debounce.label }}:</td>
+      <td align="left">{{ form.debounce(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.heartbeat.label }}:</td>
+      <td align="left">{{ form.heartbeat(size=20) }}</td>
+    </tr>   
+    <tr>
+      <td align="right">{{ form.latching.label }}:</td>
+      <td align="left">{{ form.latching(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.persistance.label }}:</td>
+      <td align="left">{{ form.persistance(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Kompression.label }}:</td>
+      <td align="left">{{ form.Kompression(size=20) }}</td>
+    </tr>    
+    <tr>
+      <td align="right">{{ form.enabled.label }}:</td>
+      <td align="left">{{ form.enabled(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Value_lt.label }}:</td>
+      <td align="left">{{ form.Value_lt(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Value_eq.label }}:</td>
+      <td align="left">{{ form.Value_eq(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Value_gt.label }}:</td>
+      <td align="left">{{ form.Value_gt(size=20) }}</td>
+    </tr>                           
+
+    <tr>
+      <td align="right">{{ form.Hysterese.label }}:</td>
+      <td align="left">{{ form.Hysterese(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Immer.label }}:</td>
+      <td align="left">{{ form.Immer(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.ResetSzene.label }}:</td>
+      <td align="left">{{ form.ResetSzene(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Wach.label }}:</td>
+      <td align="left">{{ form.Wach(size=20) }}</td>
+    </tr>   
+    <tr>
+      <td align="right">{{ form.Wecken.label }}:</td>
+      <td align="left">{{ form.Wecken(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Schlafen.label }}:</td>
+      <td align="left">{{ form.Schlafen(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Schlummern.label }}:</td>
+      <td align="left">{{ form.Schlummern(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Leise.label }}:</td>
+      <td align="left">{{ form.Leise(size=20) }}</td>
+    </tr>    
+    <tr>
+      <td align="right">{{ form.AmGehen.label }}:</td>
+      <td align="left">{{ form.AmGehen(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Gegangen.label }}:</td>
+      <td align="left">{{ form.Gegangen(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Abwesend.label }}:</td>
+      <td align="left">{{ form.Abwesend(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Urlaub.label }}:</td>
+      <td align="left">{{ form.Urlaub(size=20) }}</td>
+    </tr>    
+    <tr>
+      <td align="right">{{ form.Besuch.label }}:</td>
+      <td align="left">{{ form.Besuch(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Doppel.label }}:</td>
+      <td align="left">{{ form.Doppel(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Dreifach.label }}:</td>
+      <td align="left">{{ form.Dreifach(size=20) }}</td>
+    </tr>   
+    <tr>
+      <td align="right">{{ form.Alarm.label }}:</td>
+      <td align="left">{{ form.Alarm(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Payload.label }}:</td>
+      <td align="left">{{ form.Payload(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.debug.label }}:</td>
+      <td align="left">{{ form.debug(size=20) }}</td>
+    </tr>               
+  </table>
+  
     <input type="submit" value="Go">
 </form>

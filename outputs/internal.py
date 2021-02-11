@@ -46,6 +46,8 @@ def broadcast_input_value(Name, Value):
 def check_ext_ip(notify=True):
     try:
         ip = requests.get('https://api.ipify.org').text
+        if len(ip) > len("255.255.255.255"):
+            return
         broadcast_input_value("Internal.CheckExtIp", 1)
         if ip != constants.ext_IP or notify:
             constants.ext_IP = ip

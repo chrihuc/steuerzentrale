@@ -77,7 +77,8 @@ def on_receive(data):
         ezcontrol.SetSwitchFunction("heartbeat", "1")
     else:
 #        szenen.Szenen.trigger_scenes(name, value)
-        broadcast_input_value(name, value)
+        if msqc.setting_r("XS1_enabled") == 'True':
+            broadcast_input_value(name, value)
 #    szns, desc = msqc.inputs(name,value)
 #    for szene in szns:
 #        if szene <> None:

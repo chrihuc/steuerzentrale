@@ -67,6 +67,7 @@ try:
     t = toolbox.OwnTimer(0, function=msqc.main, args = [], name="msqc")
     threadliste.append(t)
     t.start()    
+    print('database connector started')
 except Exception as e:
     print('database connector not started')    
     print(e)
@@ -79,15 +80,15 @@ except Exception as e:
     print(e)
     aes.new_event(description="szenen not started", prio=9)
 
-try:
-    from inputs import xs1
-    t = toolbox.OwnTimer(0, function=xs1.main, args = [], name="xs1")
-    threadliste.append(t)
-    t.start()
-except Exception as e:
-    print('xs1 not started')    
-    print(e)
-    aes.new_event(description="xs1 not started", prio=9)
+#try:
+#    from inputs import xs1
+#    t = toolbox.OwnTimer(0, function=xs1.main, args = [], name="xs1")
+#    threadliste.append(t)
+#    t.start()
+#except Exception as e:
+#    print('xs1 not started')    
+#    print(e)
+#    aes.new_event(description="xs1 not started", prio=9)
 
 try:    
     from tifo import tf_connection
