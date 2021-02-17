@@ -1,0 +1,78 @@
+<form method="POST" action={{ url_for('edit_szn', Id=Id) }}>
+    {{ form.csrf_token }}
+    
+   <table>
+    <tr>
+      <td align="right">{{ form.Name.label }} :</td>
+      <td align="left">{{ form.Name(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Prio.label }} :</td>
+      <td align="left">{{ form.Prio(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.MQTTChannel.label }} :</td>
+      <td align="left">{{ form.MQTTChannel(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Beschreibung.label }} :</td>
+      <td align="left">{{ form.Beschreibung(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Durchsage.label }} :</td>
+      <td align="left">{{ form.Durchsage(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Karenz.label }} :</td>
+      <td align="left">{{ form.Karenz(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Latching.label }} :</td>
+      <td align="left">{{ form.Latching(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Gruppe.label }} :</td>
+      <td align="left">{{ form.Gruppe(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Setting.label }} :</td>
+      <td align="left">{{ form.Setting(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Delay.label }} :</td>
+      <td align="left">{{ form.Delay(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Follows.label }} :</td>
+      <td align="left">{{ form.Follows(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Cancels.label }} :</td>
+      <td align="left">{{ form.Cancels(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Bedingung.label }} :</td>
+      <td align="left">{{ form.Bedingung(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.AutoMode.label }} :</td>
+      <td align="left">{{ form.AutoMode(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.intCmd.label }} :</td>
+      <td align="left">{{ form.intCmd(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.LastUsed.label }} :</td>
+      <td align="left">{{ form.LastUsed(size=20) }} </td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Enabled.label }} :</td>
+      <td align="left">{{ form.Enabled(size=20) }} </td>
+      <td align="right">{{ form.Enabled.label }} :</td>
+      <td align="left">{{ form.Enabled(size=20) }} </td>      
+    </tr>    
+            
+             
+    <input type="submit" value="Go">
+</form>    

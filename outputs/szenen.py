@@ -52,6 +52,7 @@ hues = hue.Hue_lights()
 tv = samsung.TV()
 sat = satellites.Satellite()
 interna = internal.Internal()
+xs1_devs = msqc.SzenenDatabase.akt_type_dict('XS1')
 xs1_devs = msqc.tables.akt_type_dict['XS1']
 hue_devs = msqc.tables.akt_type_dict['HUE']
 sns_devs = msqc.tables.akt_type_dict['SONOS']
@@ -368,6 +369,13 @@ class Szenen(object):
                 t.start()
                 if eval(msqc.setting_r('CPUcontrol')):
                     return False
+        szenen = msqc.SzenenDatabase.get_elements_by_name(szene)
+        if szenen:
+            if len(szenen) > 1:
+                print('Multiple Szenen mit Name ', szene)
+            szene_dict = szenen[0].get_as_dict()
+            if szene_dict['debug']:
+                print(szene_dict)
         szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung
@@ -467,6 +475,7 @@ class Szenen(object):
                     payload = {'Setting':str(kommando), 'Value':value}
                     toolbox.communication.send_message(payload, typ='Setting')
             msqc.mdb_set_table(table=constants.sql_tables.szenen.name, device=szene, commands={'LastUsed':start_t})
+            szenen[0].LastUsed = start_t
         elif False:
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 aes.new_event(description="Szene nicht erfuellt: " + szene, prio=1, karenz = Karenz)

@@ -143,9 +143,8 @@ class MqttClient:
                     if 'uuid' in m_in.keys():
                         aes.alarm_liste.delAlarm(m_in['uuid'])
                 elif 'BdqOk' in msg.topic:
-                    if 'bdq' in m_in.keys():
-                        commands = {'valid': 'True'}                    
-                        msqc.mdb_set_table(constants.sql_tables.inputs.name, m_in['bdq'], commands, primary='Description')                         
+                    if 'bdq' in m_in.keys():                   
+                        msqc.ack_bdq(m_in['bdq'])                         
                 elif 'AlarmListClear' in msg.topic:
                     aes.alarm_liste.clear()                        
                 elif 'SetWecker' in msg.topic:

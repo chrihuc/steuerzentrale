@@ -22,11 +22,11 @@
     </tr>    
     <tr>
       <td align="right">{{ form.Logging.label }}:</td>
-      <td align="left">{{ form.Logging(size=20) }}</td>
+      <td align="left">{{ form.Logging }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Doppelklick.label }}:</td>
-      <td align="left">{{ form.Doppelklick(size=20) }}</td>
+      <td align="left">{{ form.Doppelklick }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.last1.label }}:</td>
@@ -49,6 +49,10 @@
       <td align="left">{{ form.heartbeat(size=20) }}</td>
     </tr>   
     <tr>
+      <td align="right">{{ form.fallback.label }}:</td>
+      <td align="left">{{ form.fallback(size=20) }}</td>
+    </tr>     
+    <tr>
       <td align="right">{{ form.latching.label }}:</td>
       <td align="left">{{ form.latching(size=20) }}</td>
     </tr>  
@@ -62,7 +66,7 @@
     </tr>    
     <tr>
       <td align="right">{{ form.enabled.label }}:</td>
-      <td align="left">{{ form.enabled(size=20) }}</td>
+      <td align="left">{{ form.enabled }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Value_lt.label }}:</td>
@@ -83,63 +87,75 @@
     </tr>  
     <tr>
       <td align="right">{{ form.Immer.label }}:</td>
-      <td align="left">{{ form.Immer(size=20) }}</td>
+      <td align="left">{{ form.Immer }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.ResetSzene.label }}:</td>
-      <td align="left">{{ form.ResetSzene(size=20) }}</td>
+      <td align="left">{{ form.ResetSzene }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Wach.label }}:</td>
-      <td align="left">{{ form.Wach(size=20) }}</td>
+      <td align="left">{{ form.Wach }}</td>
     </tr>   
     <tr>
       <td align="right">{{ form.Wecken.label }}:</td>
-      <td align="left">{{ form.Wecken(size=20) }}</td>
+      <td align="left">{{ form.Wecken}}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Schlafen.label }}:</td>
-      <td align="left">{{ form.Schlafen(size=20) }}</td>
+      <td align="left">{{ form.Schlafen}}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Schlummern.label }}:</td>
-      <td align="left">{{ form.Schlummern(size=20) }}</td>
+      <td align="left">{{ form.Schlummern }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Leise.label }}:</td>
-      <td align="left">{{ form.Leise(size=20) }}</td>
+      <td align="left">{{ form.Leise}}</td>
     </tr>    
     <tr>
       <td align="right">{{ form.AmGehen.label }}:</td>
-      <td align="left">{{ form.AmGehen(size=20) }}</td>
+      <td align="left">{{ form.AmGehen }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Gegangen.label }}:</td>
-      <td align="left">{{ form.Gegangen(size=20) }}</td>
+      <td align="left">{{ form.Gegangen}}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Abwesend.label }}:</td>
-      <td align="left">{{ form.Abwesend(size=20) }}</td>
+      <td align="left">{{ form.Abwesend }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Urlaub.label }}:</td>
-      <td align="left">{{ form.Urlaub(size=20) }}</td>
+      <td align="left">{{ form.Urlaub }}</td>
     </tr>    
     <tr>
       <td align="right">{{ form.Besuch.label }}:</td>
-      <td align="left">{{ form.Besuch(size=20) }}</td>
+      <td align="left">{{ form.Besuch }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Doppel.label }}:</td>
-      <td align="left">{{ form.Doppel(size=20) }}</td>
+      <td align="left">{{ form.Doppel }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Dreifach.label }}:</td>
-      <td align="left">{{ form.Dreifach(size=20) }}</td>
+      <td align="left">{{ form.Dreifach }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ form.Sturm_anz.label }}:</td>
+      <td align="left">{{ form.Sturm_anz(size=20) }}</td>
+    </tr>  
+    <tr>
+      <td align="right">{{ form.Sturm_dauer.label }}:</td>
+      <td align="left">{{ form.Sturm_dauer(size=20) }}</td>
     </tr>   
     <tr>
+      <td align="right">{{ form.Sturm.label }}:</td>
+      <td align="left">{{ form.Sturm }}</td>
+    </tr>                
+    <tr>
       <td align="right">{{ form.Alarm.label }}:</td>
-      <td align="left">{{ form.Alarm(size=20) }}</td>
+      <td align="left">{{ form.Alarm }}</td>
     </tr>  
     <tr>
       <td align="right">{{ form.Payload.label }}:</td>
@@ -147,7 +163,7 @@
     </tr>  
     <tr>
       <td align="right">{{ form.debug.label }}:</td>
-      <td align="left">{{ form.debug(size=20) }}</td>
+      <td align="left">{{ form.debug(maxlength=20) }}</td>
     </tr>               
   </table>
   
