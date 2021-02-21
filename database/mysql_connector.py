@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pandas as pd
+import glob
 
 import constants
 
@@ -113,12 +114,126 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'LastUsed':        (None, str)
                     ,'Enabled':         (None, str)
 
+                    ,'A00EIN1ADV1ST01':         (None, str)
+                    ,'A00EIN1GEN1LI01':         (None, str)
+                    ,'A00GAR1POW1DO01':         (None, str)
+                    ,'A00GAR1WAS1DO01':         (None, str)
+                    ,'A00GAR1WAS3DO01':         (None, str)
+                    ,'A00GAR1WAS2DO01':         (None, str)
+                    ,'A00RAS1MAE1DO01':         (None, str)
+                    ,'A00TER1ADV1ST01':         (None, str)
+                    ,'A00TER1DEK1LI01':         (None, str)
+                    ,'A00TER1GEN1LI01':         (None, str)
+                    ,'A00TER1GEN1PO01':         (None, str)
+                    ,'A00TER1GEN1ST01':         (None, str)
+                    ,'V00ESS1DEK1LI01':         (None, str)
+                    ,'V00ESS1RUM1LI01':         (None, str)
+                    ,'V00ESS1OUT1PO01':         (None, str)
+                    ,'V00FLU1DEK1LI01':         (None, str)
+                    ,'V00FLU1SRA1LI01':         (None, str)
+                    ,'V00FLU1TUE1DO03':         (None, str)
+                    ,'V00FLU1TUE1DO03conf':     (None, str)
+                    ,'V00FLU1TUE1PC01':         (None, str)
+                    ,'V00KUE1ZIM1PO01':         (None, str)
+                    ,'V00KUE1ADV1LI01':         (None, str)
+                    ,'V00KUE1DEK1LI01':         (None, str)
+                    ,'V00KUE1DEK1LI02':         (None, str)
+                    ,'V00KUE1RUM1AV11':         (None, str)
+                    ,'V00KUE1RUM1LI01':         (None, str)
+                    ,'V00KUE1RUM1ST01':         (None, str)
+                    ,'V00KUE1RUM1TE01':         (None, str)
+                    ,'V00KUE1SRA1LI01':         (None, str)
+                    ,'V00TOI1DEK1LI01':         (None, str)
+                    ,'V00TRE1RUM1AL01':         (None, str)
+                    ,'V00TRE1RUM1AL02':         (None, str)
+                    ,'V00TRE1RUM1AL03':         (None, str)
+                    ,'V00TRE1RUM1LI01':         (None, str)
+                    ,'V00WOH1ADV1LI01':         (None, str)
+                    ,'V00WOH1ADV1LI02':         (None, str)
+                    ,'V00WOH1DEK1LI01':         (None, str)
+                    ,'V00WOH1RUM1AV01':         (None, str)
+                    ,'V00WOH1RUM1AV11':         (None, str)
+                    ,'V00WOH1RUM1DI01':         (None, str)
+                    ,'V00WOH1RUM1DO10':         (None, str)
+                    ,'V00WOH1RUM1LI11':         (None, str)
+                    ,'V00WOH1RUM1LI12':         (None, str)
+                    ,'V00WOH1RUM1LI13':         (None, str)
+                    ,'V00WOH1RUM1LI14':         (None, str)
+                    ,'V00WOH1RUM1PC01':         (None, str)
+                    ,'V00WOH1RUM1ST01':         (None, str)
+                    ,'V00WOH1RUM1ST02':         (None, str)
+                    ,'V00WOH1RUM1TV01':         (None, str)
+                    ,'V00WOH1SRA1LI01':         (None, str)
+                    ,'V00WOH1SRA1LI02':         (None, str)
+                    ,'V00WOH1SRA1LI03':         (None, str)
+                    ,'V00WOH1SRA1LI04':         (None, str)
+                    ,'V00WOH1SRA1LI11':         (None, str)
+                    ,'V00WOH1SRA1PC01':         (None, str)
+                    ,'V00WOH1STV01':            (None, str)
+                    ,'V00WOH1STV02':            (None, str)
+                    ,'V00WOH1TUR1LI01':         (None, str)
+                    ,'V00ZIM0RUM0DO01':         (None, str)
+                    ,'V00ZIM0RUM0DO02':         (None, str)
+                    ,'V01BAD1DEK1LI01':         (None, str)
+                    ,'V01BAD1DEK1LI02':         (None, str)
+                    ,'V01BAD1RUM1AV11':         (None, str)
+                    ,'V01BAD1RUM1LI02':         (None, str)
+                    ,'V01BUE1DEK1LI01':         (None, str)
+                    ,'V01BUE1STL1DO01':         (None, str)
+                    ,'V01FLU1DEK1LI01':         (None, str)
+                    ,'V01KID1DEK1LI01':         (None, str)
+                    ,'V01KID1RUM1AV11':         (None, str)
+                    ,'V01KID1RUM1LI02':         (None, str)
+                    ,'V01KID1ZIM1ST01':         (None, str)
+                    ,'V01KID1ZIM1ST02':         (None, str)
+                    ,'V01SCH1BET1LI01':         (None, str)
+                    ,'V01SCH1BET1LI02':         (None, str)
+                    ,'V01SCH1DEK1LI01':         (None, str)
+                    ,'V01SCH1RUM1AV11':         (None, str)
+                    ,'V01SCH1RUM1LI02':         (None, str)
+                    ,'V01SCH1RUM1LI10':         (None, str)
+                    ,'V01SCH1RUM1LI11':         (None, str)
+                    ,'V01SCH1STE1LI01':         (None, str)
+                    ,'V01SCH1STE1LI02':         (None, str)
+                    ,'V02BAD1DEK1LI01':         (None, str)
+                    ,'V02TRE1DEK1LI01':         (None, str)
+                    ,'V02ZIM1DEK1LI01':         (None, str)
+                    ,'V02ZIM1RUM1ST01':         (None, str)
+                    ,'VIRKOM1SSH1PC01':         (None, str)
+                    ,'VIRKOM1SSH1PC02':         (None, str)
+                    ,'VIRKOM1SSH1PC03':         (None, str)
+                    ,'VIRKOM1SSH1PC04':         (None, str)
+                    ,'VIRKOM1SSH1PC05':         (None, str)
+                    ,'Vm1FLU1DEK1LI01':         (None, str)
+                    ,'Vm1GAR1PAR1LI01':         (None, str)
+                    ,'Vm1GAR1TUR1DI01':         (None, str)
+                    ,'Vm1ZIM1DEK1LI01':         (None, str)
+                    ,'Vm1ZIM1PFL1DO01':         (None, str)
+                    ,'Vm1ZIM1PFL1LI01':         (None, str)
+                    ,'Vm1ZIM1RUM1AV11':         (None, str)
+                    ,'Vm1ZIM1RUM1DO01':         (None, str)
+                    ,'Vm1ZIM1RUM1ST01':         (None, str)
+                    ,'Vm1ZIM1RUT1PC01':         (None, str)
+                    ,'Vm1ZIM1SAT1LI01':         (None, str)
+                    ,'Vm1ZIM1SCA1DO01':         (None, str)
+                    ,'Vm1ZIM1SEV1PC01':         (None, str)
+                    ,'Vm1ZIM1TUR1DO10':         (None, str)
+                    ,'Vm1ZIM2DEK1LI01':         (None, str)
+                    ,'Vm1ZIM2NAT1DO01':         (None, str)
+                    ,'Vm1ZIM2TRO1DO01':         (None, str)
+                    ,'Vm1ZIM2WAS1DO01':         (None, str)
+                    ,'Vm1ZIM3DEK1LI01':         (None, str)
+                    ,'Vm1ZIM3RUM1ST01':         (None, str)
+                    ,'Vm1ZIM3STR1DO01':         (None, str)
+                    ,'V01KID1ZIM1LI01':         (None, str)
+                    ,'V01KID1UIM1LI02':         (None, str)
+
                     ,'debug':           (False, bool)                    
                     }
 
 InputsDatabase = DatabaseIntern(properties_iptDB, 'inputs_table.jsn')
 
-SzenenDatabase = DatabaseSzenen(properties_sznDB)
+SzenenDatabase = DatabaseSzenen(properties_sznDB, 'szenen_table.jsn')
 
 app = Flask(__name__)
 
@@ -145,7 +260,7 @@ class TriggerForm(FlaskForm):
     latching  = StringField('latching')
 #    violTime = StringField('violTime')
     persistance  = StringField('persistance')
-    Kompression  = StringField('Kompression')
+    Kompression  = SelectField('Kompression', choices =[(False,False),(True,True),('Bool','Bool')]) 
     enabled      = SelectField('enabled', choices =[(False,False),(True,True)]) 
 #    Immer          = StringField('Immer')
     Immer          = SelectField(u'Immer', choices = SzenenDatabase.get_all_names())
@@ -227,8 +342,20 @@ class SortableTableSzenen(Table):
     intCmd       = Col('intCmd')
     LastUsed     = Col('LastUsed')
     Enabled      = Col('Enabled')
-    link = LinkCol(
-        'Edit', 'edit_szn', url_kwargs=dict(Id='Id'), allow_sort=False)
+    editconf = LinkCol(
+        'Edit config', 'edit_szn', url_kwargs=dict(Id='Id'), allow_sort=False)
+    editug = LinkCol(
+        'Edit UG', 'edit_szn_ug', url_kwargs=dict(Id='Id'), allow_sort=False)    
+    editeg = LinkCol(
+        'Edit EG', 'edit_szn_eg', url_kwargs=dict(Id='Id'), allow_sort=False)    
+    editog = LinkCol(
+        'Edit OG', 'edit_szn_og', url_kwargs=dict(Id='Id'), allow_sort=False)   
+    editdg = LinkCol(
+        'Edit DG', 'edit_szn_dg', url_kwargs=dict(Id='Id'), allow_sort=False)   
+    edita = LinkCol(
+        'Edit Aussen', 'edit_szn_a', url_kwargs=dict(Id='Id'), allow_sort=False)       
+    new = LinkCol(
+        'Copy Szene', 'copy_szene', url_kwargs=dict(Id='Id')) 
 
     allow_sort = True
     def sort_url(self, col_key, reverse=False):
@@ -237,6 +364,75 @@ class SortableTableSzenen(Table):
         else:
             direction = 'asc'
         return url_for('index_szenen', sort=col_key, direction=direction)
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def read_inputs_to_inputs_table():
+#    global inputs_table
+    inputs_table = {}
+    success = False
+    file = 'inputs_table.jsn'
+    index = 0
+    files = glob.glob("./db_backup/inputs_table*" )
+    files.sort()
+    index = len(files)
+    print(files)
+    # neu
+    while not success:
+        try:
+            with open(file) as f:
+                inptsjsn = f.read()            
+            inputs_table = json.loads(inptsjsn)
+            print("inputs table loaded from file")
+            success = True
+        except Exception as e:
+            print("COULD NOT LOAD TABLE")
+            print(e)
+            index -= 1
+            if index >= 0:
+                file = files[index]
+            else:
+                raise Exception('Kein Backup', 'inputs')
+    return inputs_table
+    
+#kompletter table:
+def mdb_get_table(db):
+    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    rlist = []
+    with con:
+        cur = con.cursor()
+        sql = 'SELECT * FROM %s' % (db)
+        cur.execute(sql)
+        results = cur.fetchall()
+        field_names = [i[0] for i in cur.description]
+        for row in results:
+            dicti = {}
+            for i in range (0,len(row)):
+               dicti[field_names[i]] = row[i]
+            rlist.append(dicti)
+    con.close()
+    return rlist
+
+def read_szenen_to_inputs_table():
+#    global inputs_table
+    szenen_table = {}
+    # neu
+    try:
+        with open('szenen_table.jsn') as f:
+            sznsjsn = f.read()            
+        szenen_table = json.loads(sznsjsn)
+        print("szenen table loaded from file") 
+    except Exception as e:
+        print(e)
+        liste = mdb_get_table(constants.sql_tables.szenen.name)
+        for line in liste:
+            szenen_table[line['Id']] = line
+        print(szenen_table[120])
+    return szenen_table
+
+print('baue')
+InputsDatabase.build(read_inputs_to_inputs_table())
+SzenenDatabase.build(read_szenen_to_inputs_table())
 
 class SzenenForm(FlaskForm):
     Name         = StringField('Name')
@@ -257,6 +453,120 @@ class SzenenForm(FlaskForm):
     intCmd       = StringField('intCmd')
     LastUsed     = StringField('LastUsed')
     Enabled      = StringField('Enabled')
+
+    A00EIN1ADV1ST01        = StringField(SzenenDatabase.get_description('A00EIN1ADV1ST01')+': '+'A00EIN1ADV1ST01')      
+    A00EIN1GEN1LI01        = StringField(SzenenDatabase.get_description('A00EIN1GEN1LI01')+': '+'A00EIN1GEN1LI01')       
+    A00GAR1POW1DO01        = StringField(SzenenDatabase.get_description('A00GAR1POW1DO01')+': '+'A00GAR1POW1DO01')       
+    A00GAR1WAS1DO01        = StringField(SzenenDatabase.get_description('A00GAR1WAS1DO01')+': '+'A00GAR1WAS1DO01')       
+    A00GAR1WAS3DO01        = StringField(SzenenDatabase.get_description('A00GAR1WAS3DO01')+': '+'A00GAR1WAS3DO01')       
+    A00GAR1WAS2DO01        = StringField(SzenenDatabase.get_description('A00GAR1WAS2DO01')+': '+'A00GAR1WAS2DO01')       
+    A00RAS1MAE1DO01        = StringField(SzenenDatabase.get_description('A00RAS1MAE1DO01')+': '+'A00RAS1MAE1DO01')       
+    A00TER1ADV1ST01        = StringField(SzenenDatabase.get_description('A00TER1ADV1ST01')+': '+'A00TER1ADV1ST01')       
+    A00TER1DEK1LI01        = StringField(SzenenDatabase.get_description('A00TER1DEK1LI01')+': '+'A00TER1DEK1LI01')       
+    A00TER1GEN1LI01        = StringField(SzenenDatabase.get_description('A00TER1GEN1LI01')+': '+'A00TER1GEN1LI01')       
+    A00TER1GEN1PO01        = StringField(SzenenDatabase.get_description('A00TER1GEN1PO01')+': '+'A00TER1GEN1PO01')       
+    A00TER1GEN1ST01        = StringField(SzenenDatabase.get_description('A00TER1GEN1ST01')+': '+'A00TER1GEN1ST01')       
+    V00ESS1DEK1LI01        = StringField(SzenenDatabase.get_description('V00ESS1DEK1LI01')+': '+'V00ESS1DEK1LI01')       
+    V00ESS1RUM1LI01        = StringField(SzenenDatabase.get_description('V00ESS1RUM1LI01')+': '+'V00ESS1RUM1LI01')       
+    V00ESS1OUT1PO01        = StringField(SzenenDatabase.get_description('V00ESS1OUT1PO01')+': '+'V00ESS1OUT1PO01')       
+    V00FLU1DEK1LI01        = StringField(SzenenDatabase.get_description('V00FLU1DEK1LI01')+': '+'V00FLU1DEK1LI01')       
+    V00FLU1SRA1LI01        = StringField(SzenenDatabase.get_description('V00FLU1SRA1LI01')+': '+'V00FLU1SRA1LI01')       
+    V00FLU1TUE1DO03        = StringField(SzenenDatabase.get_description('V00FLU1TUE1DO03')+': '+'V00FLU1TUE1DO03')       
+    V00FLU1TUE1DO03conf    = StringField(SzenenDatabase.get_description('V00FLU1TUE1DO03conf')+': '+'V00FLU1TUE1DO03conf')   
+    V00FLU1TUE1PC01        = StringField(SzenenDatabase.get_description('V00FLU1TUE1PC01')+': '+'V00FLU1TUE1PC01')       
+    V00KUE1ZIM1PO01        = StringField(SzenenDatabase.get_description('V00KUE1ZIM1PO01')+': '+'V00KUE1ZIM1PO01')       
+    V00KUE1ADV1LI01        = StringField(SzenenDatabase.get_description('V00KUE1ADV1LI01')+': '+'V00KUE1ADV1LI01')       
+    V00KUE1DEK1LI01        = StringField(SzenenDatabase.get_description('V00KUE1DEK1LI01')+': '+'V00KUE1DEK1LI01')       
+    V00KUE1DEK1LI02        = StringField(SzenenDatabase.get_description('V00KUE1DEK1LI02')+': '+'V00KUE1DEK1LI02')       
+    V00KUE1RUM1AV11        = StringField(SzenenDatabase.get_description('V00KUE1RUM1AV11')+': '+'V00KUE1RUM1AV11')       
+    V00KUE1RUM1LI01        = StringField(SzenenDatabase.get_description('V00KUE1RUM1LI01')+': '+'V00KUE1RUM1LI01')       
+    V00KUE1RUM1ST01        = StringField(SzenenDatabase.get_description('V00KUE1RUM1ST01')+': '+'V00KUE1RUM1ST01')       
+    V00KUE1RUM1TE01        = StringField(SzenenDatabase.get_description('V00KUE1RUM1TE01')+': '+'V00KUE1RUM1TE01')       
+    V00KUE1SRA1LI01        = StringField(SzenenDatabase.get_description('V00KUE1SRA1LI01')+': '+'V00KUE1SRA1LI01')       
+    V00TOI1DEK1LI01        = StringField(SzenenDatabase.get_description('V00TOI1DEK1LI01')+': '+'V00TOI1DEK1LI01')       
+    V00TRE1RUM1AL01        = StringField(SzenenDatabase.get_description('V00TRE1RUM1AL01')+': '+'V00TRE1RUM1AL01')       
+    V00TRE1RUM1AL02        = StringField(SzenenDatabase.get_description('V00TRE1RUM1AL02')+': '+'V00TRE1RUM1AL02')       
+    V00TRE1RUM1AL03        = StringField(SzenenDatabase.get_description('V00TRE1RUM1AL03')+': '+'V00TRE1RUM1AL03')       
+    V00TRE1RUM1LI01        = StringField(SzenenDatabase.get_description('V00TRE1RUM1LI01')+': '+'V00TRE1RUM1LI01')       
+    V00WOH1ADV1LI01        = StringField(SzenenDatabase.get_description('V00WOH1ADV1LI01')+': '+'V00WOH1ADV1LI01')       
+    V00WOH1ADV1LI02        = StringField(SzenenDatabase.get_description('V00WOH1ADV1LI02')+': '+'V00WOH1ADV1LI02')       
+    V00WOH1DEK1LI01        = StringField(SzenenDatabase.get_description('V00WOH1DEK1LI01')+': '+'V00WOH1DEK1LI01')       
+    V00WOH1RUM1AV01        = StringField(SzenenDatabase.get_description('V00WOH1RUM1AV01')+': '+'V00WOH1RUM1AV01')       
+    V00WOH1RUM1AV11        = StringField(SzenenDatabase.get_description('V00WOH1RUM1AV11')+': '+'V00WOH1RUM1AV11')       
+    V00WOH1RUM1DI01        = StringField(SzenenDatabase.get_description('V00WOH1RUM1DI01')+': '+'V00WOH1RUM1DI01')       
+    V00WOH1RUM1DO10        = StringField(SzenenDatabase.get_description('V00WOH1RUM1DO10')+': '+'V00WOH1RUM1DO10')       
+    V00WOH1RUM1LI11        = StringField(SzenenDatabase.get_description('V00WOH1RUM1LI11')+': '+'V00WOH1RUM1LI11')       
+    V00WOH1RUM1LI12        = StringField(SzenenDatabase.get_description('V00WOH1RUM1LI12')+': '+'V00WOH1RUM1LI12')       
+    V00WOH1RUM1LI13        = StringField(SzenenDatabase.get_description('V00WOH1RUM1LI13')+': '+'V00WOH1RUM1LI13')       
+    V00WOH1RUM1LI14        = StringField(SzenenDatabase.get_description('V00WOH1RUM1LI14')+': '+'V00WOH1RUM1LI14')       
+    V00WOH1RUM1PC01        = StringField(SzenenDatabase.get_description('V00WOH1RUM1PC01')+': '+'V00WOH1RUM1PC01')       
+    V00WOH1RUM1ST01        = StringField(SzenenDatabase.get_description('V00WOH1RUM1ST01')+': '+'V00WOH1RUM1ST01')       
+    V00WOH1RUM1ST02        = StringField(SzenenDatabase.get_description('V00WOH1RUM1ST02')+': '+'V00WOH1RUM1ST02')       
+    V00WOH1RUM1TV01        = StringField(SzenenDatabase.get_description('V00WOH1RUM1TV01')+': '+'V00WOH1RUM1TV01')       
+    V00WOH1SRA1LI01        = StringField(SzenenDatabase.get_description('V00WOH1SRA1LI01')+': '+'V00WOH1SRA1LI01')       
+    V00WOH1SRA1LI02        = StringField(SzenenDatabase.get_description('V00WOH1SRA1LI02')+': '+'V00WOH1SRA1LI02')       
+    V00WOH1SRA1LI03        = StringField(SzenenDatabase.get_description('V00WOH1SRA1LI03')+': '+'V00WOH1SRA1LI03')       
+    V00WOH1SRA1LI04        = StringField(SzenenDatabase.get_description('V00WOH1SRA1LI04')+': '+'V00WOH1SRA1LI04')       
+    V00WOH1SRA1LI11        = StringField(SzenenDatabase.get_description('V00WOH1SRA1LI11')+': '+'V00WOH1SRA1LI11')       
+    V00WOH1SRA1PC01        = StringField(SzenenDatabase.get_description('V00WOH1SRA1PC01')+': '+'V00WOH1SRA1PC01')       
+    V00WOH1STV01           = StringField(SzenenDatabase.get_description('V00WOH1STV01')+': '+'V00WOH1STV01')          
+    V00WOH1STV02           = StringField(SzenenDatabase.get_description('V00WOH1STV02')+': '+'V00WOH1STV02')          
+    V00WOH1TUR1LI01        = StringField(SzenenDatabase.get_description('V00WOH1TUR1LI01')+': '+'V00WOH1TUR1LI01')       
+    V00ZIM0RUM0DO01        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO01')+': '+'V00ZIM0RUM0DO01')       
+    V00ZIM0RUM0DO02        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO02')+': '+'V00ZIM0RUM0DO02')       
+    V01BAD1DEK1LI01        = StringField(SzenenDatabase.get_description('V01BAD1DEK1LI01')+': '+'V01BAD1DEK1LI01')       
+    V01BAD1DEK1LI02        = StringField(SzenenDatabase.get_description('V01BAD1DEK1LI02')+': '+'V01BAD1DEK1LI02')       
+    V01BAD1RUM1AV11        = StringField(SzenenDatabase.get_description('V01BAD1RUM1AV11')+': '+'V01BAD1RUM1AV11')       
+    V01BAD1RUM1LI02        = StringField(SzenenDatabase.get_description('V01BAD1RUM1LI02')+': '+'V01BAD1RUM1LI02')       
+    V01BUE1DEK1LI01        = StringField(SzenenDatabase.get_description('V01BUE1DEK1LI01')+': '+'V01BUE1DEK1LI01')       
+    V01BUE1STL1DO01        = StringField(SzenenDatabase.get_description('V01BUE1STL1DO01')+': '+'V01BUE1STL1DO01')       
+    V01FLU1DEK1LI01        = StringField(SzenenDatabase.get_description('V01FLU1DEK1LI01')+': '+'V01FLU1DEK1LI01')       
+    V01KID1DEK1LI01        = StringField(SzenenDatabase.get_description('V01KID1DEK1LI01')+': '+'V01KID1DEK1LI01')       
+    V01KID1RUM1AV11        = StringField(SzenenDatabase.get_description('V01KID1RUM1AV11')+': '+'V01KID1RUM1AV11')       
+    V01KID1RUM1LI02        = StringField(SzenenDatabase.get_description('V01KID1RUM1LI02')+': '+'V01KID1RUM1LI02')       
+    V01KID1ZIM1ST01        = StringField(SzenenDatabase.get_description('V01KID1ZIM1ST01')+': '+'V01KID1ZIM1ST01')       
+    V01KID1ZIM1ST02        = StringField(SzenenDatabase.get_description('V01KID1ZIM1ST02')+': '+'V01KID1ZIM1ST02')       
+    V01SCH1BET1LI01        = StringField(SzenenDatabase.get_description('V01SCH1BET1LI01')+': '+'V01SCH1BET1LI01')       
+    V01SCH1BET1LI02        = StringField(SzenenDatabase.get_description('V01SCH1BET1LI02')+': '+'V01SCH1BET1LI02')       
+    V01SCH1DEK1LI01        = StringField(SzenenDatabase.get_description('V01SCH1DEK1LI01')+': '+'V01SCH1DEK1LI01')       
+    V01SCH1RUM1AV11        = StringField(SzenenDatabase.get_description('V01SCH1RUM1AV11')+': '+'V01SCH1RUM1AV11')       
+    V01SCH1RUM1LI02        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI02')+': '+'V01SCH1RUM1LI02')       
+    V01SCH1RUM1LI10        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI10')+': '+'V01SCH1RUM1LI10')       
+    V01SCH1RUM1LI11        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI11')+': '+'V01SCH1RUM1LI11')       
+    V01SCH1STE1LI01        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI01')+': '+'V01SCH1STE1LI01')       
+    V01SCH1STE1LI02        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI02')+': '+'V01SCH1STE1LI02')       
+    V02BAD1DEK1LI01        = StringField(SzenenDatabase.get_description('V02BAD1DEK1LI01')+': '+'V02BAD1DEK1LI01')       
+    V02TRE1DEK1LI01        = StringField(SzenenDatabase.get_description('V02TRE1DEK1LI01')+': '+'V02TRE1DEK1LI01')       
+    V02ZIM1DEK1LI01        = StringField(SzenenDatabase.get_description('V02ZIM1DEK1LI01')+': '+'V02ZIM1DEK1LI01')       
+    V02ZIM1RUM1ST01        = StringField(SzenenDatabase.get_description('V02ZIM1RUM1ST01')+': '+'V02ZIM1RUM1ST01')       
+    VIRKOM1SSH1PC01        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC01')+': '+'VIRKOM1SSH1PC01')       
+    VIRKOM1SSH1PC02        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC02')+': '+'VIRKOM1SSH1PC02')       
+    VIRKOM1SSH1PC03        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC03')+': '+'VIRKOM1SSH1PC03')       
+    VIRKOM1SSH1PC04        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC04')+': '+'VIRKOM1SSH1PC04')       
+    VIRKOM1SSH1PC05        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC05')+': '+'VIRKOM1SSH1PC05')       
+    Vm1FLU1DEK1LI01        = StringField(SzenenDatabase.get_description('Vm1FLU1DEK1LI01')+': '+'Vm1FLU1DEK1LI01')       
+    Vm1GAR1PAR1LI01        = StringField(SzenenDatabase.get_description('Vm1GAR1PAR1LI01')+': '+'Vm1GAR1PAR1LI01')       
+    Vm1GAR1TUR1DI01        = StringField(SzenenDatabase.get_description('Vm1GAR1TUR1DI01')+': '+'Vm1GAR1TUR1DI01')       
+    Vm1ZIM1DEK1LI01        = StringField(SzenenDatabase.get_description('Vm1ZIM1DEK1LI01')+': '+'Vm1ZIM1DEK1LI01')       
+    Vm1ZIM1PFL1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM1PFL1DO01')+': '+'Vm1ZIM1PFL1DO01')       
+    Vm1ZIM1PFL1LI01        = StringField(SzenenDatabase.get_description('Vm1ZIM1PFL1LI01')+': '+'Vm1ZIM1PFL1LI01')       
+    Vm1ZIM1RUM1AV11        = StringField(SzenenDatabase.get_description('Vm1ZIM1RUM1AV11')+': '+'Vm1ZIM1RUM1AV11')       
+    Vm1ZIM1RUM1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM1RUM1DO01')+': '+'Vm1ZIM1RUM1DO01')       
+    Vm1ZIM1RUM1ST01        = StringField(SzenenDatabase.get_description('Vm1ZIM1RUM1ST01')+': '+'Vm1ZIM1RUM1ST01')       
+    Vm1ZIM1RUT1PC01        = StringField(SzenenDatabase.get_description('Vm1ZIM1RUT1PC01')+': '+'Vm1ZIM1RUT1PC01')       
+    Vm1ZIM1SAT1LI01        = StringField(SzenenDatabase.get_description('Vm1ZIM1SAT1LI01')+': '+'Vm1ZIM1SAT1LI01')       
+    Vm1ZIM1SCA1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM1SCA1DO01')+': '+'Vm1ZIM1SCA1DO01')       
+    Vm1ZIM1SEV1PC01        = StringField(SzenenDatabase.get_description('Vm1ZIM1SEV1PC01')+': '+'Vm1ZIM1SEV1PC01')       
+    Vm1ZIM1TUR1DO10        = StringField(SzenenDatabase.get_description('Vm1ZIM1TUR1DO10')+': '+'Vm1ZIM1TUR1DO10')       
+    Vm1ZIM2DEK1LI01        = StringField(SzenenDatabase.get_description('Vm1ZIM2DEK1LI01')+': '+'Vm1ZIM2DEK1LI01')       
+    Vm1ZIM2NAT1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM2NAT1DO01')+': '+'Vm1ZIM2NAT1DO01')       
+    Vm1ZIM2TRO1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM2TRO1DO01')+': '+'Vm1ZIM2TRO1DO01')       
+    Vm1ZIM2WAS1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM2WAS1DO01')+': '+'Vm1ZIM2WAS1DO01')       
+    Vm1ZIM3DEK1LI01        = StringField(SzenenDatabase.get_description('Vm1ZIM3DEK1LI01')+': '+'Vm1ZIM3DEK1LI01')       
+    Vm1ZIM3RUM1ST01        = StringField(SzenenDatabase.get_description('Vm1ZIM3RUM1ST01')+': '+'Vm1ZIM3RUM1ST01')       
+    Vm1ZIM3STR1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM3STR1DO01')+': '+'Vm1ZIM3STR1DO01')       
+    V01KID1ZIM1LI01        = StringField(SzenenDatabase.get_description('V01KID1ZIM1LI01')+': '+'V01KID1ZIM1LI01')  
+   #    V01KID1UIM1LI02        = StringField('V01KID1UIM1LI02')       
 
 @app.route('/inputs/')
 def index_inputs():
@@ -303,7 +613,7 @@ def flask_link(Id=None):
                 if item in ['Immer', 'Wach', 'Sturm']:
                     setattr(getattr(form, item), 'choices', SzenenDatabase.get_all_names(filtGruppe))                
                 setattr(getattr(form, item),'data',getattr(element, item))
-                if item in ['Logging', 'Doppelklick','enabled', 'debug']:
+                if item in ['Logging', 'Doppelklick','enabled', 'debug','Kompression']:
                     setattr(getattr(form, item),'data', str(getattr(element, item)))
     if request.method == 'POST':
         for item, value in form.__dict__.items():
@@ -323,10 +633,11 @@ def flask_link(Id=None):
 @app.route('/szenen/')
 def index_szenen():
     sort = request.args.get('sort', 'Id')
-    filtby = request.args.get('filterby', '')
-    filterkey = request.args.get('filterkey', '')
+    filtName = request.args.get('Name', '')
+    filterDesc = request.args.get('Beschreibung', '')
+    filterGruppe = request.args.get('Gruppe', '')    
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, filtby, filterkey),
+    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, filtName, filterDesc, filterGruppe),
                           sort_by=sort,
                           sort_reverse=reverse,
                           border=True)
@@ -338,27 +649,136 @@ def edit_szn(Id=None):
         Id = request.args.get('Id', 1)
     error = ""
     element  = SzenenDatabase.get_element_by_id(Id)
-#    elements = SzenenDatabase.get_elements_by_name(element.Name)
     form = SzenenForm()
-#    form_action = url_for('index')
     if request.method == 'GET':
         for item, value in form.__dict__.items():
             if item in element.__dict__:
                 setattr(getattr(form, item),'data',getattr(element, item))
-#    if request.method == 'POST':
-#        for item, value in form.__dict__.items():
-#            if item in element.__dict__ and item in properties_iptDB:
-#                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_iptDB[item][1]))
-#            if item in device_props:
-#                for subel in elements:
-#                    if item in subel.__dict__:
-#                        setattr(subel, item, convert_to(getattr(getattr(form, item), 'data'), properties_iptDB[item][1]))                    
-##        return 'thank_you'
-#        return redirect(url_for('flask_link', Id=Id))
+    if request.method == 'POST':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and item in properties_sznDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+#        return 'thank_you'
+        return redirect(url_for('edit_szn', Id=Id))
 
     # Render the sign-up page
     return render_template('szn_el_template.html', message=error, form=form, Id=Id,
                                 title="Update Profile") #form_action=form_action
+
+@app.route('/szenen/item/ug/<int:Id>', methods=['GET', 'POST'])
+def edit_szn_ug(Id=None):
+    if not Id:
+        Id = request.args.get('Id', 1)
+    error = ""
+    element  = SzenenDatabase.get_element_by_id(Id)
+    form = SzenenForm()
+    if request.method == 'GET':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__:
+                setattr(getattr(form, item),'data',getattr(element, item))
+    if request.method == 'POST':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and item in properties_sznDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+#        return 'thank_you'
+        return redirect(url_for('edit_szn_ug', Id=Id))
+
+    # Render the sign-up page
+    return render_template('szn_ug.html', message=error, form=form, Id=Id,
+                                title="Update Profile") #form_action=form_action
+
+@app.route('/szenen/item/eg/<int:Id>', methods=['GET', 'POST'])
+def edit_szn_eg(Id=None):
+    if not Id:
+        Id = request.args.get('Id', 1)
+    error = ""
+    element  = SzenenDatabase.get_element_by_id(Id)
+    form = SzenenForm()
+    if request.method == 'GET':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__:
+                setattr(getattr(form, item),'data',getattr(element, item))
+    if request.method == 'POST':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and item in properties_sznDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+#        return 'thank_you'
+        return redirect(url_for('edit_szn_eg', Id=Id))
+
+    # Render the sign-up page
+    return render_template('szn_eg.html', message=error, form=form, Id=Id,
+                                title="Update Profile") #form_action=form_action
+
+@app.route('/szenen/item/og/<int:Id>', methods=['GET', 'POST'])
+def edit_szn_og(Id=None):
+    if not Id:
+        Id = request.args.get('Id', 1)
+    error = ""
+    element  = SzenenDatabase.get_element_by_id(Id)
+    form = SzenenForm()
+    if request.method == 'GET':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__:
+                setattr(getattr(form, item),'data',getattr(element, item))
+    if request.method == 'POST':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and item in properties_sznDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+#        return 'thank_you'
+        return redirect(url_for('edit_szn_og', Id=Id))
+
+    # Render the sign-up page
+    return render_template('szn_og.html', message=error, form=form, Id=Id,
+                                title="Update Profile") #form_action=form_action
+
+@app.route('/szenen/item/dg/<int:Id>', methods=['GET', 'POST'])
+def edit_szn_dg(Id=None):
+    if not Id:
+        Id = request.args.get('Id', 1)
+    error = ""
+    element  = SzenenDatabase.get_element_by_id(Id)
+    form = SzenenForm()
+    if request.method == 'GET':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__:
+                setattr(getattr(form, item),'data',getattr(element, item))
+    if request.method == 'POST':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and item in properties_sznDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+#        return 'thank_you'
+        return redirect(url_for('edit_szn_dg', Id=Id))
+
+    # Render the sign-up page
+    return render_template('szn_dg.html', message=error, form=form, Id=Id,
+                                title="Update Profile") #form_action=form_action
+    
+@app.route('/szenen/item/a/<int:Id>', methods=['GET', 'POST'])
+def edit_szn_a(Id=None):
+    if not Id:
+        Id = request.args.get('Id', 1)
+    error = ""
+    element  = SzenenDatabase.get_element_by_id(Id)
+    form = SzenenForm()
+    if request.method == 'GET':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__:
+                setattr(getattr(form, item),'data',getattr(element, item))
+    if request.method == 'POST':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and item in properties_sznDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+#        return 'thank_you'
+        return redirect(url_for('edit_szn_a', Id=Id))
+
+    # Render the sign-up page
+    return render_template('szn_a.html', message=error, form=form, Id=Id,
+                                title="Update Profile") #form_action=form_action
+
+@app.route('/szenen/copy/<int:Id>')
+def copy_szene(Id):
+    SzenenDatabase.copy_szene(Id)
+    return 'New Szene created'
 
 datab = constants.sql_.DB
 
@@ -385,6 +805,13 @@ def json_serial(obj):
 def invalidTimers(device, desc):
     print('input timed out: ', desc)
     hkses = InputsDatabase.get_elements_by_name(device)
+    # erstmal überprüfen....
+    if hkses and hkses[0].time and hkses[0].heartbeat:
+        ct = datetime.datetime.now()
+        timout = hkses[0].time + datetime.timedelta(seconds=hkses[0].heartbeat)
+        if ct < timout:
+            print('Nein doch nicht: ', desc)
+            return None
     for item in hkses:
         item.valid = False
     if hkses and hkses[0].fallback:
@@ -956,62 +1383,9 @@ def teg_raw_cmds(db):
 
 
 
-#kompletter table:
-def mdb_get_table(db):
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    rlist = []
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM %s' % (db)
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            dicti = {}
-            for i in range (0,len(row)):
-               dicti[field_names[i]] = row[i]
-            rlist.append(dicti)
-    con.close()
-    return rlist
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-def read_inputs_to_inputs_table():
-#    global inputs_table
-    inputs_table = {}
-    # neu
-    try:
-        with open('inputs_table.jsn') as f:
-            inptsjsn = f.read()            
-        inputs_table = json.loads(inptsjsn)
-        print("inputs table loaded from file") 
-    except Exception as e:
-        print(e)
-        liste = mdb_get_table(constants.sql_tables.inputs.name)
-        for line in liste:
-            inputs_table[line['Id']] = line
-        print("inputs table loaded from DB")        
-        payload = {'Szene':'wert', 'desc':'inputs table loaded from DB'}
-        toolbox.communication.send_message(payload, typ='ExecSzene')        
-#    InputsDB.build(inputs_table)
-    return inputs_table
-    
-def read_szenen_to_inputs_table():
-#    global inputs_table
-    szenen_table = {}
-    # neu
-    try:
-        with open('szenen_table.jsn') as f:
-            sznsjsn = f.read()            
-        szenen_table = json.loads(sznsjsn)
-        print("szenen table loaded from file") 
-    except Exception as e:
-        print(e)
-        liste = mdb_get_table(constants.sql_tables.szenen.name)
-        for line in liste:
-            szenen_table[line['Id']] = line
-        payload = {'Szene':'wert', 'desc':'szenen table loaded from DB'}
-        toolbox.communication.send_message(payload, typ='ExecSzene')        
-    return szenen_table
+
+
 
 #    print(inputs_table)
 
@@ -1593,9 +1967,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     return alle_szenen, descriptions, heartbt, alle_payloads
 
 #print(read_inputs_to_inputs_table())
-print('baue')
-InputsDatabase.build(read_inputs_to_inputs_table())
-SzenenDatabase.build(read_szenen_to_inputs_table())
+
 
 def apptask():
     app.run(host='0.0.0.0', port=4444)

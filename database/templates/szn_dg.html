@@ -1,0 +1,23 @@
+<form method="POST" action={{ url_for('edit_szn_dg', Id=Id) }}>
+    {{ form.csrf_token }}
+    
+   <table>  
+    <tr>
+        <td align="right">{{ form.V02BAD1DEK1LI01.label }} :</td>
+        <td align="left">{{  form.V02BAD1DEK1LI01(size=20) }} </td>
+    </tr>  
+    <tr>
+        <td align="right">{{ form.V02TRE1DEK1LI01.label }} :</td>
+        <td align="left">{{  form.V02TRE1DEK1LI01(size=20) }} </td>
+    </tr>  
+    <tr>
+        <td align="right">{{ form.V02ZIM1DEK1LI01.label }} :</td>
+        <td align="left">{{  form.V02ZIM1DEK1LI01(size=20) }} </td>
+    </tr>      
+    <tr>
+        <td align="right">{{ form.V02ZIM1RUM1ST01.label }} :</td>
+        <td align="left">{{  form.V02ZIM1RUM1ST01(size=20) }} </td>
+    </tr>     
+  </table>   
+   <input type="submit" value="Go">
+</form>   

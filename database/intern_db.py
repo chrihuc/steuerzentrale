@@ -155,7 +155,7 @@ class DBTemplate(object):
             fname = "./db_backup"
             if not os.path.exists(fname):
                 os.makedirs(fname) 
-            b_filename = self.filename.split(".")[0] + str(time.strftime("%Y-%m-%d",time.localtime(time.time()))) + self.filename.split(".")[-1]
+            b_filename = self.filename.split(".")[0] + "_" + str(time.strftime("%Y-%m-%d",time.localtime(time.time()))) + "." + self.filename.split(".")[-1]
             b_filename = fname +'/' + b_filename
             with open(b_filename, 'w') as fout:
                 json.dump(self.get_as_list(), fout, default=json_serial)             
@@ -174,7 +174,7 @@ class DBTemplate(object):
         return True      
     
     def periodic_save(self):
-        thread_pt = Timer(60, self.periodic_save)
+        thread_pt = Timer(300, self.periodic_save)
         thread_pt.start()    
         self.save_to_file()
         return True        
@@ -259,12 +259,14 @@ class DatabaseIntern(DBTemplate):
     
 class DatabaseSzenen(DBTemplate):
     
-    def get_sorted_by(self, sort, reverse=False, filtby='', filtkey=''):
+    def get_sorted_by(self, sort, reverse=False, filtName='', filterDesc='', filterGruppe=''):
         elements = [element for element in self.elements]
-        if filtby == 'Name':
-            elements = [element for element in self.elements if filtkey in element.Name]
-        if filtby == 'Description':
-            elements = [element for element in self.elements if filtkey in element.Description]             
+        if filtName:
+            elements = [element for element in elements if filtName in element.Name]
+        if filterDesc:
+            elements = [element for element in elements if filterDesc in element.Beschreibung] 
+        if filterGruppe:
+            elements = [element for element in elements if filterGruppe in element.Gruppe]             
         result = None
         if self.props[sort][1] in [int, float]:
             result = sorted(
@@ -307,6 +309,20 @@ class DatabaseSzenen(DBTemplate):
     def get_val_in_szenen(self,device,szene):
         szenen = self.get_elements_by_name(szene)
         return getattr(szenen[0], device)            
+    
+    def copy_szene(self, Id):
+        curEl = self.get_element_by_id(Id)
+        newEl = copy.copy(curEl)
+        max_id = self.get_max_id()
+        newEl.Id = max_id + 5  
+        self.elements.append(newEl)
+        self.save_to_file()  
+        
+    def get_description(self, hks):
+        elem = self.get_elements_by_name('Description')
+        if getattr(elem[0], hks):
+            return getattr(elem[0], hks)
+        return ''
     
 if __name__ == '__main__':
     properties = {'Val1':'Val1','Val2':'Val2','Val0':0,'ValNone':None}
