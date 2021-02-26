@@ -266,7 +266,7 @@ class DatabaseSzenen(DBTemplate):
         if filterDesc:
             elements = [element for element in elements if filterDesc in element.Beschreibung] 
         if filterGruppe:
-            elements = [element for element in elements if filterGruppe in element.Gruppe]             
+            elements = [element for element in elements if element.Gruppe and filterGruppe in element.Gruppe]             
         result = None
         if self.props[sort][1] in [int, float]:
             result = sorted(

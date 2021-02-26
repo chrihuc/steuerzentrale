@@ -54,16 +54,23 @@ sat = satellites.Satellite()
 interna = internal.Internal()
 xs1_devs = msqc.SzenenDatabase.akt_type_dict('XS1')
 xs1_devs = msqc.tables.akt_type_dict['XS1']
+hue_devs = msqc.SzenenDatabase.akt_type_dict('HUE')
 hue_devs = msqc.tables.akt_type_dict['HUE']
+sns_devs = msqc.SzenenDatabase.akt_type_dict('SONOS')
 sns_devs = msqc.tables.akt_type_dict['SONOS']
+tvs_devs = msqc.SzenenDatabase.akt_type_dict('TV')
 tvs_devs = msqc.tables.akt_type_dict['TV']
+sat_devs = msqc.SzenenDatabase.akt_type_dict('SATELLITE')
 sat_devs = msqc.tables.akt_type_dict['SATELLITE']
-sat_devs += msqc.tables.akt_type_dict['ZWave']
+#xs1_devs = msqc.SzenenDatabase.akt_type_dict('XS1')
+#sat_devs += msqc.tables.akt_type_dict['ZWave']
+loc_devs = msqc.SzenenDatabase.akt_type_dict('Local')
 loc_devs = msqc.tables.akt_type_dict['Local']
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs  + trads_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
 
+# TODO!!!!!!!!:
 porcupine = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, 'Porcupine')
 
 # TODO Tests split adress from hks
@@ -129,6 +136,7 @@ class Szenen(object):
 
     @staticmethod
     def list_commands(gruppe='default'):
+        # TODO:!!!!!!!!!!!
         table = msqc.mdb_get_table(constants.sql_tables.szenen.name)
         liste = {'':''}
         if not isinstance(gruppe, list):
@@ -276,12 +284,15 @@ class Szenen(object):
             t_list = {}
         if commando in ["man", "auto"]:
             msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
+            msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
         elif commando in ["autoToggle"]:
             current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
             if 'auto' in current:
                 msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
+                msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
             else:
                 msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
+                msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
         elif True: #szn_id == None or szn_id in cls.running_list:
             if device in xs1_devs:
                 executed = xs1.set_device(adress, str(commando))
@@ -330,6 +341,7 @@ class Szenen(object):
 # TODO: Return True and value and write value to table
             if device not in ['Name', 'Id']:
                 msqc.set_val_in_szenen(device=device, szene="Value", value=commando)
+                msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Value", value=commando)
         if szn_id == None:
             return
         if executed:

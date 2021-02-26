@@ -1,111 +1,13 @@
 <form method="POST" action={{ url_for('edit_szn_ug', Id=Id) }}>
     {{ form.csrf_token }}
     
-   <table>    
-    <tr>
-        <td align="right">{{ form.VIRKOM1SSH1PC01.label }} :</td>
-        <td align="left">{{  form.VIRKOM1SSH1PC01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.VIRKOM1SSH1PC02.label }} :</td>
-        <td align="left">{{  form.VIRKOM1SSH1PC02(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.VIRKOM1SSH1PC03.label }} :</td>
-        <td align="left">{{  form.VIRKOM1SSH1PC03(size=20) }} </td>
-    </tr>        
-    <tr>
-        <td align="right">{{ form.VIRKOM1SSH1PC04.label }} :</td>
-        <td align="left">{{  form.VIRKOM1SSH1PC04(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.VIRKOM1SSH1PC05.label }} :</td>
-        <td align="left">{{  form.VIRKOM1SSH1PC05(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1FLU1DEK1LI01.label }} :</td>
-        <td align="left">{{  form.Vm1FLU1DEK1LI01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1GAR1PAR1LI01.label }} :</td>
-        <td align="left">{{  form.Vm1GAR1PAR1LI01(size=20) }} </td>
+   <table>
+   {% for field in form %}
+     <tr>
+        <td align="right">{{ field.label() }}:</td>
+        <td align="left">{{ field() }} </td>
     </tr>      
-    <tr>
-        <td align="right">{{ form.Vm1GAR1TUR1DI01.label }} :</td>
-        <td align="left">{{  form.Vm1GAR1TUR1DI01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1DEK1LI01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1DEK1LI01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1PFL1DO01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1PFL1DO01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1PFL1LI01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1PFL1LI01(size=20) }} </td>
-    </tr>              
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1RUM1AV11.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1RUM1AV11(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1RUM1DO01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1RUM1DO01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1RUM1ST01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1RUM1ST01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1RUT1PC01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1RUT1PC01(size=20) }} </td>
-    </tr>      
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1SAT1LI01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1SAT1LI01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1SCA1DO01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1SCA1DO01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1SEV1PC01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1SEV1PC01(size=20) }} </td>
-    </tr>  
-    <tr>
-        <td align="right">{{ form.Vm1ZIM1TUR1DO10.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM1TUR1DO10(size=20) }} </td>
-    </tr>     
-    <tr>
-        <td align="right">{{ form.Vm1ZIM2DEK1LI01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM2DEK1LI01(size=20) }} </td>
-    </tr> 
-    <tr>
-        <td align="right">{{ form.Vm1ZIM2NAT1DO01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM2NAT1DO01(size=20) }} </td>
-    </tr> 
-    <tr>
-        <td align="right">{{ form.Vm1ZIM2TRO1DO01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM2TRO1DO01(size=20) }} </td>
-    </tr> 
-    <tr>
-        <td align="right">{{ form.Vm1ZIM2WAS1DO01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM2WAS1DO01(size=20) }} </td>
-    </tr> 
-    <tr>
-        <td align="right">{{ form.Vm1ZIM3DEK1LI01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM3DEK1LI01(size=20) }} </td>
-    </tr> 
-    <tr>
-        <td align="right">{{ form.Vm1ZIM3RUM1ST01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM3RUM1ST01(size=20) }} </td>
-    </tr> 
-    <tr>
-        <td align="right">{{ form.Vm1ZIM3STR1DO01.label }} :</td>
-        <td align="left">{{  form.Vm1ZIM3STR1DO01(size=20) }} </td>
-    </tr>     
-  </table>    
+   {% endfor %} 
+   </table>   
     <input type="submit" value="Go">
 </form>       

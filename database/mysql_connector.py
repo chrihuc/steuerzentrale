@@ -366,6 +366,10 @@ class SortableTableSzenen(Table):
         return url_for('index_szenen', sort=col_key, direction=direction)
 
 
+for key, value in properties_sznDB.items():
+    if any([i in key for i in ['V0', 'Vm', 'A0', 'VIR']]):
+        SortableTableSzenen.add_column(key, Col(key))
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def read_inputs_to_inputs_table():
 #    global inputs_table
@@ -454,6 +458,7 @@ class SzenenForm(FlaskForm):
     LastUsed     = StringField('LastUsed')
     Enabled      = StringField('Enabled')
 
+class SzenenFormA(FlaskForm):
     A00EIN1ADV1ST01        = StringField(SzenenDatabase.get_description('A00EIN1ADV1ST01')+': '+'A00EIN1ADV1ST01')      
     A00EIN1GEN1LI01        = StringField(SzenenDatabase.get_description('A00EIN1GEN1LI01')+': '+'A00EIN1GEN1LI01')       
     A00GAR1POW1DO01        = StringField(SzenenDatabase.get_description('A00GAR1POW1DO01')+': '+'A00GAR1POW1DO01')       
@@ -466,6 +471,8 @@ class SzenenForm(FlaskForm):
     A00TER1GEN1LI01        = StringField(SzenenDatabase.get_description('A00TER1GEN1LI01')+': '+'A00TER1GEN1LI01')       
     A00TER1GEN1PO01        = StringField(SzenenDatabase.get_description('A00TER1GEN1PO01')+': '+'A00TER1GEN1PO01')       
     A00TER1GEN1ST01        = StringField(SzenenDatabase.get_description('A00TER1GEN1ST01')+': '+'A00TER1GEN1ST01')       
+
+class SzenenFormEG(FlaskForm):
     V00ESS1DEK1LI01        = StringField(SzenenDatabase.get_description('V00ESS1DEK1LI01')+': '+'V00ESS1DEK1LI01')       
     V00ESS1RUM1LI01        = StringField(SzenenDatabase.get_description('V00ESS1RUM1LI01')+': '+'V00ESS1RUM1LI01')       
     V00ESS1OUT1PO01        = StringField(SzenenDatabase.get_description('V00ESS1OUT1PO01')+': '+'V00ESS1OUT1PO01')       
@@ -512,8 +519,9 @@ class SzenenForm(FlaskForm):
     V00WOH1STV01           = StringField(SzenenDatabase.get_description('V00WOH1STV01')+': '+'V00WOH1STV01')          
     V00WOH1STV02           = StringField(SzenenDatabase.get_description('V00WOH1STV02')+': '+'V00WOH1STV02')          
     V00WOH1TUR1LI01        = StringField(SzenenDatabase.get_description('V00WOH1TUR1LI01')+': '+'V00WOH1TUR1LI01')       
-    V00ZIM0RUM0DO01        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO01')+': '+'V00ZIM0RUM0DO01')       
-    V00ZIM0RUM0DO02        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO02')+': '+'V00ZIM0RUM0DO02')       
+      
+
+class SzenenFormOG(FlaskForm):
     V01BAD1DEK1LI01        = StringField(SzenenDatabase.get_description('V01BAD1DEK1LI01')+': '+'V01BAD1DEK1LI01')       
     V01BAD1DEK1LI02        = StringField(SzenenDatabase.get_description('V01BAD1DEK1LI02')+': '+'V01BAD1DEK1LI02')       
     V01BAD1RUM1AV11        = StringField(SzenenDatabase.get_description('V01BAD1RUM1AV11')+': '+'V01BAD1RUM1AV11')       
@@ -534,11 +542,10 @@ class SzenenForm(FlaskForm):
     V01SCH1RUM1LI10        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI10')+': '+'V01SCH1RUM1LI10')       
     V01SCH1RUM1LI11        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI11')+': '+'V01SCH1RUM1LI11')       
     V01SCH1STE1LI01        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI01')+': '+'V01SCH1STE1LI01')       
-    V01SCH1STE1LI02        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI02')+': '+'V01SCH1STE1LI02')       
-    V02BAD1DEK1LI01        = StringField(SzenenDatabase.get_description('V02BAD1DEK1LI01')+': '+'V02BAD1DEK1LI01')       
-    V02TRE1DEK1LI01        = StringField(SzenenDatabase.get_description('V02TRE1DEK1LI01')+': '+'V02TRE1DEK1LI01')       
-    V02ZIM1DEK1LI01        = StringField(SzenenDatabase.get_description('V02ZIM1DEK1LI01')+': '+'V02ZIM1DEK1LI01')       
-    V02ZIM1RUM1ST01        = StringField(SzenenDatabase.get_description('V02ZIM1RUM1ST01')+': '+'V02ZIM1RUM1ST01')       
+    V01SCH1STE1LI02        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI02')+': '+'V01SCH1STE1LI02') 
+    V01KID1ZIM1LI01        = StringField(SzenenDatabase.get_description('V01KID1ZIM1LI01')+': '+'V01KID1ZIM1LI01')            
+
+class SzenenFormUG(FlaskForm):
     VIRKOM1SSH1PC01        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC01')+': '+'VIRKOM1SSH1PC01')       
     VIRKOM1SSH1PC02        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC02')+': '+'VIRKOM1SSH1PC02')       
     VIRKOM1SSH1PC03        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC03')+': '+'VIRKOM1SSH1PC03')       
@@ -564,9 +571,16 @@ class SzenenForm(FlaskForm):
     Vm1ZIM2WAS1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM2WAS1DO01')+': '+'Vm1ZIM2WAS1DO01')       
     Vm1ZIM3DEK1LI01        = StringField(SzenenDatabase.get_description('Vm1ZIM3DEK1LI01')+': '+'Vm1ZIM3DEK1LI01')       
     Vm1ZIM3RUM1ST01        = StringField(SzenenDatabase.get_description('Vm1ZIM3RUM1ST01')+': '+'Vm1ZIM3RUM1ST01')       
-    Vm1ZIM3STR1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM3STR1DO01')+': '+'Vm1ZIM3STR1DO01')       
-    V01KID1ZIM1LI01        = StringField(SzenenDatabase.get_description('V01KID1ZIM1LI01')+': '+'V01KID1ZIM1LI01')  
+    Vm1ZIM3STR1DO01        = StringField(SzenenDatabase.get_description('Vm1ZIM3STR1DO01')+': '+'Vm1ZIM3STR1DO01')         
    #    V01KID1UIM1LI02        = StringField('V01KID1UIM1LI02')       
+class SzenenFormDG(FlaskForm):
+    V02BAD1DEK1LI01        = StringField(SzenenDatabase.get_description('V02BAD1DEK1LI01')+': '+'V02BAD1DEK1LI01')       
+    V02TRE1DEK1LI01        = StringField(SzenenDatabase.get_description('V02TRE1DEK1LI01')+': '+'V02TRE1DEK1LI01')       
+    V02ZIM1DEK1LI01        = StringField(SzenenDatabase.get_description('V02ZIM1DEK1LI01')+': '+'V02ZIM1DEK1LI01')       
+    V02ZIM1RUM1ST01        = StringField(SzenenDatabase.get_description('V02ZIM1RUM1ST01')+': '+'V02ZIM1RUM1ST01') 
+    V00ZIM0RUM0DO01        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO01')+': '+'V00ZIM0RUM0DO01')       
+    V00ZIM0RUM0DO02        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO02')+': '+'V00ZIM0RUM0DO02')     
+    
 
 @app.route('/inputs/')
 def index_inputs():
@@ -657,7 +671,8 @@ def edit_szn(Id=None):
     if request.method == 'POST':
         for item, value in form.__dict__.items():
             if item in element.__dict__ and item in properties_sznDB:
-                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+                if not any([i in item for i in ['V0', 'Vm', 'A0', 'VIR']]):
+                    setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
 #        return 'thank_you'
         return redirect(url_for('edit_szn', Id=Id))
 
@@ -671,7 +686,7 @@ def edit_szn_ug(Id=None):
         Id = request.args.get('Id', 1)
     error = ""
     element  = SzenenDatabase.get_element_by_id(Id)
-    form = SzenenForm()
+    form = SzenenFormUG()
     if request.method == 'GET':
         for item, value in form.__dict__.items():
             if item in element.__dict__:
@@ -679,7 +694,8 @@ def edit_szn_ug(Id=None):
     if request.method == 'POST':
         for item, value in form.__dict__.items():
             if item in element.__dict__ and item in properties_sznDB:
-                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+                if any([i in item for i in ['Vm', 'VIR']]):
+                    setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
 #        return 'thank_you'
         return redirect(url_for('edit_szn_ug', Id=Id))
 
@@ -693,7 +709,7 @@ def edit_szn_eg(Id=None):
         Id = request.args.get('Id', 1)
     error = ""
     element  = SzenenDatabase.get_element_by_id(Id)
-    form = SzenenForm()
+    form = SzenenFormEG()
     if request.method == 'GET':
         for item, value in form.__dict__.items():
             if item in element.__dict__:
@@ -715,7 +731,7 @@ def edit_szn_og(Id=None):
         Id = request.args.get('Id', 1)
     error = ""
     element  = SzenenDatabase.get_element_by_id(Id)
-    form = SzenenForm()
+    form = SzenenFormOG()
     if request.method == 'GET':
         for item, value in form.__dict__.items():
             if item in element.__dict__:
@@ -737,7 +753,7 @@ def edit_szn_dg(Id=None):
         Id = request.args.get('Id', 1)
     error = ""
     element  = SzenenDatabase.get_element_by_id(Id)
-    form = SzenenForm()
+    form = SzenenFormDG()
     if request.method == 'GET':
         for item, value in form.__dict__.items():
             if item in element.__dict__:
@@ -759,7 +775,7 @@ def edit_szn_a(Id=None):
         Id = request.args.get('Id', 1)
     error = ""
     element  = SzenenDatabase.get_element_by_id(Id)
-    form = SzenenForm()
+    form = SzenenFormA()
     if request.method == 'GET':
         for item, value in form.__dict__.items():
             if item in element.__dict__:
@@ -1127,15 +1143,9 @@ def setting_r(setting):
     return value
 
 def valid_r(inpt):
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT valid FROM %s WHERE HKS = "%s"' % (constants.sql_tables.inputs.name, inpt)
-        cur.execute(sql)
-        results = cur.fetchall()
-    con.close()
-    if results:
-        return results[0][0]
+    items = [item.valid for item in InputsDatabase.elements if item.HKS == inpt]
+    if items:
+        return items[0]
     else:
         return True
 
@@ -1866,7 +1876,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         # hier können wir dann den timer starten, oder besser dort wo wir auch wissen, das pesistence gibt
                     if not append and not dicti.get('violTime') is None: # bedingung nicht erfüllt und ViolTime war gesetzt (reset)
                         violTime = None
-                    if append:
+                    # hier war bisher nur append, das heisst aber das wir latchen, auch wenn nichts auszuführen ist.
+                    # jetzt latchen wir nur, wenn auch eine Szene ausgeführt wird... mal schauen
+                    if append and szenen:
                         latchMerker = True
                     if append and dicti.get('persistance') is not None:  # wir hätten was auszufühern aber persistence ist grösser null
                         if type(dicti.get('persistance')) == str and len(dicti.get('persistance')) == 0:
