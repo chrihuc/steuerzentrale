@@ -284,15 +284,15 @@ class Szenen(object):
             t_list = {}
         if commando in ["man", "auto"]:
             msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
-            msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
+            msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
         elif commando in ["autoToggle"]:
             current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
             if 'auto' in current:
                 msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
-                msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
+                msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
             else:
                 msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
-                msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
+                msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
         elif True: #szn_id == None or szn_id in cls.running_list:
             if device in xs1_devs:
                 executed = xs1.set_device(adress, str(commando))
@@ -341,7 +341,7 @@ class Szenen(object):
 # TODO: Return True and value and write value to table
             if device not in ['Name', 'Id']:
                 msqc.set_val_in_szenen(device=device, szene="Value", value=commando)
-                msqc.InputsDatabase.set_val_in_szenen(device=device, szene="Value", value=commando)
+                msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Value", value=commando)
         if szn_id == None:
             return
         if executed:

@@ -1143,7 +1143,7 @@ def setting_r(setting):
     return value
 
 def valid_r(inpt):
-    items = [item.valid for item in InputsDatabase.elements if item.HKS == inpt]
+    items = [item.valid for item in SzenenDatabase.elements if item.HKS == inpt]
     if items:
         return items[0]
     else:
