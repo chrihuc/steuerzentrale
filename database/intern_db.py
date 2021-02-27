@@ -145,6 +145,12 @@ class DBTemplate(object):
         liste = []
         for element in self.elements:
             liste.append(element.__dict__)
+        return liste    
+    
+    def get_as_dict(self):
+        liste = {}
+        for element in self.elements:
+            liste[element.Name] = (element.__dict__)
         return liste      
 
     def save_to_file(self):
@@ -259,14 +265,20 @@ class DatabaseIntern(DBTemplate):
     
 class DatabaseSzenen(DBTemplate):
     
-    def get_sorted_by(self, sort, reverse=False, filtName='', filterDesc='', filterGruppe=''):
+    def get_sorted_by(self, sort, reverse=False, filtName='', filterDesc='', filterGruppe='', Setting='', Follows='', Bedingung=''):
         elements = [element for element in self.elements]
         if filtName:
             elements = [element for element in elements if filtName in element.Name]
         if filterDesc:
             elements = [element for element in elements if filterDesc in element.Beschreibung] 
         if filterGruppe:
-            elements = [element for element in elements if element.Gruppe and filterGruppe in element.Gruppe]             
+            elements = [element for element in elements if element.Gruppe and filterGruppe in element.Gruppe]  
+        if Setting:
+            elements = [element for element in elements if element.Setting and Setting in element.Setting] 
+        if Follows:
+            elements = [element for element in elements if element.Follows and Follows in element.Follows] 
+        if Bedingung:
+            elements = [element for element in elements if element.Bedingung and Bedingung in element.Bedingung]             
         result = None
         if self.props[sort][1] in [int, float]:
             result = sorted(

@@ -53,25 +53,26 @@ tv = samsung.TV()
 sat = satellites.Satellite()
 interna = internal.Internal()
 xs1_devs = msqc.SzenenDatabase.akt_type_dict('XS1')
-xs1_devs = msqc.tables.akt_type_dict['XS1']
+#xs1_devs = msqc.tables.akt_type_dict['XS1']
 hue_devs = msqc.SzenenDatabase.akt_type_dict('HUE')
-hue_devs = msqc.tables.akt_type_dict['HUE']
+#hue_devs = msqc.tables.akt_type_dict['HUE']
 sns_devs = msqc.SzenenDatabase.akt_type_dict('SONOS')
-sns_devs = msqc.tables.akt_type_dict['SONOS']
+#sns_devs = msqc.tables.akt_type_dict['SONOS']
 tvs_devs = msqc.SzenenDatabase.akt_type_dict('TV')
-tvs_devs = msqc.tables.akt_type_dict['TV']
+#tvs_devs = msqc.tables.akt_type_dict['TV']
 sat_devs = msqc.SzenenDatabase.akt_type_dict('SATELLITE')
-sat_devs = msqc.tables.akt_type_dict['SATELLITE']
+#sat_devs = msqc.tables.akt_type_dict['SATELLITE']
 #xs1_devs = msqc.SzenenDatabase.akt_type_dict('XS1')
 #sat_devs += msqc.tables.akt_type_dict['ZWave']
 loc_devs = msqc.SzenenDatabase.akt_type_dict('Local')
-loc_devs = msqc.tables.akt_type_dict['Local']
+#loc_devs = msqc.tables.akt_type_dict['Local']
 cmd_devs = xs1_devs + hue_devs + sns_devs + tvs_devs + sat_devs  + trads_devs
 aes = alarmevents.AES()
 mes = messaging.Messaging()
 
 # TODO!!!!!!!!:
-porcupine = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, 'Porcupine')
+porcupine = msqc.SzenenDatabase.get_elements_by_name('Porcupine')[0].get_as_dict()
+#porcupine = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, 'Porcupine')
 
 # TODO Tests split adress from hks
 # Add Aktor_bedingung
@@ -137,7 +138,8 @@ class Szenen(object):
     @staticmethod
     def list_commands(gruppe='default'):
         # TODO:!!!!!!!!!!!
-        table = msqc.mdb_get_table(constants.sql_tables.szenen.name)
+        table = msqc.SzenenDatabase.get_as_dict()
+#        table = msqc.mdb_get_table(constants.sql_tables.szenen.name)
         liste = {'':''}
         if not isinstance(gruppe, list):
             gruppe = [gruppe]
@@ -247,8 +249,9 @@ class Szenen(object):
                     elif operand == 'valid':
                         if not (str(valid) == wert):
                             erfuellt = False   
-                except:
+                except Exception as e:
                     print(bedingung)
+                    print(e)
                     return False
         if verbose: print( "Ergebniss: ",erfuellt)
         return erfuellt
@@ -283,10 +286,11 @@ class Szenen(object):
         else:
             t_list = {}
         if commando in ["man", "auto"]:
-            msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
+#            msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
             msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
         elif commando in ["autoToggle"]:
-            current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
+            current = msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode")
+#            current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
             if 'auto' in current:
                 msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
                 msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
@@ -325,7 +329,8 @@ class Szenen(object):
     #                            for kommando in kommandos:
     #                                t = threading.Thread(target=interner_befehl, args=[commando])
     #                                t.start()
-            elif device in msqc.tables.akt_type_dict['Local']:
+#            elif device in msqc.tables.akt_type_dict['Local']:
+            elif device in msqc.SzenenDatabase.akt_type_dict('Local'):
 #                print(msqc.tables.akt_cmd_tbl_dict[device], commando)
                 com_set = msqc.mdb_read_table_entry(db=msqc.tables.akt_cmd_tbl_dict[device], entry=commando)
 #                print(com_set)
@@ -348,7 +353,7 @@ class Szenen(object):
             for itm in t_list:
                 if itm[0] == device and itm[1] == commando:
                     t_list.remove(itm)
-        elif not device in msqc.tables.akt_type_dict['Local']:
+        elif not device in msqc.SzenenDatabase.akt_type_dict('Local'):
             aes.new_event(description="Failed: " + str(device) + str(commando), prio=1, karenz = 0.03)
         cls.kommando_dict[szn_id] = t_list
 
@@ -388,7 +393,7 @@ class Szenen(object):
             szene_dict = szenen[0].get_as_dict()
             if szene_dict['debug']:
                 print(szene_dict)
-        szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
+#        szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung
         bedingungen = {}
@@ -439,7 +444,8 @@ class Szenen(object):
                 aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
-                interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")              
+                interlocks = msqc.SzenenDatabase.get_elements_by_name("Auto_Mode")[0].get_as_dict()
+#                interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")              
             for idk, key in enumerate(szene_dict):
                 if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                     kommandos = cls.__return_enum__(szene_dict.get(key))
@@ -503,7 +509,10 @@ class Szenen(object):
                 #cls.running_list = {key:val for key, val in cls.running_list.items() if val != kommando}  # was ist mit der Szenen die ich bin? 
 #==============================================================================
 # start timer with following actions
-# ['Szene', delay(s), exact_retrigger [0 nicht exact & retrig,1,2 nicht nicht], selben bedingungen, abhängig erfolg]                
+# ['Szene', delay(s), exact_retrigger [0 nicht exact & retrig,1,2 nicht nicht], selben bedingungen, abhängig erfolg] 
+# 1 Exact und retrigger
+# 2 nicht extact, kein retrigger
+# cancel sollte immer wirken
 #==============================================================================
         if ((szene_dict.get("Follows") != "") and (str(szene_dict.get("Follows")) != "None")):
             kommandos = cls.__return_enum__(szene_dict.get("Follows"))

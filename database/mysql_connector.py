@@ -649,9 +649,12 @@ def index_szenen():
     sort = request.args.get('sort', 'Id')
     filtName = request.args.get('Name', '')
     filterDesc = request.args.get('Beschreibung', '')
-    filterGruppe = request.args.get('Gruppe', '')    
+    filterGruppe = request.args.get('Gruppe', '')  
+    Setting = request.args.get('Setting', '')
+    Follows = request.args.get('Follows', '')
+    Bedingung = request.args.get('Bedingung', '')
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, filtName, filterDesc, filterGruppe),
+    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, filtName, filterDesc, filterGruppe, Setting, Follows, Bedingung),
                           sort_by=sort,
                           sort_reverse=reverse,
                           border=True)
@@ -1143,7 +1146,7 @@ def setting_r(setting):
     return value
 
 def valid_r(inpt):
-    items = [item.valid for item in SzenenDatabase.elements if item.HKS == inpt]
+    items = [item.valid for item in InputsDatabase.elements if item.HKS == inpt]
     if items:
         return items[0]
     else:
@@ -1227,8 +1230,9 @@ def mdb_read_table_entry(db, entry, column='Name',recalc=True):
     return dicti
 
 def get_actor_value(hks):
-    temp_res = mdb_read_table_entry(constants.sql_tables.szenen.name, 'Value')
-    return temp_res[hks]
+#    temp_res = mdb_read_table_entry(constants.sql_tables.szenen.name, 'Value')
+#    return temp_res[hks]
+    return SzenenDatabase.get_val_in_szenen(hks,'Value')
 
 def mdb_read_table_column(db, column):
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -1506,51 +1510,52 @@ def remove_entry(table, device, primary = 'Name'):
 def get_device_adress(device):
     """ returns the adress with with the device is saved in each interface
     """
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    value = 0
-    with con:
-        cur = con.cursor()
-        cur.execute("SELECT %s FROM %s.%s WHERE ID = '6'" % (device, datab, constants.sql_tables.szenen.name))
-#        if cur.fetchone()[0] != 0:
-        results = cur.fetchall()
-        for row in results:
-            value = row[0]
-    con.close()
-    return value
+#    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+#    value = 0
+#    with con:
+#        cur = con.cursor()
+#        cur.execute("SELECT %s FROM %s.%s WHERE ID = '6'" % (device, datab, constants.sql_tables.szenen.name))
+##        if cur.fetchone()[0] != 0:
+#        results = cur.fetchall()
+#        for row in results:
+#            value = row[0]
+#    con.close()
+#    return value
+    return SzenenDatabase.get_val_in_szenen(device,'Adress')
 
 
-def getSzenenSources(szene):
-    # für gui veraltet
-    if szene in ['', None]:
-        return [],[]
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    ilist, slist = [], []
-    with con:
-        cur = con.cursor()
-        sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+\
-              '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)'
-        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)' % (constants.sql_tables.inputs.name, szene)
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            dicti = {}
-            for i in range (0,len(row)):
-               dicti[field_names[i]] = row[i]
-            ilist.append(dicti)
-        sql = 'SELECT * FROM '+constants.sql_tables.szenen.name+' where Follows like "%'+szene+'%"'
-        szene = "%" + szene + "%"
-        sql = 'SELECT * FROM %s.%s where Follows like "%s"' % (datab, constants.sql_tables.szenen.name, szene)
-        cur.execute(sql)
-        results = cur.fetchall()
-        field_names = [i[0] for i in cur.description]
-        for row in results:
-            dicti = {}
-            for i in range (0,len(row)):
-               dicti[field_names[i]] = row[i]
-            slist.append(dicti)
-    con.close()
-    return ilist, slist
+#def getSzenenSources(szene):
+#    # für gui veraltet
+#    if szene in ['', None]:
+#        return [],[]
+#    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+#    ilist, slist = [], []
+#    with con:
+#        cur = con.cursor()
+#        sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+\
+#              '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)'
+#        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)' % (constants.sql_tables.inputs.name, szene)
+#        cur.execute(sql)
+#        results = cur.fetchall()
+#        field_names = [i[0] for i in cur.description]
+#        for row in results:
+#            dicti = {}
+#            for i in range (0,len(row)):
+#               dicti[field_names[i]] = row[i]
+#            ilist.append(dicti)
+#        sql = 'SELECT * FROM '+constants.sql_tables.szenen.name+' where Follows like "%'+szene+'%"'
+#        szene = "%" + szene + "%"
+#        sql = 'SELECT * FROM %s.%s where Follows like "%s"' % (datab, constants.sql_tables.szenen.name, szene)
+#        cur.execute(sql)
+#        results = cur.fetchall()
+#        field_names = [i[0] for i in cur.description]
+#        for row in results:
+#            dicti = {}
+#            for i in range (0,len(row)):
+#               dicti[field_names[i]] = row[i]
+#            slist.append(dicti)
+#    con.close()
+#    return ilist, slist
 
 def maxSzenenId():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
