@@ -141,10 +141,14 @@ class DBTemplate(object):
         self.lock = False
         return results       
     
-    def get_as_list(self):
+    def get_as_list(self, filt=None, filt_on=None):
         liste = []
         for element in self.elements:
-            liste.append(element.__dict__)
+            if filt and filt_on:
+                if getattr(element.__dict__, filt_on) == filt:
+                    liste.append(element.__dict__)
+            else:
+                liste.append(element.__dict__)
         return liste    
     
     def get_as_dict(self):
@@ -265,12 +269,14 @@ class DatabaseIntern(DBTemplate):
     
 class DatabaseSzenen(DBTemplate):
     
-    def get_sorted_by(self, sort, reverse=False, filtName='', filterDesc='', filterGruppe='', Setting='', Follows='', Bedingung=''):
+    def get_sorted_by(self, sort, reverse=False, Id='', filtName='', filterDesc='', filterGruppe='', Setting='', Follows='', Bedingung=''):
         elements = [element for element in self.elements]
+        if Id:
+            elements = [element for element in elements if (int(Id) == element.Id or (element.Id in [1, 5, 6]))]        
         if filtName:
             elements = [element for element in elements if filtName in element.Name]
         if filterDesc:
-            elements = [element for element in elements if filterDesc in element.Beschreibung] 
+            elements = [element for element in elements if element.filterDesc and filterDesc in element.Beschreibung] 
         if filterGruppe:
             elements = [element for element in elements if element.Gruppe and filterGruppe in element.Gruppe]  
         if Setting:
@@ -304,7 +310,7 @@ class DatabaseSzenen(DBTemplate):
         types = self.get_elements_by_name('Device_Type')[0].get_as_dict()
         for key, value in types.items():
             if value == typ:
-                result.append(value)
+                result.append(key)
         return result
     
     def akt_cmd_tbl_dict(self,device):

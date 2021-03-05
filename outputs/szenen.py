@@ -20,6 +20,7 @@ from alarm_event_messaging import alarmevents
 from alarm_event_messaging import messaging
 
 from database import mysql_connector as msqc
+from database import intern_db
 
 from outputs import hue
 
@@ -292,10 +293,10 @@ class Szenen(object):
             current = msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode")
 #            current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
             if 'auto' in current:
-                msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
+#                msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
                 msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='man')
             else:
-                msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
+#                msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
                 msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value='auto')
         elif True: #szn_id == None or szn_id in cls.running_list:
             if device in xs1_devs:
@@ -345,7 +346,7 @@ class Szenen(object):
         if executed:
 # TODO: Return True and value and write value to table
             if device not in ['Name', 'Id']:
-                msqc.set_val_in_szenen(device=device, szene="Value", value=commando)
+#                msqc.set_val_in_szenen(device=device, szene="Value", value=commando)
                 msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Value", value=commando)
         if szn_id == None:
             return
@@ -393,6 +394,9 @@ class Szenen(object):
             szene_dict = szenen[0].get_as_dict()
             if szene_dict['debug']:
                 print(szene_dict)
+        else:
+            print(szene)
+            return False
 #        szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
         start_t = datetime.datetime.now()
         #check bedingung
@@ -411,6 +415,7 @@ class Szenen(object):
 #            time.sleep(float(szene_dict.get("Delay")))            
         erfuellt = cls.__bedingung__(bedingungen)
         if str(szene_dict.get("Latching")) != 'None' and str(szene_dict.get("LastUsed")) != 'None':
+            szene_dict["LastUsed"] = intern_db.convert_to(szene_dict["LastUsed"], datetime.datetime)
             next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
             if start_t < next_start:
                 erfuellt = False
@@ -435,20 +440,22 @@ class Szenen(object):
             else:
                 beschr = szene_dict.get("Beschreibung")
                 if device:
+                    beschr = msqc.re_calc(beschr)
                     text = '%s, %s = %s' % (str(beschr), device, wert)
                 else:
                     text = '%s %s' % (str(beschr), desc)
                     if not beschr:
                         text = False
+                    text = msqc.re_calc(text)
             if str(text) != 'False':
                 aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.SzenenDatabase.get_elements_by_name("Auto_Mode")[0].get_as_dict()
 #                interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")              
-            for idk, key in enumerate(szene_dict):
-                if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") and (str(interlocks.get(key)) in ["None", "auto"])):
-                    kommandos = cls.__return_enum__(szene_dict.get(key))
+            for key, value in szene_dict.items():
+                if ((value != "") and (str(value) != "None") and (str(interlocks.get(key)) in ["None", "auto"]) and not key in ['Beschreibung']):
+                    kommandos = cls.__return_enum__(value)
                     if constants.redundancy_.master:
                         delay = 0
                         for kommando in kommandos:
@@ -517,6 +524,7 @@ class Szenen(object):
         if ((szene_dict.get("Follows") != "") and (str(szene_dict.get("Follows")) != "None")):
             kommandos = cls.__return_enum__(szene_dict.get("Follows"))
             for kommando in kommandos:
+                kommando = msqc.re_calc(kommando)
                 szn = kommando[0]
                 dlay = kommando[1]
                 ex_re = kommando[2]
@@ -560,6 +568,7 @@ class Szenen(object):
         if ((szene_dict.get("Follows") != "") and (str(szene_dict.get("Follows")) != "None")):
             kommandos = cls.__return_enum__(szene_dict.get("Follows"))
             for kommando in kommandos:
+                kommando = msqc.re_calc(kommando)
                 szn = kommando[0]
                 dlay = kommando[1]
                 ex_re = kommando[2]

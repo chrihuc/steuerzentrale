@@ -19,7 +19,7 @@ from tools import toolbox
 import json
 
 from flask import Flask, Markup, request, url_for, render_template, redirect
-from flask_table import Table, Col, LinkCol
+from flask_table import Table, Col, LinkCol, ButtonCol
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField
@@ -111,7 +111,7 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'Bedingung':       (None, str)
                     ,'AutoMode':        (None, str) 
                     ,'intCmd':          (None, str)  
-                    ,'LastUsed':        (None, str)
+                    ,'LastUsed':        (None, datetime.datetime)
                     ,'Enabled':         (None, str)
 
                     ,'A00EIN1ADV1ST01':         (None, str)
@@ -228,7 +228,7 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'V01KID1ZIM1LI01':         (None, str)
                     ,'V01KID1UIM1LI02':         (None, str)
 
-                    ,'debug':           (False, bool)                    
+                    ,'debug':                   (False, bool)                    
                     }
 
 InputsDatabase = DatabaseIntern(properties_iptDB, 'inputs_table.jsn')
@@ -293,6 +293,8 @@ class TriggerForm(FlaskForm):
 class SortableTableInputs(Table):
     Id = Col('ID')
     Name = Col('Name')
+#    Name = LinkCol(
+#        'Name', 'index_inputs', url_kwargs=dict(Name='Name'), allow_sort=False)
     HKS = Col('HKS')
     Description = Col('Description')
     Status = Col('Status')
@@ -323,8 +325,14 @@ class SortableTableInputs(Table):
         return url_for('index_inputs', sort=col_key, direction=direction)
 
 class SortableTableSzenen(Table):
-    Id           = Col('Id')
-    Name         = Col('Name')
+#    Id           = Col('Id')
+    Id = LinkCol(
+        'Id', 'index_szenen', url_kwargs=dict(Id='Id'), allow_sort=False, attr=('Id'))
+#    Name         = Col('Name')
+    Name = LinkCol(
+        'Name', 'index_inputs', url_kwargs=dict(Scene='Name'), allow_sort=False, attr=('Name'))
+    Execute      = ButtonCol('Ausführen', 'execScene', url_kwargs=dict(Scene='Name',Id='Id'))
+    LastUsed     = Col('LastUsed')
     Prio         = Col('Prio')
     MQTTChannel  = Col('MQTTChannel')
     Beschreibung = Col('Beschreibung')
@@ -340,7 +348,6 @@ class SortableTableSzenen(Table):
     Bedingung    = Col('Bedingung')
     AutoMode     = Col('AutoMode')
     intCmd       = Col('intCmd')
-    LastUsed     = Col('LastUsed')
     Enabled      = Col('Enabled')
     editconf = LinkCol(
         'Edit config', 'edit_szn', url_kwargs=dict(Id='Id'), allow_sort=False)
@@ -356,6 +363,8 @@ class SortableTableSzenen(Table):
         'Edit Aussen', 'edit_szn_a', url_kwargs=dict(Id='Id'), allow_sort=False)       
     new = LinkCol(
         'Copy Szene', 'copy_szene', url_kwargs=dict(Id='Id')) 
+    delet = LinkCol(
+        'Delete', 'delete_szene', url_kwargs=dict(Id='Id'))
 
     allow_sort = True
     def sort_url(self, col_key, reverse=False):
@@ -380,7 +389,7 @@ def read_inputs_to_inputs_table():
     files = glob.glob("./db_backup/inputs_table*" )
     files.sort()
     index = len(files)
-    print(files)
+#    print(files)
     # neu
     while not success:
         try:
@@ -390,7 +399,7 @@ def read_inputs_to_inputs_table():
             print("inputs table loaded from file")
             success = True
         except Exception as e:
-            print("COULD NOT LOAD TABLE")
+            print("COULD NOT LOAD INPUTS TABLE")
             print(e)
             index -= 1
             if index >= 0:
@@ -420,18 +429,28 @@ def mdb_get_table(db):
 def read_szenen_to_inputs_table():
 #    global inputs_table
     szenen_table = {}
+    success = False
+    file = 'szenen_table.jsn'
+    index = 0
+    files = glob.glob("./db_backup/szenen_table*" )
+    files.sort()
+    index = len(files)    
     # neu
-    try:
-        with open('szenen_table.jsn') as f:
-            sznsjsn = f.read()            
-        szenen_table = json.loads(sznsjsn)
-        print("szenen table loaded from file") 
-    except Exception as e:
-        print(e)
-        liste = mdb_get_table(constants.sql_tables.szenen.name)
-        for line in liste:
-            szenen_table[line['Id']] = line
-        print(szenen_table[120])
+    while not success:
+        try:
+            with open(file) as f:
+                szenejsn = f.read()            
+            szenen_table = json.loads(szenejsn)
+            print("Szenen table loaded from file")
+            success = True
+        except Exception as e:
+            print("COULD NOT LOAD SZENEN TABLE")
+            print(e)
+            index -= 1
+            if index >= 0:
+                file = files[index]
+            else:
+                raise Exception('Kein Backup', 'szenen')
     return szenen_table
 
 print('baue')
@@ -456,7 +475,8 @@ class SzenenForm(FlaskForm):
     AutoMode     = StringField('AutoMode')
     intCmd       = StringField('intCmd')
     LastUsed     = StringField('LastUsed')
-    Enabled      = StringField('Enabled')
+    Enabled      = SelectField('Enabled', choices =[(False,False),(True,True)])
+    debug        = SelectField('debug', choices =[(False,False),(True,True)])
 
 class SzenenFormA(FlaskForm):
     A00EIN1ADV1ST01        = StringField(SzenenDatabase.get_description('A00EIN1ADV1ST01')+': '+'A00EIN1ADV1ST01')      
@@ -543,7 +563,8 @@ class SzenenFormOG(FlaskForm):
     V01SCH1RUM1LI11        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI11')+': '+'V01SCH1RUM1LI11')       
     V01SCH1STE1LI01        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI01')+': '+'V01SCH1STE1LI01')       
     V01SCH1STE1LI02        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI02')+': '+'V01SCH1STE1LI02') 
-    V01KID1ZIM1LI01        = StringField(SzenenDatabase.get_description('V01KID1ZIM1LI01')+': '+'V01KID1ZIM1LI01')            
+    V01KID1ZIM1LI01        = StringField(SzenenDatabase.get_description('V01KID1ZIM1LI01')+': '+'V01KID1ZIM1LI01') 
+    V01KID1UIM1LI02        = StringField(SzenenDatabase.get_description('V01KID1UIM1LI02')+': '+'V01KID1UIM1LI02')            
 
 class SzenenFormUG(FlaskForm):
     VIRKOM1SSH1PC01        = StringField(SzenenDatabase.get_description('VIRKOM1SSH1PC01')+': '+'VIRKOM1SSH1PC01')       
@@ -583,14 +604,15 @@ class SzenenFormDG(FlaskForm):
     
 
 @app.route('/inputs/')
-def index_inputs():
+def index_inputs(Scene=None):
     sort = request.args.get('sort', 'Id')
-    filtName = request.args.get('Name', '')
+    Name = request.args.get('Name', '')
     filtHKS = request.args.get('HKS', '')
     filtDesc = request.args.get('Desc', '') 
-    filtScene = request.args.get('Scene', '')
+    if not Scene:
+        Scene = request.args.get('Scene', '')
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTableInputs(InputsDatabase.get_sorted_by(sort, reverse, filtName, filtHKS, filtDesc,filtScene),
+    table = SortableTableInputs(InputsDatabase.get_sorted_by(sort, reverse, Name, filtHKS, filtDesc,Scene),
                           sort_by=sort,
                           sort_reverse=reverse,
                           border=True)
@@ -647,6 +669,7 @@ def flask_link(Id=None):
 @app.route('/szenen/')
 def index_szenen():
     sort = request.args.get('sort', 'Id')
+    Id = request.args.get('Id', '')
     filtName = request.args.get('Name', '')
     filterDesc = request.args.get('Beschreibung', '')
     filterGruppe = request.args.get('Gruppe', '')  
@@ -654,11 +677,28 @@ def index_szenen():
     Follows = request.args.get('Follows', '')
     Bedingung = request.args.get('Bedingung', '')
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, filtName, filterDesc, filterGruppe, Setting, Follows, Bedingung),
+    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, Id, filtName, filterDesc, filterGruppe, Setting, Follows, Bedingung),
                           sort_by=sort,
                           sort_reverse=reverse,
                           border=True)
     return table.__html__()
+
+@app.route('/execScene/<int:Id>', methods=['GET', 'POST'])
+def execScene(Scene=None, Id=None):
+    if not Scene:
+        Scene = request.args.get('Scene', None)    
+    payload = {'Szene':Scene}
+    toolbox.communication.send_message(payload, typ='ExecSzene')   
+    return redirect(url_for('index_szenen', Id=Id))
+
+@app.route('/szenen/delete/<int:Id>', methods=['GET', 'POST'])
+def delete_szene(Id):    
+    if request.method == 'POST':
+        print('delete Szene')
+        SzenenDatabase.del_element(Id)
+        return 'Szene deleted'
+    elif request.method == 'GET':
+        return render_template('delete_form.html') 
 
 @app.route('/szenen/item/<int:Id>', methods=['GET', 'POST'])
 def edit_szn(Id=None):
@@ -670,12 +710,11 @@ def edit_szn(Id=None):
     if request.method == 'GET':
         for item, value in form.__dict__.items():
             if item in element.__dict__:
-                setattr(getattr(form, item),'data',getattr(element, item))
+                setattr(getattr(form, item),'data',str(getattr(element, item)))
     if request.method == 'POST':
         for item, value in form.__dict__.items():
             if item in element.__dict__ and item in properties_sznDB:
-                if not any([i in item for i in ['V0', 'Vm', 'A0', 'VIR']]):
-                    setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))  
 #        return 'thank_you'
         return redirect(url_for('edit_szn', Id=Id))
 
@@ -697,8 +736,7 @@ def edit_szn_ug(Id=None):
     if request.method == 'POST':
         for item, value in form.__dict__.items():
             if item in element.__dict__ and item in properties_sznDB:
-                if any([i in item for i in ['Vm', 'VIR']]):
-                    setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                   
 #        return 'thank_you'
         return redirect(url_for('edit_szn_ug', Id=Id))
 
