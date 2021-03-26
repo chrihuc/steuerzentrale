@@ -13,6 +13,7 @@ from tools import toolbox
 from outputs import mqtt_publish
 import constants
 import time
+import copy
 
 class Shelly(object):
 
@@ -115,12 +116,22 @@ def receive_communication(payload, *args, **kwargs):
         elif toolbox.kw_unpack(kwargs,'receiver') == 'WLED':
 #            print(device)
 #            print(payload)
-            result = mqtt_publish.mqtt_pub(device + "/api", payload)
-            if 'bri' in payload and int(payload['bri']) > 0:
+#            pscopy = copy.copy(payload)
+            #pscopy.pop('bri', None)
+            result = False
+            if 'bri' in payload and not payload['bri']:
+                result = mqtt_publish.mqtt_pub(device + "/api", payload)
+            elif 'bri' in payload and payload['bri'] and int(payload['bri']) > 0:
                 payload['bri'] = round(payload['bri'])   
-                payload.pop('ps', None)
-                payload['on'] = True                
-                mqtt_publish.mqtt_pub(device + "/api", payload)
+                #payload.pop('ps', None)
+                #payload['on'] = True                
+                result = mqtt_publish.mqtt_pub(device + "/api", payload)
+            elif 'bri' in payload and payload['bri'] and int(payload['bri']) <= 0:
+                payload['bri'] = 0  
+                #payload.pop('ps', None)
+                #payload['on'] = False                
+                result = mqtt_publish.mqtt_pub(device + "/api", payload)                
+                
             toolbox.communication.send_message(payload, typ='return', value=result)                
     
 

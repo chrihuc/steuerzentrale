@@ -184,7 +184,7 @@ class DBTemplate(object):
         return True      
     
     def periodic_save(self):
-        thread_pt = Timer(300, self.periodic_save)
+        thread_pt = Timer(1800, self.periodic_save)
         thread_pt.start()    
         self.save_to_file()
         return True        
@@ -269,7 +269,7 @@ class DatabaseIntern(DBTemplate):
     
 class DatabaseSzenen(DBTemplate):
     
-    def get_sorted_by(self, sort, reverse=False, Id='', filtName='', filterDesc='', filterGruppe='', Setting='', Follows='', Bedingung=''):
+    def get_sorted_by(self, sort, reverse=False, Id='', filtName='', filterDesc='', filterGruppe='', Setting='', Follows='', Bedingung='', **kwargs):
         elements = [element for element in self.elements]
         if Id:
             elements = [element for element in elements if (int(Id) == element.Id or (element.Id in [1, 5, 6]))]        
@@ -284,7 +284,14 @@ class DatabaseSzenen(DBTemplate):
         if Follows:
             elements = [element for element in elements if element.Follows and Follows in element.Follows] 
         if Bedingung:
-            elements = [element for element in elements if element.Bedingung and Bedingung in element.Bedingung]             
+            elements = [element for element in elements if element.Bedingung and Bedingung in element.Bedingung]     
+        try:
+#            print(kwargs)
+            for kw, value in kwargs.items():
+                if value and not value in ['', '[]']:
+                    elements = [element for element in elements if getattr(element, kw) and value in str(getattr(element, kw))] 
+        except Exception as e:
+            print(e)
         result = None
         if self.props[sort][1] in [int, float]:
             result = sorted(

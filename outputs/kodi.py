@@ -47,7 +47,7 @@ class kodi_client():
     def callback_receiver(self, payload, *args, **kwargs):
         if toolbox.kw_unpack(kwargs,'typ') == 'Setting':
             if payload['Setting'] == 'Status':
-                if payload['Value'] == 'Wach':
+                if payload['Value'] in ['Wach', 'Besuch']:
                     self.slideshow()
                 else:
                     self.stop()

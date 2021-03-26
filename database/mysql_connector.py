@@ -44,6 +44,7 @@ properties_iptDB = { 'Id':          (None, int)
                     ,'heartbeat' :  (None, int)
                     ,'latching' :   (None, bool)
                     ,'latched' :    (None, bool)
+                    ,'latch_always':(False, bool)
                     ,'persistance' :(None, int)
                     ,'violTime' :   (None, datetime.datetime)
                     ,'valid' :      (True, bool)
@@ -123,9 +124,13 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'A00RAS1MAE1DO01':         (None, str)
                     ,'A00TER1ADV1ST01':         (None, str)
                     ,'A00TER1DEK1LI01':         (None, str)
+                    ,'A00TER1DEK1DO01':         (None, str)
                     ,'A00TER1GEN1LI01':         (None, str)
                     ,'A00TER1GEN1PO01':         (None, str)
                     ,'A00TER1GEN1ST01':         (None, str)
+                    ,'A00TER2MAR1DO01':         (None, str)
+                    ,'A00TER2MAR1DO02':         (None, str)
+                    ,'A00TER2MAR1DO03':         (None, str)                    
                     ,'V00ESS1DEK1LI01':         (None, str)
                     ,'V00ESS1RUM1LI01':         (None, str)
                     ,'V00ESS1OUT1PO01':         (None, str)
@@ -186,6 +191,8 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'V01KID1RUM1LI02':         (None, str)
                     ,'V01KID1ZIM1ST01':         (None, str)
                     ,'V01KID1ZIM1ST02':         (None, str)
+                    ,'V01KID1ZIM1LI01':         (None, str)
+                    ,'V01KID1UIM1LI02':         (None, str)                    
                     ,'V01SCH1BET1LI01':         (None, str)
                     ,'V01SCH1BET1LI02':         (None, str)
                     ,'V01SCH1DEK1LI01':         (None, str)
@@ -225,8 +232,6 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'Vm1ZIM3DEK1LI01':         (None, str)
                     ,'Vm1ZIM3RUM1ST01':         (None, str)
                     ,'Vm1ZIM3STR1DO01':         (None, str)
-                    ,'V01KID1ZIM1LI01':         (None, str)
-                    ,'V01KID1UIM1LI02':         (None, str)
 
                     ,'debug':                   (False, bool)                    
                     }
@@ -258,6 +263,7 @@ class TriggerForm(FlaskForm):
     debounce  = StringField('debounce')
     heartbeat  = StringField('heartbeat')
     latching  = StringField('latching')
+    latch_always  = SelectField('latch_always', choices =[(False,False),(True,True)]) 
 #    violTime = StringField('violTime')
     persistance  = StringField('persistance')
     Kompression  = SelectField('Kompression', choices =[(False,False),(True,True),('Bool','Bool')]) 
@@ -307,7 +313,7 @@ class SortableTableInputs(Table):
 #    heartbeat
     latching = Col('latching')
     latched= Col('latched')
-    latched= Col('latched')
+    latch_always= Col('latch_always')
     persistance= Col('persistance')
     link = LinkCol(
         'Edit', 'flask_link', url_kwargs=dict(Id='Id'), allow_sort=False)
@@ -339,12 +345,18 @@ class SortableTableSzenen(Table):
     Durchsage    = Col('Durchsage')
     Karenz       = Col('Karenz')
     Latching     = Col('Latching')
-    Gruppe       = Col('Gruppe')
+#    Gruppe       = Col('Gruppe') # Todo linkcol
+    Gruppe = LinkCol(
+        'Gruppe', 'index_szenen', url_kwargs=dict(Gruppe='Gruppe'), allow_sort=True, attr=('Gruppe'))    
     #inApp        = Col('inApp')
     Setting      = Col('Setting')
     Delay        = Col('Delay')
-    Follows      = Col('Follows')
-    Cancels      = Col('Cancels')
+#    Follows      = Col('Follows') # Todo linkcol
+    Follows = LinkCol(
+        'Follows', 'index_szenen', url_kwargs=dict(Follows='Name'), allow_sort=True, attr=('Follows'))      
+#    Cancels      = Col('Cancels') # Todo linkcol
+    Cancels = LinkCol(
+        'Cancels', 'index_szenen', url_kwargs=dict(Cancels='Name'), allow_sort=True, attr=('Cancels'))      
     Bedingung    = Col('Bedingung')
     AutoMode     = Col('AutoMode')
     intCmd       = Col('intCmd')
@@ -490,7 +502,11 @@ class SzenenFormA(FlaskForm):
     A00TER1DEK1LI01        = StringField(SzenenDatabase.get_description('A00TER1DEK1LI01')+': '+'A00TER1DEK1LI01')       
     A00TER1GEN1LI01        = StringField(SzenenDatabase.get_description('A00TER1GEN1LI01')+': '+'A00TER1GEN1LI01')       
     A00TER1GEN1PO01        = StringField(SzenenDatabase.get_description('A00TER1GEN1PO01')+': '+'A00TER1GEN1PO01')       
-    A00TER1GEN1ST01        = StringField(SzenenDatabase.get_description('A00TER1GEN1ST01')+': '+'A00TER1GEN1ST01')       
+    A00TER1GEN1ST01        = StringField(SzenenDatabase.get_description('A00TER1GEN1ST01')+': '+'A00TER1GEN1ST01') 
+    A00TER1DEK1DO01        = StringField(SzenenDatabase.get_description('A00TER1DEK1DO01')+': '+'A00TER1DEK1DO01')
+    A00TER2MAR1DO01        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO01')+': '+'A00TER2MAR1DO01')
+    A00TER2MAR1DO02        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO02')+': '+'A00TER2MAR1DO02')
+    A00TER2MAR1DO03        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO03')+': '+'A00TER2MAR1DO03')    
 
 class SzenenFormEG(FlaskForm):
     V00ESS1DEK1LI01        = StringField(SzenenDatabase.get_description('V00ESS1DEK1LI01')+': '+'V00ESS1DEK1LI01')       
@@ -649,7 +665,7 @@ def flask_link(Id=None):
                 if item in ['Immer', 'Wach', 'Sturm']:
                     setattr(getattr(form, item), 'choices', SzenenDatabase.get_all_names(filtGruppe))                
                 setattr(getattr(form, item),'data',getattr(element, item))
-                if item in ['Logging', 'Doppelklick','enabled', 'debug','Kompression']:
+                if item in ['Logging', 'Doppelklick','enabled', 'debug','Kompression','latch_always']:
                     setattr(getattr(form, item),'data', str(getattr(element, item)))
     if request.method == 'POST':
         for item, value in form.__dict__.items():
@@ -677,7 +693,11 @@ def index_szenen():
     Follows = request.args.get('Follows', '')
     Bedingung = request.args.get('Bedingung', '')
     reverse = (request.args.get('direction', 'asc') == 'desc')
-    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, Id, filtName, filterDesc, filterGruppe, Setting, Follows, Bedingung),
+    kwargs = {}
+    for key, value in properties_sznDB.items():
+        if any([i in key for i in ['V0', 'Vm', 'A0', 'VIR']]):
+            kwargs[key] = request.args.get(key, '')    
+    table = SortableTableSzenen(SzenenDatabase.get_sorted_by(sort, reverse, Id, filtName, filterDesc, filterGruppe, Setting, Follows, Bedingung, **kwargs),
                           sort_by=sort,
                           sort_reverse=reverse,
                           border=True)
@@ -1074,15 +1094,19 @@ def writeInfluxDb(hks, value, utc):
     return True  
 
 def writeInfluxString(key, value, utc):
-    try:
-        json_body = [{"measurement": key,
-                      "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
-                      "fields": {"value": str(value)}}]
-        client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
-        client.write_points(json_body)
-    except:
-        pass
-#        print(key, value, utc)
+    tries = 0
+    retries = 4
+    while tries < retries:
+        try:
+            json_body = [{"measurement": key,
+                          "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                          "fields": {"value": str(value)}}]
+            client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
+            if client.write_points(json_body):
+                tries = retries
+        except:
+            tries += 1
+            print(key, value, utc)
     return True 
 
 def get_input_value(hks):
@@ -1139,7 +1163,7 @@ def setting_s(setting, wert):
         except:
             print('could not set input', setting, wert)
     else:
-        data = {'Value':wert, 'Setting':setting}
+        data = {'Value':str(wert), 'Setting':str(setting)}
         prozessspiegel[setting] = wert
         mqtt_pub("Settings/" + setting, data)
         thread_inflx = Timer(0, writeInfluxString, [setting, wert, utc])
@@ -1921,7 +1945,8 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         violTime = None
                     # hier war bisher nur append, das heisst aber das wir latchen, auch wenn nichts auszuführen ist.
                     # jetzt latchen wir nur, wenn auch eine Szene ausgeführt wird... mal schauen
-                    if append and szenen:
+                    # jetzt machen wir es auswählbar
+                    if append and (szenen or trigger.latch_always):
                         latchMerker = True
                     if append and dicti.get('persistance') is not None:  # wir hätten was auszufühern aber persistence ist grösser null
                         if type(dicti.get('persistance')) == str and len(dicti.get('persistance')) == 0:
@@ -2036,4 +2061,5 @@ def main():
 #    with open('inputs_table.jsn', 'w') as fout:
 #        json.dump(InputsDB.get_as_list(), fout, default=json_serial) 
     InputsDatabase.save_to_file()
+    SzenenDatabase.save_to_file()
     print("table written")

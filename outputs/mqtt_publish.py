@@ -55,7 +55,9 @@ class MqttClient():
             time.sleep(5)
             if not self.connected: self.connect()
         zeit =  time.time()
-        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit)))    
+        uhr = str(strftime("%Y-%m-%d %H:%M:%S",localtime(zeit))) 
+        result = None
+        message = None
         if isinstance(data, dict):
             if not short:
                 data['ts'] = uhr
@@ -67,19 +69,30 @@ class MqttClient():
                         pass
                 data = json.dumps(data, default=handler, allow_nan=False)
             except:
-                self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)
+                message = "couldn't convert to json"
             else:
-                self.client.publish(channel, data, qos=1, retain=retain)
+                message = data
         elif isinstance(data, list):
             data = {'payload': data, 'ts': uhr}
             try:
                 data = json.dumps(data, default=handler, allow_nan=False)
             except:
-                self.client.publish(channel, "couldn't convert to json", qos=1, retain=True)
+                message = "couldn't convert to json"
             else:
-                self.client.publish(channel, data, qos=1, retain=retain)            
+                message = data            
         else:
-            self.client.publish(channel, data, qos=1, retain=retain)
+            message = data
+        retries = 4
+        tries = 0
+        while tries < retries:
+            tries += 1
+            try:
+                result = self.client.publish(channel, message, qos=1, retain=retain)
+                if result.is_published:
+                    tries = retries
+            except Exception as e:
+                print(e)
+        #print(dir(result))
         return True
 
     def receive_communication(self, payload, *args, **kwargs):
@@ -88,6 +101,10 @@ class MqttClient():
             device = adress.split(".")[1] 
 #            der teil muss abgekürzt werden, wenn ein ESP der empfänger ist, auf nur das nötigste
             if toolbox.kw_unpack(kwargs,'receiver') == 'ESP':
+                if not 'value' in payload:
+                    print('no value in payload')
+                    print(payload, args, kwargs)
+                    return
                 new_pl = {}
                 new_pl['Value'] = payload['Value']
                 new_pl['SleepTime'] = payload['SleepTime']

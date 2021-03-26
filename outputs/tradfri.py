@@ -162,31 +162,34 @@ class Tradfri_lights():
             transT = 0
 #        print(transT)
         
+        
         if l != None:
     #        dim_command = l.light_control.set_dimmer(szene['bri'])
     #        api(dim_command)
 #            print(l)
             for lampe in l:
+                szene['lname'] = lampe.name
                 if szene['toggle']:
                     if lampe.light_control.state:
                         bri = 0
                 hash_id = str(uuid.uuid4())
                 Tradfri_lights.locklist[lampe] = hash_id
                 if bri == 0:
+                    transT = max(0.1, transT)
                     dim_command = lampe.light_control.set_dimmer(bri, transition_time=transT)
-                    self.api_cmd(dim_command)
+                    self.api_cmd(dim_command, szene)
                 elif transT == 0:
                     if lampe.light_control.can_set_color:                     
     #                    RANGE_SATURATION = (0, 65279)
-                        color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']))
-                        self.api_cmd(color_command)
-                        dim_command = lampe.light_control.set_dimmer(bri)
-                        self.api_cmd(dim_command)                    
+                        color_command = lampe.light_control.set_hsb(int(szene['hue']), int(szene['sat']), transition_time=0.1)
+                        self.api_cmd(color_command, szene)
+                        dim_command = lampe.light_control.set_dimmer(bri, transition_time=0.1)
+                        self.api_cmd(dim_command,szene)                    
                     else:
-                        dim_command = lampe.light_control.set_dimmer(bri)
-                        self.api_cmd(dim_command) 
-                        dim_command = lampe.light_control.set_color_temp(temp)
-                        self.api_cmd(dim_command)
+                        dim_command = lampe.light_control.set_dimmer(bri, transition_time=0.1)
+                        self.api_cmd(dim_command,szene) 
+                        dim_command = lampe.light_control.set_color_temp(temp, transition_time=0.1)
+                        self.api_cmd(dim_command,szene)
                 else:
                     if lampe.light_control.can_set_color:                     
     #                    RANGE_SATURATION = (0, 65279)
@@ -208,14 +211,21 @@ class Tradfri_lights():
             success = True
         return success
     
-    def api_cmd(self, command):
+    def api_cmd(self, command, desc=None):
         retry_max = 3
         retry = 0
+        uhr = str(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time())))         
+        if desc:
+            print(uhr, desc['lname'], desc['Name'], desc['transitiontime'], desc['bri'])
         while retry < retry_max:
             try:
+#                print('tradfr', retry)
+                if retry > 0:
+                    print(retry)
                 api(command)
                 retry = retry_max
             except Exception as e:
+                print(e)
                 retry += 1
                 time.sleep(0.05 * retry)
                 if retry >= retry_max:

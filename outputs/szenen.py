@@ -28,7 +28,9 @@ from outputs import internal
 from outputs import samsung
 from outputs import satellites
 try:
+    pass
     from outputs import sonos
+    print('sonos imported')
     sn = sonos.Sonos()
 except Exception as e:
     print(e)
@@ -333,7 +335,8 @@ class Szenen(object):
 #            elif device in msqc.tables.akt_type_dict['Local']:
             elif device in msqc.SzenenDatabase.akt_type_dict('Local'):
 #                print(msqc.tables.akt_cmd_tbl_dict[device], commando)
-                com_set = msqc.mdb_read_table_entry(db=msqc.tables.akt_cmd_tbl_dict[device], entry=commando)
+                #com_set = msqc.mdb_read_table_entry(db=msqc.tables.akt_cmd_tbl_dict[device], entry=commando)
+                com_set = msqc.mdb_read_table_entry(db=msqc.SzenenDatabase.get_as_dict()['Command_Table'][device] , entry=commando)
 #                print(com_set)
                 payload = {'Device': device, 'Szene': commando, 'Szene_id': szn_id}
                 if com_set: payload.update(com_set)
@@ -395,6 +398,7 @@ class Szenen(object):
             if szene_dict['debug']:
                 print(szene_dict)
         else:
+            print('Keine Szene mit Namen')
             print(szene)
             return False
 #        szene_dict = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name, szene)
@@ -490,12 +494,15 @@ class Szenen(object):
             key = "Setting"
             if ((szene_dict.get(key) != "") and (str(szene_dict.get(key)) != "None") and (str(interlocks.get(key)) in ["None", "auto"])):
                 kommandos = cls.__return_enum__(szene_dict.get(key))
-                for kommando in kommandos:
+                if type(kommandos) != dict:
+                    print(szene)
+                    print(kommandos)
+                for kommando, value in kommandos.items():
 #                    set_del = Timer(0, setting_s, [str(kommando), str(kommandos.get(kommando))])
 #                    #timer set to 0 for following actions
 #                    set_del.start()
                     # solution above could give timing issues
-                    value = msqc.re_calc(str(kommandos.get(kommando)))
+                    value = msqc.re_calc(value)
                     msqc.setting_s(str(kommando), value)
                     payload = {'Setting':str(kommando), 'Value':value}
                     toolbox.communication.send_message(payload, typ='Setting')

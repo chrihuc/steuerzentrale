@@ -20,6 +20,7 @@ from io import BytesIO
 #import json
 
 import MySQLdb as mdb
+from influxdb import InfluxDBClient
 
 from alarm_event_messaging import messaging
 from database import mysql_connector
@@ -199,6 +200,14 @@ class AES:
                 else:
                     insertstatement = 'INSERT INTO '+table.name+'(description, prio, Date) VALUES("' + str(description) + '", "' + str(prio) + '", CURRENT_TIMESTAMP)'
 #                cur.execute(insertstatement)
+            if description != '' :
+                utc = datetime.datetime.utcnow()
+                json_body = [{"measurement": "Events",
+                              "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
+                              "fields": {"value": str(description)}}]
+#                print(json_body)
+                client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'sz_events')     
+                client.write_points(json_body)              
 #            if str(mysql_connector.setting_r("Status")) == "Wach":
 #                anwesend = True
 #            else:

@@ -97,13 +97,17 @@ class MqttClient:
         try:
             m_in=(json.loads(message)) #decode json data
         except ValueError:
-            if "shellies" in msg.topic:
-                name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[3]
-                if message == "on":
-                    value = 1
-                else:
-                    value = 0
-                broadcast_input_value('MQTT.' + name, value)
+            try:
+                if "shellies" in msg.topic:
+                    name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[3]
+                    if message == "on":
+                        value = 1
+                    else:
+                        value = 0
+                    broadcast_input_value('MQTT.' + name, value)
+            except Exception as e:
+                print(msg.topic)
+                print(message)
 #            print("no json code", message)
         else:        
     #        print(m_in)

@@ -120,7 +120,6 @@ class SecvestHandler(object):
 
         alarms = self.alarmanlage.get_alarms() 
         for alarm in alarms:
-            print(alarm)
             if not alarm in self.alarms:
                 if alarm['type'] == '1':
                     payload = {'Szene':'SecvestInfo', 'desc':'Einbruch'}
@@ -128,6 +127,8 @@ class SecvestHandler(object):
                     payload = {'Szene':'SecvestInfo', 'desc':'Sabotage'}                    
                 toolbox.communication.send_message(payload, typ='ExecSzene')
                 self.alarms.append(alarm)
+            if not alarm['type'] in ['1', '4']:
+                print(alarm)
         delete = []                
         for alarm in self.alarms:
             if not alarm in alarms:
