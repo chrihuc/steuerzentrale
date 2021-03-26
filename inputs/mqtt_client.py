@@ -97,6 +97,8 @@ class MqttClient:
         try:
             m_in=(json.loads(message)) #decode json data
         except ValueError:
+            if 'temperature_status' in msg.topic:
+                return True
             try:
                 if "shellies" in msg.topic:
                     name = msg.topic.split("/")[1] + '.' + msg.topic.split("/")[3]
