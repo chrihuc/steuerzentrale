@@ -54,8 +54,11 @@ class MqttClient:
         self.assign_handlers(self.on_connect, self.dis_con, self.on_message)
         self.client.username_pw_set(username=constants.mqtt_.user,password=constants.mqtt_.password)
         self.client.connect(self.ip, self.port, 60)
-    #    client.loop_start()
-        self.client.loop_forever()
+        self.client.loop_start()
+#        self.client.loop_forever()
+        while constants.run:
+            time.sleep(1)
+        self.client.loop_stop()
     
     
     def assign_handlers(self, connect, disconnect, message):
