@@ -288,21 +288,22 @@ try:
         toolbox.sleep(5)
         heartbeats += 1        
 except KeyboardInterrupt:
-    print('Warte 5 s um Threads zu stoppen')
-    constants.run = False 
-    time.sleep(1)
-    print('4')
-    time.sleep(1)
-    print('3')
-    time.sleep(1)
-    print('2')
-    time.sleep(1)
-    print('1')    
-    time.sleep(1)
-    for t in threadliste:
-        if t in threading.enumerate():
-            print(t.name + ' still running')
-    print('Ende')
+    pass
+print('Warte 5 s um Threads zu stoppen')
+constants.run = False 
+time.sleep(1)
+print('4')
+time.sleep(1)
+print('3')
+time.sleep(1)
+print('2')
+time.sleep(1)
+print('1')    
+time.sleep(1)
+for t in threadliste:
+    if t in threading.enumerate():
+        print(t.name + ' still running')
+print('Ende')
 sys.exit()
 
 

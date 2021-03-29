@@ -214,7 +214,8 @@ class Tradfri_lights():
     def api_cmd(self, command, desc=None):
         retry_max = 3
         retry = 0
-        uhr = str(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time())))         
+        uhr = str(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))) # das wird im sekundentakt dann ausgeführt... block es das weitere?
+        # trennen vom gateway in Abstaänden?
         if desc:
             print(uhr, desc['lname'], desc['Name'], desc['transitiontime'], desc['bri'])
         while retry < retry_max:

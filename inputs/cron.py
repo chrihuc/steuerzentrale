@@ -72,7 +72,7 @@ def periodic_supervision():
             stunde = int(strftime("%H", lt))
             minute = int(strftime("%M", lt))
             sekunde = int(strftime("%S", lt))
-            time.sleep(60-sekunde)
+            toolbox.sleep(60-sekunde)
             min2 = int((minute))
             min1 = 0
             l = 0
@@ -125,7 +125,7 @@ def periodic_supervision():
                         t.start()
                         lt = localtime()
                         sekunde = int(strftime("%S", lt))
-                        time.sleep(60-sekunde)
+                        toolbox.sleep(60-sekunde)
                     #executed every 30 min
                     t = threading.Thread(target=every_30_min)
                     t.start()

@@ -168,7 +168,7 @@ class TempController(object):
     def cycling(cls):
         while cls.running and constants.run:
             cls.update_rooms()
-            time.sleep(cls.cylcetime)
+            toolbox.sleep(cls.cylcetime)
     
     @classmethod
     def start_thread(cls):
