@@ -412,7 +412,7 @@ class TiFo:
     def connect(self, *execCmd, **kwargs):
 
         # Connect to brickd, will trigger cb_connected
-        while True:
+        while constants.run:
             try:
                 self.LEDList = LEDStrips()
                 self.ipcon.disconnect()
@@ -432,20 +432,20 @@ class TiFo:
             except Error as e:
                 if self.connectverbose:
                     print('Connection Error: ' + str(e.description))
-                time.sleep(10)
+                toolbox.sleep(10)
             except socket.error as e:
 #                print('Socket error: ' + str(e))
-                time.sleep(10)
+                toolbox.sleep(10)
         # falls wir das reconnecten testen wollen
         self.connectverbose = False
         if execCmd:
             if execCmd[0] == "LEDStrips" and kwargs:
-                time.sleep(10)
+                toolbox.sleep(10)
 #                self.set_LED(execCmd[1], **kwargs)
             else:
                 print('no kwargs')
         toolbox.communication.register_callback(self.receive_communication)
-        time.sleep(5)
+        toolbox.sleep(5)
         toolbox.log('TiFo started')
 
     def main(self):
@@ -809,54 +809,54 @@ class TiFo:
                 if (red-o_r) > 0:
                     o_r = o_r + 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 elif (red-o_r) < 0:
                     o_r = o_r - 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 if (green-o_g) > 0:
                     o_g = o_g + 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 elif (green-o_g) < 0:
                     o_g = o_g - 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 if (blue-o_b) > 0:
                     o_b = o_b + 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 elif (blue-o_b) < 0:
                     o_b = o_b - 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 start += laenge
                 laenge = (ende-start)
             else:
                 if (red-o_r) > 0:
                     o_r = o_r + 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 elif (red-o_r) < 0:
                     o_r = o_r - 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 if (green-o_g) > 0:
                     o_g = o_g + 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 elif (green-o_g) < 0:
                     o_g = o_g - 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 if (blue-o_b) > 0:
                     o_b = o_b + 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
                 elif (blue-o_b) < 0:
                     o_b = o_b - 1
                     LED.get('LED').set_rgb_values(start, laenge, o_r, o_g, o_b)
-                    time.sleep(wartezeit)
+                    toolbox.sleep(wartezeit)
 
 
     def set_LED(self, adress, **kwargs):

@@ -10,6 +10,7 @@ from database import mysql_connector as msqc
 from outputs.mqtt_publish import mqtt_pub
 
 import constants
+from tools import toolbox
 
 
 """
@@ -78,7 +79,7 @@ def main():
             else:
                 mqtt_pub("Outputs/Kerze1", 10)
 
-            time.sleep(20)
+            toolbox.sleep(20)
 #        except:
 #            print('Batswitch mqtt next try')
 

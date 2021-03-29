@@ -49,6 +49,7 @@ def main():
     httpd = HTTPServer(web_dir, ("", port))
 #    httpd.serve_forever()
     httpd.serve_forever()
+    print('Stopping Soundprovider')
     httpd.socket.close()
 
 #

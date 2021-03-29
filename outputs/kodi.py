@@ -56,7 +56,7 @@ class kodi_client():
 def main():
     kodi = kodi_client()
     while constants.run:
-        time.sleep(100)
+        toolbox.sleep(100)
         
 if __name__ == "__main__":
     main()

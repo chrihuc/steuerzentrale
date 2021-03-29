@@ -210,10 +210,11 @@ class SecvestHandler(object):
                     print('Eingeloggt secvest')
                     self.check_ob_zu()
                 except:
+                    print('einloggen fehlgeschlagen')
                     logged = False
             self.checkActive = False
             self.pause_monitoring()
-            time.sleep(self.cycleTime)
+            toolbox.sleep(self.cycleTime)
         if self.alarmanlage is not None:
             self.alarmanlage.logout()
         print('Secvest logged out')

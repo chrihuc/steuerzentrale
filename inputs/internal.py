@@ -48,7 +48,7 @@ class Anwesenheit:
     def check_handys_service(self):
         while True:
             self.check_handys()
-            time.sleep(60)
+            toolbox.sleep(60)
 
 if __name__ == "__main__":
     anw_class = Anwesenheit()

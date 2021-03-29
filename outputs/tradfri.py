@@ -54,29 +54,34 @@ api = None
 lights = []
 
 def connect():
-    global api, lights
-    identity = constants.tradfri_.identity
-    psk = constants.tradfri_.psk
-    host = constants.tradfri_.host
-    if psk == '' or identity == '':
-        api_factory = authenticate()
-    else:
-        api_factory = APIFactory(host=host, psk_id=identity, psk=psk)
-    api = api_factory.request
-    try:
-        gateway = Gateway()
-        devices_command = gateway.get_devices()
-        devices_commands = api(devices_command)
-        devices = api(devices_commands)
-        lights = [dev for dev in devices if dev.has_light_control]
-        print('Trafdfri connected')
-    except Exception as e:
-        print(e)
-        devices_command = []
-        devices_commands = []
-        devices = []
-        lights = []
-        aes.new_event(description="Tradfri nicht erreichbar", prio=9)
+#    while constants.run:
+    if True:
+        global api, lights
+        identity = constants.tradfri_.identity
+        psk = constants.tradfri_.psk
+        host = constants.tradfri_.host
+        if psk == '' or identity == '':
+            api_factory = authenticate()
+        else:
+            api_factory = APIFactory(host=host, psk_id=identity, psk=psk)
+        api = api_factory.request
+        try:
+            gateway = Gateway()
+            devices_command = gateway.get_devices()
+            devices_commands = api(devices_command)
+            devices = api(devices_commands)
+            lights = [dev for dev in devices if dev.has_light_control]
+            print('Trafdfri connected')
+        except Exception as e:
+            print(e)
+            devices_command = []
+            devices_commands = []
+            devices = []
+            lights = []
+            aes.new_event(description="Tradfri nicht erreichbar", prio=9)
+#    toolbox.sleep(60*60)
+#    print('restarting tradfri')
+        
 
 connect()
 #for l in lights:
