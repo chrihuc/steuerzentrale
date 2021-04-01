@@ -200,6 +200,7 @@ class LineBrick:
 #            self.pulsTime = datetime.datetime.now()
 #            if delta.total_seconds() > 0.5: 
 #                broadcast_input_value('TiFo.' + self.name + '.raw', str(25/delta.total_seconds()))
+            broadcast_input_value('TiFo.' + self.name + '.puls', str(0))
 #            self.reset.cancel()
 #            self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
 #            self.reset.start()            
@@ -211,6 +212,7 @@ class LineBrick:
             self.pulsTime = datetime.datetime.now()
             if delta.total_seconds() > 0.2: 
                 broadcast_input_value('TiFo.' + self.name + '.raw', str(60/delta.total_seconds()))
+            broadcast_input_value('TiFo.' + self.name + '.puls', str(1))
             self.reset.cancel()
             self.reset = threading.Timer(delta.total_seconds()*2, self.reset_delta, [delta.total_seconds()*2])
             self.reset.start()              

@@ -37,6 +37,8 @@ def convert_to(string, targettype):
     if not type(string) == str or (type(string) == targettype and targettype != str):
         return string
     if targettype == str:
+        if str(string) == 'None':
+            return None
         if len(string) > 0:
             result = string
     elif targettype == int:

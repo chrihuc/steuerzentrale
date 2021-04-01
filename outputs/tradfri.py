@@ -19,6 +19,7 @@ from tools import toolbox
 
 from pytradfri.api.libcoap_api import APIFactory
 from pytradfri import Gateway
+import threading
 
 aes = alarmevents.AES()
 
@@ -54,8 +55,8 @@ api = None
 lights = []
 
 def connect():
-#    while constants.run:
-    if True:
+    while constants.run:
+#    if True:
         global api, lights
         identity = constants.tradfri_.identity
         psk = constants.tradfri_.psk
@@ -72,6 +73,7 @@ def connect():
             devices = api(devices_commands)
             lights = [dev for dev in devices if dev.has_light_control]
             print('Trafdfri connected')
+            toolbox.sleep(60*60)
         except Exception as e:
             print(e)
             devices_command = []
@@ -79,11 +81,12 @@ def connect():
             devices = []
             lights = []
             aes.new_event(description="Tradfri nicht erreichbar", prio=9)
-#    toolbox.sleep(60*60)
-#    print('restarting tradfri')
+            toolbox.sleep(10)
+    print('stopped tradfri')
         
-
-connect()
+t = toolbox.OwnTimer(0, function=connect, args = [], name="tradfri")
+t.start()
+#connect()
 #for l in lights:
 #    print(l.light_control.can_set_color)
 
@@ -222,7 +225,8 @@ class Tradfri_lights():
         uhr = str(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))) # das wird im sekundentakt dann ausgeführt... block es das weitere?
         # trennen vom gateway in Abstaänden?
         if desc:
-            print(uhr, desc['lname'], desc['Name'], desc['transitiontime'], desc['bri'])
+            pass
+#            print(uhr, desc['lname'], desc['Name'], desc['transitiontime'], desc['bri'])
         while retry < retry_max:
             try:
 #                print('tradfr', retry)

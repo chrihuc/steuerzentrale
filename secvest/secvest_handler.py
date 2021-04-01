@@ -195,7 +195,7 @@ class SecvestHandler(object):
         logged = True
         while constants.run and logged:
             self.pause_monitoring()
-            while self.commandActive:
+            while constants.run and self.commandActive:
                 time.sleep(1)
             self.pause_monitoring()
             self.checkActive = True

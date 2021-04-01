@@ -124,7 +124,8 @@ def receive_communication(payload, *args, **kwargs):
             elif 'bri' in payload and payload['bri'] and int(payload['bri']) > 0:
                 payload['bri'] = round(payload['bri'])   
                 #payload.pop('ps', None)
-                #payload['on'] = True                
+                #payload['on'] = True    
+                print(payload)
                 result = mqtt_publish.mqtt_pub(device + "/api", payload)
             elif 'bri' in payload and payload['bri'] and int(payload['bri']) <= 0:
                 payload['bri'] = 0  

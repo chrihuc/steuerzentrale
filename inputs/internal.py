@@ -46,7 +46,7 @@ class Anwesenheit:
             broadcast_input_value('Bewohner.'+person['Name']+'.Handy', int(state))
 
     def check_handys_service(self):
-        while True:
+        while constants.run:
             self.check_handys()
             toolbox.sleep(60)
 
