@@ -147,9 +147,9 @@ for mqtt_con in constants.mqtt_.server:
 if not mqtt_list:
     print("Kein MQTT Server gefunden")        
 
-def mqtt_pub(channel, data, retain=True):
+def mqtt_pub(channel, data, retain=True, short=False):
     for cli in mqtt_list:
 #        print(cli.ip)
 #        print(channel, data, retain)
-        cli.mqtt_pub(channel, data, retain)
+        cli.mqtt_pub(channel, data, retain, short)
            

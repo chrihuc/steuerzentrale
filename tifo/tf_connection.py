@@ -177,7 +177,15 @@ class LineBrick:
         self.readout_h.start()
         self.readout_d = threading.Timer(self.day - (stunde * 3600) - (minute * 60) - sekunde, self.evaluate_d)
         self.readout_d.start()       
-        self.reset = threading.Timer(60, self.reset_delta)         
+        self.reset = threading.Timer(60, self.reset_delta) 
+        
+        self.filterPTime = datetime.datetime.now()
+        self.filterVal  = 0  
+        self.filterConst = 0.35  # bei Pulse
+        self.filterDecConst = 0.7 # am timed runtergehen
+        self.filterTime  = 15
+        self.timerFilter = threading.Timer(self.filterTime, self.decrFilterVal)
+        
         toolbox.log('line Bricklet created', level=5)
      
     def reset_delta(self, value=190):
@@ -190,10 +198,31 @@ class LineBrick:
             broadcast_input_value('TiFo.' + self.name + '.raw', 0)
             time.sleep(5)
             broadcast_input_value('TiFo.' + self.name + '.raw', 0)
+    
+    def calcFilterVal(self):
+        delta = datetime.datetime.now() - self.filterPTime
+        delta = min(delta.total_seconds(), 2)
+        self.filterVal = self.filterConst * 60/delta + (1-self.filterConst) * self.filterVal
+        broadcast_input_value('TiFo.' + self.name + '.filter', str(self.filterVal))
+        self.filterPTime = datetime.datetime.now()
+        self.timerFilter.cancel()
+        self.timerFilter = threading.Timer(self.filterTime, self.decrFilterVal)
+        self.timerFilter.start()         
+        
+    def decrFilterVal(self):
+        if self.filterVal > 0.2:
+            self.filterVal = self.filterDecConst * self.filterVal
+            broadcast_input_value('TiFo.' + self.name + '.filter', str(self.filterVal)) 
+            self.timerFilter = threading.Timer(self.filterTime, self.decrFilterVal)
+            self.timerFilter.start()
+        else:
+            self.filterVal = 0
+            broadcast_input_value('TiFo.' + self.name + '.filter', str(self.filterVal))             
+        
         
     def callback(self, value):
         self.min = min(self.min, value)
-        self.max = max(self.max, value)
+        self.max = max(self.max, value)       
         if value < self.gwl and self.state == 1:
             self.state = 0
 #            delta = datetime.datetime.now() - self.pulsTime
@@ -201,6 +230,7 @@ class LineBrick:
 #            if delta.total_seconds() > 0.5: 
 #                broadcast_input_value('TiFo.' + self.name + '.raw', str(25/delta.total_seconds()))
             broadcast_input_value('TiFo.' + self.name + '.puls', str(0))
+            #self.calcFilterVal()
 #            self.reset.cancel()
 #            self.reset = threading.Timer(2*delta.total_seconds(), self.reset_delta)
 #            self.reset.start()            
@@ -213,6 +243,7 @@ class LineBrick:
             if delta.total_seconds() > 0.2: 
                 broadcast_input_value('TiFo.' + self.name + '.raw', str(60/delta.total_seconds()))
             broadcast_input_value('TiFo.' + self.name + '.puls', str(1))
+            self.calcFilterVal()
             self.reset.cancel()
             self.reset = threading.Timer(delta.total_seconds()*2, self.reset_delta, [delta.total_seconds()*2])
             self.reset.start()              

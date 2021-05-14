@@ -276,7 +276,7 @@ class DatabaseSzenen(DBTemplate):
         if Id:
             elements = [element for element in elements if (int(Id) == element.Id or (element.Id in [1, 5, 6]))]        
         if filtName:
-            elements = [element for element in elements if filtName in element.Name]
+            elements = [element for element in elements if element.filtName and filtName in element.Name]
         if filterDesc:
             elements = [element for element in elements if element.filterDesc and filterDesc in element.Beschreibung] 
         if filterGruppe:

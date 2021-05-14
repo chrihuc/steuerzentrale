@@ -14,6 +14,7 @@ from outputs.mqtt_publish import mqtt_pub
 from database import mysql_connector as msqc
 
 import pyowm
+import codecs
 
 import itertools
 import operator
@@ -83,6 +84,22 @@ def get_boeen():
                     if feature['id'] == 'PSI':
                         boee2 = feature['properties']['value']                        
         return boee1, boee2
+    
+def get_strahl():
+    with urllib.request.urlopen("https://data.geo.admin.ch/ch.meteoschweiz.messwerte-globalstrahlung-10min/ch.meteoschweiz.messwerte-globalstrahlung-10min_de.json") as url:
+        decoded_data=codecs.decode(url.read(), 'utf-8-sig')
+        data = json.loads(decoded_data)
+#        data = json.loads(url.read().decode())
+        val1, val2 = 0, 0
+        for section in data:
+#            print(section)
+            if section == 'features':
+                for feature in data['features']:
+                    if feature['id'] == 'BUS':
+                        val1 = feature['properties']['value']
+                    if feature['id'] == 'PSI':
+                        val2 = feature['properties']['value']                        
+        return val1, val2    
 
 def main():
     while constants.run:
@@ -118,7 +135,17 @@ def main():
             except Exception as e:
                 print(e)
                 retries += 1
-#                print("Wind Boeen Failed")              
+#                print("Wind Boeen Failed")      
+        retries = 0
+        while retries < 3:             
+            try:            
+                val1, val2 = get_strahl()
+                broadcast_input_value('Wetter/Strahlung', val1)   
+                retries = 3
+            except Exception as e:
+                print(e)
+                retries += 1
+#                print("Wind Boeen Failed")                    
         
         client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'steuerzentrale')
         regentage = msqc.setting_r('minDohneRasenS') # 7
@@ -139,18 +166,23 @@ def main():
                 f = forecast.get_forecast()        
                 jetzt = datetime.datetime.today()
                 morgen = jetzt + datetime.timedelta(days=1)
+                nexth  = jetzt + datetime.timedelta(hours=1)
                 bern = pytz.timezone('Europe/Berlin')
                 morgen = bern.localize(morgen)
+                nexth  = bern.localize(nexth)
                 minimum = 100
                 maximum = -100 
-                stati = []   
+                stati = []  
+                maxwind = 0
                 for weather in f:
                 #    datetime.strptime(time2, format)
                     if morgen >  weather.get_reference_time('date'):
                         minimum = min(weather.get_temperature('celsius')['temp'], minimum)
                         maximum = max(weather.get_temperature('celsius')['temp'], maximum)
                         stati.append(weather.get_detailed_status())   
-        
+                    if nexth > weather.get_reference_time('date'):
+#                        print(weather.get_wind())
+                        maxwind = max(weather.get_wind()['gust'], maxwind)
                 w = observation.get_weather()
                 value = w.get_temperature('celsius')['temp']
         #        tmin = w.get_temperature('celsius')['temp_min']
@@ -160,9 +192,13 @@ def main():
                 mqtt_pub("Wetter/Jetzt", data)
                 broadcast_input_value('Internal.OWM', 1)
                 broadcast_input_value('Wetter/Aussentemp', value) 
+                broadcast_input_value('Wetter/MaxWindFc', maxwind) 
                 retries = 3
             except:
 #                print("OWM Failed")
                 retries += 1
                 pass
         toolbox.sleep(60*1)
+
+if __name__ == "__main__":
+    print(get_strahl())

@@ -42,6 +42,7 @@ class HTTPServer(BaseHTTPServer):
         """Handle one request at a time until doomsday."""
         while constants.run:
             self.handle_request()
+        self.server_close()
 
 def main():
     port = constants.sound_prov.PORT

@@ -180,8 +180,9 @@ class SecvestHandler(object):
             toolbox.communication.send_message(payload, typ='return', value=result)            
           
     def pause_monitoring(self):
-        if bool(eval(str(msqc.setting_r("PauseSecvest")))):
+        if not constants.run or bool(eval(str(msqc.setting_r("PauseSecvest")))):
             if self.alarmanlage:
+                print('secvest logging out')
                 self.alarmanlage.logout()
             counter = 0
             while bool(eval(str(msqc.setting_r("PauseSecvest")))):
@@ -189,7 +190,8 @@ class SecvestHandler(object):
                 counter += 1
                 if counter > 3600:
                     msqc.setting_s("PauseSecvest", False)
-            self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
+            if constants.run:
+                self.alarmanlage = Secvest(hostname=constants.secvest.hostname, username=constants.secvest.username, password=constants.secvest.password)
             
     def monitor(self):
         logged = True
@@ -210,12 +212,13 @@ class SecvestHandler(object):
                     print('Eingeloggt secvest')
                     self.check_ob_zu()
                 except:
-                    print('einloggen fehlgeschlagen')
+                    print('Secvest einloggen fehlgeschlagen')
                     logged = False
             self.checkActive = False
             self.pause_monitoring()
             toolbox.sleep(self.cycleTime)
         if self.alarmanlage is not None:
+            print('Secvest lgging out')
             self.alarmanlage.logout()
         print('Secvest logged out')
             

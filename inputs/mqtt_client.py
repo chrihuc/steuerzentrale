@@ -193,7 +193,7 @@ class MqttClient:
                     mqtt_pub("DataRequest/Answer/SzenenGruppen", msqc.SzenenDatabase.get_as_list())
                 elif 'SzenenErinnerung' in m_in.values():
 #                    print(msqc.mdb_read_table_column_filt2(constants.sql_tables.szenen.name, ['Name','Gruppe','Beschreibung'], filt='Erinnerung', filt_on='Gruppe'))
-                    mqtt_pub("DataRequest/Answer/SzenenErinnerung", msqc.SzenenDatabase.get_as_list(filt='Erinnerung', filt_on='Gruppe'))
+                    mqtt_pub("DataRequest/Answer/SzenenErinnerung", msqc.SzenenDatabase.get_as_list(filt='Erinnerung', filt_on='Gruppe')) # dict object has no element gruppe
                 elif 'BDQs' in m_in.values():
 #                    print(msqc.mdb_read_bdqs())
                     mqtt_pub("DataRequest/Answer/BDQs", msqc.mdb_read_bdqs())

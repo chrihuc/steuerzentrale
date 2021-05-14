@@ -27,11 +27,15 @@ def broadcast_input_value(Name, Value):
     toolbox.communication.send_message(payload, typ='InputValue')
 
 def eventcallback(address, interface_id, key, value):
-    keys = ['LOWBAT', 'STATE', 'LEVEL', 'ACTUAL_TEMPERATURE', 'OPERATING_VOLTAGE', 'SET_TEMPERATURE', 'SET_POINT_TEMPERATURE', 'PRESS_SHORT', 'PRESS_LONG']
+    keys = ['LOWBAT', 'STATE', 'LEVEL', 'ACTUAL_TEMPERATURE', 'OPERATING_VOLTAGE', 'SET_TEMPERATURE', 'SET_POINT_TEMPERATURE', 'PRESS_SHORT', 'PRESS_LONG',
+            'HUMIDITY', 'ILLUMINATION', 'WIND_SPEED', 'LOW_BAT']
 #    print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value))
     if key in keys:
 #        print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value)) 
         broadcast_input_value('homematic.' + address + '.' + key, float(value))
+    else:
+        pass
+#        print(address, interface_id, key, value)
 
 def main():
     pyhomematic = HMConnection(interface_id="myserver",

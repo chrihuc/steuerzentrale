@@ -118,20 +118,32 @@ def receive_communication(payload, *args, **kwargs):
 #            print(payload)
 #            pscopy = copy.copy(payload)
             #pscopy.pop('bri', None)
+            uhr = str(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time())))
             result = False
+#            print(uhr, payload)
+            payload.pop('Device', None)
+            payload.pop('Szene', None)
+            payload.pop('Szene_id', None)
+            payload.pop('Id', None)
+            payload.pop('Name', None)
+            payload.pop('ts', None)            
             if 'bri' in payload and not payload['bri']:
-                result = mqtt_publish.mqtt_pub(device + "/api", payload)
+                payload.pop('bri', None)
+                result = mqtt_publish.mqtt_pub(device + "/api", payload, retain=True, short=True)
+#                print(uhr, payload)
             elif 'bri' in payload and payload['bri'] and int(payload['bri']) > 0:
                 payload['bri'] = round(payload['bri'])   
                 #payload.pop('ps', None)
                 #payload['on'] = True    
-                print(payload)
-                result = mqtt_publish.mqtt_pub(device + "/api", payload)
+                
+                result = mqtt_publish.mqtt_pub(device + "/api", payload, short=True)
+#                print(uhr, payload)
             elif 'bri' in payload and payload['bri'] and int(payload['bri']) <= 0:
                 payload['bri'] = 0  
                 #payload.pop('ps', None)
-                #payload['on'] = False                
-                result = mqtt_publish.mqtt_pub(device + "/api", payload)                
+                #payload['on'] = False    
+                result = mqtt_publish.mqtt_pub(device + "/api", payload, short=True)         
+#                print(uhr, payload)
                 
             toolbox.communication.send_message(payload, typ='return', value=result)                
     

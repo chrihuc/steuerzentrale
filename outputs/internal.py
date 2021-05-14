@@ -21,6 +21,9 @@ from alarm_event_messaging import alarmevents
 from outputs import simulation
 from tools import toolbox
 
+from outputs import cron
+crn = cron.Cron()
+
 # TODO Tests split adress from hks
 
 #HOST = constants.udp_.SERVER   # Symbolic name meaning the local host
@@ -109,7 +112,7 @@ class Internal:
 
     def list_commands(self):
         return ['Restart','Update', 'Check_Anwesenheit', 'convert_mts', 'Klingel_Mail',
-                'geist_start', 'geist_stop', 'check_ext_ip']
+                'geist_start', 'geist_stop', 'check_ext_ip', 'next_wecker']
 
     def execute(self, commd):
         if commd == 'Update':
@@ -129,7 +132,10 @@ class Internal:
         elif commd == 'Reboot':
             self.reboot()            
         elif commd == 'check_ext_ip':
-            check_ext_ip()            
+            check_ext_ip()    
+        elif commd == 'next_wecker':
+            payload = {'Szene':'InternInfo', 'desc':crn.next_wecker_heute_morgen()}
+            toolbox.communication.send_message(payload, typ='ExecSzene')         
 
     def restart(self):
         constants.run = False

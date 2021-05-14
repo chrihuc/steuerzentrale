@@ -18,6 +18,8 @@ import copy
 from tools import toolbox
 import json
 
+from multiprocessing import Process
+
 from flask import Flask, Markup, request, url_for, render_template, redirect
 from flask_table import Table, Col, LinkCol, ButtonCol
 
@@ -128,11 +130,13 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'A00TER1GEN1LI01':         (None, str)
                     ,'A00TER1GEN1PO01':         (None, str)
                     ,'A00TER1GEN1ST01':         (None, str)
-                    ,'A00TER2MAR1DO01':         (None, str)
-                    ,'A00TER2MAR1DO02':         (None, str)
-                    ,'A00TER2MAR1DO03':         (None, str)  
-                    ,'A00TER2MAR1DO99':         (None, str)                    
+                    ,'A00TER2MAR1DO01':         (None, str) # button fernbedienung
+                    ,'A00TER2MAR1DO02':         (None, str) # button fernbedienung
+                    ,'A00TER2MAR1DO03':         (None, str) # button fernbedienung
+                    ,'A00TER2MAR1DO99':         (None, str) # Fernbedienung programmieren (button 1 und 2)  
+                    ,'A00TER2MAR1PO01':         (None, str) # Strom Markise (Shelly)
                     ,'V00ESS1DEK1LI01':         (None, str)
+                    ,'V00ESS1TUR1SR01':         (None, str) # Store
                     ,'V00ESS1RUM1LI01':         (None, str)
                     ,'V00ESS1OUT1PO01':         (None, str)
                     ,'V00FLU1DEK1LI01':         (None, str)
@@ -144,6 +148,7 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'V00KUE1ADV1LI01':         (None, str)
                     ,'V00KUE1DEK1LI01':         (None, str)
                     ,'V00KUE1DEK1LI02':         (None, str)
+                    ,'V00KUE1FEN1SR01':         (None, str) # Store                    
                     ,'V00KUE1RUM1AV11':         (None, str)
                     ,'V00KUE1RUM1LI01':         (None, str)
                     ,'V00KUE1RUM1ST01':         (None, str)
@@ -157,6 +162,7 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'V00WOH1ADV1LI01':         (None, str)
                     ,'V00WOH1ADV1LI02':         (None, str)
                     ,'V00WOH1DEK1LI01':         (None, str)
+                    ,'V00WOH1FEN1SR01':         (None, str) # Store fenster klein
                     ,'V00WOH1RUM1AV01':         (None, str)
                     ,'V00WOH1RUM1AV11':         (None, str)
                     ,'V00WOH1RUM1DI01':         (None, str)
@@ -178,16 +184,21 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'V00WOH1STV01':            (None, str)
                     ,'V00WOH1STV02':            (None, str)
                     ,'V00WOH1TUR1LI01':         (None, str)
+                    ,'V00WOH1TUR1SR01':         (None, str) # Store Tür
                     ,'V00ZIM0RUM0DO01':         (None, str)
                     ,'V00ZIM0RUM0DO02':         (None, str)
                     ,'V01BAD1DEK1LI01':         (None, str)
                     ,'V01BAD1DEK1LI02':         (None, str)
                     ,'V01BAD1RUM1AV11':         (None, str)
                     ,'V01BAD1RUM1LI02':         (None, str)
+                    ,'V01BAD1FEN1SR01':         (None, str) # Store
                     ,'V01BUE1DEK1LI01':         (None, str)
+                    ,'V01BUE1FEN1SR01':         (None, str) # Store
+                    ,'V01BUE1FEN2SR01':         (None, str) # Store
                     ,'V01BUE1STL1DO01':         (None, str)
                     ,'V01FLU1DEK1LI01':         (None, str)
                     ,'V01KID1DEK1LI01':         (None, str)
+                    ,'V01KID1FEN1SR01':         (None, str) # Store
                     ,'V01KID1RUM1AV11':         (None, str)
                     ,'V01KID1RUM1LI02':         (None, str)
                     ,'V01KID1ZIM1ST01':         (None, str)
@@ -197,15 +208,20 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'V01SCH1BET1LI01':         (None, str)
                     ,'V01SCH1BET1LI02':         (None, str)
                     ,'V01SCH1DEK1LI01':         (None, str)
+                    ,'V01SCH1FEN1SR01':         (None, str) # Store
+                    ,'V01SCH1FEN2SR01':         (None, str) # Store
                     ,'V01SCH1RUM1AV11':         (None, str)
                     ,'V01SCH1RUM1LI02':         (None, str)
                     ,'V01SCH1RUM1LI10':         (None, str)
                     ,'V01SCH1RUM1LI11':         (None, str)
+                    ,'V01SCH1RUM1PO01':         (None, str) # Srom Steckdosen
                     ,'V01SCH1STE1LI01':         (None, str)
                     ,'V01SCH1STE1LI02':         (None, str)
                     ,'V02BAD1DEK1LI01':         (None, str)
                     ,'V02TRE1DEK1LI01':         (None, str)
                     ,'V02ZIM1DEK1LI01':         (None, str)
+                    ,'V02ZIM1FEN1SR01':         (None, str) # Store
+                    ,'V02ZIM1FEN2SR01':         (None, str) # Store                    
                     ,'V02ZIM1RUM1ST01':         (None, str)
                     ,'VIRKOM1SSH1PC01':         (None, str)
                     ,'VIRKOM1SSH1PC02':         (None, str)
@@ -374,6 +390,8 @@ class SortableTableSzenen(Table):
         'Edit DG', 'edit_szn_dg', url_kwargs=dict(Id='Id'), allow_sort=False)   
     edita = LinkCol(
         'Edit Aussen', 'edit_szn_a', url_kwargs=dict(Id='Id'), allow_sort=False)       
+    edita = LinkCol(
+        'Edit Storen', 'edit_szn_store', url_kwargs=dict(Id='Id'), allow_sort=False)     
     new = LinkCol(
         'Copy Szene', 'copy_szene', url_kwargs=dict(Id='Id')) 
     delet = LinkCol(
@@ -508,7 +526,8 @@ class SzenenFormA(FlaskForm):
     A00TER2MAR1DO01        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO01')+': '+'A00TER2MAR1DO01')
     A00TER2MAR1DO02        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO02')+': '+'A00TER2MAR1DO02')
     A00TER2MAR1DO03        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO03')+': '+'A00TER2MAR1DO03')   
-    A00TER2MAR1DO99        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO99')+': '+'A00TER2MAR1DO99')  
+    A00TER2MAR1DO99        = StringField(SzenenDatabase.get_description('A00TER2MAR1DO99')+': '+'A00TER2MAR1DO99') 
+    A00TER2MAR1PO01        = StringField(SzenenDatabase.get_description('A00TER2MAR1PO01')+': '+'A00TER2MAR1PO01') # Strom Markise
 
 class SzenenFormEG(FlaskForm):
     V00ESS1DEK1LI01        = StringField(SzenenDatabase.get_description('V00ESS1DEK1LI01')+': '+'V00ESS1DEK1LI01')       
@@ -578,7 +597,8 @@ class SzenenFormOG(FlaskForm):
     V01SCH1RUM1AV11        = StringField(SzenenDatabase.get_description('V01SCH1RUM1AV11')+': '+'V01SCH1RUM1AV11')       
     V01SCH1RUM1LI02        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI02')+': '+'V01SCH1RUM1LI02')       
     V01SCH1RUM1LI10        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI10')+': '+'V01SCH1RUM1LI10')       
-    V01SCH1RUM1LI11        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI11')+': '+'V01SCH1RUM1LI11')       
+    V01SCH1RUM1LI11        = StringField(SzenenDatabase.get_description('V01SCH1RUM1LI11')+': '+'V01SCH1RUM1LI11') 
+    V01SCH1RUM1PO01        = StringField(SzenenDatabase.get_description('V01SCH1RUM1PO01')+': '+'V01SCH1RUM1PO01') # Strom Steckdosen
     V01SCH1STE1LI01        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI01')+': '+'V01SCH1STE1LI01')       
     V01SCH1STE1LI02        = StringField(SzenenDatabase.get_description('V01SCH1STE1LI02')+': '+'V01SCH1STE1LI02') 
     V01KID1ZIM1LI01        = StringField(SzenenDatabase.get_description('V01KID1ZIM1LI01')+': '+'V01KID1ZIM1LI01') 
@@ -619,7 +639,22 @@ class SzenenFormDG(FlaskForm):
     V02ZIM1RUM1ST01        = StringField(SzenenDatabase.get_description('V02ZIM1RUM1ST01')+': '+'V02ZIM1RUM1ST01') 
     V00ZIM0RUM0DO01        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO01')+': '+'V00ZIM0RUM0DO01')       
     V00ZIM0RUM0DO02        = StringField(SzenenDatabase.get_description('V00ZIM0RUM0DO02')+': '+'V00ZIM0RUM0DO02')     
+
+class SzenenFormStore(FlaskForm):
+    V00KUE1FEN1SR01        = StringField(SzenenDatabase.get_description('V00KUE1FEN1SR01')+': '+'V00KUE1FEN1SR01')       
+    V00ESS1TUR1SR01        = StringField(SzenenDatabase.get_description('V00ESS1TUR1SR01')+': '+'V00ESS1TUR1SR01')       
+    V00WOH1FEN1SR01        = StringField(SzenenDatabase.get_description('V00WOH1FEN1SR01')+': '+'V00WOH1FEN1SR01')       
+    V00WOH1TUR1SR01        = StringField(SzenenDatabase.get_description('V00WOH1TUR1SR01')+': '+'V00WOH1TUR1SR01') 
     
+    V01BAD1FEN1SR01        = StringField(SzenenDatabase.get_description('V01BAD1FEN1SR01')+': '+'V01BAD1FEN1SR01')       
+    V01SCH1FEN1SR01        = StringField(SzenenDatabase.get_description('V01SCH1FEN1SR01')+': '+'V01SCH1FEN1SR01')     
+    V01SCH1FEN2SR01        = StringField(SzenenDatabase.get_description('V01SCH1FEN2SR01')+': '+'V01SCH1FEN2SR01')  
+    V01BUE1FEN1SR01        = StringField(SzenenDatabase.get_description('V01BUE1FEN1SR01')+': '+'V01BUE1FEN1SR01')  
+    V01BUE1FEN2SR01        = StringField(SzenenDatabase.get_description('V01BUE1FEN2SR01')+': '+'V01BUE1FEN2SR01')  
+    V01KID1FEN1SR01        = StringField(SzenenDatabase.get_description('V01KID1FEN1SR01')+': '+'V01KID1FEN1SR01')  
+
+    V02ZIM1FEN1SR01        = StringField(SzenenDatabase.get_description('V02ZIM1FEN1SR01')+': '+'V02ZIM1FEN1SR01')  
+    V02ZIM1FEN2SR01        = StringField(SzenenDatabase.get_description('V02ZIM1FEN2SR01')+': '+'V02ZIM1FEN2SR01')      
 
 @app.route('/inputs/')
 def index_inputs(Scene=None):
@@ -852,6 +887,28 @@ def edit_szn_a(Id=None):
 
     # Render the sign-up page
     return render_template('szn_a.html', message=error, form=form, Id=Id,
+                                title="Update Profile") #form_action=form_action
+
+@app.route('/szenen/item/storen/<int:Id>', methods=['GET', 'POST'])
+def edit_szn_store(Id=None):
+    if not Id:
+        Id = request.args.get('Id', 1)
+    error = ""
+    element  = SzenenDatabase.get_element_by_id(Id)
+    form = SzenenFormStore()
+    if request.method == 'GET':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__:
+                setattr(getattr(form, item),'data',getattr(element, item))
+    if request.method == 'POST':
+        for item, value in form.__dict__.items():
+            if item in element.__dict__ and item in properties_sznDB:
+                setattr(element, item, convert_to(getattr(getattr(form, item), 'data'), properties_sznDB[item][1]))                    
+#        return 'thank_you'
+        return redirect(url_for('edit_szn_store', Id=Id))
+
+    # Render the sign-up page
+    return render_template('szn_store.html', message=error, form=form, Id=Id,
                                 title="Update Profile") #form_action=form_action
 
 @app.route('/szenen/copy/<int:Id>')
@@ -1722,9 +1779,9 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #            print(value)
 #            print(device)
             return [], [], None, []
-    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
+    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
     
-    dicti_1 = {}
+    #dicti_1 = {}
     alle_szenen = []
     alle_payloads = []
     descriptions = []
@@ -2049,10 +2106,15 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     return alle_szenen, descriptions, heartbt, alle_payloads
 
 #print(read_inputs_to_inputs_table())
-
+server = None
 
 def apptask():
+    global server
     app.run(host='0.0.0.0', port=4444)
+    server = Process(target=app.run)
+    server.start()
+# ...
+  
     
 def main(): 
     apptimer = Timer(0, apptask)
@@ -2065,3 +2127,6 @@ def main():
     InputsDatabase.save_to_file()
     SzenenDatabase.save_to_file()
     print("table written")
+    server.terminate()
+    server.join()  
+    print('flask stopped')

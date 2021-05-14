@@ -55,6 +55,7 @@ api = None
 lights = []
 
 def connect():
+    connected = True
     while constants.run:
 #    if True:
         global api, lights
@@ -72,7 +73,10 @@ def connect():
             devices_commands = api(devices_command)
             devices = api(devices_commands)
             lights = [dev for dev in devices if dev.has_light_control]
-            print('Trafdfri connected')
+            if not connected:
+                print('Trafdfri connected')
+                aes.new_event(description="Tradfri connected", prio=9)
+            connected = True
             toolbox.sleep(60*60)
         except Exception as e:
             print(e)
@@ -80,7 +84,9 @@ def connect():
             devices_commands = []
             devices = []
             lights = []
-            aes.new_event(description="Tradfri nicht erreichbar", prio=9)
+            if connected:
+                aes.new_event(description="Tradfri nicht erreichbar", prio=9)
+            connected = False
             toolbox.sleep(10)
     print('stopped tradfri')
         
