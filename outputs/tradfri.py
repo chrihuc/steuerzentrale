@@ -54,6 +54,11 @@ def authenticate():
 api = None
 lights = []
 
+def broadcast_input_value(Name, Value):
+    payload = {'Name':Name,'Value':Value}
+    toolbox.log(Name, Value)
+    toolbox.communication.send_message(payload, typ='InputValue')
+
 def connect():
     connected = True
     while constants.run:
@@ -75,7 +80,8 @@ def connect():
             lights = [dev for dev in devices if dev.has_light_control]
             if not connected:
                 print('Trafdfri connected')
-                aes.new_event(description="Tradfri connected", prio=9)
+                broadcast_input_value('Inputs.Status.Tradfri', 1)
+#                aes.new_event(description="Tradfri connected", prio=9)
             connected = True
             toolbox.sleep(60*60)
         except Exception as e:
@@ -85,7 +91,8 @@ def connect():
             devices = []
             lights = []
             if connected:
-                aes.new_event(description="Tradfri nicht erreichbar", prio=9)
+                broadcast_input_value('Inputs.Status.Tradfri', 0)
+#                aes.new_event(description="Tradfri nicht erreichbar", prio=9)
             connected = False
             toolbox.sleep(10)
     print('stopped tradfri')

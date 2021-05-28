@@ -206,8 +206,11 @@ class AES:
                               "time": utc,#.strftime('%Y-%m-%dT%H:%M:%SZ'), #"2009-11-10T23:00:00Z",
                               "fields": {"value": str(description)}}]
 #                print(json_body)
-                client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'sz_events')     
-                client.write_points(json_body)              
+                try:
+                    client = InfluxDBClient(constants.sql_.IP, 8086, constants.sql_.USER, constants.sql_.PASS, 'sz_events')     
+                    client.write_points(json_body)       
+                except Exception as e:
+                    pass
 #            if str(mysql_connector.setting_r("Status")) == "Wach":
 #                anwesend = True
 #            else:

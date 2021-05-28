@@ -211,14 +211,14 @@ except Exception as e:
     print(e)
     aes.new_event(description="kodi not started", prio=9)
 
-try:
-    import app
-    t = toolbox.OwnTimer(0, function=app.main, args = [], name="flask")
-    threadliste.append(t)
-    t.start()
-except Exception as e:
-    print(e)
-    aes.new_event(description="flask not started", prio=9)
+#try:
+#    import app
+#    t = toolbox.OwnTimer(0, function=app.main, args = [], name="flask")
+#    threadliste.append(t)
+#    t.start()
+#except Exception as e:
+#    print(e)
+#    aes.new_event(description="flask not started", prio=9)
 
 if constants.debug:
     toolbox.log(threadliste)

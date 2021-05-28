@@ -180,7 +180,7 @@ class SecvestHandler(object):
             toolbox.communication.send_message(payload, typ='return', value=result)            
           
     def pause_monitoring(self):
-        if not constants.run or bool(eval(str(msqc.setting_r("PauseSecvest")))):
+        if constants.run and bool(eval(str(msqc.setting_r("PauseSecvest")))):
             if self.alarmanlage:
                 print('secvest logging out')
                 self.alarmanlage.logout()

@@ -276,9 +276,9 @@ class DatabaseSzenen(DBTemplate):
         if Id:
             elements = [element for element in elements if (int(Id) == element.Id or (element.Id in [1, 5, 6]))]        
         if filtName:
-            elements = [element for element in elements if element.filtName and filtName in element.Name]
+            elements = [element for element in elements if element.Name and filtName in element.Name]
         if filterDesc:
-            elements = [element for element in elements if element.filterDesc and filterDesc in element.Beschreibung] 
+            elements = [element for element in elements if element.Beschreibung and filterDesc in element.Beschreibung] 
         if filterGruppe:
             elements = [element for element in elements if element.Gruppe and filterGruppe in element.Gruppe]  
         if Setting:
@@ -344,6 +344,7 @@ class DatabaseSzenen(DBTemplate):
         newEl.Id = max_id + 5  
         self.elements.append(newEl)
         self.save_to_file()  
+        return newEl.Id
         
     def get_description(self, hks):
         elem = self.get_elements_by_name('Description')

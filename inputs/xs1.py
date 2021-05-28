@@ -127,7 +127,11 @@ def main():
     conn.setopt(pycurl.URL, constants.xs1_.STREAM_URL)
     conn.setopt(pycurl.WRITEFUNCTION, on_receive)
     #aes.new_event(description="XS1inputs neugestartet", prio=0)
-    conn.perform()
+    try:
+        conn.perform()
+    except Error as e:
+        pass
+    print('XS1 connection closed')
 
 
 if __name__ == '__main__':

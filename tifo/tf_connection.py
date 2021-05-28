@@ -200,12 +200,12 @@ class LineBrick:
             broadcast_input_value('TiFo.' + self.name + '.raw', 0)
     
     def calcFilterVal(self):
+        self.timerFilter.cancel()
         delta = datetime.datetime.now() - self.filterPTime
-        delta = min(delta.total_seconds(), 2)
+        delta = max(delta.total_seconds(), 2)
         self.filterVal = self.filterConst * 60/delta + (1-self.filterConst) * self.filterVal
         broadcast_input_value('TiFo.' + self.name + '.filter', str(self.filterVal))
         self.filterPTime = datetime.datetime.now()
-        self.timerFilter.cancel()
         self.timerFilter = threading.Timer(self.filterTime, self.decrFilterVal)
         self.timerFilter.start()         
         
@@ -502,7 +502,10 @@ class TiFo:
 
 
     def disconnect(self):
-        self.ipcon.disconnect()
+        try:
+            self.ipcon.disconnect()
+        except Error as e:
+            pass
         print('disconnected: ' + self.ip)
 
     def thread_RSerror(self):

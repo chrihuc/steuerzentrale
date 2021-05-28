@@ -166,7 +166,7 @@ def main():
                 f = forecast.get_forecast()        
                 jetzt = datetime.datetime.today()
                 morgen = jetzt + datetime.timedelta(days=1)
-                nexth  = jetzt + datetime.timedelta(hours=1)
+                nexth  = jetzt + datetime.timedelta(hours=3)
                 bern = pytz.timezone('Europe/Berlin')
                 morgen = bern.localize(morgen)
                 nexth  = bern.localize(nexth)
@@ -182,7 +182,7 @@ def main():
                         stati.append(weather.get_detailed_status())   
                     if nexth > weather.get_reference_time('date'):
 #                        print(weather.get_wind())
-                        maxwind = max(weather.get_wind()['gust'], maxwind)
+                        maxwind = max(weather.get_wind()['gust'] * 3.6, maxwind) 
                 w = observation.get_weather()
                 value = w.get_temperature('celsius')['temp']
         #        tmin = w.get_temperature('celsius')['temp_min']

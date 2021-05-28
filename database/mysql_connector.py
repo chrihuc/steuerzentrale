@@ -50,6 +50,8 @@ properties_iptDB = { 'Id':          (None, int)
                     ,'persistance' :(None, int)
                     ,'violTime' :   (None, datetime.datetime)
                     ,'valid' :      (True, bool)
+                    ,'lastChange':  (None, datetime.datetime)
+                    ,'frozen':      (None, int)
                     ,'enabled' :    (True, bool)
                     ,'fallback':    (None, float)
                     ,'RecoverSzn':  (None, str)
@@ -95,6 +97,7 @@ device_props =[ 'HKS'
                ,'Kompression'
                ,'fallback'
                ,'Sturm_anz', 'Sturm_dauer', 'Sturm', 'Sturm_count'
+               ,'lastChange', 'frozen'
                ]
 
 properties_sznDB = { 'Id':              (None, int)
@@ -279,6 +282,7 @@ class TriggerForm(FlaskForm):
     offset  = StringField('offset')
     debounce  = StringField('debounce')
     heartbeat  = StringField('heartbeat')
+    frozen     = StringField('frozen')
     latching  = StringField('latching')
     latch_always  = SelectField('latch_always', choices =[(False,False),(True,True)]) 
 #    violTime = StringField('violTime')
@@ -323,6 +327,7 @@ class SortableTableInputs(Table):
     Status = Col('Status')
     time = Col('time')
     Value = Col('Value')
+    lastChange = Col('lastChange')
     Value_lt =  Col('Value_lt')
     Value_eq =  Col('Value_eq')   
     Value_gt =  Col('Value_gt') 
@@ -913,8 +918,8 @@ def edit_szn_store(Id=None):
 
 @app.route('/szenen/copy/<int:Id>')
 def copy_szene(Id):
-    SzenenDatabase.copy_szene(Id)
-    return 'New Szene created'
+    new_id = SzenenDatabase.copy_szene(Id)
+    return redirect(url_for('index_szenen', Id=new_id))
 
 datab = constants.sql_.DB
 
@@ -1765,6 +1770,13 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     utc = datetime.datetime.utcnow()
 #    if 'inputs' in device:
 #        print(value,device)
+    set_inval = False
+    try:
+        if 'invalid' in value:
+            set_inval = True
+            value = 0
+    except Exception as e:
+        pass
     try:
         last_time = locklist[device]
     except KeyError:
@@ -1869,6 +1881,13 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
             recSzn =  trigger_0.RecoverSzn
             offset =  trigger_0.offset
             last1 =   trigger_0.last1
+            lc    =   trigger_0.lastChange
+
+            if not lc:
+                lc = ct
+            frozenTime = lc                
+            if trigger_0.frozen:
+                frozenTime = lc + datetime.timedelta(seconds=trigger_0.frozen)
 #                last1 =   datetime.datetime.strptime(trigger_0.last1, '%Y-%m-%dT%H:%M:%S.%f')
             debounce = trigger_0.debounce
             if type(debounce) == str and len(debounce) == 0:
@@ -1884,14 +1903,29 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                     offset = 0
                 offset = float(offset)
                 value = value + offset
-            if not valid and not fallingback and not persTimer:
+            if not valid and not fallingback and not persTimer and not set_inval:  # das hier ist fürs Timeout 
+                if (not trigger_0.frozen) or ((last_value != value) or (frozenTime > ct)):# das ist wenn der Wert eingefroren ist
+                    for trigger in results2:
+                        trigger.valid = True                 
+                    payload = {'Szene':'InputTimedOut', 'desc':'input recovered: '+ desc}
+                    toolbox.communication.send_message(payload, typ='ExecSzene')
+                    if recSzn:
+                        payload = {'Szene':recSzn}
+                        toolbox.communication.send_message(payload, typ='ExecSzene') 
+            if valid and not fallingback and not persTimer:
+                if trigger_0.frozen and (frozenTime < ct) and (last_value == value): 
+                    payload = {'Szene':'InputTimedOut', 'desc':'Wert eingefroren: '+ desc}
+                    toolbox.communication.send_message(payload, typ='ExecSzene')                    
+                    for trigger in results2:
+                        trigger.valid = False
+            if set_inval:
+                payload = {'Szene':'InputTimedOut', 'desc':'Wert invaliditiert: '+ desc}
+                toolbox.communication.send_message(payload, typ='ExecSzene')                    
                 for trigger in results2:
-                    trigger.valid = True
-                payload = {'Szene':'InputTimedOut', 'desc':'input recovered: '+ desc}
-                toolbox.communication.send_message(payload, typ='ExecSzene')
-                if recSzn:
-                    payload = {'Szene':recSzn}
-                    toolbox.communication.send_message(payload, typ='ExecSzene')                                    
+                    trigger.valid = False                
+            if not fallingback and not persTimer and (last_value != value):
+                for trigger in results2:
+                    trigger.lastChange = ct                
             if last_value is None: 
                 last_value = value
                 writeToInflx = True
@@ -2109,16 +2143,20 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 server = None
 
 def apptask():
-    global server
+#    global server
     app.run(host='0.0.0.0', port=4444)
-    server = Process(target=app.run)
-    server.start()
+#    server = Process(target=app.run)
+#    server.start()
 # ...
   
     
 def main(): 
-    apptimer = Timer(0, apptask)
-    apptimer.start()     
+#    apptimer = Timer(0, apptask)
+#    apptimer.start()  
+#    app.run(host='0.0.0.0', port=4444)
+    server = Process(target=apptask)
+    server.start()   
+    print('database server started goin into loop')
     while constants.run:
         time.sleep(1)
     
@@ -2130,3 +2168,14 @@ def main():
     server.terminate()
     server.join()  
     print('flask stopped')
+    for key, timer in validTimers.items():
+        try:
+            timer['timer'].cancel()
+        except Exception as e:
+            pass
+    for key, timer in sturmTimers.items():
+        try:
+            timer['timer'].cancel()
+        except Exception as e:
+            pass    
+    # todo alle persistence timer noch stoppen

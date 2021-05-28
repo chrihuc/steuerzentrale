@@ -14,6 +14,8 @@ from tools import toolbox
 
 from socketserver import TCPServer
 
+from multiprocessing import Process
+
 try:
     # python 2
     from SimpleHTTPServer import SimpleHTTPRequestHandler
@@ -41,10 +43,13 @@ class HTTPServer(BaseHTTPServer):
     def serve_forever(self):
         """Handle one request at a time until doomsday."""
         while constants.run:
-            self.handle_request()
+            try:
+                self.handle_request()
+            except Exception as e:
+                pass
         self.server_close()
 
-def main():
+def main_p():
     port = constants.sound_prov.PORT
     web_dir = os.path.join(os.path.abspath(os.curdir), 'media')
     httpd = HTTPServer(web_dir, ("", port))
@@ -53,33 +58,10 @@ def main():
     print('Stopping Soundprovider')
     httpd.socket.close()
 
-#
-#class HttpServer(Thread):
-#    """A simple HTTP Server in its own thread"""
-#
-#    def __init__(self, port):
-#        super(HttpServer, self).__init__()
-#        self.daemon = True
-#        handler = SimpleHTTPRequestHandler
-#        self.httpd = TCPServer(("", port), handler)
-#
-#    def run(self):
-#        """Start the server"""
-#        print('Start HTTP server')
-#        self.httpd.serve_forever()
-#
-#    def stop(self):
-#        """Stop the server"""
-#        print('Stop HTTP server')
-#        self.httpd.socket.close()
-#
-#def main():
-#    # Settings
-#    port = constants.sound_prov.PORT
-#    os.chdir("./media")
-#    server = HttpServer(port)
-#    server.start()
-#    time.sleep(10**8)
-#    server.stop()
-    
-#main()
+def main():
+    server = Process(target=main_p)
+    server.start() 
+    while constants.run:
+        time.sleep(1)
+    server.terminate()
+    server.join()      
