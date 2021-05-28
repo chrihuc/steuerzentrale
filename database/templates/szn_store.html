@@ -1,0 +1,13 @@
+<form method="POST" action={{ url_for('edit_szn_store', Id=Id) }}>
+    {{ form.csrf_token }}
+    
+   <table>
+   {% for field in form %}
+     <tr>
+        <td align="right">{{ field.label() }}:</td>
+        <td align="left">{{ field() }} </td>
+    </tr>      
+   {% endfor %} 
+   </table>   
+    <input type="submit" value="Go">
+</form>       
