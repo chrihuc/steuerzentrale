@@ -436,23 +436,28 @@ class Szenen(object):
 # commandos to devices and internal commands
 #==============================================================================
         if erfuellt:
+            titel='Hinweis'
             #cls.running_list[szn_id] = szene
 #            if desc != '':
 #                text = desc
             if str(szene_dict.get("Beschreibung")) in ['None','']:
                 text = desc
+                titel = desc
             else:
                 beschr = szene_dict.get("Beschreibung")
                 if device:
                     beschr = msqc.re_calc(beschr)
+                    titel = beschr
                     text = '%s, %s = %s' % (str(beschr), device, wert)
                 else:
                     text = '%s %s' % (str(beschr), desc)
                     if not beschr:
                         text = False
+                    else:
+                        titel = str(beschr)
                     text = msqc.re_calc(text)
             if str(text) != 'False':
-                aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload)
+                aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload, titel=titel)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.SzenenDatabase.get_elements_by_name("Auto_Mode")[0].get_as_dict()

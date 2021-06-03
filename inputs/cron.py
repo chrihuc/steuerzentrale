@@ -55,7 +55,10 @@ def every_10_min():
     pass
 
 def every_30_min():
-    pass
+    wecker = crn.next_wecker_heute_morgen(horizont=1, noAlarm=False)
+    if wecker:
+        payload = {'Szene':'WeckerInfo', 'desc':wecker}
+        toolbox.communication.send_message(payload, typ='ExecSzene')  
 
 def every_60_min():
     internal.check_ext_ip(False)

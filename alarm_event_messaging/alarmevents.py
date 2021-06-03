@@ -169,11 +169,11 @@ class AES:
             server.sendmail(constants.mail_.USER, constants.mail_.receiver, msg.as_string())
 
 
-    def new_event(self, description, to=None, prio=0, durchsage="", karenz=-1, payload=None):
-        t = threading.Thread(target=self.new_event_t, args=[description, to, prio, durchsage, karenz, payload])
+    def new_event(self, description, to=None, prio=0, durchsage="", karenz=-1, payload=None, titel='Hinweis'):
+        t = threading.Thread(target=self.new_event_t, args=[description, to, prio, durchsage, karenz, payload, titel])
         t.start()
 
-    def new_event_t(self, description, to=None, prio=0, durchsage="", karenz=-1, payload=None):
+    def new_event_t(self, description, to=None, prio=0, durchsage="", karenz=-1, payload=None, titel='Hinweis'):
         data = {"Description":description, "Durchsage":durchsage}
         mqtt_pub("AES/Prio" + str(prio), data)
         if prio == None:
@@ -231,14 +231,14 @@ class AES:
             if nurwach and str(mysql_connector.setting_r("Status")) in ["Leise"]:
                 prio = stummaus * 1e2 + 8
             if mail:
-                self.send_mail('Hinweis/Alarm', text=description)
+                self.send_mail(titel, text=description)
             if anwesend == 1:
-                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio, payload=payload)
+                self.mes.send_zuhause(to=to, titel=titel, text=description, prio=prio, payload=payload)
             elif anwesend == 2:
-                self.mes.send_zuhause(to=to, titel="Hinweis", text=description, prio=prio, payload=payload)  
-                self.mes.send_abwesend(to=to, titel="Hinweis", text=description, prio=ton, payload=payload)
+                self.mes.send_zuhause(to=to, titel=titel, text=description, prio=prio, payload=payload)  
+                self.mes.send_abwesend(to=to, titel=titel, text=description, prio=ton, payload=payload)
             elif prio > 1:
-                self.mes.send_direkt(to=to, titel="Hinweis", text=description, prio=prio, payload=payload)
+                self.mes.send_direkt(to=to, titel=titel, text=description, prio=prio, payload=payload)
             mute = prio // 1e2
             prio = prio - mute * 1e2
             if prio > 1:

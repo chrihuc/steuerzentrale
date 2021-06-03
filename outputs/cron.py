@@ -89,7 +89,7 @@ class Cron(object):
         con.close
         return liste
 
-    def get_next(self, tag, zeit, wecker=False, datum=None):
+    def get_next(self, tag, zeit, wecker=False, datum=None, horizont=12):
         """ returns a list of stored events which are due next
             propose to load as pandas dataframe
         """
@@ -98,7 +98,7 @@ class Cron(object):
         ret_liste = []
         zeit = datetime.timedelta(hours=int(zeit[:zeit.find(":")]),
                                   minutes=int(zeit[zeit.find(":")+1:]), seconds=0)
-        next_one = datetime.timedelta(hours=12, minutes=0, seconds=0)
+        next_one = datetime.timedelta(hours=horizont, minutes=0, seconds=0)
         nulltime = datetime.timedelta(hours=0, minutes=0, seconds=0)
         morgen = tag + 1
         if morgen == 7:
@@ -277,15 +277,17 @@ class Cron(object):
                 con.close
         return True
 
-    def next_wecker_heute_morgen(self, horizont=12):
+    def next_wecker_heute_morgen(self, horizont=12, noAlarm=True):
         """ calculates the time till the next alarm today or tomorrow
         """
         time = localtime()
         zeit = strftime("%H:%M", time)
         tag = int(strftime("%w", time))
-        liste = self.get_next(tag, zeit, wecker=True)
+        liste = self.get_next(tag, zeit, wecker=True, horizont=horizont)
         if liste == []:
             text = "Kein Wecker fuer " + str(horizont) + " Stunden."
+            if not noAlarm:
+                text = False
         else:
             text = "Wecker um " + str(liste[0].get("Time")).rsplit(':')[0] + " Uhr"
             if str(liste[0].get("Time")).rsplit(':')[1] != "00":
