@@ -193,6 +193,7 @@ def main():
                 broadcast_input_value('Internal.OWM', 1)
                 broadcast_input_value('Wetter/Aussentemp', value) 
                 broadcast_input_value('Wetter/MaxWindFc', maxwind) 
+                broadcast_input_value('Wetter/MaxTempFc', maximum) 
                 retries = 3
             except:
 #                print("OWM Failed")

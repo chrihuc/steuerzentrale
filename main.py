@@ -3,7 +3,7 @@
 
 from alarm_event_messaging import alarmevents as aevs
 aes = aevs.AES()
-aes.new_event(description="Starting", prio=9)
+aes.new_event(description="Startup", prio=9, titel='Startup')
 
 import threading
 import time, sys
@@ -227,7 +227,7 @@ startup = True
 #add supervision of threads
 #aes.new_event(description="All Threads kicked off", prio=9)
 #time.sleep(5)
-aes.new_event(description="All Threads started", prio=9)
+aes.new_event(description="All Threads started", prio=9, titel='Starting')
 broadcast_input_value('Inputs.Status.Main', 0)
 
 starttime = 25
@@ -277,7 +277,7 @@ try:
                 elif t.heartbeat > 13:
                     t.starting = False                    
         if startup and not starting:
-            aes.new_event(description="All Threads finally startet", prio=9)
+            aes.new_event(description="All Threads finally startet", prio=9, titel='Started')
             toolbox.log('threads running')
             broadcast_input_value('Inputs.Status.Main', 10)
             broadcast_input_value('Inputs.Autostart', 1)

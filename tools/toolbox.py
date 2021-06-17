@@ -198,6 +198,7 @@ class communication(object):
                     t.start()         
                 
         cls.locked = False
+        return True
 #            callback(payload, *args, **kwargs)
 
 class meas_value:

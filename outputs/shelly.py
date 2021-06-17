@@ -98,9 +98,22 @@ def receive_communication(payload, *args, **kwargs):
 #        print(payload)
 #            der teil muss abgekürzt werden, wenn ein ESP der empfänger ist, auf nur das nötigste
 #        einschalten der shelly switches scheint nur über channel zu gehen
-        if toolbox.kw_unpack(kwargs,'receiver') == 'Shelly' and payload['Channel'] is None:
-            result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'], retain=False)
-            toolbox.communication.send_message(payload, typ='return', value=result) 
+        if toolbox.kw_unpack(kwargs,'receiver') == 'Shelly' and toolbox.kw_unpack(payload, 'Channel', None) is None:
+            if payload['Value'] == 'pulse_open':
+                result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'open', retain=False)
+                toolbox.communication.send_message(payload, typ='return', value=result) 
+                time.sleep(0.3)
+                result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'stop', retain=False)
+                toolbox.communication.send_message(payload, typ='return', value=result)    
+            elif payload['Value'] == 'pulse_close':
+                result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'close', retain=False)
+                toolbox.communication.send_message(payload, typ='return', value=result) 
+                time.sleep(0.3)
+                result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'stop', retain=False)
+                toolbox.communication.send_message(payload, typ='return', value=result)                  
+            else:
+                result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'], retain=False)
+                toolbox.communication.send_message(payload, typ='return', value=result) 
         elif toolbox.kw_unpack(kwargs,'receiver') == 'Shelly' and payload['Channel'] is not None and ip is not None:
             shelly = Shelly(ip) 
             shelly.set_setting(payload['Value'], payload['Channel'])            

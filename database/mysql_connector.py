@@ -61,6 +61,7 @@ properties_iptDB = { 'Id':          (None, int)
                     ,'Hysterese':   (None, float)
                     ,'Kompression': (None, str)
                     
+                    ,'directAction': (None, str)
                     ,'Immer':       (None, str)
                     ,'ResetSzene':  (None, str)
                     ,'Wach':        (None, str)
@@ -116,7 +117,8 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'Cancels':         (None, str)
                     ,'Bedingung':       (None, str)
                     ,'AutoMode':        (None, str) 
-                    ,'intCmd':          (None, str)  
+                    ,'intCmd':          (None, str)
+                    ,'Payload':         (None, str)
                     ,'LastUsed':        (None, datetime.datetime)
                     ,'Enabled':         (None, str)
 
@@ -289,7 +291,7 @@ class TriggerForm(FlaskForm):
     persistance  = StringField('persistance')
     Kompression  = SelectField('Kompression', choices =[(False,False),(True,True),('Bool','Bool')]) 
     enabled      = SelectField('enabled', choices =[(False,False),(True,True)]) 
-#    Immer          = StringField('Immer')
+    directAction          = StringField('directAction')
     Immer          = SelectField(u'Immer', choices = SzenenDatabase.get_all_names())
     Value_lt          = StringField('Value_lt')
     Value_eq          = StringField('Value_eq')
@@ -352,6 +354,25 @@ class SortableTableInputs(Table):
             direction = 'asc'
         return url_for('index_inputs', sort=col_key, direction=direction)
 
+class TableInputsMobile(Table):
+    HKS = Col('HKS')
+    Description = Col('Description')
+    Status = Col('Status')
+    link = LinkCol(
+        'Edit', 'flask_link', url_kwargs=dict(Id='Id'), allow_sort=False)
+    new = LinkCol(
+        'New Trigger', 'new_trig', url_kwargs=dict(Id='Id'))    
+    delet = LinkCol(
+        'Delete', 'delete_id', url_kwargs=dict(Id='Id'))
+    allow_sort = True
+
+    def sort_url(self, col_key, reverse=False):
+        if reverse:
+            direction = 'desc'
+        else:
+            direction = 'asc'
+        return url_for('index_inputs', sort=col_key, direction=direction)
+
 class SortableTableSzenen(Table):
 #    Id           = Col('Id')
     Id = LinkCol(
@@ -382,6 +403,7 @@ class SortableTableSzenen(Table):
     Bedingung    = Col('Bedingung')
     AutoMode     = Col('AutoMode')
     intCmd       = Col('intCmd')
+    Payload       = Col('Payload')
     Enabled      = Col('Enabled')
     editconf = LinkCol(
         'Edit config', 'edit_szn', url_kwargs=dict(Id='Id'), allow_sort=False)
@@ -510,6 +532,7 @@ class SzenenForm(FlaskForm):
     Bedingung    = StringField('Bedingung')
     AutoMode     = StringField('AutoMode')
     intCmd       = StringField('intCmd')
+    Payload      = StringField('Payload')
     LastUsed     = StringField('LastUsed')
     Enabled      = SelectField('Enabled', choices =[(False,False),(True,True)])
     debug        = SelectField('debug', choices =[(False,False),(True,True)])
@@ -676,6 +699,20 @@ def index_inputs(Scene=None):
                           border=True)
     return table.__html__()
 
+@app.route('/inputs_mobile/')
+def index_inputs_mobile(Scene=None):
+    sort = request.args.get('sort', 'HKS')
+    filtHKS = request.args.get('HKS', '')
+    filtDesc = request.args.get('Desc', '') 
+    if not Scene:
+        Scene = request.args.get('Scene', '')
+    reverse = (request.args.get('direction', 'asc') == 'desc')
+    table = TableInputsMobile(InputsDatabase.get_sorted_by(sort, False, None, filtHKS, filtDesc,Scene, True),
+                          sort_by=sort,
+                          sort_reverse=reverse,                              
+                          border=True)
+    return table.__html__()
+
 @app.route('/inputs/new/<int:Id>')
 def new_trig(Id):
     InputsDatabase.new_trigger(Id)
@@ -750,7 +787,8 @@ def execScene(Scene=None, Id=None):
     if not Scene:
         Scene = request.args.get('Scene', None)    
     payload = {'Szene':Scene}
-    toolbox.communication.send_message(payload, typ='ExecSzene')   
+    print('db', payload)
+    print(toolbox.communication.send_message(payload, typ='ExecSzene'))   
     return redirect(url_for('index_szenen', Id=Id))
 
 @app.route('/szenen/delete/<int:Id>', methods=['GET', 'POST'])
@@ -932,7 +970,27 @@ inputs_dict = {}
 prozessspiegel = {}
 
 
-
+def parse_input_string(intext):
+    # gibt zurück szenen als liste, und komandos als dict
+    if not intext:
+        return intext, intext    
+    try:
+        text = intext
+        if not ((text[0] == '[' and text[-1] == ']') or (text[0] == '{' and text[-1] == '}')):
+            text = '['+text+']'
+        result = eval(text)
+        if isinstance(result, dict):
+            return [], result
+        if isinstance(result, list):
+            directActions = {}
+            for idx, item in reversed(list(enumerate(result))):
+                if isinstance(item, dict):
+                    result.pop(idx)
+                    for key,val in item.items():
+                        directActions[key] = val
+            return result, directActions
+    except Exception as e:
+        return [intext], {}
 
 
 def json_serial(obj):
@@ -1576,112 +1634,13 @@ def remove_entry(table, device, primary = 'Name'):
         sql = 'DELETE FROM %s.%s WHERE %s = "%s"' % (datab,table,primary,device)
         cur.execute(sql)
     con.close()
-#def mdb_sonos_s(player, commands):
-    ##commands = Pause, Radio, Sender, TitelNr, Time, MasterZone, Volume
-    #if player in sn.Names:
-        #playern = sn.Names.get(player)
-    #else:
-        #playern = player
-    #cmds = get_raw_cmds(constants.sql_tables.Sonos.name)
-    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    #with con:
-        #cur = con.cursor()
-        #for cmd in commands:
-            #if len(cmds) == 0:
-                #commando = cmd
-            #else:
-                #commando = cmds.get(cmd)
-            #sql = 'UPDATE '+constants.sql_tables.Sonos.name+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(playern) + '"'
-            #cur.execute(sql)
-    #con.close()
 
-#def mdb_hue_s(device, commands):
-    ##setting must be a dict
-    ##{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
-    #cmds = get_raw_cmds(constants.sql_tables.hue.name)
-    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    #with con:
-        #cur = con.cursor()
-        #for cmd in commands:
-            #if len(cmds) == 0:
-                #commando = cmd
-            #else:
-                #commando = cmds.get(cmd)
-            #sql = 'UPDATE '+constants.sql_tables.hue.name+' SET '+str(commando)+' = "'+commands.get(cmd)+ '" WHERE Name = "' + str(device) + '"'
-            #cur.execute(sql)
-    #con.close()
-
-##to rewrite
-
-#def mdb_marantz_s(name, setting):
-    ##setting must be a dict
-    ##{'Treble': '7', 'Bass': '2', 'Power': 'True', 'Mute': 'False', 'Attenuate': 'False', 'Volume': '-25', 'Source': '11'}
-    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    #with con:
-        #cur = con.cursor()
-        #sql = "UPDATE Marantz SET Power = '" + str(setting.get("Power")) + "', Volume = '0" + str(setting.get("Volume")) + "', Source = '" + str(setting.get("Source")) + "', Mute = '" + str(setting.get("Mute")) + "' WHERE Name = '" + name +"'"
-        #cur.execute(sql)
-    #con.close()
-
-#def mdb_sideb_s(name, setting):
-    ##setting must be a dict
-    ##{'hue': '7', 'bri': '2', 'sat': 'True', 'on': 'False'}
-    #con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-    #with con:
-        #cur = con.cursor()
-        #sql = "UPDATE Sideboard SET rot = '" + str(setting.get("rot")) + "', gruen = '" + str(setting.get("gruen")) + "', blau = '" + str(setting.get("blau")) + "' WHERE Name = '" + name +"'"
-        #cur.execute(sql)
-    #con.close()
 
 def get_device_adress(device):
     """ returns the adress with with the device is saved in each interface
     """
-#    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-#    value = 0
-#    with con:
-#        cur = con.cursor()
-#        cur.execute("SELECT %s FROM %s.%s WHERE ID = '6'" % (device, datab, constants.sql_tables.szenen.name))
-##        if cur.fetchone()[0] != 0:
-#        results = cur.fetchall()
-#        for row in results:
-#            value = row[0]
-#    con.close()
-#    return value
     return SzenenDatabase.get_val_in_szenen(device,'Adress')
 
-
-#def getSzenenSources(szene):
-#    # für gui veraltet
-#    if szene in ['', None]:
-#        return [],[]
-#    con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
-#    ilist, slist = [], []
-#    with con:
-#        cur = con.cursor()
-#        sql = 'SELECT * FROM '+constants.sql_tables.inputs.name+' where "'+szene+\
-#              '" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)'
-#        sql = 'SELECT * FROM %s where "%s" in (Wach, Schlafen, Schlummern, Leise, AmGehen, Gegangen, Abwesend, Urlaub, Besuch, Doppel, Dreifach, Alarm)' % (constants.sql_tables.inputs.name, szene)
-#        cur.execute(sql)
-#        results = cur.fetchall()
-#        field_names = [i[0] for i in cur.description]
-#        for row in results:
-#            dicti = {}
-#            for i in range (0,len(row)):
-#               dicti[field_names[i]] = row[i]
-#            ilist.append(dicti)
-#        sql = 'SELECT * FROM '+constants.sql_tables.szenen.name+' where Follows like "%'+szene+'%"'
-#        szene = "%" + szene + "%"
-#        sql = 'SELECT * FROM %s.%s where Follows like "%s"' % (datab, constants.sql_tables.szenen.name, szene)
-#        cur.execute(sql)
-#        results = cur.fetchall()
-#        field_names = [i[0] for i in cur.description]
-#        for row in results:
-#            dicti = {}
-#            for i in range (0,len(row)):
-#               dicti[field_names[i]] = row[i]
-#            slist.append(dicti)
-#    con.close()
-#    return ilist, slist
 
 def maxSzenenId():
     con = mdb.connect(constants.sql_.IP, constants.sql_.USER, constants.sql_.PASS, constants.sql_.DB)
@@ -1805,34 +1764,12 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
     
     results2, last_val = InputsDatabase.new_value(device, value, ct, fallingback)
 
-
-#        cur = con.cursor()
-#        cur.execute("SELECT COUNT(*) FROM "+datab+"."+constants.sql_tables.inputs.name+" WHERE Name = '"+device+"'")
-#        if not device in [item['Name'] for key, item in inputs_table.items()]:
-#        if cur.fetchone()[0] == 0:
-    if True:
-#            sql = 'INSERT INTO '+constants.sql_tables.inputs.name+' (Name, HKS, Description, Logging, Setting, Doppelklick) VALUES ("' + str(device) + '","' + str(device) + '","' + str(device) + '","True","False","False")'
-#            cur.execute(sql)
-#        else:
-#            get last value and last time
-#            sql = 'SELECT * FROM %s WHERE Name = "%s"' % (constants.sql_tables.inputs.name, str(device))
-#            cur.execute(sql)
-#            results_1 = cur.fetchall()
-#            field_names_1 = [i[0] for i in cur.description]
-#            for row in results_1:
-#                for i in range (0,len(row)):
-#                    dicti_1[field_names_1[i]] = row[i]
-#            last_value = dicti_1['last_Value']         
+    if True:       
                 
         trigger_0 = results2[0]
         last_value = last_val            
         
-        # wenn wir dann interne sachen nehmen:
-#            inputs_table_c = copy.copy(inputs_table)                    
-        #dicti_2 = results2[device]
-                   
-        # Filtern, wenn groesser oder kleiner Messung ignorieren
-#            filtering = dicti_1['Filter']
+
         filtering = trigger_0.Filter
 #            hks = dicti_1['HKS']
         hks = trigger_0.HKS
@@ -1863,15 +1800,6 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                 InputsDatabase.set_val_by_name(trigger_0.name, 'Sturm_count', 0)
                 
         if not filtered:        
-#                valid =   dicti_1['valid']
-#                heartbt = dicti_1['heartbeat']
-#                desc =    dicti_1['Description']
-#                komp =    dicti_1['Kompression']
-#                hyst =    dicti_1['Hysterese']
-#                recSzn =  dicti_1['RecoverSzn']
-#                offset =  dicti_1['offset']
-#                last1 =   dicti_1['last1']
-#                debounce = dicti_1['debounce']
             
             valid =   trigger_0.valid
             heartbt = trigger_0.heartbeat
@@ -1954,6 +1882,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 
             for trigger in results2:
                 szenen = []
+                directAction = {}
                 latchMerker = False
                 payloads = []
                 kondition = []
@@ -2008,25 +1937,39 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                     if str(dicti.get("last2")) != "None" and append:
                         if ct - dicti.get("last2") < datetime.timedelta(hours=0, minutes=0, seconds=4):
                             if dicti.get("Dreifach") is not None:
-                                szenen.append(dicti.get("Dreifach"))
+#                                szenen.append(dicti.get("Dreifach"))
+                                _szenen, _actions = parse_input_string(dicti.get('Dreifach'))
+                                szenen = szenen + _szenen
+                                directAction = {**directAction, **_actions}
                                 payloads.append(dicti.get("Payload"))
                                 kondition.append(desc + " " + descri)
                                 single = False
                         elif ct - dicti.get("last1") < datetime.timedelta(hours=0, minutes=0, seconds=3):
                             if dicti.get("Doppel") is not None:                                
-                                szenen.append(dicti.get("Doppel"))
+#                                szenen.append(dicti.get("Doppel"))
+                                _szenen, _actions = parse_input_string(dicti.get('Doppel'))
+                                szenen = szenen + _szenen
+                                directAction = {**directAction, **_actions}
                                 payloads.append(dicti.get("Payload"))
                                 kondition.append(desc + " " + descri)
                                 single = False
                     if str(doppelklick) != "True": single = True                            
                     if single and append and dicti.get(setting_r("Status")) is not None: 
-                        szenen.append(dicti.get(setting_r("Status")))
+#                        szenen.append(dicti.get(setting_r("Status")))
+                        _szenen, _actions = parse_input_string(dicti.get(setting_r("Status")))
+                        szenen = szenen + _szenen
+                        directAction = {**directAction, **_actions}
                         payloads.append(dicti.get("Payload"))
                         kondition.append(desc + " " + descri)
                     if append and dicti.get('Immer') is not None:
-                        szenen.append(dicti.get('Immer'))
+#                        szenen.append(dicti.get('Immer'))
+                        _szenen, _actions = parse_input_string(dicti.get('Immer'))
+                        szenen = szenen + _szenen
+                        directAction = {**directAction, **_actions}
                         payloads.append(dicti.get("Payload"))
                         kondition.append(desc + " " + descri)
+                    if append and dicti.get('directAction') is not None:
+                        directAction = {**directAction, **parse_input_string(dicti.get('directAction'))[1]}
                     #if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                     if str(dicti.get('latching')) == "True":
                         if dicti.get('persistance') is None:
@@ -2047,12 +1990,14 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         if dicti.get('violTime') is not None:  # Zeit der ersten Bedinungsverletzung ist eingetragen
                             if ct - dicti.get("violTime") < datetime.timedelta(seconds=int(dicti.get('persistance'))): # persistence zeit ist noch nicht abgelaufen
                                 szenen = []
+                                directAction = None
                                 payloads = []
                                 kondition = []
                                 latchMerker = False
                         if dicti.get('violTime') is None and datetime.timedelta(seconds=int(dicti.get('persistance'))) > datetime.timedelta(seconds=0):
                             # bedingung wurde jetzt gerade erfüllt, aber wir müssen persistence abwarten
                             szenen = []
+                            directAction = None
                             payloads = []
                             kondition = []
                             latchMerker = False
@@ -2065,11 +2010,15 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                             latched = 'False'
                             # anti szene (praktisch das reset):
                             if dicti.get('ResetSzene') is not None:
-                                szenen.append(dicti.get('ResetSzene'))
+#                                szenen.append(dicti.get('ResetSzene'))
+                                _szenen, _actions = parse_input_string(dicti.get('ResetSzene'))
+                                szenen = szenen + _szenen
+                                directAction = {**directAction, **_actions}
                                 payloads.append(dicti.get("Payload"))
                                 kondition.append(desc + " " + descri)
                         elif latchMerker and str(dicti.get('latched')) == "True":
                             szenen = []
+                            directAction = None
                             payloads = []
                             kondition = []
                         elif latchMerker and str(dicti.get('latched')) != "True": 
@@ -2087,7 +2036,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         elem.violTime = violTime 
                         if latched:
                             elem.latched  = latched
-
+                    if directAction:
+                        for key, val in directAction.items():
+                            payload = {'Device':key, 'Command':val}
+                            toolbox.communication.send_message(payload, typ='SetDevice')  
                 if trigger.debug:
                     print(szenen, payloads, kondition) 
                 alle_szenen += szenen       
@@ -2151,11 +2103,14 @@ def apptask():
   
     
 def main(): 
-#    apptimer = Timer(0, apptask)
-#    apptimer.start()  
+    apptimer = Timer(0, apptask)
+    apptimer.start()
+    
 #    app.run(host='0.0.0.0', port=4444)
-    server = Process(target=apptask)
-    server.start()   
+    
+#    server = Process(target=apptask)
+#    server.start()   
+    
     print('database server started goin into loop')
     while constants.run:
         time.sleep(1)

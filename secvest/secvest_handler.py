@@ -96,7 +96,7 @@ class SecvestHandler(object):
             if not fault['ui-string'] in self.faults:
 #                print(fault)
                 if fault['is-rf-warning']:
-                    payload = {'Szene':'SecvestDebug', 'desc':'Secvest Warnung: ' + fault['ui-string']}
+                    payload = {'Szene':'SecvestDebug', 'desc':'Warnung: ' + fault['ui-string']}
                     toolbox.communication.send_message(payload, typ='ExecSzene')
                 self.faults[fault['ui-string']] = fault
         delete = []
@@ -106,7 +106,7 @@ class SecvestHandler(object):
                 if stored == fault['ui-string']:
                     found = True
             if not found and value['is-rf-warning']: 
-                payload = {'Szene':'SecvestDebug', 'desc':'Secvest Warnung weg: ' + value['ui-string']}
+                payload = {'Szene':'SecvestDebug', 'desc':'Ok: ' + value['ui-string']}
                 toolbox.communication.send_message(payload, typ='ExecSzene') 
                 delete.append(stored)
         for item in delete:

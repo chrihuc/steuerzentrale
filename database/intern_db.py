@@ -224,7 +224,7 @@ class DatabaseIntern(DBTemplate):
         self.save_to_file()
       
         
-    def get_sorted_by(self, sort, reverse=False, filtName=None, filtHKS=None, filtDesc=None, filtScene=None):
+    def get_sorted_by(self, sort, reverse=False, filtName=None, filtHKS=None, filtDesc=None, filtScene=None, onlyHKS=False):
         elements = [element for element in self.elements]
         if filtName:
             elements = [element for element in elements if filtName in element.Name]
@@ -236,7 +236,8 @@ class DatabaseIntern(DBTemplate):
             elements = [element for element in elements if filtScene in [element.Immer, element.ResetSzene, element.Wach, element.Wecken, element.Schlafen,
                                                                          element.Schlummern, element.Leise, element.AmGehen, element.Gegangen, element.Abwesend, element.Urlaub,
                                                                          element.Besuch, element.Doppel, element.Dreifach, element.Alarm]]
-    
+        if onlyHKS:
+            elements = [element for element in elements if element.HKS != element.Name]
         result = None
         if self.props[sort][1] in [int, float]:
             result = sorted(

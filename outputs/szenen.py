@@ -440,24 +440,43 @@ class Szenen(object):
             #cls.running_list[szn_id] = szene
 #            if desc != '':
 #                text = desc
-            if str(szene_dict.get("Beschreibung")) in ['None','']:
-                text = desc
-                titel = desc
-            else:
-                beschr = szene_dict.get("Beschreibung")
-                if device:
-                    beschr = msqc.re_calc(beschr)
-                    titel = beschr
-                    text = '%s, %s = %s' % (str(beschr), device, wert)
-                else:
-                    text = '%s %s' % (str(beschr), desc)
-                    if not beschr:
-                        text = False
+# Android empfängt
+# Topic, Body, Prio Payload
+# SzeneElemnt hat Name, Beschreibung, Prio und Payload
+# SzenenFunction hat: szene, wert=0, device=None, desc='', payload=None
+# 
+# Countdown hat keine Beschreibung, und kein Device, ist nur Ton auf dem Handy
+#
+            if Prio and Prio > 0:
+                if str(szene_dict.get("Beschreibung")) in ['None','']:
+                    if desc != '':
+                        text = desc
+                        titel = desc[:65]
                     else:
-                        titel = str(beschr)
-                    text = msqc.re_calc(text)
-            if str(text) != 'False':
-                aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload, titel=titel)
+                        titel = szene
+                        text = ''
+#                        print('Szene: ', szene, desc)
+                else:   # Szene hat Beschreibung
+                    beschr = szene_dict.get("Beschreibung")
+                    if device:
+                        beschr = msqc.re_calc(beschr)
+                        titel = beschr[:65]
+                        text = '%s (%s)' % (device, wert)
+                    else:  # wir sind nicht Inputs ausgelöst (z.b. Heartbeats, interne Infos)
+                        if desc != '':
+                            text = desc
+                        else:
+                            text = beschr
+                        if not beschr:     # Szene hat Beschreibung "False" und 
+                            text = False   # Dann schicken wir keine Nachricht
+#                            print('Szene: ', szene, desc)
+                        else:
+                            titel = str(beschr)[:65]
+                        text = msqc.re_calc(text)  # wenn wir z.b. BDQs abfragen kommt hier ein False, wenns keine gibt
+                if not str(szene_dict.get("Payload")) in ['None','']:
+                    payload = str(szene_dict.get("Payload"))
+                if str(text) != 'False':
+                    aes.new_event(description=text, to=szene_dict.get("MQTTChannel"), prio=Prio, karenz=Karenz, payload=payload, titel=titel)
             interlocks = {}
             if str(szene_dict.get("AutoMode")) == "True":
                 interlocks = msqc.SzenenDatabase.get_elements_by_name("Auto_Mode")[0].get_as_dict()
@@ -608,9 +627,14 @@ class Szenen(object):
 
     @classmethod
     def timer_add(cls, callback, parent, delay, child, exact, retrig, device=None, noDelay=False):
-        cls.sz_t.callback = callback
+#        cls.sz_t.callback = callback ist das wirklich nötig? wir finden es raus
+        
+        # warum das auskommentiert ist, weiss ich nicht
 #        t = Timer(0, cls.sz_t.retrigger_add, args=[parent, delay, child, exact, retrig, device, noDelay])
 #        t.start()        
+        if 'Schlafen' in parent:
+            start_t = datetime.datetime.now()
+            print(start_t, delay, child, exact, retrig, device, noDelay)
         cls.sz_t.retrigger_add(parent, delay, child, exact, retrig, device, noDelay)
 
 toolbox.communication.register_callback(Szenen.callback_receiver)
