@@ -46,7 +46,9 @@ class Szenen_Timer:
 
     def add_timer(self, parent, delay, child, exact, retrig, device, noDelay, start=False):
         if delay == 0 and start:
-            self.callback(child)
+            t =  Timer(0,self.callback, args=[child])
+            t.start()
+#            self.callback(child)
             return None
         ct = datetime.datetime.now()
         dicti = {}

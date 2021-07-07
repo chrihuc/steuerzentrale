@@ -102,15 +102,21 @@ def receive_communication(payload, *args, **kwargs):
             if payload['Value'] == 'pulse_open':
                 result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'open', retain=False)
                 toolbox.communication.send_message(payload, typ='return', value=result) 
-                time.sleep(0.3)
+                time.sleep(0.1) 
                 result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'stop', retain=False)
                 toolbox.communication.send_message(payload, typ='return', value=result)    
             elif payload['Value'] == 'pulse_close':
                 result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'close', retain=False)
                 toolbox.communication.send_message(payload, typ='return', value=result) 
-                time.sleep(0.3)
+                time.sleep(0.1)
                 result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'stop', retain=False)
-                toolbox.communication.send_message(payload, typ='return', value=result)                  
+                toolbox.communication.send_message(payload, typ='return', value=result) 
+            elif payload['Value'] == 'open_vent':
+                result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'open', retain=False)
+                toolbox.communication.send_message(payload, typ='return', value=result) 
+                time.sleep(1)
+                result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], 'stop', retain=False)
+                toolbox.communication.send_message(payload, typ='return', value=result)                   
             else:
                 result = mqtt_publish.mqtt_pub("shellies/" + device + adress.split(".")[2], payload['Value'], retain=False)
                 toolbox.communication.send_message(payload, typ='return', value=result) 

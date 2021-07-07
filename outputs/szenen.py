@@ -96,6 +96,8 @@ class Szenen(object):
 #        self.timeout = datetime.timedelta(hours=0, minutes=0, seconds=15)
         Szenen.sz_t.callback = self.execute
         Szenen.sz_t.load()
+#        self.sz_t.callback = self.execute  tut scheinbar nicht
+#        self.sz_t.load()        
         pass
 
     @classmethod
@@ -288,9 +290,11 @@ class Szenen(object):
             t_list = cls.kommando_dict.get(szn_id)
         else:
             t_list = {}
-        if commando in ["man", "auto"]:
+        if commando in ["man", "auto", "deactivated"]:
 #            msqc.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
             msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode", value=commando)
+        elif msqc.SzenenDatabase.get_val_in_szenen(device=device, szene="Auto_Mode") == "deactivated":
+            executed = True
         elif commando in ["autoToggle"]:
             current = msqc.SzenenDatabase.set_val_in_szenen(device=device, szene="Auto_Mode")
 #            current = msqc.get_val_in_szenen(device=device, szene="Auto_Mode")
@@ -423,8 +427,8 @@ class Szenen(object):
             next_start = szene_dict.get("LastUsed") + datetime.timedelta(hours=0, minutes=0, seconds=float(szene_dict.get("Latching")))
             if start_t < next_start:
                 erfuellt = False
-        if str(szene_dict.get("Enabled")) == "False":
-            erfuellt = False
+        if str(szene_dict.get("Enabled")) == "False" or str(szene_dict.get("Enabled")) == "false":
+            erfuellt = False 
         if str(szene_dict.get("Karenz")) != 'None':
             Karenz = (szene_dict.get("Karenz"))
         else:
@@ -482,26 +486,32 @@ class Szenen(object):
                 interlocks = msqc.SzenenDatabase.get_elements_by_name("Auto_Mode")[0].get_as_dict()
 #                interlocks = msqc.mdb_read_table_entry(constants.sql_tables.szenen.name,"Auto_Mode")              
             for key, value in szene_dict.items():
-                if ((value != "") and (str(value) != "None") and (str(interlocks.get(key)) in ["None", "auto"]) and not key in ['Beschreibung']):
+                if ((value != "") and (str(value) != "None") and not key in ['Beschreibung']):
                     kommandos = cls.__return_enum__(value)
                     if constants.redundancy_.master:
                         delay = 0
                         for kommando in kommandos:
                             kommando = msqc.re_calc(kommando)
-                            if key in cmd_devs:
-                                t_list = cls.kommando_dict.get(szn_id)
-                                t_list.append([key,kommando])
-                                cls.kommando_dict[szn_id] = t_list
-                            text=szene_dict.get("Durchsage")
-                            if kommando == 'warte_1':
-                                delay += 1
-                            elif kommando == 'warte_3':
-                                delay += 3
-                            elif kommando == 'warte_5':
-                                delay += 5
+                            if (str(interlocks.get(key)) in ["None", "auto"]):
+                                if kommando == "man":
+                                    interlocks[key] = "man"
                             else:
-                                t = Timer(delay, cls.__sub_cmds__, args=[szn_id, key, kommando, text])
-                                t.start()
+                                if key in cmd_devs:
+                                    t_list = cls.kommando_dict.get(szn_id)
+                                    t_list.append([key,kommando])
+                                    cls.kommando_dict[szn_id] = t_list
+                                text=szene_dict.get("Durchsage")
+                                if kommando == 'warte_1':
+                                    delay += 1
+                                elif kommando == 'warte_3':
+                                    delay += 3
+                                elif kommando == 'warte_5':
+                                    delay += 5
+                                elif 'warte' in str(kommando):
+                                    delay += eval(str(kommando).split('_')[1])
+                                else:
+                                    t = Timer(delay, cls.__sub_cmds__, args=[szn_id, key, kommando, text])
+                                    t.start()
 #==============================================================================
 # Internal
 #==============================================================================                               
@@ -603,13 +613,17 @@ class Szenen(object):
                 szn = kommando[0]
                 dlay = kommando[1]
                 ex_re = kommando[2]
-                immer = False
+                depBed = False
                 depErfolg = 0
                 if len(kommando) > 3:
-                    immer = kommando[3]
+                    if kommando[3] == 'negiert':
+                        depBed = not erfuellt
+                    else:
+                        depBed = not kommando[3]
+                        depBed = depBed or erfuellt
                 if len(kommando) == 5:
                     depErfolg = kommando[4]
-                if (immer or erfuellt) and ((depErfolg == 1 and erfolg) or (depErfolg == 2 and not erfolg)):
+                if depBed and ((depErfolg == 1 and erfolg) or (depErfolg == 2 and not erfolg)):
 #                    if Prio > 0:
 #                        print("szene timed start", start_t, szn, dlay)                    
                     if ex_re == 0:
@@ -627,14 +641,14 @@ class Szenen(object):
 
     @classmethod
     def timer_add(cls, callback, parent, delay, child, exact, retrig, device=None, noDelay=False):
-#        cls.sz_t.callback = callback ist das wirklich nötig? wir finden es raus
+        cls.sz_t.callback = callback # ist das wirklich nötig? wir finden es raus, ja es ist nötig
         
         # warum das auskommentiert ist, weiss ich nicht
 #        t = Timer(0, cls.sz_t.retrigger_add, args=[parent, delay, child, exact, retrig, device, noDelay])
 #        t.start()        
-        if 'Schlafen' in parent:
-            start_t = datetime.datetime.now()
-            print(start_t, delay, child, exact, retrig, device, noDelay)
+#        if 'Schlafen' in parent:
+#            start_t = datetime.datetime.now()
+#            print(start_t, delay, child, exact, retrig, device, noDelay)
         cls.sz_t.retrigger_add(parent, delay, child, exact, retrig, device, noDelay)
 
 toolbox.communication.register_callback(Szenen.callback_receiver)

@@ -33,6 +33,7 @@ properties_iptDB = { 'Id':          (None, int)
                     ,'Name':        ('HKS', str)
                     ,'HKS':         ('HKS', str)
                     ,'Value':       (0, float)
+                    ,'F_10' :       (0, float)                    
                     ,'time':        (None, datetime.datetime)
                     ,'Description': (None, str)
                     ,'Status' :     (None, str)
@@ -58,6 +59,7 @@ properties_iptDB = { 'Id':          (None, int)
                     ,'Value_lt':    (None, str)
                     ,'Value_eq':    (None, str)
                     ,'Value_gt':    (None, str)
+                    ,'Bed_grad':    (None, str)
                     ,'Hysterese':   (None, float)
                     ,'Kompression': (None, str)
                     
@@ -297,6 +299,7 @@ class TriggerForm(FlaskForm):
     Value_eq          = StringField('Value_eq')
     Value_gt          = StringField('Value_gt') 
     Hysterese          = StringField('Hysterese')
+    Bed_grad          = StringField('Bed_grad')
     ResetSzene     = StringField('ResetSzene')
     Wach           = SelectField('Wach') 
     Wecken         = StringField('Wecken') 
@@ -329,6 +332,7 @@ class SortableTableInputs(Table):
     Status = Col('Status')
     time = Col('time')
     Value = Col('Value')
+    F_10 = Col('F_10')
     lastChange = Col('lastChange')
     Value_lt =  Col('Value_lt')
     Value_eq =  Col('Value_eq')   
@@ -980,17 +984,18 @@ def parse_input_string(intext):
             text = '['+text+']'
         result = eval(text)
         if isinstance(result, dict):
-            return [], result
+            return [], [result]
         if isinstance(result, list):
-            directActions = {}
+            directActions = []
             for idx, item in reversed(list(enumerate(result))):
                 if isinstance(item, dict):
                     result.pop(idx)
-                    for key,val in item.items():
-                        directActions[key] = val
+                    directActions.append(item)
+#                    for key,val in item.items():
+#                        directActions[key] = val
             return result, directActions
     except Exception as e:
-        return [intext], {}
+        return [intext], [{}]
 
 
 def json_serial(obj):
@@ -1714,6 +1719,13 @@ def read_inputs_dict():
     con.close()
     return inputs_dict
 
+def combine_dicts(a,b):
+    c = {}
+    for key, val in a.items():
+        c[key] = val
+    for key, val in b.items():
+        c[key] = val
+    return c
 # latching (user setting)
 # latched (from evaluation automatic) only latch after scene was found
 # persistance (user setting)
@@ -1805,11 +1817,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
             heartbt = trigger_0.heartbeat
             desc =    trigger_0.Description
             komp =    trigger_0.Kompression
-            hyst =    trigger_0.Hysterese
             recSzn =  trigger_0.RecoverSzn
             offset =  trigger_0.offset
             last1 =   trigger_0.last1
             lc    =   trigger_0.lastChange
+            F_10  =   trigger_0.F_10
 
             if not lc:
                 lc = ct
@@ -1831,6 +1843,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                     offset = 0
                 offset = float(offset)
                 value = value + offset
+            
+            F_10 = F_10*9/10 + value/10
+            for trigger in results2:
+                trigger.F_10 = F_10
             if not valid and not fallingback and not persTimer and not set_inval:  # das hier ist fürs Timeout 
                 if (not trigger_0.frozen) or ((last_value != value) or (frozenTime > ct)):# das ist wenn der Wert eingefroren ist
                     for trigger in results2:
@@ -1882,10 +1898,11 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 
             for trigger in results2:
                 szenen = []
-                directAction = {}
+                directAction = []
                 latchMerker = False
                 payloads = []
                 kondition = []
+                hyst =    trigger.Hysterese
                 
                 violTime = trigger.violTime
                 latched = None                    
@@ -1926,6 +1943,13 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         append = False                            
                     if (gt is not None and gt >= value):
                         append = False
+                    if not dicti['Bed_grad'] is None and dicti['Bed_grad'] != '':
+                        if dicti['Bed_grad'] == 'steigend':  # Bedinugung ist Steigend
+                            if value <= F_10:                 # Wert ist kleiner als der 10 Durchschnitt
+                                append = False
+                        if dicti['Bed_grad'] == 'fallend':  # Bedinugung ist Steigend
+                            if value >= F_10:                 # Wert ist grösser als der 10 Durchschnitt
+                                append = False                                
                     if append and persTimer and dicti.get('violTime') is None: 
                         # Bedingungen sind erfüllt aber die Funktion wurde getimed ausgelöst, Peristtime, aber in der Zwischenzeit wurde schon resettiert
                         append = False
@@ -1940,7 +1964,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #                                szenen.append(dicti.get("Dreifach"))
                                 _szenen, _actions = parse_input_string(dicti.get('Dreifach'))
                                 szenen = szenen + _szenen
-                                directAction = {**directAction, **_actions}
+                                directAction = directAction + _actions
                                 payloads.append(dicti.get("Payload"))
                                 kondition.append(desc + " " + descri)
                                 single = False
@@ -1949,7 +1973,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #                                szenen.append(dicti.get("Doppel"))
                                 _szenen, _actions = parse_input_string(dicti.get('Doppel'))
                                 szenen = szenen + _szenen
-                                directAction = {**directAction, **_actions}
+                                directAction = directAction + _actions
                                 payloads.append(dicti.get("Payload"))
                                 kondition.append(desc + " " + descri)
                                 single = False
@@ -1958,18 +1982,19 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #                        szenen.append(dicti.get(setting_r("Status")))
                         _szenen, _actions = parse_input_string(dicti.get(setting_r("Status")))
                         szenen = szenen + _szenen
-                        directAction = {**directAction, **_actions}
+                        directAction = directAction + _actions
                         payloads.append(dicti.get("Payload"))
                         kondition.append(desc + " " + descri)
                     if append and dicti.get('Immer') is not None:
 #                        szenen.append(dicti.get('Immer'))
                         _szenen, _actions = parse_input_string(dicti.get('Immer'))
                         szenen = szenen + _szenen
-                        directAction = {**directAction, **_actions}
+                        directAction = directAction + _actions
                         payloads.append(dicti.get("Payload"))
                         kondition.append(desc + " " + descri)
                     if append and dicti.get('directAction') is not None:
-                        directAction = {**directAction, **parse_input_string(dicti.get('directAction'))[1]}
+                        _szenen, _actions = parse_input_string(dicti.get('directAction'))
+                        directAction = directAction + _actions
                     #if append and dicti.get('violTime') is None: # bedinung ist erfüllt und ViolTime war nicht gesetzt (set)
                     if str(dicti.get('latching')) == "True":
                         if dicti.get('persistance') is None:
@@ -2013,7 +2038,7 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
 #                                szenen.append(dicti.get('ResetSzene'))
                                 _szenen, _actions = parse_input_string(dicti.get('ResetSzene'))
                                 szenen = szenen + _szenen
-                                directAction = {**directAction, **_actions}
+                                directAction = directAction + _actions
                                 payloads.append(dicti.get("Payload"))
                                 kondition.append(desc + " " + descri)
                         elif latchMerker and str(dicti.get('latched')) == "True":
@@ -2037,9 +2062,10 @@ def inputs(device, value, add_to_mqtt=True, fallingback=False, persTimer=False):
                         if latched:
                             elem.latched  = latched
                     if directAction:
-                        for key, val in directAction.items():
-                            payload = {'Device':key, 'Command':val}
-                            toolbox.communication.send_message(payload, typ='SetDevice')  
+                        for item in directAction:
+                            for key, val in item.items():
+                                payload = {'Device':key, 'Command':val}
+                                toolbox.communication.send_message(payload, typ='SetDevice')  
                 if trigger.debug:
                     print(szenen, payloads, kondition) 
                 alle_szenen += szenen       
