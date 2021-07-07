@@ -493,9 +493,6 @@ class Szenen(object):
                         for kommando in kommandos:
                             kommando = msqc.re_calc(kommando)
                             if (str(interlocks.get(key)) in ["None", "auto"]):
-                                if kommando == "man":
-                                    interlocks[key] = "man"
-                            else:
                                 if key in cmd_devs:
                                     t_list = cls.kommando_dict.get(szn_id)
                                     t_list.append([key,kommando])
@@ -512,6 +509,9 @@ class Szenen(object):
                                 else:
                                     t = Timer(delay, cls.__sub_cmds__, args=[szn_id, key, kommando, text])
                                     t.start()
+                            else:      
+                                if kommando == "auto":
+                                    interlocks[key] = "auto"                                
 #==============================================================================
 # Internal
 #==============================================================================                               
