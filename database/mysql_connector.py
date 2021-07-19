@@ -130,6 +130,13 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'A00GAR1WAS1DO01':         (None, str)
                     ,'A00GAR1WAS3DO01':         (None, str)
                     ,'A00GAR1WAS2DO01':         (None, str)
+                    
+                    ,'A00GAR1GAB3LI05':         (None, str)
+                    ,'A00GAR1GAB3LI06':         (None, str)
+                    ,'A00GAR1GAB4LI07':         (None, str)
+                    ,'A00GAR1GAB5LI08':         (None, str)
+                    ,'A00GAR1EIC1LI09':         (None, str)
+                    
                     ,'A00RAS1MAE1DO01':         (None, str)
                     ,'A00TER1ADV1ST01':         (None, str)
                     ,'A00TER1DEK1LI01':         (None, str)
@@ -142,6 +149,7 @@ properties_sznDB = { 'Id':              (None, int)
                     ,'A00TER2MAR1DO03':         (None, str) # button fernbedienung
                     ,'A00TER2MAR1DO99':         (None, str) # Fernbedienung programmieren (button 1 und 2)  
                     ,'A00TER2MAR1PO01':         (None, str) # Strom Markise (Shelly)
+                    
                     ,'V00ESS1DEK1LI01':         (None, str)
                     ,'V00ESS1TUR1SR01':         (None, str) # Store
                     ,'V00ESS1RUM1LI01':         (None, str)
@@ -547,7 +555,14 @@ class SzenenFormA(FlaskForm):
     A00GAR1POW1DO01        = StringField(SzenenDatabase.get_description('A00GAR1POW1DO01')+': '+'A00GAR1POW1DO01')       
     A00GAR1WAS1DO01        = StringField(SzenenDatabase.get_description('A00GAR1WAS1DO01')+': '+'A00GAR1WAS1DO01')       
     A00GAR1WAS3DO01        = StringField(SzenenDatabase.get_description('A00GAR1WAS3DO01')+': '+'A00GAR1WAS3DO01')       
-    A00GAR1WAS2DO01        = StringField(SzenenDatabase.get_description('A00GAR1WAS2DO01')+': '+'A00GAR1WAS2DO01')       
+    A00GAR1WAS2DO01        = StringField(SzenenDatabase.get_description('A00GAR1WAS2DO01')+': '+'A00GAR1WAS2DO01')   
+    
+    A00GAR1GAB3LI05        = StringField(SzenenDatabase.get_description('A00GAR1GAB3LI05')+': '+'A00GAR1GAB3LI05')
+    A00GAR1GAB3LI06        = StringField(SzenenDatabase.get_description('A00GAR1GAB3LI06')+': '+'A00GAR1GAB3LI06')
+    A00GAR1GAB4LI07        = StringField(SzenenDatabase.get_description('A00GAR1GAB4LI07')+': '+'A00GAR1GAB4LI07')
+    A00GAR1GAB5LI08        = StringField(SzenenDatabase.get_description('A00GAR1GAB5LI08')+': '+'A00GAR1GAB5LI08')
+    A00GAR1EIC1LI09        = StringField(SzenenDatabase.get_description('A00GAR1EIC1LI09')+': '+'A00GAR1EIC1LI09')
+
     A00RAS1MAE1DO01        = StringField(SzenenDatabase.get_description('A00RAS1MAE1DO01')+': '+'A00RAS1MAE1DO01')       
     A00TER1ADV1ST01        = StringField(SzenenDatabase.get_description('A00TER1ADV1ST01')+': '+'A00TER1ADV1ST01')       
     A00TER1DEK1LI01        = StringField(SzenenDatabase.get_description('A00TER1DEK1LI01')+': '+'A00TER1DEK1LI01')       

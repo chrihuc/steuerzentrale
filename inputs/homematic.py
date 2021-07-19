@@ -28,7 +28,7 @@ def broadcast_input_value(Name, Value):
 
 def eventcallback(address, interface_id, key, value):
     keys = ['LOWBAT', 'STATE', 'LEVEL', 'ACTUAL_TEMPERATURE', 'OPERATING_VOLTAGE', 'SET_TEMPERATURE', 'SET_POINT_TEMPERATURE', 'PRESS_SHORT', 'PRESS_LONG',
-            'HUMIDITY', 'ILLUMINATION', 'WIND_SPEED', 'LOW_BAT']
+            'HUMIDITY', 'ILLUMINATION', 'WIND_SPEED', 'LOW_BAT', 'MOTION']
 #    print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value))
     if key in keys:
 #        print("CALLBACK: %s, %s, %s, %s" % (address, interface_id, key, value)) 
