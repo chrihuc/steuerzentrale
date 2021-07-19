@@ -429,7 +429,7 @@ class SortableTableSzenen(Table):
         'Edit DG', 'edit_szn_dg', url_kwargs=dict(Id='Id'), allow_sort=False)   
     edita = LinkCol(
         'Edit Aussen', 'edit_szn_a', url_kwargs=dict(Id='Id'), allow_sort=False)       
-    edita = LinkCol(
+    editst = LinkCol(
         'Edit Storen', 'edit_szn_store', url_kwargs=dict(Id='Id'), allow_sort=False)     
     new = LinkCol(
         'Copy Szene', 'copy_szene', url_kwargs=dict(Id='Id')) 
